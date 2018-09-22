@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Set;
 
-import org.assertj.core.api.Assertions;
 import org.ent.net.Net;
 import org.ent.net.NetController;
 import org.ent.net.ReadOnlyNetController;
@@ -26,7 +25,7 @@ public class NetParserTest {
 		Net net = parser.parse("(<nop>, [<nop>])");
 
 		Set<Node> nodes = net.getNodes();
-		Assertions.assertThat(nodes.size()).isEqualTo(4);
+		assertThat(nodes.size()).isEqualTo(4);
 		Node root = net.getRoot();
 		assertThat(root).isInstanceOf(BNode.class);
 		BNode bRoot = (BNode) root;
@@ -39,6 +38,16 @@ public class NetParserTest {
 		assertThat(urNode.getChild(controller)).isInstanceOfSatisfying(CNode.class, c -> {
 			assertThat(c.getCommand()).isEqualTo(CommandFactory.getByName("nop"));
 		});
+	}
+
+	@Test
+	public void parse_chain() throws Exception {
+		NetParser parser = new NetParser();
+
+		Net net = parser.parse("A=B; B=C; C=<nop>");
+
+		Set<Node> nodes = net.getNodes();
+		assertThat(nodes.size()).isEqualTo(1);
 	}
 
 }
