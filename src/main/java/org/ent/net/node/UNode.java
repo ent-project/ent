@@ -55,6 +55,10 @@ public class UNode extends Node {
 		return nc.getTarget(arrow);
 	}
 
+	public void setChild(NetController nc, Node child) {
+		nc.setTarget(arrow, child);
+	}
+
 	public Arrow getArrow() {
 		return arrow;
 	}

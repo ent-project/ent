@@ -79,8 +79,16 @@ public class BNode extends Node {
 		return nc.getTarget(leftArrow);
 	}
 
+	public void setLeftChild(NetController nc, Node child) {
+		nc.setTarget(leftArrow, child);
+	}
+
 	public Node getRightChild(NetController nc) {
 		return nc.getTarget(rightArrow);
+	}
+
+	public void setRightChild(NetController nc, Node child) {
+		nc.setTarget(rightArrow, child);
 	}
 
 	public Arrow getLeftArrow() {

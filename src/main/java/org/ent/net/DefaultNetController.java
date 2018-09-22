@@ -2,19 +2,25 @@ package org.ent.net;
 
 import org.ent.ExecutionEventHandler;
 import org.ent.net.node.BNode;
+import org.ent.net.node.CNode;
 import org.ent.net.node.Hub;
 import org.ent.net.node.Node;
 import org.ent.net.node.UNode;
+import org.ent.net.node.cmd.Command;
 
 public class DefaultNetController implements NetController {
 
-	private final ExecutionEventHandler executionContext;
-
 	private final Net net;
 
-	public DefaultNetController(ExecutionEventHandler executionContext, Net net) {
-		this.executionContext = executionContext;
+	private final ExecutionEventHandler executionContext;
+
+	public DefaultNetController(Net net) {
+		this(net, null);
+	}
+
+	public DefaultNetController(Net net, ExecutionEventHandler executionContext) {
 		this.net = net;
+		this.executionContext = executionContext;
 	}
 
 	@Override
@@ -39,7 +45,7 @@ public class DefaultNetController implements NetController {
 		if (executionContext != null) {
 			executionContext.fireNewNode(unaryNode);
 		}
-		net.addInternalNode(unaryNode);
+		net.addNode(unaryNode);
 		return unaryNode;
 	}
 
@@ -49,8 +55,18 @@ public class DefaultNetController implements NetController {
 		if (executionContext != null) {
 			executionContext.fireNewNode(binaryNode);
 		}
-		net.addInternalNode(binaryNode);
+		net.addNode(binaryNode);
 		return binaryNode;
+	}
+
+	@Override
+	public CNode newCNode(Command command) {
+		CNode commandNode = new CNode(command);
+		if (executionContext != null) {
+			executionContext.fireNewNode(commandNode);
+		}
+		net.addNode(commandNode);
+		return commandNode;
 	}
 
 	@Override
