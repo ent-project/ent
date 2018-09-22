@@ -1,6 +1,7 @@
 package org.ent.net.io.parser;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.entry;
 
 import java.io.StringReader;
@@ -8,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class FirstPassNetParserTest {
@@ -47,6 +47,14 @@ public class FirstPassNetParserTest {
 	}
 
 	@Test
+	public void parseAll_okay_semicolons() throws Exception {
+		String input = "; <nop> ;;; <nop>;";
+		FirstPassNetParser parser = new FirstPassNetParser(new StringReader(input));
+		parser.parseAll();
+		assertThat(parser.getAllEntries().size()).isEqualTo(2);
+	}
+
+	@Test
 	public void resolveIdentifier_error_cycle() throws Exception {
 		String input = "A=B; B=C; C=A";
 		FirstPassNetParser parser = new FirstPassNetParser(new StringReader(input));
@@ -54,8 +62,15 @@ public class FirstPassNetParserTest {
 		Map<String, NodeTemplate> identifierMapping = parser.getIdentifierMapping();
 		assertThat(identifierMapping.size()).isEqualTo(3);
 		NodeTemplate template1 = identifierMapping.get("A");
-		Assertions.assertThatThrownBy(() -> parser.resolveIdentifier((IdentifierNodeTemplate) template1))
+		assertThatThrownBy(() -> parser.resolveIdentifier((IdentifierNodeTemplate) template1))
 				.isInstanceOf(ParserException.class).hasMessage("Cyclic identifier binding");
 	}
 
+	@Test
+	public void parseAll_error_duplicateName() throws Exception {
+		String input = "(A=<nop>, A=[<nop>])";
+		FirstPassNetParser parser = new FirstPassNetParser(new StringReader(input));
+		assertThatThrownBy(() -> parser.parseAll())
+				.isInstanceOf(ParserException.class).hasMessage("Identifier 'A' bound more than once.");
+	}
 }
