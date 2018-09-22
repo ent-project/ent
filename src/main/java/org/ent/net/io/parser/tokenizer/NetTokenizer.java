@@ -15,11 +15,14 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 
+import org.ent.Main;
 import org.ent.net.io.parser.ParserException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NetTokenizer {
 
-    private static final boolean TRACE_TOKENIZER = false;
+	private final Logger log = LoggerFactory.getLogger(Main.class);
 
     private final Reader reader;
     private int ch;
@@ -54,9 +57,7 @@ public class NetTokenizer {
             return this.queue.remove();
         }
         Token next = fetchNextToken();
-        if (TRACE_TOKENIZER) {
-            System.err.println("TOKEN: " + next + " ");
-        }
+        log.trace("TOKEN: {}", next);
         return next;
     }
 
@@ -124,9 +125,7 @@ public class NetTokenizer {
     public Token peek(int n) throws ParserException {
         while (queue.size() < n) {
             Token tkn = fetchNextToken();
-            if (TRACE_TOKENIZER) {
-                System.err.println("TOKEN: " + tkn + " ");
-            }
+            log.trace("TOKEN: {}", tkn);
             this.queue.add(tkn);
         }
         return (new ArrayList<>(queue)).get(n - 1);
