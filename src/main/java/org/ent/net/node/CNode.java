@@ -16,15 +16,15 @@ import org.ent.net.node.cmd.Command;
  */
 public class CNode extends Node {
 
-	private final Command cmd;
+	private final Command command;
 
-	public CNode(Command cmd) {
+	public CNode(Command command) {
 		super();
-		this.cmd = cmd;
+		this.command = command;
 	}
 
 	public Command getCommand() {
-		return cmd;
+		return command;
 	}
 
 	@Override

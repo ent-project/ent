@@ -10,6 +10,10 @@ public abstract class Node {
 
 	private Hub hub;
 
+	public Node() {
+		this.hub = new Hub(this);
+	}
+
 	public Hub getHub() {
 		return hub;
 	}

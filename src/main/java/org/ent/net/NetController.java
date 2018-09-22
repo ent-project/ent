@@ -1,8 +1,10 @@
 package org.ent.net;
 
 import org.ent.net.node.BNode;
+import org.ent.net.node.CNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.UNode;
+import org.ent.net.node.cmd.Command;
 
 public interface NetController {
 
@@ -13,6 +15,8 @@ public interface NetController {
 	UNode newUNode(Node child);
 
 	BNode newBNode(Node leftChild, Node rightChild);
+
+	CNode newCNode(Command command);
 
 	void referenceSwap(Node x, Node y);
 }
