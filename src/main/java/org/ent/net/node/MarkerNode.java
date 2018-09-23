@@ -8,6 +8,8 @@ import org.ent.net.ArrowDirection;
 
 public class MarkerNode extends Node {
 
+	public static final String MARKER_NODE_SYMBOL = "###";
+
     @Override
     public List<Arrow> getArrows() {
         throw new UnsupportedOperationException();
@@ -30,6 +32,6 @@ public class MarkerNode extends Node {
 
     @Override
     public String toString() {
-        return "###";
+        return MARKER_NODE_SYMBOL;
     }
 }

@@ -1,0 +1,84 @@
+package org.ent.net.io.formatter;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.ent.net.Arrow;
+import org.ent.net.Net;
+import org.ent.net.NetController;
+import org.ent.net.ReadOnlyNetController;
+import org.ent.net.node.Node;
+
+public class NetFormatter {
+
+	private final NetController controller = new ReadOnlyNetController();
+
+    private Map<Node, String> lastVariableBindings;
+
+	private Integer maxDepth;
+
+	public Integer getMaxDepth() {
+		return maxDepth;
+	}
+
+	public void setMaxDepth(Integer maxDepth) {
+		this.maxDepth = maxDepth;
+	}
+
+	public void setNodeNames(Map<Node, String> nodeNames) {
+		if (lastVariableBindings != null) {
+			throw new IllegalArgumentException("Must not set node names after 'format' has been called.");
+		}
+		this.lastVariableBindings = new HashMap<>(nodeNames);
+	}
+
+	public String format(Net net) {
+        Set<Node> collected = new HashSet<>();
+        List<Node> rootNodes = new ArrayList<>();
+        rootNodes.add(net.getRoot());
+
+        collectRecursively(net.getRoot(), collected);
+
+        Set<Node> missing = new HashSet<>(net.getNodes());
+        missing.removeAll(collected);
+
+        while (!missing.isEmpty()) {
+            Node nextRoot = missing.iterator().next();
+            collectRecursivelyInverted(nextRoot, missing);
+            rootNodes.add(nextRoot);
+        }
+
+        FormattingWorker worker = new FormattingWorker(rootNodes, lastVariableBindings, maxDepth);
+
+        String result = worker.formatRecursively();
+
+        lastVariableBindings = worker.getVariableBindings();
+
+        return result;
+	}
+
+	private void collectRecursively(Node node, Set<Node> collected) {
+        if (collected.contains(node))
+            return;
+        collected.add(node);
+        for (Arrow arrow : node.getArrows()) {
+        	Node child = arrow.getTarget(controller);
+        	collectRecursively(child, collected);
+        }
+    }
+
+	private void collectRecursivelyInverted(Node node, Set<Node> missing) {
+        if (!missing.contains(node))
+            return;
+        missing.remove(node);
+        for (Arrow arrow : node.getArrows()) {
+        	Node child = arrow.getTarget(controller);
+        	collectRecursivelyInverted(child, missing);
+        }
+    }
+
+}
