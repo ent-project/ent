@@ -75,20 +75,20 @@ public class BNode extends Node {
 		this.rightChildHub.addInverseReference(rightArrow);
 	}
 
-	public Node getLeftChild(NetController nc) {
-		return nc.getTarget(leftArrow);
+	public Node getLeftChild(NetController controller) {
+		return controller.getTarget(leftArrow);
 	}
 
-	public void setLeftChild(NetController nc, Node child) {
-		nc.setTarget(leftArrow, child);
+	public void setLeftChild(NetController controller, Node child) {
+		controller.setTarget(leftArrow, child);
 	}
 
-	public Node getRightChild(NetController nc) {
-		return nc.getTarget(rightArrow);
+	public Node getRightChild(NetController controller) {
+		return controller.getTarget(rightArrow);
 	}
 
-	public void setRightChild(NetController nc, Node child) {
-		nc.setTarget(rightArrow, child);
+	public void setRightChild(NetController controller, Node child) {
+		controller.setTarget(rightArrow, child);
 	}
 
 	public Arrow getLeftArrow() {
@@ -145,15 +145,15 @@ public class BNode extends Node {
 		return rightChildHub.getNode();
 	}
 
-	private void setLeftChildForController(Node n) {
+	private void setLeftChildForController(Node child) {
 		this.leftChildHub.removeInverseReference(leftArrow);
-		this.leftChildHub = n.getHub();
+		this.leftChildHub = child.getHub();
 		this.leftChildHub.addInverseReference(leftArrow);
 	}
 
-	private void setRightChildForController(Node n) {
+	private void setRightChildForController(Node child) {
 		this.rightChildHub.removeInverseReference(rightArrow);
-		this.rightChildHub = n.getHub();
+		this.rightChildHub = child.getHub();
 		this.rightChildHub.addInverseReference(rightArrow);
 	}
 

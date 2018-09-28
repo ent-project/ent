@@ -89,7 +89,6 @@ public class NetTestData {
 	public NetWithStringRepresentation buildNetDeep() {
     	Net net = new Net();
     	NetController controller = new DefaultNetController(net);
-    	Node dummy = new MarkerNode();
 
         CNode nop = controller.newCNode(new NopCommand());
         Node n = nop;
