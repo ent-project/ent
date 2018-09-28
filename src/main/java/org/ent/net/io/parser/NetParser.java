@@ -38,7 +38,7 @@ public class NetParser {
 
     private final Node markerNode = new MarkerNode();
 
-    private Map<Node, String> nodeNames;
+    private Map<String, Node> nodeNames;
 
     private final Set<Node> allNodes = new HashSet<>();
 
@@ -59,7 +59,7 @@ public class NetParser {
         return buildNet(mainNodeTemplates);
     }
 
-    public Map<Node, String> getNodeNames() throws ParserException {
+    public Map<String, Node> getNodeNames() throws ParserException {
         if (nodeNames == null) {
         	nodeNames = buildNodeNames();
         }
@@ -114,15 +114,14 @@ public class NetParser {
         }
 	}
 
-	private Map<Node, String> buildNodeNames() throws ParserException {
-		Map<Node, String> result = new HashMap<>();
+	private Map<String, Node> buildNodeNames() throws ParserException {
+		Map<String, Node> result = new HashMap<>();
 		Map<String, NodeTemplate> identifierMapping = firstPassNetParser.getIdentifierMapping();
 		for (Entry<String, NodeTemplate> entry : identifierMapping.entrySet()) {
 			String name = entry.getKey();
 			NodeTemplate template = entry.getValue();
 			Node node = resolveNode(template);
-			if (result.containsKey(node)) throw new AssertionError();
-	        result.put(node, name);
+	        result.put(name, node);
 		}
 		return result;
 	}
