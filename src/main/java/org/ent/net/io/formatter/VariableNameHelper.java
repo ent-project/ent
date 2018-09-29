@@ -9,6 +9,8 @@ public class VariableNameHelper {
 
 	private static final int RADIX = 26; // number of letters 'a' .. 'z'
 
+	// total number of possible variable names with number of characters
+	// less or equal to index i (using letters 'a' .. 'z')
 	private static final List<Integer> summedBlockSizes = new ArrayList<>();
 
 	static {
