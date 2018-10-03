@@ -1,4 +1,4 @@
-package org.ent.net.node.cmd;
+package org.ent.net.node.cmd.operation;
 
 import org.ent.net.Arrow;
 import org.ent.net.NetController;

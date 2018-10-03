@@ -13,6 +13,8 @@ import org.ent.net.node.cmd.accessor.NodeAccessor;
 import org.ent.net.node.cmd.accessor.PtrArrowAccessor;
 import org.ent.net.node.cmd.accessor.PtrNodeAccessor;
 import org.ent.net.node.cmd.accessor.PtrPtrNodeAccessor;
+import org.ent.net.node.cmd.operation.DupOperation;
+import org.ent.net.node.cmd.operation.SetOperation;
 
 public class CommandFactory {
 
