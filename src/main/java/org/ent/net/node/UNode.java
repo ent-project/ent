@@ -51,12 +51,12 @@ public class UNode extends Node {
 		this.arrows = Collections.singletonList(arrow);
 	}
 
-	public Node getChild(NetController nc) {
-		return nc.getTarget(arrow);
+	public Node getChild(NetController controller) {
+		return controller.getTarget(arrow);
 	}
 
-	public void setChild(NetController nc, Node child) {
-		nc.setTarget(arrow, child);
+	public void setChild(NetController controller, Node child) {
+		controller.setTarget(arrow, child);
 	}
 
 	public Arrow getArrow() {
@@ -103,9 +103,9 @@ public class UNode extends Node {
 		return childHub.getNode();
 	}
 
-	private void setChildForController(Node n) {
+	private void setChildForController(Node node) {
 		this.childHub.removeInverseReference(arrow);
-		this.childHub = n.getHub();
+		this.childHub = node.getHub();
 		this.childHub.addInverseReference(arrow);
 	}
 
