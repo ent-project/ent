@@ -47,6 +47,9 @@ public class CommandFactory {
 				}
 			}
 		}
+		for (ArrowDirection left : ArrowDirection.values()) {
+			result.add(createDupCommand(left));
+		}
 		return result;
 	}
 
@@ -93,4 +96,7 @@ public class CommandFactory {
 				new SetOperation());
 	}
 
+	public static Command createDupCommand(ArrowDirection left) {
+		return new BiCommand<Arrow, Node>(new ArrowAccessor(left), new NodeAccessor(), new DupOperation());
+	}
 }
