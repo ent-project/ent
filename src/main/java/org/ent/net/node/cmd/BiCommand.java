@@ -4,6 +4,7 @@ import org.ent.net.NetController;
 import org.ent.net.node.BNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
+import org.ent.net.node.cmd.operation.BiOperation;
 
 public class BiCommand<H1, H2> implements Command {
 

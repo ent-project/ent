@@ -15,6 +15,7 @@ import org.ent.net.NetController;
 import org.ent.net.io.parser.NetParser;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
+import org.ent.net.node.cmd.operation.BiOperation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
