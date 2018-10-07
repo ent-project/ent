@@ -6,12 +6,12 @@ import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.UNode;
-import org.ent.net.node.cmd.ExecuteResult;
+import org.ent.net.node.cmd.ExecutionResult;
 
 public class DupOperation implements BiOperation<Arrow, Node> {
 
 	@Override
-	public ExecuteResult apply(NetController controller, Arrow setter, Node target) {
+	public ExecutionResult apply(NetController controller, Arrow setter, Node target) {
 		Node copy;
 		if (target instanceof CNode) {
 			CNode targetCNode = (CNode) target;
@@ -26,7 +26,7 @@ public class DupOperation implements BiOperation<Arrow, Node> {
 			throw new AssertionError("Unexpected Node type: " + target.getClass());
 		}
 		setter.setTarget(controller, copy);
-		return ExecuteResult.NORMAL;
+		return ExecutionResult.NORMAL;
 	}
 
 	@Override

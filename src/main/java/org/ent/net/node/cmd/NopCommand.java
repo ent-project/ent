@@ -6,8 +6,8 @@ import org.ent.net.node.Node;
 public class NopCommand implements Command {
 
 	@Override
-	public ExecuteResult execute(NetController controller, Node parameters) {
-		return ExecuteResult.NORMAL;
+	public ExecutionResult execute(NetController controller, Node parameters) {
+		return ExecutionResult.NORMAL;
 	}
 
 	@Override

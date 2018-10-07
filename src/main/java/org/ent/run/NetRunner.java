@@ -6,7 +6,7 @@ import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
-import org.ent.net.node.cmd.ExecuteResult;
+import org.ent.net.node.cmd.ExecutionResult;
 
 public class NetRunner {
 
@@ -43,7 +43,7 @@ public class NetRunner {
 		Command command = ((CNode) commandNode).getCommand();
 		Node parameters = commandBranch.getRightChild(controller);
 
-		ExecuteResult executeResult = command.execute(controller, parameters);
+		ExecutionResult executeResult = command.execute(controller, parameters);
 
 		switch (executeResult) {
 		case NORMAL: return StepResult.SUCCESS;

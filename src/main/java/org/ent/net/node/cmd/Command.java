@@ -5,7 +5,7 @@ import org.ent.net.node.Node;
 
 public interface Command {
 
-    ExecuteResult execute(NetController controller, Node parameters);
+    ExecutionResult execute(NetController controller, Node parameters);
 
 	String getShortName();
 

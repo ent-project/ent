@@ -47,7 +47,7 @@ public class BiCommandTest {
 		Net net = new NetParser().parse("A=[A]");
 		NetController controller = new DefaultNetController(net);
 
-		assertThat(command.execute(controller, net.getRoot())).isEqualTo(ExecuteResult.ERROR);
+		assertThat(command.execute(controller, net.getRoot())).isEqualTo(ExecutionResult.ERROR);
 
 		verifyNoMoreInteractions(accessor1, accessor2, operation);
 	}
@@ -58,7 +58,7 @@ public class BiCommandTest {
 		NetController controller = new DefaultNetController(net);
 		Node node = net.getRoot();
 
-		assertThat(command.execute(controller, node)).isEqualTo(ExecuteResult.ERROR);
+		assertThat(command.execute(controller, node)).isEqualTo(ExecutionResult.ERROR);
 
 		verify(accessor1).get(controller, node);
 		verifyNoMoreInteractions(accessor1, accessor2, operation);
@@ -72,7 +72,7 @@ public class BiCommandTest {
 
 		when(accessor1.get(controller, node)).thenReturn(Optional.of(node.getArrow(ArrowDirection.LEFT)));
 
-		assertThat(command.execute(controller, node)).isEqualTo(ExecuteResult.ERROR);
+		assertThat(command.execute(controller, node)).isEqualTo(ExecutionResult.ERROR);
 
 		verify(accessor1).get(controller, node);
 		verify(accessor2).get(controller, node);
@@ -88,9 +88,9 @@ public class BiCommandTest {
 
 		when(accessor1.get(controller, node)).thenReturn(Optional.of(arrow));
 		when(accessor2.get(controller, node)).thenReturn(Optional.of(node));
-		when(operation.apply(eq(controller), any(), any())).thenReturn(ExecuteResult.NORMAL);
+		when(operation.apply(eq(controller), any(), any())).thenReturn(ExecutionResult.NORMAL);
 
-		assertThat(command.execute(controller, node)).isEqualTo(ExecuteResult.NORMAL);
+		assertThat(command.execute(controller, node)).isEqualTo(ExecutionResult.NORMAL);
 
 		verify(accessor1).get(controller, node);
 		verify(accessor2).get(controller, node);
