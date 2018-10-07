@@ -18,5 +18,5 @@ public interface NetController {
 
 	CNode newCNode(Command command);
 
-	void referenceSwap(Node x, Node y);
+	void ancestorSwap(Node x, Node y);
 }
