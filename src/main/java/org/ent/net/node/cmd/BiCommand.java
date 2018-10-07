@@ -32,8 +32,7 @@ public class BiCommand<H1, H2> implements Command {
 	private ExecuteResult executeImpl(NetController controller, Node arg1, Node arg2) {
 		return accessor1.get(controller, arg1).flatMap(handle1 -> {
 			return accessor2.get(controller, arg2).map(handle2 -> {
-				operation.apply(controller, handle1, handle2);
-				return ExecuteResult.NORMAL;
+				return operation.apply(controller, handle1, handle2);
 			});
 		}).orElse(ExecuteResult.ERROR);
 	}

@@ -1,6 +1,8 @@
 package org.ent.net.node.cmd;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -86,6 +88,7 @@ public class BiCommandTest {
 
 		when(accessor1.get(controller, node)).thenReturn(Optional.of(arrow));
 		when(accessor2.get(controller, node)).thenReturn(Optional.of(node));
+		when(operation.apply(eq(controller), any(), any())).thenReturn(ExecuteResult.NORMAL);
 
 		assertThat(command.execute(controller, node)).isEqualTo(ExecuteResult.NORMAL);
 
