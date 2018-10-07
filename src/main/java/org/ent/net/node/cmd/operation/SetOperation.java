@@ -3,14 +3,14 @@ package org.ent.net.node.cmd.operation;
 import org.ent.net.Arrow;
 import org.ent.net.NetController;
 import org.ent.net.node.Node;
-import org.ent.net.node.cmd.ExecuteResult;
+import org.ent.net.node.cmd.ExecutionResult;
 
 public class SetOperation implements BiOperation<Arrow, Node> {
 
 	@Override
-	public ExecuteResult apply(NetController controller, Arrow setter, Node target) {
+	public ExecutionResult apply(NetController controller, Arrow setter, Node target) {
 		setter.setTarget(controller, target);
-		return ExecuteResult.NORMAL;
+		return ExecutionResult.NORMAL;
 	}
 
 	@Override

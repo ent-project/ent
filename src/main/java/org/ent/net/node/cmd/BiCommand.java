@@ -23,18 +23,18 @@ public class BiCommand<H1, H2> implements Command {
 	}
 
 	@Override
-	public ExecuteResult execute(NetController controller, Node parameters) {
-        if (!(parameters instanceof BNode)) return ExecuteResult.ERROR;
+	public ExecutionResult execute(NetController controller, Node parameters) {
+        if (!(parameters instanceof BNode)) return ExecutionResult.ERROR;
         BNode top = (BNode) parameters;
         return executeImpl(controller, top.getLeftChild(controller), top.getRightChild(controller));
 	}
 
-	private ExecuteResult executeImpl(NetController controller, Node arg1, Node arg2) {
+	private ExecutionResult executeImpl(NetController controller, Node arg1, Node arg2) {
 		return accessor1.get(controller, arg1).flatMap(handle1 -> {
 			return accessor2.get(controller, arg2).map(handle2 -> {
 				return operation.apply(controller, handle1, handle2);
 			});
-		}).orElse(ExecuteResult.ERROR);
+		}).orElse(ExecutionResult.ERROR);
 	}
 
 	@Override

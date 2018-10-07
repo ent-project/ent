@@ -1,6 +1,6 @@
 package org.ent.net.node.cmd;
 
-public enum ExecuteResult {
+public enum ExecutionResult {
     NORMAL,
     JUMP,
     ERROR
