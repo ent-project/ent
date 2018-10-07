@@ -40,7 +40,7 @@ public class ReadOnlyNetController implements NetController {
 	}
 
 	@Override
-	public void referenceSwap(Node x, Node y) {
+	public void ancestorSwap(Node x, Node y) {
 		throw new UnsupportedOperationException();
 	}
 

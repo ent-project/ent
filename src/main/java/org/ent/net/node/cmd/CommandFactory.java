@@ -13,6 +13,7 @@ import org.ent.net.node.cmd.accessor.NodeAccessor;
 import org.ent.net.node.cmd.accessor.PtrArrowAccessor;
 import org.ent.net.node.cmd.accessor.PtrNodeAccessor;
 import org.ent.net.node.cmd.accessor.PtrPtrNodeAccessor;
+import org.ent.net.node.cmd.operation.AncestorSwapOperation;
 import org.ent.net.node.cmd.operation.DupOperation;
 import org.ent.net.node.cmd.operation.SetOperation;
 
@@ -51,6 +52,12 @@ public class CommandFactory {
 		}
 		for (ArrowDirection left : ArrowDirection.values()) {
 			result.add(createDupCommand(left));
+		}
+		result.add(createAncestorSwapCommand());
+		for (ArrowDirection left : ArrowDirection.values()) {
+			for (ArrowDirection right : ArrowDirection.values()) {
+				result.add(createAncestorSwapCommandLR(left, right));
+			}
 		}
 		return result;
 	}
@@ -100,5 +107,13 @@ public class CommandFactory {
 
 	public static Command createDupCommand(ArrowDirection left) {
 		return new BiCommand<Arrow, Node>(new ArrowAccessor(left), new NodeAccessor(), new DupOperation());
+	}
+
+	public static Command createAncestorSwapCommand() {
+		return new BiCommand<Node, Node>(new NodeAccessor(), new NodeAccessor(), new AncestorSwapOperation());
+	}
+
+	public static Command createAncestorSwapCommandLR(ArrowDirection left, ArrowDirection right) {
+		return new BiCommand<Node, Node>(new PtrNodeAccessor(left), new PtrNodeAccessor(right), new AncestorSwapOperation());
 	}
 }

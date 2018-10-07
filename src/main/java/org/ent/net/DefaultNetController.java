@@ -70,7 +70,7 @@ public class DefaultNetController implements NetController {
 	}
 
 	@Override
-	public void referenceSwap(Node x, Node y) {
+	public void ancestorSwap(Node x, Node y) {
 		Hub xHub = x.getHub();
 		Hub yHub = y.getHub();
 		x.setHub(yHub);
