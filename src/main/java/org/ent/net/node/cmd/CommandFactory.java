@@ -15,6 +15,7 @@ import org.ent.net.node.cmd.accessor.PtrNodeAccessor;
 import org.ent.net.node.cmd.accessor.PtrPtrNodeAccessor;
 import org.ent.net.node.cmd.operation.AncestorSwapOperation;
 import org.ent.net.node.cmd.operation.DupOperation;
+import org.ent.net.node.cmd.operation.IsIdenticalOperation;
 import org.ent.net.node.cmd.operation.SetOperation;
 
 public class CommandFactory {
@@ -57,6 +58,12 @@ public class CommandFactory {
 		for (ArrowDirection left : ArrowDirection.values()) {
 			for (ArrowDirection right : ArrowDirection.values()) {
 				result.add(createAncestorSwapCommandLR(left, right));
+			}
+		}
+		result.add(createIsIdenticalCommand());
+		for (ArrowDirection left : ArrowDirection.values()) {
+			for (ArrowDirection right : ArrowDirection.values()) {
+				result.add(createIsIdenticalCommandLR(left, right));
 			}
 		}
 		return result;
@@ -116,4 +123,13 @@ public class CommandFactory {
 	public static Command createAncestorSwapCommandLR(ArrowDirection left, ArrowDirection right) {
 		return new BiCommand<Node, Node>(new PtrNodeAccessor(left), new PtrNodeAccessor(right), new AncestorSwapOperation());
 	}
+
+	public static Command createIsIdenticalCommand() {
+		return new BiCommand<Node, Node>(new NodeAccessor(), new NodeAccessor(), new IsIdenticalOperation());
+	}
+
+	public static Command createIsIdenticalCommandLR(ArrowDirection left, ArrowDirection right) {
+		return new BiCommand<Node, Node>(new PtrNodeAccessor(left), new PtrNodeAccessor(right), new IsIdenticalOperation());
+	}
+
 }
