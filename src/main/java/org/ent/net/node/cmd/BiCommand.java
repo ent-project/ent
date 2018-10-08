@@ -22,6 +22,10 @@ public class BiCommand<H1, H2> implements Command {
 		this.operation = operation;
 	}
 
+	public BiOperation<H1, H2> getOperation() {
+		return operation;
+	}
+
 	@Override
 	public ExecutionResult execute(NetController controller, Node parameters) {
         if (!(parameters instanceof BNode)) return ExecutionResult.ERROR;
@@ -35,6 +39,11 @@ public class BiCommand<H1, H2> implements Command {
 				return operation.apply(controller, handle1, handle2);
 			});
 		}).orElse(ExecutionResult.ERROR);
+	}
+
+	@Override
+	public int getEvalLevel() {
+		return operation.getEvalLevel();
 	}
 
 	@Override

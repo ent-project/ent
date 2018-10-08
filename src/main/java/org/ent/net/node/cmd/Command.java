@@ -7,6 +7,8 @@ public interface Command {
 
     ExecutionResult execute(NetController controller, Node parameters);
 
+    int getEvalLevel();
+
 	String getShortName();
 
     default String getShortNameAscii() {
