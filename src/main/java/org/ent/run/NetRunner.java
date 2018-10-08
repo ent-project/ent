@@ -26,7 +26,7 @@ public class NetRunner {
 		}
 		BNode executionPointer = (BNode) root;
 		StepResult result = doStep(executionPointer);
-		result = advanceExecutionPointer(executionPointer, result);
+		advanceExecutionPointer(executionPointer);
 		return result;
 	}
 
@@ -45,23 +45,19 @@ public class NetRunner {
 
 		ExecutionResult executeResult = command.execute(controller, parameters);
 
+		return convertToStepResult(executeResult);
+	}
+
+	private StepResult convertToStepResult(ExecutionResult executeResult) throws AssertionError {
 		switch (executeResult) {
 		case NORMAL: return StepResult.SUCCESS;
-		case JUMP: return StepResult.SUCCESS_JUMP;
 		case ERROR: return StepResult.COMMAND_EXECUTION_FAILED;
 		default: throw new AssertionError("Unexpected execution result: " + executeResult);
 		}
 	}
 
-	private StepResult advanceExecutionPointer(BNode executionPointer, StepResult result) {
+	private void advanceExecutionPointer(BNode executionPointer) {
 		Node newExecutionPointer = executionPointer.getRightChild(controller);
-		if (result == StepResult.SUCCESS_JUMP) {
-			if (!(newExecutionPointer instanceof BNode)) {
-				return StepResult.FATAL;
-			}
-			newExecutionPointer = ((BNode) newExecutionPointer).getRightChild(controller);
-		}
 		net.setRoot(newExecutionPointer);
-		return result;
 	}
 }
