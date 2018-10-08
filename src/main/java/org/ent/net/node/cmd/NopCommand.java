@@ -11,6 +11,11 @@ public class NopCommand implements Command {
 	}
 
 	@Override
+	public int getEvalLevel() {
+		return 0;
+	}
+
+	@Override
 	public String getShortName() {
 		return "nop";
 	}

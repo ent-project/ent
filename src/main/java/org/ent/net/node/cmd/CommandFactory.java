@@ -15,10 +15,13 @@ import org.ent.net.node.cmd.accessor.PtrNodeAccessor;
 import org.ent.net.node.cmd.accessor.PtrPtrNodeAccessor;
 import org.ent.net.node.cmd.operation.AncestorSwapOperation;
 import org.ent.net.node.cmd.operation.DupOperation;
+import org.ent.net.node.cmd.operation.EvalOperation;
 import org.ent.net.node.cmd.operation.IsIdenticalOperation;
 import org.ent.net.node.cmd.operation.SetOperation;
 
 public class CommandFactory {
+
+	private static final int MAX_EVAL_LEVEL = 5;
 
 	private final static List<Command> allCommands = collectAllCommands();
 
@@ -58,6 +61,14 @@ public class CommandFactory {
 		for (ArrowDirection left : ArrowDirection.values()) {
 			for (ArrowDirection right : ArrowDirection.values()) {
 				result.add(createAncestorSwapCommandLR(left, right));
+			}
+		}
+		for (int evalLevel = 1; evalLevel < MAX_EVAL_LEVEL; evalLevel++) {
+			result.add(createEvalCommand(evalLevel));
+			for (ArrowDirection left : ArrowDirection.values()) {
+				for (ArrowDirection right : ArrowDirection.values()) {
+					result.add(createEvalCommandLR(evalLevel, left, right));
+				}
 			}
 		}
 		for (ArrowDirection left : ArrowDirection.values()) {
@@ -121,6 +132,14 @@ public class CommandFactory {
 
 	public static Command createAncestorSwapCommandLR(ArrowDirection left, ArrowDirection right) {
 		return new BiCommand<Node, Node>(new PtrNodeAccessor(left), new PtrNodeAccessor(right), new AncestorSwapOperation());
+	}
+
+	public static Command createEvalCommand(int evalLevel) {
+		return new BiCommand<Node, Node>(new NodeAccessor(), new NodeAccessor(), new EvalOperation(evalLevel));
+	}
+
+	public static Command createEvalCommandLR(int evalLevel, ArrowDirection left, ArrowDirection right) {
+		return new BiCommand<Node, Node>(new PtrNodeAccessor(left), new PtrNodeAccessor(right), new EvalOperation(evalLevel));
 	}
 
 	public static Command createIsIdenticalCommand(ArrowDirection left, ArrowDirection right) {
