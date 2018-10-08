@@ -60,10 +60,9 @@ public class CommandFactory {
 				result.add(createAncestorSwapCommandLR(left, right));
 			}
 		}
-		result.add(createIsIdenticalCommand());
 		for (ArrowDirection left : ArrowDirection.values()) {
 			for (ArrowDirection right : ArrowDirection.values()) {
-				result.add(createIsIdenticalCommandLR(left, right));
+				result.add(createIsIdenticalCommand(left, right));
 			}
 		}
 		return result;
@@ -124,12 +123,8 @@ public class CommandFactory {
 		return new BiCommand<Node, Node>(new PtrNodeAccessor(left), new PtrNodeAccessor(right), new AncestorSwapOperation());
 	}
 
-	public static Command createIsIdenticalCommand() {
-		return new BiCommand<Node, Node>(new NodeAccessor(), new NodeAccessor(), new IsIdenticalOperation());
-	}
-
-	public static Command createIsIdenticalCommandLR(ArrowDirection left, ArrowDirection right) {
-		return new BiCommand<Node, Node>(new PtrNodeAccessor(left), new PtrNodeAccessor(right), new IsIdenticalOperation());
+	public static Command createIsIdenticalCommand(ArrowDirection left, ArrowDirection right) {
+		return new BiCommand<Arrow, Arrow>(new ArrowAccessor(left), new ArrowAccessor(right), new IsIdenticalOperation());
 	}
 
 }

@@ -14,12 +14,12 @@ public interface Arrow {
 
 	Node getOrigin();
 
-	default Node getTarget(NetController nc) {
-		return nc.getTarget(this);
+	default Node getTarget(NetController controller) {
+		return controller.getTarget(this);
 	}
 
-	default void setTarget(NetController nc, Node target) {
-		nc.setTarget(this, target);
+	default void setTarget(NetController controller, Node target) {
+		controller.setTarget(this, target);
 	}
 
 	Node getTargetForNetControllerOnly();
