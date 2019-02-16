@@ -29,7 +29,7 @@ public class CommandFactory {
 
 	private static List<Command> collectAllCommands() {
 		List<Command> result = new ArrayList<>();
-		result.add(new NopCommand());
+		result.add(createNopCommand());
 		for (ArrowDirection left : ArrowDirection.values()) {
 			result.add(createSetCommandL(left));
 			for (ArrowDirection right : ArrowDirection.values()) {
@@ -93,6 +93,10 @@ public class CommandFactory {
 
 	public static Command getByName(String name) {
 		return commandsByName.get(name);
+	}
+
+	public static Command createNopCommand() {
+		return new NopCommand();
 	}
 
 	public static Command createSetCommandL(ArrowDirection left) {
