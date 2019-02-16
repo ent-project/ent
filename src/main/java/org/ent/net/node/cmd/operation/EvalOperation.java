@@ -8,10 +8,15 @@ import org.ent.net.node.cmd.ExecutionResult;
 
 public class EvalOperation implements BiOperation<Node, Node> {
 
+	private static final char[] SUPERSCRIPT_NUMBERS = new char[] { '⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹' };
+
 	private final int evalLevel;
+
+	private final String shortName;
 
 	public EvalOperation(int evalLevel) {
 		this.evalLevel = evalLevel;
+		this.shortName = "🞜" + toSuperscriptNumber(evalLevel);
 	}
 
 	@Override
@@ -36,7 +41,23 @@ public class EvalOperation implements BiOperation<Node, Node> {
 
 	@Override
 	public String getShortName() {
-		return "🞜";
+		return shortName;
 	}
 
+	static String toSuperscriptNumber(int n) {
+		if (n < 0) {
+			throw new IllegalArgumentException("input must be greater or equal 0!");
+		}
+		String s = Integer.toString(n);
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+			if ('0' <= c && c <= '9') {
+				sb.append(SUPERSCRIPT_NUMBERS[c - '0']);
+			} else {
+				throw new AssertionError();
+			}
+		}
+		return sb.toString();
+	}
 }
