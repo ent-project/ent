@@ -17,7 +17,7 @@ public class NetFormatter {
 
 	private final NetController controller = new ReadOnlyNetController();
 
-    private Map<Node, String> lastVariableBindings;
+    private Map<Node, String> givenNodeNames = new HashMap<>();
 
 	private Integer maxDepth;
 
@@ -32,10 +32,7 @@ public class NetFormatter {
 	}
 
 	public void setNodeNames(Map<Node, String> nodeNames) {
-		if (lastVariableBindings != null) {
-			throw new IllegalArgumentException("Must not set node names after 'format' has been called.");
-		}
-		this.lastVariableBindings = new HashMap<>(nodeNames);
+		givenNodeNames.putAll(nodeNames);
 	}
 
 	public boolean isAscii() {
@@ -62,12 +59,12 @@ public class NetFormatter {
             rootNodes.add(nextRoot);
         }
 
-        FormattingWorker worker = new FormattingWorker(rootNodes, lastVariableBindings, maxDepth);
+        FormattingWorker worker = new FormattingWorker(rootNodes, givenNodeNames, maxDepth);
         worker.setAscii(ascii);
 
         String result = worker.formatRecursively();
 
-        lastVariableBindings = worker.getVariableBindings();
+        givenNodeNames.putAll(worker.getVariableBindings());
 
         return result;
 	}
