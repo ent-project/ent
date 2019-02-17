@@ -34,6 +34,7 @@ public class NetFormatterTest {
 	@MethodSource("format_testData")
 	public void format(Net net, String stringRepresentation) throws Exception {
 		NetFormatter formatter = new NetFormatter();
+		formatter.setAscii(true);
 		Assertions.assertThat(formatter.format(net)).isEqualTo(stringRepresentation);
 	}
 
@@ -60,6 +61,7 @@ public class NetFormatterTest {
         net.setRoot(b1);
 
         NetFormatter formatter = new NetFormatter();
+        formatter.setAscii(true);
         Assertions.assertThat(formatter.format(net)).isEqualTo("(a=[a], b=[b])");
 
         b1.setLeftChild(controller, controller.newCNode(new NopCommand()));
@@ -86,6 +88,7 @@ public class NetFormatterTest {
     	net.setRoot(b1);
 
         NetFormatter formatter = new NetFormatter();
+        formatter.setAscii(true);
         Assertions.assertThat(formatter.format(net)).isEqualTo("A=(a=[a], <nop>); [A]");
 	}
 

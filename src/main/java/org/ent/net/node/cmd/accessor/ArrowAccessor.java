@@ -13,9 +13,12 @@ public class ArrowAccessor implements Accessor<Arrow> {
 
     private final String shortName;
 
+    private final String shortNameAscii;
+
     public ArrowAccessor(ArrowDirection direction) {
 		this.direction = direction;
 		this.shortName = ArrowDirection.ARROW_SYMBOLS.get(direction);
+		this.shortNameAscii = ArrowDirection.ARROW_SYMBOLS_ASCII.get(direction);
 	}
 
 	@Override
@@ -26,5 +29,10 @@ public class ArrowAccessor implements Accessor<Arrow> {
 	@Override
 	public String getShortName() {
 		return shortName;
+	}
+
+	@Override
+	public String getShortNameAscii() {
+		return shortNameAscii;
 	}
 }

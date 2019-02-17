@@ -15,10 +15,14 @@ public class PtrArrowAccessor implements Accessor<Arrow> {
 
     private final String shortName;
 
-	public PtrArrowAccessor(ArrowDirection direction1, ArrowDirection direction2) {
+    private final String shortNameAscii;
+
+    public PtrArrowAccessor(ArrowDirection direction1, ArrowDirection direction2) {
 		this.direction1 = direction1;
 		this.direction2 = direction2;
 		this.shortName = ArrowDirection.ARROW_SYMBOLS.get(direction1) + ArrowDirection.ARROW_SYMBOLS.get(direction2);
+		this.shortNameAscii = ArrowDirection.ARROW_SYMBOLS_ASCII.get(direction1)
+				+ ArrowDirection.ARROW_SYMBOLS_ASCII.get(direction2);
 	}
 
 	@Override
@@ -32,5 +36,10 @@ public class PtrArrowAccessor implements Accessor<Arrow> {
 	@Override
 	public String getShortName() {
 		return shortName;
+	}
+
+	@Override
+	public String getShortNameAscii() {
+		return shortNameAscii;
 	}
 }

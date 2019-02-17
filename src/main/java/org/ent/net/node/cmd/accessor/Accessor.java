@@ -10,4 +10,6 @@ public interface Accessor<T> {
 	Optional<T> get(NetController controller, Node node);
 
 	String getShortName();
+
+	String getShortNameAscii();
 }

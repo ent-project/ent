@@ -4,6 +4,7 @@ import org.ent.net.NetController;
 import org.ent.net.node.BNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
+import org.ent.net.node.cmd.accessor.NodeAccessor;
 import org.ent.net.node.cmd.operation.BiOperation;
 
 public class BiCommand<H1, H2> implements Command {
@@ -49,9 +50,17 @@ public class BiCommand<H1, H2> implements Command {
 	@Override
 	public String getShortName() {
 		if (shortName == null) {
-			shortName = accessor1.getShortName() + operation.getShortName() + accessor2.getShortName();
+			if (isTwoNodeAccessorShortcut()) {
+				shortName = operation.getShortName();
+			} else {
+				shortName = accessor1.getShortName() + operation.getShortName() + accessor2.getShortName();
+			}
 		}
 		return shortName;
+	}
+
+	private boolean isTwoNodeAccessorShortcut() {
+		return accessor1 instanceof NodeAccessor && accessor2 instanceof NodeAccessor;
 	}
 
 }
