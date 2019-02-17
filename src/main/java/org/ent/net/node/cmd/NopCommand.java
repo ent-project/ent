@@ -17,7 +17,11 @@ public class NopCommand implements Command {
 
 	@Override
 	public String getShortName() {
-		return "nop";
+		return "∅";
 	}
 
+	@Override
+	public String getShortNameAscii() {
+		return "nop";
+	}
 }

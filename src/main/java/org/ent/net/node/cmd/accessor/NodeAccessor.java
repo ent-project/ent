@@ -14,7 +14,11 @@ public class NodeAccessor implements Accessor<Node> {
 
 	@Override
 	public String getShortName() {
-		return "∗";
+		return "•";
 	}
 
+	@Override
+	public String getShortNameAscii() {
+		return "*";
+	}
 }

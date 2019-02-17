@@ -12,9 +12,12 @@ public class PtrNodeAccessor implements Accessor<Node> {
 
     private final String shortName;
 
+    private final String shortNameAscii;
+
 	public PtrNodeAccessor(ArrowDirection direction) {
 		this.direction = direction;
 		this.shortName = ArrowDirection.ARROW_SYMBOLS.get(direction);
+		this.shortNameAscii = ArrowDirection.ARROW_SYMBOLS_ASCII.get(direction);
 	}
 
 	@Override
@@ -29,4 +32,8 @@ public class PtrNodeAccessor implements Accessor<Node> {
 		return shortName;
 	}
 
+	@Override
+	public String getShortNameAscii() {
+		return shortNameAscii;
+	}
 }

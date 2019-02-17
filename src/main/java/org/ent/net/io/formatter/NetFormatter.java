@@ -21,6 +21,8 @@ public class NetFormatter {
 
 	private Integer maxDepth;
 
+	private boolean ascii;
+
 	public Integer getMaxDepth() {
 		return maxDepth;
 	}
@@ -34,6 +36,14 @@ public class NetFormatter {
 			throw new IllegalArgumentException("Must not set node names after 'format' has been called.");
 		}
 		this.lastVariableBindings = new HashMap<>(nodeNames);
+	}
+
+	public boolean isAscii() {
+		return ascii;
+	}
+
+	public void setAscii(boolean ascii) {
+		this.ascii = ascii;
 	}
 
 	public String format(Net net) {
@@ -53,6 +63,7 @@ public class NetFormatter {
         }
 
         FormattingWorker worker = new FormattingWorker(rootNodes, lastVariableBindings, maxDepth);
+        worker.setAscii(ascii);
 
         String result = worker.formatRecursively();
 

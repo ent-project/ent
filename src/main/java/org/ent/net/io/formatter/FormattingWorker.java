@@ -28,6 +28,8 @@ public class FormattingWorker {
 
 	private final StringBuilder stringBuilder;
 
+	private boolean ascii;
+
 	private int uNodeVariableNameIndex;
 
 	private int bNodeVariableNameIndex;
@@ -44,6 +46,14 @@ public class FormattingWorker {
 		this.variableBindings = new HashMap<>();
 		this.maxDepth = maxDepth;
 		this.stringBuilder = new StringBuilder();
+	}
+
+	public boolean isAscii() {
+		return ascii;
+	}
+
+	public void setAscii(boolean ascii) {
+		this.ascii = ascii;
 	}
 
 	public String formatRecursively() {
@@ -99,7 +109,7 @@ public class FormattingWorker {
         } else if (node instanceof CNode) {
             CNode cnode = (CNode) node;
             stringBuilder.append("<");
-            stringBuilder.append(cnode.getCommand().getShortName());
+			stringBuilder.append(ascii ? cnode.getCommand().getShortNameAscii() : cnode.getCommand().getShortName());
             stringBuilder.append(">");
         } else if (node instanceof MarkerNode) {
         	stringBuilder.append(MarkerNode.MARKER_NODE_SYMBOL);

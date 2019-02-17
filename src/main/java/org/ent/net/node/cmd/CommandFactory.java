@@ -87,6 +87,13 @@ public class CommandFactory {
 				throw new AssertionError("Duplicate command name: " + name);
 			}
 			result.put(name, command);
+			String nameAscii = command.getShortNameAscii();
+			if (!name.equals(nameAscii)) {
+				if (result.containsKey(nameAscii)) {
+					throw new AssertionError("Duplicate command name: " + nameAscii);
+				}
+				result.put(nameAscii, command);
+			}
 		}
 		return result;
 	}
