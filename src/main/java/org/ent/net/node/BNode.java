@@ -22,7 +22,7 @@ public class BNode extends Node {
 
 	private class BNodeLeftArrow implements Arrow {
 		@Override
-		public ArrowDirection getType() {
+		public ArrowDirection getDirection() {
 			return ArrowDirection.LEFT;
 		}
 
@@ -44,7 +44,7 @@ public class BNode extends Node {
 
 	private class BNodeRightArrow implements Arrow {
 		@Override
-		public ArrowDirection getType() {
+		public ArrowDirection getDirection() {
 			return ArrowDirection.RIGHT;
 		}
 

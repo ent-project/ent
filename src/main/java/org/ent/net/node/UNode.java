@@ -23,7 +23,7 @@ public class UNode extends Node {
 
 	private class UNodeArrow implements Arrow {
 		@Override
-		public ArrowDirection getType() {
+		public ArrowDirection getDirection() {
 			return ArrowDirection.DOWN;
 		}
 

@@ -10,7 +10,7 @@ import org.ent.net.node.Node;
  */
 public interface Arrow {
 
-	ArrowDirection getType();
+	ArrowDirection getDirection();
 
 	Node getOrigin();
 
