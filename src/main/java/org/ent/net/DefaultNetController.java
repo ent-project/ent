@@ -12,7 +12,7 @@ public class DefaultNetController implements NetController {
 
 	private final Net net;
 
-	private final ExecutionEventHandler executionContext;
+	private final ExecutionEventHandler eventHandler;
 
 	public DefaultNetController(Net net) {
 		this(net, null);
@@ -20,21 +20,21 @@ public class DefaultNetController implements NetController {
 
 	public DefaultNetController(Net net, ExecutionEventHandler executionContext) {
 		this.net = net;
-		this.executionContext = executionContext;
+		this.eventHandler = executionContext;
 	}
 
 	@Override
 	public Node getTarget(Arrow arrow) {
-		if (executionContext != null) {
-			executionContext.fireGetChild(arrow.getOrigin(), arrow.getType());
+		if (eventHandler != null) {
+			eventHandler.fireGetChild(arrow.getOrigin(), arrow.getType());
 		}
 		return arrow.getTargetForNetControllerOnly();
 	}
 
 	@Override
 	public void setTarget(Arrow arrow, Node target) {
-		if (executionContext != null) {
-			executionContext.fireSetChild(arrow.getOrigin(), arrow.getType(), target);
+		if (eventHandler != null) {
+			eventHandler.fireSetChild(arrow.getOrigin(), arrow.getType(), target);
 		}
 		arrow.setTargetForNetControllerOnly(target);
 	}
@@ -42,8 +42,8 @@ public class DefaultNetController implements NetController {
 	@Override
 	public UNode newUNode(Node child) {
 		UNode unaryNode = new UNode(child);
-		if (executionContext != null) {
-			executionContext.fireNewNode(unaryNode);
+		if (eventHandler != null) {
+			eventHandler.fireNewNode(unaryNode);
 		}
 		net.addNode(unaryNode);
 		return unaryNode;
@@ -52,8 +52,8 @@ public class DefaultNetController implements NetController {
 	@Override
 	public BNode newBNode(Node leftChild, Node rightChild) {
 		BNode binaryNode = new BNode(leftChild, rightChild);
-		if (executionContext != null) {
-			executionContext.fireNewNode(binaryNode);
+		if (eventHandler != null) {
+			eventHandler.fireNewNode(binaryNode);
 		}
 		net.addNode(binaryNode);
 		return binaryNode;
@@ -62,8 +62,8 @@ public class DefaultNetController implements NetController {
 	@Override
 	public CNode newCNode(Command command) {
 		CNode commandNode = new CNode(command);
-		if (executionContext != null) {
-			executionContext.fireNewNode(commandNode);
+		if (eventHandler != null) {
+			eventHandler.fireNewNode(commandNode);
 		}
 		net.addNode(commandNode);
 		return commandNode;
