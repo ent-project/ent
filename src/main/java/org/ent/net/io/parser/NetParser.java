@@ -104,7 +104,7 @@ public class NetParser {
             }
             Node node = templateNodeMap.get(template);
             for (Arrow arrow : node.getArrows()) {
-            	Node child = resolveNode(template.getChild(arrow.getType()));
+            	Node child = resolveNode(template.getChild(arrow.getDirection()));
             	if (child == null) {
             		throw new ParserException();
             	}

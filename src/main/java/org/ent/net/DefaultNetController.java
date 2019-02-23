@@ -26,7 +26,7 @@ public class DefaultNetController implements NetController {
 	@Override
 	public Node getTarget(Arrow arrow) {
 		if (eventHandler != null) {
-			eventHandler.fireGetChild(arrow.getOrigin(), arrow.getType());
+			eventHandler.fireGetChild(arrow.getOrigin(), arrow.getDirection());
 		}
 		return arrow.getTargetForNetControllerOnly();
 	}
@@ -34,7 +34,7 @@ public class DefaultNetController implements NetController {
 	@Override
 	public void setTarget(Arrow arrow, Node target) {
 		if (eventHandler != null) {
-			eventHandler.fireSetChild(arrow.getOrigin(), arrow.getType(), target);
+			eventHandler.fireSetChild(arrow.getOrigin(), arrow.getDirection(), target);
 		}
 		arrow.setTargetForNetControllerOnly(target);
 	}
