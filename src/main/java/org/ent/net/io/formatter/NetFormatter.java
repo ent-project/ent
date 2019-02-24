@@ -2,7 +2,7 @@ package org.ent.net.io.formatter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,6 +11,7 @@ import org.ent.net.Arrow;
 import org.ent.net.Net;
 import org.ent.net.NetController;
 import org.ent.net.ReadOnlyNetController;
+import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 
 public class NetFormatter {
@@ -21,6 +22,8 @@ public class NetFormatter {
 
 	private Integer maxDepth;
 
+	private boolean markerNodesPermitted;
+
 	private boolean ascii;
 
 	public Integer getMaxDepth() {
@@ -29,6 +32,14 @@ public class NetFormatter {
 
 	public void setMaxDepth(Integer maxDepth) {
 		this.maxDepth = maxDepth;
+	}
+
+	public boolean isMarkerNodesPermitted() {
+		return markerNodesPermitted;
+	}
+
+	public void setMarkerNodesPermitted(boolean markerNodesPermitted) {
+		this.markerNodesPermitted = markerNodesPermitted;
 	}
 
 	public void setNodeNames(Map<Node, String> nodeNames) {
@@ -44,13 +55,13 @@ public class NetFormatter {
 	}
 
 	public String format(Net net) {
-        Set<Node> collected = new HashSet<>();
+        Set<Node> collected = new LinkedHashSet<>();
         List<Node> rootNodes = new ArrayList<>();
         rootNodes.add(net.getRoot());
 
         collectRecursively(net.getRoot(), collected);
 
-        Set<Node> missing = new HashSet<>(net.getNodes());
+        Set<Node> missing = new LinkedHashSet<>(net.getNodes());
         missing.removeAll(collected);
 
         while (!missing.isEmpty()) {
@@ -73,6 +84,13 @@ public class NetFormatter {
         if (collected.contains(node))
             return;
         collected.add(node);
+        if (node instanceof MarkerNode) {
+        	if (markerNodesPermitted) {
+        		return;
+        	} else {
+        		throw new IllegalArgumentException("Found marker node");
+        	}
+        }
         for (Arrow arrow : node.getArrows()) {
         	Node child = arrow.getTarget(controller);
         	collectRecursively(child, collected);

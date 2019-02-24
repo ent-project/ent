@@ -12,4 +12,6 @@ public interface BiOperation<H1, H2> {
 	}
 
 	String getShortName();
+
+	String getShortNameAscii();
 }

@@ -112,11 +112,14 @@ public class FormattingWorker {
 			stringBuilder.append(ascii ? cnode.getCommand().getShortNameAscii() : cnode.getCommand().getShortName());
             stringBuilder.append(">");
         } else if (node instanceof MarkerNode) {
-        	stringBuilder.append(MarkerNode.MARKER_NODE_SYMBOL);
+        	stringBuilder.append(ascii ? MarkerNode.MARKER_NODE_SYMBOL_ASCII : MarkerNode.MARKER_NODE_SYMBOL);
         }
 	}
 
 	private boolean requiresVariable(Node n) {
+		if (n instanceof MarkerNode) {
+			return false;
+		}
 		int inverseReferences = n.getHub().getInverseReferences().size();
 		if (rootNodes.contains(n)) {
 			return inverseReferences >= 1;

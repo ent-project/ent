@@ -11,8 +11,6 @@ public interface Command {
 
 	String getShortName();
 
-    default String getShortNameAscii() {
-        return getShortName();
-    }
+    String getShortNameAscii();
 
 }

@@ -14,9 +14,12 @@ public class EvalOperation implements BiOperation<Node, Node> {
 
 	private final String shortName;
 
+	private final String shortNameAscii;
+
 	public EvalOperation(int evalLevel) {
 		this.evalLevel = evalLevel;
 		this.shortName = "🞜" + toSuperscriptNumber(evalLevel);
+		this.shortNameAscii = "eval" + String.valueOf(evalLevel);
 	}
 
 	@Override
@@ -42,6 +45,11 @@ public class EvalOperation implements BiOperation<Node, Node> {
 	@Override
 	public String getShortName() {
 		return shortName;
+	}
+
+	@Override
+	public String getShortNameAscii() {
+		return shortNameAscii;
 	}
 
 	static String toSuperscriptNumber(int n) {

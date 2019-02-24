@@ -18,4 +18,9 @@ public class SetOperation implements BiOperation<Arrow, Node> {
 		return "◄";
 	}
 
+	@Override
+	public String getShortNameAscii() {
+		return ":";
+	}
+
 }

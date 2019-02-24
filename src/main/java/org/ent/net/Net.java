@@ -1,6 +1,6 @@
 package org.ent.net;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.ent.net.node.Hub;
@@ -14,7 +14,7 @@ public class Net {
 	private NetController internalNetController;
 
 	public Net() {
-		this.nodes = new HashSet<>();
+		this.nodes = new LinkedHashSet<>();
 		this.internalNetController = new ReadOnlyNetController();
 	}
 
