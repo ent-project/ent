@@ -17,4 +17,8 @@ public class AncestorSwapOperation implements BiOperation<Node, Node> {
 		return "⤩";
 	}
 
+	@Override
+	public String getShortNameAscii() {
+		return "ix";
+	}
 }

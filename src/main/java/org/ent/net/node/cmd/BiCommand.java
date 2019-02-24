@@ -17,6 +17,8 @@ public class BiCommand<H1, H2> implements Command {
 
 	private String shortName;
 
+	private String shortNameAscii;
+
 	public BiCommand(Accessor<H1> accessor1, Accessor<H2> accessor2, BiOperation<H1, H2> operation) {
 		this.accessor1 = accessor1;
 		this.accessor2 = accessor2;
@@ -57,6 +59,19 @@ public class BiCommand<H1, H2> implements Command {
 			}
 		}
 		return shortName;
+	}
+
+	@Override
+	public String getShortNameAscii() {
+		if (shortNameAscii == null) {
+			if (isTwoNodeAccessorShortcut()) {
+				shortNameAscii = operation.getShortNameAscii();
+			} else {
+				shortNameAscii = accessor1.getShortNameAscii() + operation.getShortNameAscii()
+						+ accessor2.getShortNameAscii();
+			}
+		}
+		return shortNameAscii;
 	}
 
 	private boolean isTwoNodeAccessorShortcut() {

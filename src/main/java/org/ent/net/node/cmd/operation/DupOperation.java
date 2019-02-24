@@ -34,4 +34,8 @@ public class DupOperation implements BiOperation<Arrow, Node> {
 		return "⏪";
 	}
 
+	@Override
+	public String getShortNameAscii() {
+		return "dup";
+	}
 }

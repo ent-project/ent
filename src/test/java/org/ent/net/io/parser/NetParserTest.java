@@ -73,7 +73,7 @@ public class NetParserTest {
 
 	@Test
 	public void parse_okay_comment() throws Exception {
-		Net net = parser.parse("A=[B]; # definition of B follows\nB=A");
+		Net net = parser.parse("A=[B]; @ definition of B follows\nB=A");
 
 		Set<Node> nodes = net.getNodes();
 		assertThat(nodes.size()).isEqualTo(1);

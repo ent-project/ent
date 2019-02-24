@@ -26,4 +26,9 @@ public class IsIdenticalOperation implements BiOperation<Arrow, Arrow> {
 		return "≡";
 	}
 
+	@Override
+	public String getShortNameAscii() {
+		return "==";
+	}
+
 }
