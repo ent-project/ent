@@ -4,6 +4,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.ent.net.node.Hub;
+import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 
 public class Net {
@@ -12,6 +13,10 @@ public class Net {
 
 	private Node root;
 	private NetController internalNetController;
+
+	private boolean markerNodePermitted;
+
+	private MarkerNode markerNode;
 
 	public Net() {
 		this.nodes = new LinkedHashSet<>();
@@ -34,6 +39,24 @@ public class Net {
 		this.root = root;
 	}
 
+	public void permitMarkerNode(MarkerNode markerNode) {
+		this.markerNodePermitted = true;
+		this.markerNode = markerNode;
+	}
+
+	public void forbidMarkerNode() {
+		this.markerNodePermitted = false;
+		this.markerNode = null;
+	}
+
+	public boolean isMarkerNodePermitted() {
+		return markerNodePermitted;
+	}
+
+	public MarkerNode getMarkerNode() {
+		return markerNode;
+	}
+
 	public void consistencyTest() {
 		if (root == null) {
 			throw new AssertionError("Root is null");
@@ -45,13 +68,19 @@ public class Net {
 		for (Node node : nodes) {
 			for (Arrow arrow : node.getArrows()) {
 				Node child = arrow.getTarget(internalNetController);
-				if (!nodes.contains(child)) {
-					throw new AssertionError("Child of node must be part of the net");
-				}
+				if (child instanceof MarkerNode) {
+					if (!markerNodePermitted) {
+						throw new AssertionError("Child of node is MarkerNode, but they are not permitted");
+					}
+				} else {
+					if (!nodes.contains(child)) {
+						throw new AssertionError("Child of node must be part of the net");
+					}
 
-				Hub childHub = child.getHub();
-				if (!childHub.getInverseReferences().contains(arrow)) {
-					throw new AssertionError("Child nodes must be aware of their parents");
+					Hub childHub = child.getHub();
+					if (!childHub.getInverseReferences().contains(arrow)) {
+						throw new AssertionError("Child nodes must be aware of their parents");
+					}
 				}
 			}
 

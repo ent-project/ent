@@ -5,6 +5,7 @@ import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_EOF;
 import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_EQUALS;
 import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_LEFT_PARENTHESIS;
 import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_LEFT_SQUARE_BRACKET;
+import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_MARKER;
 import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_RIGHT_PARENTHESIS;
 import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_RIGHT_SQUARE_BRACKET;
 import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_SEMICOLON;
@@ -15,14 +16,13 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 
-import org.ent.Main;
 import org.ent.net.io.parser.ParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NetTokenizer {
 
-	private final Logger log = LoggerFactory.getLogger(Main.class);
+	private final Logger log = LoggerFactory.getLogger(NetTokenizer.class);
 
     private final Reader reader;
     private int ch;
@@ -68,7 +68,7 @@ public class NetTokenizer {
                 nextChar();
                 advanced = true;
             }
-            if (this.ch == '#') {
+            if (this.ch == '@') {
                 // comment - advance to the next newline or end of file
                 nextChar();
                 while (this.ch != '\n' && this.ch != -1) {
@@ -99,6 +99,10 @@ public class NetTokenizer {
             case '=':
                 nextChar();
                 return TOKEN_EQUALS;
+            case '#': // fall through
+            case '●':
+            	nextChar();
+            	return TOKEN_MARKER;
             case ',':
                 nextChar();
                 return TOKEN_COMMA;

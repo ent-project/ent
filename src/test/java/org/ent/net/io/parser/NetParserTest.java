@@ -12,6 +12,7 @@ import org.ent.net.NetController;
 import org.ent.net.ReadOnlyNetController;
 import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
+import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.UNode;
 import org.ent.net.node.cmd.CommandFactory;
@@ -80,6 +81,21 @@ public class NetParserTest {
 	}
 
 	@Test
+	public void parse_okay_marker() throws Exception {
+		parser.permitMarkerNodes(new MarkerNode());
+		Net net = parser.parse("A=[#]");
+
+		Set<Node> nodes = net.getNodes();
+		assertThat(nodes.size()).isEqualTo(1);
+	}
+
+	@Test
+	public void parse_error_marker() throws Exception {
+		assertThatThrownBy(() -> parser.parse("A=[#]")).isInstanceOf(ParserException.class)
+				.hasMessage("Found marker node in line 1, column 6, but is not permitted");
+	}
+
+	@Test
 	public void parse_error_tokenizer() throws Exception {
 		assertThatThrownBy(() -> parser.parse("A=[B];\nC=]")).isInstanceOf(ParserException.class)
 				.hasMessageContaining("Unexpected token ']' in line 2, column 5");
@@ -111,4 +127,5 @@ public class NetParserTest {
 		assertThat(mainNodes).asList().containsExactly(nodeNames.get("T"), nodeNames.get("K"),
 				nodeNames.get("F"));
 	}
+
 }

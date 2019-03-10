@@ -36,7 +36,7 @@ import org.ent.net.node.Node;
  */
 public class NetParser {
 
-    private final Node markerNode = new MarkerNode();
+    private final Node placeholderNode = new MarkerNode();
 
     private Map<String, Node> nodeNames;
 
@@ -48,6 +48,10 @@ public class NetParser {
 
 	private FirstPassNetParser firstPassNetParser;
 
+	private boolean markerNodePermitted;
+
+	private MarkerNode markerNode;
+
     public Net parse(String input) throws ParserException {
         return parse(new StringReader(input));
     }
@@ -55,6 +59,9 @@ public class NetParser {
     public Net parse(Reader reader) throws ParserException {
         clear();
         firstPassNetParser = new FirstPassNetParser(reader);
+        if (markerNodePermitted) {
+        	firstPassNetParser.setMarkerNodesPermitted(markerNode);
+        }
         List<NodeTemplate> mainNodeTemplates = firstPassNetParser.parseAll();
         return buildNet(mainNodeTemplates);
     }
@@ -70,9 +77,17 @@ public class NetParser {
 		return mainNodes;
 	}
 
+    public void permitMarkerNodes(MarkerNode markerNode) {
+    	this.markerNodePermitted = true;
+    	this.markerNode = markerNode;
+    }
+
     private Net buildNet(List<NodeTemplate> mainNodeTemplates) throws ParserException {
 
     	Net net = new Net();
+    	if (markerNodePermitted) {
+    		net.permitMarkerNode(markerNode);
+    	}
         NetController controller = new DefaultNetController(net);
 
         instantiateNodesFromTemplates(controller);
@@ -91,7 +106,7 @@ public class NetParser {
 	private void instantiateNodesFromTemplates(NetController controller) throws ParserException {
 		for (NodeTemplate template : firstPassNetParser.getAllEntries()) {
         	if (!(template instanceof IdentifierNodeTemplate)) {
-        		Node node = template.generateNode(controller, markerNode);
+        		Node node = template.generateNode(controller, placeholderNode);
         		templateNodeMap.put(template, node);
         	}
         }
