@@ -22,6 +22,8 @@ import org.ent.net.io.parser.tokenizer.CommandToken;
 import org.ent.net.io.parser.tokenizer.IdentifierToken;
 import org.ent.net.io.parser.tokenizer.NetTokenizer;
 import org.ent.net.io.parser.tokenizer.Token;
+import org.ent.net.io.parser.tokenizer.TokenManager;
+import org.ent.net.node.MarkerNode;
 
 public class FirstPassNetParser {
 
@@ -31,9 +33,18 @@ public class FirstPassNetParser {
 
 	private final Set<NodeTemplate> allEntries = new HashSet<>();
 
+	private boolean markerNodePermitted;
+
+	private MarkerNode markerNode;
+
     public FirstPassNetParser(Reader reader) {
     	this.tokenizer = new NetTokenizer(reader);
 	}
+
+    public void setMarkerNodesPermitted(MarkerNode markerNode) {
+    	this.markerNodePermitted = true;
+    	this.markerNode = markerNode;
+    }
 
 	public Set<NodeTemplate> getAllEntries() {
 		return allEntries;
@@ -121,6 +132,14 @@ public class FirstPassNetParser {
             return new BNodeTemplate(leftChild, rightChild);
         } else if (token instanceof IdentifierToken) {
             return new IdentifierNodeTemplate(((IdentifierToken) token).getName());
+        } else if (token == TokenManager.TOKEN_MARKER) {
+        	if (markerNodePermitted) {
+            	return new MarkerNodeTemplate(markerNode);
+        	} else {
+        		throw new ParserException(MessageFormat.format(
+        				"Found marker node in line {0}, column {1}, but is not permitted",
+        				token, tokenizer.getLine(), tokenizer.getColumn()));
+        	}
         } else {
             throw new ParserException(MessageFormat.format(
                     "Unexpected token ''{0}'' in line {1}, column {2}",

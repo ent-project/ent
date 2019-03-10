@@ -5,7 +5,7 @@ public class CommandToken extends Token {
     private final String commandName;
 
 	public CommandToken(String commandName) {
-        super("{@cmd=" + commandName + "}");
+        super("{@cmd=<" + commandName + ">}");
         this.commandName = commandName;
     }
 
