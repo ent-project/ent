@@ -26,7 +26,7 @@ public class NetTestData {
     	all = Arrays.asList(net0, net1, net2, netDeep);
 	}
 
-	public NetWithStringRepresentation buildNet0() {
+	public static NetWithStringRepresentation buildNet0() {
     	Net net = new Net();
     	NetController controller = new DefaultNetController(net);
         Node dummy = new MarkerNode();
@@ -44,7 +44,7 @@ public class NetTestData {
         return new NetWithStringRepresentation(net, "(a=[a], <nop>)");
     }
 
-	public NetWithStringRepresentation buildNet1() {
+	public static NetWithStringRepresentation buildNet1() {
     	Net net = new Net();
     	NetController controller = new DefaultNetController(net);
 
@@ -57,7 +57,7 @@ public class NetTestData {
         return new NetWithStringRepresentation(net, "(a=[<nop>], (a, <nop>))");
     }
 
-	public NetWithStringRepresentation buildNet2() {
+	public static NetWithStringRepresentation buildNet2() {
     	Net net = new Net();
     	NetController controller = new DefaultNetController(net);
     	Node dummy = new MarkerNode();

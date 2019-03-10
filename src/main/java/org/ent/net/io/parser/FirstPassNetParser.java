@@ -138,7 +138,7 @@ public class FirstPassNetParser {
         	} else {
         		throw new ParserException(MessageFormat.format(
         				"Found marker node in line {0}, column {1}, but is not permitted",
-        				token, tokenizer.getLine(), tokenizer.getColumn()));
+        				tokenizer.getLine(), tokenizer.getColumn()));
         	}
         } else {
             throw new ParserException(MessageFormat.format(

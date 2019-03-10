@@ -6,6 +6,7 @@ import java.util.Set;
 import org.ent.net.node.Hub;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
+import org.ent.net.util.ReferentialGarbageCollection;
 
 public class Net {
 
@@ -94,6 +95,10 @@ public class Net {
 				}
 			}
 		}
+	}
+
+	public void referentialGarbageCollection() {
+		new ReferentialGarbageCollection(this).run();
 	}
 
 }
