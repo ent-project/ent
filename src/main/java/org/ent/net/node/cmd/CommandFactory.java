@@ -63,7 +63,7 @@ public class CommandFactory {
 				result.add(createAncestorSwapCommandLR(left, right));
 			}
 		}
-		for (int evalLevel = 1; evalLevel < MAX_EVAL_LEVEL; evalLevel++) {
+		for (int evalLevel = 1; evalLevel <= MAX_EVAL_LEVEL; evalLevel++) {
 			result.add(createEvalCommand(evalLevel));
 			for (ArrowDirection left : ArrowDirection.values()) {
 				for (ArrowDirection right : ArrowDirection.values()) {

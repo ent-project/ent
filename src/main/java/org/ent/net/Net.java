@@ -1,7 +1,9 @@
 package org.ent.net;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.ent.net.node.Hub;
 import org.ent.net.node.MarkerNode;
@@ -28,8 +30,24 @@ public class Net {
 		return nodes;
 	}
 
-	public void addNode(Node node) {
-		nodes.add(node);
+	public boolean addNode(Node node) {
+		return nodes.add(node);
+	}
+
+	public boolean addNodes(Collection<Node> nodes) {
+		return nodes.addAll(nodes);
+	}
+
+	public boolean removeNode(Node node) {
+		return nodes.remove(node);
+	}
+
+	public boolean removeNodeIf(Predicate<? super Node> filter) {
+		return nodes.removeIf(filter);
+	}
+
+	public void clearNodes() {
+		nodes.clear();
 	}
 
 	public Node getRoot() {
