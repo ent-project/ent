@@ -33,10 +33,11 @@ public class NetCopy {
 		this.originalToCloneMap = new HashMap<>();
 	}
 
-	public void runCopy() {
+	public Net createCopy() {
 		copyNodes();
 		setRoot();
 		setArrowTargets();
+		return netClone;
 	}
 
 	private void copyNodes() throws AssertionError {

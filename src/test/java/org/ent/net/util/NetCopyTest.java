@@ -23,10 +23,10 @@ public class NetCopyTest {
 
 	@ParameterizedTest(name = "{index} => runCopy(...) on {1}")
 	@MethodSource("netData")
-	public void runCopy(Net net, String str) throws Exception {
+	public void createCopy(Net net, String str) throws Exception {
 		NetCopy copy = new NetCopy(net);
 
-		copy.runCopy();
+		copy.createCopy();
 
 		Net clone = copy.getClonedNet();
 		clone.consistencyTest();

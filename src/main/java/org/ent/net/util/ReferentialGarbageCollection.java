@@ -27,8 +27,7 @@ public class ReferentialGarbageCollection {
 				unlink(n);
 			}
 		}
-		net.getNodes().clear();
-		net.getNodes().addAll(reachableNodes);
+		net.removeNodeIf(node -> !reachableNodes.contains(node));
 	}
 
 	private void unlink(Node n) {
