@@ -10,7 +10,7 @@ import org.ent.net.node.cmd.Command;
 
 /**
  * A command node.
- * <p>
+ *
  * This node has no children. It is used to indicate a certain command that is to be
  * executed.
  */
