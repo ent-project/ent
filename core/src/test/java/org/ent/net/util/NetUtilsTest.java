@@ -31,6 +31,7 @@ public class NetUtilsTest {
 		assertThat(nodes).isEqualTo(net.getNodes());
 	}
 
+	@SuppressWarnings("unused")
 	private static Stream<Arguments> collectReachable_testData() {
 		return data.all.stream().map(netRep -> of(netRep.getNet()));
 	}

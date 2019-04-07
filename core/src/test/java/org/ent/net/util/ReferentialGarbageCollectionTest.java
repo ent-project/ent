@@ -29,6 +29,7 @@ public class ReferentialGarbageCollectionTest {
 		assertThat(net.getNodes()).isEqualTo(originalNodes);
 	}
 
+	@SuppressWarnings("unused")
 	private static Stream<Arguments> run_testData() {
 		return Stream.of(
 				of(NetTestData.buildNet0().getNet(), NetTestData.buildNet1().getNet()),
