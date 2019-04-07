@@ -17,11 +17,11 @@ public class RandomNetCreator {
 
 	private int numberOfNodes = 15;
 
-	private double fractionCNodes = 0.2;
-
 	private double fractionBNodes = 0.3;
 
 	private double fractionUNodes = 0.5;
+
+	private double fractionCNodes = 0.2;
 
 	private final Random rand;
 
@@ -65,14 +65,6 @@ public class RandomNetCreator {
 		this.numberOfNodes = numberOfNodes;
 	}
 
-	public double getFractionCNodes() {
-		return fractionCNodes;
-	}
-
-	public void setFractionCNodes(double fractionCNodes) {
-		this.fractionCNodes = fractionCNodes;
-	}
-
 	public double getFractionBNodes() {
 		return fractionBNodes;
 	}
@@ -87,6 +79,14 @@ public class RandomNetCreator {
 
 	public void setFractionUNodes(double fractionUNodes) {
 		this.fractionUNodes = fractionUNodes;
+	}
+
+	public double getFractionCNodes() {
+		return fractionCNodes;
+	}
+
+	public void setFractionCNodes(double fractionCNodes) {
+		this.fractionCNodes = fractionCNodes;
 	}
 
 	private void initialize() {
