@@ -19,6 +19,14 @@ public class NetRunner {
 		this.controller = controller;
 	}
 
+	public Net getNet() {
+		return net;
+	}
+
+	public NetController getController() {
+		return controller;
+	}
+
 	public StepResult step() {
 		Node root = net.getRoot();
 		if (!(root instanceof BNode)) {

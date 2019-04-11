@@ -3,7 +3,7 @@
 	<appender name="STDOUT"
 		class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} %-5level %logger{20}: %msg%n</pattern>
+			<pattern>%d{HH:mm:ss.SSS} %-5level %logger{20} - %msg%n</pattern>
 		</encoder>
 	</appender>
 
@@ -22,6 +22,7 @@
 		<appender-ref ref="PLAIN" />
 	</logger>
 	
-	<logger name="org.ent.dev.Level0" level="TRACE"/>
+	<logger name="org.ent.dev.Level1" level="TRACE"/>
+	<logger name="org.ent.dev.Level1.reject" level="INFO"/>
 	
 </configuration>

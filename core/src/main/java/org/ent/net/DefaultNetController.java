@@ -18,9 +18,9 @@ public class DefaultNetController implements NetController {
 		this(net, null);
 	}
 
-	public DefaultNetController(Net net, ExecutionEventHandler executionContext) {
+	public DefaultNetController(Net net, ExecutionEventHandler eventHandler) {
 		this.net = net;
-		this.eventHandler = executionContext;
+		this.eventHandler = eventHandler;
 	}
 
 	@Override
