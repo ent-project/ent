@@ -20,9 +20,11 @@ import org.ent.net.node.cmd.accessor.Accessor;
 import org.ent.net.node.cmd.operation.BiOperation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class BiCommandTest {
 
 	private BiCommand<Arrow, Node> command;
@@ -38,7 +40,6 @@ public class BiCommandTest {
 
 	@BeforeEach
 	public void setUp() {
-		MockitoAnnotations.initMocks(this);
 		command = new BiCommand<>(accessor1, accessor2, operation);
 	}
 

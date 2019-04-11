@@ -60,8 +60,10 @@ public class Level0 {
 		}
 
 		public void log() {
-			NetFormatter formatter = new NetFormatter();
-			log.trace("#{} {}", toHex(seed), formatter.format(net));
+			if (log.isTraceEnabled()) {
+				NetFormatter formatter = new NetFormatter();
+				log.trace("#{} {}", toHex(seed), formatter.format(net));
+			}
 		}
 	}
 
@@ -97,7 +99,9 @@ public class Level0 {
 	}
 
 	private void logReject(long seed) {
-		log.trace("#{} :reject", toHex(seed));
+		if (log.isTraceEnabled()) {
+			log.trace("#{} :reject", toHex(seed));
+		}
 	}
 
 	private List<CommandCandidate> setupCommandCandidates() {
