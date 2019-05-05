@@ -90,9 +90,16 @@ public class NetParserTest {
 	}
 
 	@Test
-	public void parse_error_marker() throws Exception {
+	public void parse_error_markerNotPermitted() throws Exception {
 		assertThatThrownBy(() -> parser.parse("A=[#]")).isInstanceOf(ParserException.class)
 				.hasMessage("Found marker node in line 1, column 6, but is not permitted");
+	}
+
+	@Test
+	public void parse_error_markerTopLevel() throws Exception {
+		parser.permitMarkerNodes(new MarkerNode());
+		assertThatThrownBy(() -> parser.parse("<nop>; #")).isInstanceOf(ParserException.class)
+				.hasMessage("Top level node must not be a marker node");
 	}
 
 	@Test
