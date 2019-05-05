@@ -17,7 +17,7 @@ public class NetRunnerTest {
 
 	@Test
 	public void testNetRunner1() throws Exception {
-		doTestNetRunner(true, Arrays.asList(
+		doTestNetRunner(true, StepResult.FATAL, Arrays.asList(
 				"((<eval1>, (<\\==|>, [#])), A=(B=(<\\==|>, (A, [B])), [#]))",
 				"A=(B=(<\\==|>, (A, [B])), [#])",
 				"a=[B=(<\\==|>, ((B, a), a))]"));
@@ -25,7 +25,7 @@ public class NetRunnerTest {
 
 	@Test
 	public void testNetRunner2() throws Exception {
-		doTestNetRunner(false, Arrays.asList(
+		doTestNetRunner(false, StepResult.FATAL, Arrays.asList(
 				"A=((_a=<|dup*>, B=([B], C=(_a, C))), ((<ix>, (A, _b=<eval5>)), _b))",
 				"D=((<ix>, (((_a=<|dup*>, ([(_a, C=(_a, C))], C)), D), _b=<eval5>)), _b)",
 				"A=((_a=<|dup*>, ([(_a, C=(_a, C))], C)), ((<ix>, (<eval5>, A)), A))",
@@ -33,7 +33,16 @@ public class NetRunnerTest {
 				"<eval5>"));
 	}
 
-	private void doTestNetRunner(boolean allowMarker, List<String> steps) throws Exception {
+	@Test
+	public void testNetRunner3() throws Exception {
+		doTestNetRunner(false, StepResult.INVALID_COMMAND_NODE, Arrays.asList(
+				"A=(B=(<ix>, B), (A, B))",
+				"C=((_a=<ix>, C), _a)",
+				"A=(A, (<ix>, A))"));
+	}
+
+	private void doTestNetRunner(boolean allowMarker, StepResult expectedFinalResult,
+			List<String> steps) throws Exception {
 		String netStr = steps.get(0);
 		NetParser parser = new NetParser();
 		if (allowMarker) {
@@ -51,16 +60,16 @@ public class NetRunnerTest {
 		NetRunner runner = new NetRunner(net, controller);
 
 		for (int i = 1; i < steps.size(); i++) {
-			StepResult r1 = runner.step();
-			assertThat(r1).isEqualTo(StepResult.SUCCESS);
+			StepResult result = runner.step();
+			assertThat(result).isEqualTo(StepResult.SUCCESS);
 
 			net.referentialGarbageCollection();
 
-			String out1 = formatter.format(net);
-			assertThat(out1).isEqualTo(steps.get(i));
+			String netFmt = formatter.format(net);
+			assertThat(netFmt).isEqualTo(steps.get(i));
 		}
 
-		StepResult r3 = runner.step();
-		assertThat(r3).isEqualTo(StepResult.FATAL);
+		StepResult actualFinalResult = runner.step();
+		assertThat(actualFinalResult).isEqualTo(expectedFinalResult);
 	}
 }
