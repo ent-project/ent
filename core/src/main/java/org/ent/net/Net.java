@@ -35,7 +35,7 @@ public class Net {
 	}
 
 	public boolean addNodes(Collection<Node> nodes) {
-		return nodes.addAll(nodes);
+		return this.nodes.addAll(nodes);
 	}
 
 	public boolean removeNode(Node node) {
