@@ -6,8 +6,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.ent.net.io.parser.NetParser;
 import org.ent.net.node.BNode;
+import org.ent.net.node.CNode;
 import org.ent.net.node.MarkerNode;
+import org.ent.net.node.Node;
 import org.ent.net.node.UNode;
+import org.ent.net.node.cmd.NopCommand;
 import org.junit.jupiter.api.Test;
 
 public class NetTest {
@@ -38,11 +41,10 @@ public class NetTest {
 	@Test
 	public void consistencyTest_error_rogueChild() throws Exception {
 		Net net = new NetParser().parse("A=[A]");
-		NetController controller = new DefaultNetController(net);
 		Net net2 = new NetParser().parse("x=(x,x)");
 
 		UNode root = (UNode) net.getRoot();
-		root.setChild(controller, net2.getRoot());
+		root.getArrow().setTargetForNetControllerOnly(net2.getRoot());
 
 		assertThatThrownBy(() -> net.consistencyTest()).isInstanceOf(AssertionError.class)
 				.hasMessage("Child of node must be part of the net");
@@ -52,10 +54,9 @@ public class NetTest {
 	public void consistencyTest_error_rogueParent() throws Exception {
 		Net net = new NetParser().parse("A=[A]");
 		Net net2 = new NetParser().parse("x=(x,x)");
-		NetController controller2 = new DefaultNetController(net2);
 
 		BNode root2 = (BNode) net2.getRoot();
-		root2.setLeftChild(controller2, net.getRoot());
+		root2.getLeftArrow().setTargetForNetControllerOnly(net.getRoot());
 
 		assertThatThrownBy(() -> net.consistencyTest()).isInstanceOf(AssertionError.class)
 				.hasMessage("Nodes referencing a net node must be part of the net");
@@ -84,6 +85,17 @@ public class NetTest {
 	}
 
 	@Test
+	public void consistencyTest_error_markerNotPermitted() throws Exception {
+		NetParser parser = new NetParser();
+		parser.permitMarkerNodes(new MarkerNode());
+		Net net = parser.parse("A=[#]");
+		net.forbidMarkerNode();
+
+		assertThatThrownBy(() -> net.consistencyTest()).isInstanceOf(AssertionError.class)
+				.hasMessage("Child of node is marker node, but they are not permitted");
+	}
+
+	@Test
 	public void addNodes() throws Exception {
 		Net net = new NetParser().parse("A=[A]");
 		assertThat(net.getNodes().size()).isEqualTo(1);
@@ -95,4 +107,36 @@ public class NetTest {
 		assertThat(net.getNodes()).containsAll(net2.getNodes());
 	}
 
+	@Test
+	public void belongsToNet() throws Exception {
+		NetParser parser = new NetParser();
+		Net net = parser.parse("A=[A]");
+		Node a = parser.getNodeNames().get("A");
+		Node externalNode = new CNode(new NopCommand());
+
+		assertThat(net.belongsToNet(a)).isTrue();
+		assertThat(net.belongsToNet(externalNode)).isFalse();
+	}
+
+	@Test
+	public void belongsToNet_marker() throws Exception {
+		Net net = new Net();
+		MarkerNode marker = new MarkerNode();
+		net.permitMarkerNode(marker);
+		Node externalMarker = new MarkerNode();
+
+		assertThat(net.belongsToNet(marker)).isTrue();
+		assertThat(net.belongsToNet(externalMarker)).isFalse();
+	}
+
+	@Test
+	public void runWithMarkerNode() throws Exception {
+		final Net net = new Net();
+		assertThat(net.isMarkerNodePermitted()).isFalse();
+		net.runWithMarkerNode(marker -> {
+			assertThat(net.isMarkerNodePermitted()).isTrue();
+			assertThat(net.getMarkerNode()).isSameAs(marker);
+		});
+		assertThat(net.isMarkerNodePermitted()).isFalse();
+	}
 }

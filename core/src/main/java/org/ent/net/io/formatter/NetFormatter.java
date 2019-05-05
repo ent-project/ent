@@ -46,6 +46,12 @@ public class NetFormatter {
 		givenNodeNames.putAll(nodeNames);
 	}
 
+	public void setNodeNamesInverse(Map<String, Node> nodeNames) {
+		nodeNames.entrySet().forEach(entry -> {
+			givenNodeNames.put(entry.getValue(), entry.getKey());
+		});
+	}
+
 	public boolean isAscii() {
 		return ascii;
 	}

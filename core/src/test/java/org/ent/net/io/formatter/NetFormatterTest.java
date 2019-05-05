@@ -12,7 +12,6 @@ import org.ent.net.NetController;
 import org.ent.net.NetTestData;
 import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
-import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.UNode;
 import org.ent.net.node.cmd.NopCommand;
@@ -57,25 +56,25 @@ public class NetFormatterTest {
 	public void format_2Calls() {
 		Net net = new Net();
 		NetController controller = new DefaultNetController(net);
-		Node dummy = new MarkerNode();
+		net.runWithMarkerNode(dummy -> {
+			BNode b1 = controller.newBNode(dummy, dummy);
+			UNode u1 = controller.newUNode(dummy);
+			UNode u2 = controller.newUNode(dummy);
 
-		BNode b1 = controller.newBNode(dummy, dummy);
-		UNode u1 = controller.newUNode(dummy);
-		UNode u2 = controller.newUNode(dummy);
+			b1.setLeftChild(controller, u1);
+			b1.setRightChild(controller, u2);
+			u1.setChild(controller, u1);
+			u2.setChild(controller, u2);
 
-		b1.setLeftChild(controller, u1);
-		b1.setRightChild(controller, u2);
-		u1.setChild(controller, u1);
-		u2.setChild(controller, u2);
+			net.setRoot(b1);
 
-		net.setRoot(b1);
+			assertThat(formatter.format(net)).isEqualTo("(a=[a], b=[b])");
 
-		assertThat(formatter.format(net)).isEqualTo("(a=[a], b=[b])");
+			b1.setLeftChild(controller, controller.newCNode(new NopCommand()));
+			net.getNodes().remove(u1);
 
-		b1.setLeftChild(controller, controller.newCNode(new NopCommand()));
-		net.getNodes().remove(u1);
-
-		assertThat(formatter.format(net)).isEqualTo("(<nop>, b=[b])");
+			assertThat(formatter.format(net)).isEqualTo("(<nop>, b=[b])");
+		});
 	}
 
 	@Test
@@ -93,18 +92,18 @@ public class NetFormatterTest {
 	public void format_multipleRoots() {
 		Net net = new Net();
 		NetController controller = new DefaultNetController(net);
-		Node dummy = new MarkerNode();
+		net.runWithMarkerNode(dummy -> {
+			BNode b1 = controller.newBNode(dummy, dummy);
+			UNode u1 = controller.newUNode(dummy);
+			CNode nop = controller.newCNode(new NopCommand());
 
-		BNode b1 = controller.newBNode(dummy, dummy);
-		UNode u1 = controller.newUNode(dummy);
-		CNode nop = controller.newCNode(new NopCommand());
+			b1.setLeftChild(controller, u1);
+			b1.setRightChild(controller, nop);
+			u1.setChild(controller, u1);
 
-		b1.setLeftChild(controller, u1);
-		b1.setRightChild(controller, nop);
-		u1.setChild(controller, u1);
-
-		controller.newUNode(b1);
-		net.setRoot(b1);
+			controller.newUNode(b1);
+			net.setRoot(b1);
+		});
 
 		assertThat(formatter.format(net)).isEqualTo("A=(a=[a], <nop>); [A]");
 	}
@@ -113,10 +112,8 @@ public class NetFormatterTest {
 	public void format_setNodeNames() {
 		Net net = new Net();
 		NetController controller = new DefaultNetController(net);
-		Node dummy = new MarkerNode();
 
-		UNode u1 = controller.newUNode(dummy);
-		u1.setChild(controller, u1);
+		UNode u1 = controller.newUNode();
 
 		net.setRoot(u1);
 

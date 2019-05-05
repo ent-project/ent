@@ -6,7 +6,7 @@ import org.ent.net.node.Node;
 
 interface NodeTemplate {
 
-	Node generateNode(NetController controller, Node childPlaceholder) throws ParserException;
+	Node generateNode(NetController controller) throws ParserException;
 
 	NodeTemplate getChild(ArrowDirection arrowDirection);
 }

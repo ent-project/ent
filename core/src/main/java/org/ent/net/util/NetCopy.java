@@ -9,7 +9,6 @@ import org.ent.net.Net;
 import org.ent.net.NetController;
 import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
-import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.UNode;
 
@@ -41,16 +40,15 @@ public class NetCopy {
 	}
 
 	private void copyNodes() throws AssertionError {
-		MarkerNode marker = new MarkerNode();
 		for (Node nodeOrig : netOrig.getNodes()) {
 			Node nodeClone;
 			if (nodeOrig instanceof CNode) {
 				CNode cNodeOrig = (CNode) nodeOrig;
 				nodeClone = controllerClone.newCNode(cNodeOrig.getCommand());
 			} else if (nodeOrig instanceof UNode) {
-				nodeClone = controllerClone.newUNode(marker);
+				nodeClone = controllerClone.newUNode();
 			} else if (nodeOrig instanceof BNode) {
-				nodeClone = controllerClone.newBNode(marker, marker);
+				nodeClone = controllerClone.newBNode();
 			} else {
 				throw new AssertionError("Unexpected Node type: " + nodeOrig.getClass());
 			}

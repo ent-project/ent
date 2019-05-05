@@ -14,7 +14,7 @@ public class MarkerNodeTemplate implements NodeTemplate {
 	}
 
 	@Override
-	public Node generateNode(NetController controller, Node childPlaceholder) throws ParserException {
+	public Node generateNode(NetController controller) throws ParserException {
 		return markerNode;
 	}
 
