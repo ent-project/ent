@@ -22,8 +22,6 @@ public class NetFormatter {
 
 	private Integer maxDepth;
 
-	private boolean markerNodesPermitted;
-
 	private boolean ascii;
 
 	public Integer getMaxDepth() {
@@ -32,14 +30,6 @@ public class NetFormatter {
 
 	public void setMaxDepth(Integer maxDepth) {
 		this.maxDepth = maxDepth;
-	}
-
-	public boolean isMarkerNodesPermitted() {
-		return markerNodesPermitted;
-	}
-
-	public void setMarkerNodesPermitted(boolean markerNodesPermitted) {
-		this.markerNodesPermitted = markerNodesPermitted;
 	}
 
 	public void setNodeNames(Map<Node, String> nodeNames) {
@@ -65,7 +55,7 @@ public class NetFormatter {
         List<Node> rootNodes = new ArrayList<>();
         rootNodes.add(net.getRoot());
 
-        collectRecursively(net.getRoot(), collected);
+        collectRecursively(net.getRoot(), collected, net.isMarkerNodePermitted());
 
         Set<Node> missing = new LinkedHashSet<>(net.getNodes());
         missing.removeAll(collected);
@@ -86,7 +76,7 @@ public class NetFormatter {
         return result;
 	}
 
-	private void collectRecursively(Node node, Set<Node> collected) {
+	private void collectRecursively(Node node, Set<Node> collected, boolean markerNodesPermitted) {
         if (collected.contains(node))
             return;
         collected.add(node);
@@ -99,7 +89,7 @@ public class NetFormatter {
         }
         for (Arrow arrow : node.getArrows()) {
         	Node child = arrow.getTarget(controller);
-        	collectRecursively(child, collected);
+        	collectRecursively(child, collected, markerNodesPermitted);
         }
     }
 
