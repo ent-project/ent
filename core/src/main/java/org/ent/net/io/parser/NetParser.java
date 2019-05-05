@@ -95,9 +95,8 @@ public class NetParser {
 
         fillInChildNodes(controller);
 
-        for (NodeTemplate template : mainNodeTemplates) {
-            mainNodes.add(resolveNode(template));
-        }
+        resolveMainNodes(mainNodeTemplates);
+
         net.setRoot(mainNodes.get(0));
 
         net.consistencyTest();
@@ -128,6 +127,16 @@ public class NetParser {
             }
             allNodes.add(node);
         }
+	}
+
+	private void resolveMainNodes(List<NodeTemplate> mainNodeTemplates) throws ParserException {
+		for (NodeTemplate template : mainNodeTemplates) {
+			Node node = resolveNode(template);
+			if (node instanceof MarkerNode) {
+				throw new ParserException("Top level node must not be a marker node");
+			}
+			mainNodes.add(node);
+		}
 	}
 
 	private Map<String, Node> buildNodeNames() throws ParserException {
