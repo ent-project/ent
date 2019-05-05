@@ -78,9 +78,10 @@ public class NetParser {
 		return mainNodes;
 	}
 
-    public void permitMarkerNodes(MarkerNode markerNode) {
+    public NetParser permitMarkerNodes(MarkerNode markerNode) {
     	this.markerNodePermitted = true;
     	this.markerNode = markerNode;
+    	return this;
     }
 
     private Net buildNet(List<NodeTemplate> mainNodeTemplates) throws ParserException {
