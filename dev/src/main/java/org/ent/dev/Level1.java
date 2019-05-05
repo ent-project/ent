@@ -102,12 +102,12 @@ public class Level1 {
 	}
 
 	private RunSetup getRunSetup() {
-		RunSetup setup = new RunSetup();
-		setup.setCommandExecutionFailedIsFatal(LEVEL1_COMMAND_EXECUTION_FAILED_IS_FATAL);
-		setup.setInvalidCommandBranchIsFatal(LEVEL1_INVALID_COMMAND_BRANCH_IS_FATAL);
-		setup.setInvalidCommandNodeIsFatal(LEVEL1_INVALID_COMMAND_NODE_IS_FATAL);
-		setup.setMaxSteps(STEP_LIMIT);
-		return setup;
+		return new RunSetup.Builder()
+				.withCommandExecutionFailedIsFatal(LEVEL1_COMMAND_EXECUTION_FAILED_IS_FATAL)
+				.withInvalidCommandBranchIsFatal(LEVEL1_INVALID_COMMAND_BRANCH_IS_FATAL)
+				.withInvalidCommandNodeIsFatal(LEVEL1_INVALID_COMMAND_NODE_IS_FATAL)
+				.withMaxSteps(STEP_LIMIT)
+				.build();
 	}
 
 	private boolean passesThreshold(int steps) {
