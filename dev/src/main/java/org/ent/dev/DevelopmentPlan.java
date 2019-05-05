@@ -17,7 +17,10 @@ public class DevelopmentPlan {
 
 	public static void main(String[] args) throws Exception {
 		DevelopmentPlan plan = new DevelopmentPlan();
+		long start = System.currentTimeMillis();
 		plan.execute();
+		long diff = System.currentTimeMillis() - start;
+		System.err.println(String.format("execution time: %.3f s", ((double) diff) / 1000));
 	}
 
 	private static class StatCounter implements Level1EventListener {
