@@ -1,48 +1,106 @@
 package org.ent.dev;
 
-public class RunSetup {
+public final class RunSetup {
 
-	private Integer maxSteps;
+	private final Integer maxSteps;
 
-	private boolean commandExecutionFailedIsFatal;
+	private final boolean commandExecutionFailedIsFatal;
 
-	private boolean invalidCommandBranchIsFatal;
+	private final boolean invalidCommandBranchIsFatal;
 
-	private boolean invalidCommandNodeIsFatal;
+	private final boolean invalidCommandNodeIsFatal;
 
-	public RunSetup() {
+	public static class Builder {
+
+		private Integer maxSteps;
+
+		private boolean commandExecutionFailedIsFatal;
+
+		private boolean invalidCommandBranchIsFatal;
+
+		private boolean invalidCommandNodeIsFatal;
+
+		public Builder withMaxSteps(Integer maxSteps) {
+			this.maxSteps = maxSteps;
+			return this;
+		}
+
+		public Builder withCommandExecutionFailedIsFatal(boolean commandExecutionFailedIsFatal) {
+			this.commandExecutionFailedIsFatal = commandExecutionFailedIsFatal;
+			return this;
+		}
+
+		public Builder withInvalidCommandBranchIsFatal(boolean invalidCommandBranchIsFatal) {
+			this.invalidCommandBranchIsFatal = invalidCommandBranchIsFatal;
+			return this;
+		}
+
+		public Builder withInvalidCommandNodeIsFatal(boolean invalidCommandNodeIsFatal) {
+			this.invalidCommandNodeIsFatal = invalidCommandNodeIsFatal;
+			return this;
+		}
+
+		public RunSetup build() {
+			return new RunSetup(maxSteps, commandExecutionFailedIsFatal, invalidCommandBranchIsFatal, invalidCommandNodeIsFatal);
+		}
+	}
+
+	public RunSetup(Integer maxSteps, boolean commandExecutionFailedIsFatal, boolean invalidCommandBranchIsFatal,
+			boolean invalidCommandNodeIsFatal) {
+		this.maxSteps = maxSteps;
+		this.commandExecutionFailedIsFatal = commandExecutionFailedIsFatal;
+		this.invalidCommandBranchIsFatal = invalidCommandBranchIsFatal;
+		this.invalidCommandNodeIsFatal = invalidCommandNodeIsFatal;
 	}
 
 	public boolean isCommandExecutionFailedIsFatal() {
 		return commandExecutionFailedIsFatal;
 	}
 
-	public void setCommandExecutionFailedIsFatal(boolean commandExecutionFailedIsFatal) {
-		this.commandExecutionFailedIsFatal = commandExecutionFailedIsFatal;
-	}
-
 	public boolean isInvalidCommandBranchIsFatal() {
 		return invalidCommandBranchIsFatal;
-	}
-
-	public void setInvalidCommandBranchIsFatal(boolean invalidCommandBranchIsFatal) {
-		this.invalidCommandBranchIsFatal = invalidCommandBranchIsFatal;
 	}
 
 	public boolean isInvalidCommandNodeIsFatal() {
 		return invalidCommandNodeIsFatal;
 	}
 
-	public void setInvalidCommandNodeIsFatal(boolean invalidCommandNodeIsFatal) {
-		this.invalidCommandNodeIsFatal = invalidCommandNodeIsFatal;
-	}
-
 	public Integer getMaxSteps() {
 		return maxSteps;
 	}
 
-	public void setMaxSteps(Integer maxSteps) {
-		this.maxSteps = maxSteps;
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (commandExecutionFailedIsFatal ? 1231 : 1237);
+		result = prime * result + (invalidCommandBranchIsFatal ? 1231 : 1237);
+		result = prime * result + (invalidCommandNodeIsFatal ? 1231 : 1237);
+		result = prime * result + ((maxSteps == null) ? 0 : maxSteps.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RunSetup other = (RunSetup) obj;
+		if (commandExecutionFailedIsFatal != other.commandExecutionFailedIsFatal)
+			return false;
+		if (invalidCommandBranchIsFatal != other.invalidCommandBranchIsFatal)
+			return false;
+		if (invalidCommandNodeIsFatal != other.invalidCommandNodeIsFatal)
+			return false;
+		if (maxSteps == null) {
+			if (other.maxSteps != null)
+				return false;
+		} else if (!maxSteps.equals(other.maxSteps))
+			return false;
+		return true;
 	}
 
 }

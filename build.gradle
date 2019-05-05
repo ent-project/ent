@@ -29,6 +29,7 @@ subprojects {
         testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '2.4.5'
         testCompile group: 'org.mockito', name: 'mockito-core', version: '2.22.0'
         testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '2.22.0'
+        testCompile group: 'org.mockito', name: 'mockito-inline', version: '2.22.0'
     }
 
     test {
