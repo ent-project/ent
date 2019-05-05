@@ -4,6 +4,6 @@ apply plugin: 'application'
 mainClassName = 'org.ent.dev.DevelopmentPlan'
 
 dependencies {
-    compile project(':core')
+    implementation project(':core')
 }
 
