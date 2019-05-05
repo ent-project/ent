@@ -18,7 +18,7 @@ class CommandNodeTemplate implements NodeTemplate {
     }
 
 	@Override
-	public Node generateNode(NetController controller, Node childPlaceholder) throws ParserException {
+	public Node generateNode(NetController controller) throws ParserException {
         Command command = CommandFactory.getByName(commandName);
         if (command == null) {
             throw new ParserException("Unknown command: '" + commandName + "'");

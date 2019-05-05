@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
-import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.UNode;
 import org.ent.net.node.cmd.NopCommand;
@@ -29,17 +28,17 @@ public class NetTestData {
 	public static NetWithStringRepresentation buildNet0() {
     	Net net = new Net();
     	NetController controller = new DefaultNetController(net);
-        Node dummy = new MarkerNode();
+    	net.runWithMarkerNode(dummy -> {
+            BNode b1 = controller.newBNode(dummy, dummy);
+            UNode u1 = controller.newUNode(dummy);
+            CNode nop = controller.newCNode(new NopCommand());
 
-        BNode b1 = controller.newBNode(dummy, dummy);
-        UNode u1 = controller.newUNode(dummy);
-        CNode nop = controller.newCNode(new NopCommand());
+            b1.setLeftChild(controller, u1);
+            b1.setRightChild(controller, nop);
+            u1.setChild(controller, u1);
 
-        b1.setLeftChild(controller, u1);
-        b1.setRightChild(controller, nop);
-        u1.setChild(controller, u1);
-
-        net.setRoot(b1);
+            net.setRoot(b1);
+    	});
 
         return new NetWithStringRepresentation(net, "(a=[a], <nop>)");
     }
@@ -60,29 +59,29 @@ public class NetTestData {
 	public static NetWithStringRepresentation buildNet2() {
     	Net net = new Net();
     	NetController controller = new DefaultNetController(net);
-    	Node dummy = new MarkerNode();
 
-        UNode u1 = controller.newUNode(dummy);			// a
-        UNode u2 = controller.newUNode(dummy);			// b
-        BNode b1 = controller.newBNode(dummy, dummy);
-        BNode b2 = controller.newBNode(dummy, dummy);	// A
-        BNode b3 = controller.newBNode(dummy, dummy);
-        BNode bb = controller.newBNode(dummy, dummy);
-        CNode nop = controller.newCNode(new NopCommand());
+    	net.runWithMarkerNode(dummy -> {
+	        UNode u1 = controller.newUNode(dummy);			// a
+	        UNode u2 = controller.newUNode(dummy);			// b
+	        BNode b1 = controller.newBNode(dummy, dummy);
+	        BNode b2 = controller.newBNode(dummy, dummy);	// A
+	        BNode b3 = controller.newBNode(dummy, dummy);
+	        BNode bb = controller.newBNode(dummy, dummy);
+	        CNode nop = controller.newCNode(new NopCommand());
 
-        u1.setChild(controller, u2);
-        u2.setChild(controller, b1);
-        b1.setLeftChild(controller, bb);
-        b1.setRightChild(controller, b2);
-        b2.setLeftChild(controller, bb);
-        b2.setRightChild(controller, b3);
-        b3.setLeftChild(controller, bb);
-        b3.setRightChild(controller, u2);
-        bb.setLeftChild(controller, nop);
-        bb.setRightChild(controller, u1);
+	        u1.setChild(controller, u2);
+	        u2.setChild(controller, b1);
+	        b1.setLeftChild(controller, bb);
+	        b1.setRightChild(controller, b2);
+	        b2.setLeftChild(controller, bb);
+	        b2.setRightChild(controller, b3);
+	        b3.setLeftChild(controller, bb);
+	        b3.setRightChild(controller, u2);
+	        bb.setLeftChild(controller, nop);
+	        bb.setRightChild(controller, u1);
 
-        net.setRoot(u1);
-
+	        net.setRoot(u1);
+    	});
         return new NetWithStringRepresentation(net, "a=[b=[(A=(<nop>, a), (A, (A, b)))]]");
     }
 

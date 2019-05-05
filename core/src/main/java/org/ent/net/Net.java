@@ -3,6 +3,7 @@ package org.ent.net;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.ent.net.node.Hub;
@@ -15,6 +16,7 @@ public class Net {
 	private Set<Node> nodes;
 
 	private Node root;
+
 	private NetController internalNetController;
 
 	private boolean markerNodePermitted;
@@ -56,6 +58,13 @@ public class Net {
 
 	public void setRoot(Node root) {
 		this.root = root;
+	}
+
+	public boolean belongsToNet(Node node) {
+		if (node == null) {
+			throw new IllegalArgumentException("node must not be null");
+		}
+		return node == markerNode || nodes.contains(node);
 	}
 
 	public void permitMarkerNode(MarkerNode markerNode) {
@@ -122,6 +131,13 @@ public class Net {
 
 	public void referentialGarbageCollection() {
 		new ReferentialGarbageCollection(this).run();
+	}
+
+	public void runWithMarkerNode(Consumer<MarkerNode> consumer) {
+		MarkerNode marker = new MarkerNode();
+		permitMarkerNode(marker);
+		consumer.accept(marker);
+		forbidMarkerNode();
 	}
 
 }

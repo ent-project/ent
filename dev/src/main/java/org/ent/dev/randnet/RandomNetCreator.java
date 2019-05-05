@@ -9,7 +9,6 @@ import org.ent.net.Arrow;
 import org.ent.net.DefaultNetController;
 import org.ent.net.Net;
 import org.ent.net.NetController;
-import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 import org.ent.util.ModifiedPoisson;
 
@@ -96,8 +95,6 @@ public class RandomNetCreator {
 	}
 
 	private void createNodes() {
-		MarkerNode marker = new MarkerNode();
-
 		int noBNodes = ModifiedPoisson.getModifiedPoisson(numberOfNodes * fractionBNodes).drawModifiedPoisson(rand);
 		if (noBNodes == 0) {
 			result = DrawResult.REJECT;
@@ -105,7 +102,7 @@ public class RandomNetCreator {
 		}
 		int rootIdx = rand.nextInt(noBNodes);
 		for (int i = 0; i < noBNodes; i++) {
-			Node n = controller.newBNode(marker, marker);
+			Node n = controller.newBNode();
 			if (i == rootIdx) {
 				net.setRoot(n);
 			}
@@ -113,7 +110,7 @@ public class RandomNetCreator {
 
 		int noUNodes = ModifiedPoisson.getModifiedPoisson(numberOfNodes * fractionUNodes).drawModifiedPoisson(rand);
 		for (int i = 0; i < noUNodes; i++) {
-			controller.newUNode(marker);
+			controller.newUNode();
 		}
 
 		int noCNodes = ModifiedPoisson.getModifiedPoisson(numberOfNodes * fractionCNodes).drawModifiedPoisson(rand);

@@ -12,8 +12,8 @@ class UNodeTemplate implements NodeTemplate {
     }
 
 	@Override
-	public Node generateNode(NetController controller, Node childPlaceholder) {
-		return controller.newUNode(childPlaceholder);
+	public Node generateNode(NetController controller) {
+		return controller.newUNode();
 	}
 
 	@Override

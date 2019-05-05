@@ -25,7 +25,17 @@ public class ReadOnlyNetController implements NetController {
 	}
 
 	@Override
+	public UNode newUNode() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public UNode newUNode(Node child) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public BNode newBNode() {
 		throw new UnsupportedOperationException();
 	}
 

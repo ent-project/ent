@@ -66,6 +66,7 @@ public class NetParser {
         return buildNet(mainNodeTemplates);
     }
 
+    // values are not unique, i.e. one node can have several names
     public Map<String, Node> getNodeNames() throws ParserException {
         if (nodeNames == null) {
         	nodeNames = buildNodeNames();
@@ -106,7 +107,7 @@ public class NetParser {
 	private void instantiateNodesFromTemplates(NetController controller) throws ParserException {
 		for (NodeTemplate template : firstPassNetParser.getAllEntries()) {
         	if (!(template instanceof IdentifierNodeTemplate)) {
-        		Node node = template.generateNode(controller, placeholderNode);
+        		Node node = template.generateNode(controller);
         		templateNodeMap.put(template, node);
         	}
         }

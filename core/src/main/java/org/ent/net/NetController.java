@@ -12,7 +12,11 @@ public interface NetController {
 
 	void setTarget(Arrow arrow, Node target);
 
+	UNode newUNode();
+
 	UNode newUNode(Node child);
+
+	BNode newBNode();
 
 	BNode newBNode(Node leftChild, Node rightChild);
 
