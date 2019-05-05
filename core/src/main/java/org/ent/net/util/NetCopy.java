@@ -9,6 +9,7 @@ import org.ent.net.Net;
 import org.ent.net.NetController;
 import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
+import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.UNode;
 
@@ -34,6 +35,7 @@ public class NetCopy {
 
 	public Net createCopy() {
 		copyNodes();
+		copyMarker();
 		setRoot();
 		setArrowTargets();
 		return netClone;
@@ -53,6 +55,13 @@ public class NetCopy {
 				throw new AssertionError("Unexpected Node type: " + nodeOrig.getClass());
 			}
 			originalToCloneMap.put(nodeOrig, nodeClone);
+		}
+	}
+
+	private void copyMarker() {
+		if (netOrig.isMarkerNodePermitted()) {
+			MarkerNode markerClone = new MarkerNode();
+			netClone.permitMarkerNode(markerClone);
 		}
 	}
 
@@ -79,15 +88,21 @@ public class NetCopy {
 	}
 
 	public Node originalToClone(Node nodeOrig) {
-		return originalToCloneMap.get(nodeOrig);
+		Node nodeClone;
+		if (netOrig.isMarkerNodePermitted() && nodeOrig == netOrig.getMarkerNode()) {
+			return netClone.getMarkerNode();
+		} else {
+			nodeClone = originalToCloneMap.get(nodeOrig);
+		}
+		if (nodeClone == null) {
+			throw new AssertionError("Corresponding node cannot be found in copy");
+		}
+		return nodeClone;
 	}
 
 	public Arrow originalToClone(Arrow arrowOrig) {
 		Node nodeOrig = arrowOrig.getOrigin();
-		Node nodeClone = originalToCloneMap.get(nodeOrig);
-		if (nodeClone == null) {
-			throw new AssertionError("Corresponding node cannot be found in copy");
-		}
+		Node nodeClone = originalToClone(nodeOrig);
 		return nodeClone.getArrow(arrowOrig.getDirection());
 	}
 }
