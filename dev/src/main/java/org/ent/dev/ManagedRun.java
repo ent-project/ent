@@ -101,7 +101,6 @@ public class ManagedRun {
 		noSteps = 0;
 		if (log.isTraceEnabled()) {
 			formatter = new NetFormatter();
-			formatter.setMarkerNodesPermitted(true);
 			log.trace("before: {}", formatter.format(net));
 		}
 	}

@@ -43,9 +43,6 @@ public class NetRunnerTest {
 		Net net = parser.parse(netStr);
 
 		NetFormatter formatter = new NetFormatter();
-		if (allowMarker) {
-			formatter.setMarkerNodesPermitted(true);
-		}
 		formatter.setAscii(true);
 		String out0 = formatter.format(net);
 		assertThat(out0).isEqualTo(netStr);
