@@ -85,11 +85,16 @@ public class Net {
 		}
 
 		for (Node node : nodes) {
+			if (node instanceof MarkerNode) {
+				throw new AssertionError("Net node must not be a marker node");
+			}
 			for (Arrow arrow : node.getArrows()) {
 				Node child = arrow.getTarget(internalNetController);
 				if (child instanceof MarkerNode) {
 					if (!markerNodePermitted) {
-						throw new AssertionError("Child of node is MarkerNode, but they are not permitted");
+						throw new AssertionError("Child of node is marker node, but they are not permitted");
+					} else if (child != markerNode) {
+						throw new AssertionError("Child of node is marker node, but not the designated one");
 					}
 				} else {
 					if (!nodes.contains(child)) {
