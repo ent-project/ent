@@ -73,10 +73,8 @@ public class NetTest {
 
 	@Test
 	public void consistencyTest_error_wrongMarker() throws Exception {
-		NetParser parser = new NetParser();
 		MarkerNode markerNode = new MarkerNode();
-		parser.permitMarkerNodes(markerNode);
-		Net net = parser.parse("[#]");
+		Net net = new NetParser().permitMarkerNodes(markerNode).parse("[#]");
 		MarkerNode markerNode2 = new MarkerNode();
 		net.permitMarkerNode(markerNode2);
 
@@ -86,9 +84,7 @@ public class NetTest {
 
 	@Test
 	public void consistencyTest_error_markerNotPermitted() throws Exception {
-		NetParser parser = new NetParser();
-		parser.permitMarkerNodes(new MarkerNode());
-		Net net = parser.parse("A=[#]");
+		Net net = new NetParser().permitMarkerNodes(new MarkerNode()).parse("A=[#]");
 		net.forbidMarkerNode();
 
 		assertThatThrownBy(() -> net.consistencyTest()).isInstanceOf(AssertionError.class)
