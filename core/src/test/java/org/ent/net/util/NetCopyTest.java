@@ -43,10 +43,8 @@ public class NetCopyTest {
 
 	@Test
 	public void createCopy_withMarker() throws Exception {
-		NetParser parser = new NetParser();
 		MarkerNode markerNode = new MarkerNode();
-		parser.permitMarkerNodes(markerNode);
-		Net net = parser.parse("[#]");
+		Net net = new NetParser().permitMarkerNodes(markerNode).parse("[#]");
 		NetCopy copy = new NetCopy(net);
 
 		copy.createCopy();
