@@ -51,9 +51,7 @@ public class NetCopyTest {
 
 		Net clone = copy.getClonedNet();
 		clone.consistencyTest();
-		NetFormatter formatter = new NetFormatter();
-		formatter.setAscii(true);
-		assertThat(formatter.format(clone)).isEqualTo("[#]");
+		assertThat(new NetFormatter().withAscii(true).format(clone)).isEqualTo("[#]");
 		assertThat(clone.isMarkerNodePermitted()).isTrue();
 		assertThat(clone.getMarkerNode()).isNotSameAs(markerNode);
 	}

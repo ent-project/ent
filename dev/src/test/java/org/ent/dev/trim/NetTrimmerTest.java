@@ -31,9 +31,9 @@ public class NetTrimmerTest {
 		NetTrimmer trimmer = new NetTrimmer(net, runSetup);
 		trimmer.runTrimmer();
 
-		NetFormatter formatter = new NetFormatter();
-		formatter.setNodeNamesInverse(parser.getNodeNames());
-		formatter.setAscii(true);
+		NetFormatter formatter = new NetFormatter()
+				.withNodeNamesInverse(parser.getNodeNames())
+				.withAscii(true);
 		String actualTrimmed = formatter.format(net);
 
 		assertThat(actualTrimmed).isEqualTo(expectedTrimmed);

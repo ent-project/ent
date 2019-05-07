@@ -206,9 +206,9 @@ public class DefaultNetControllerTest {
 
 		controller.ancestorSwap(a, b);
 
-		NetFormatter formatter = new NetFormatter();
-		formatter.setNodeNamesInverse(parser.getNodeNames());
-		formatter.setAscii(true);
+		NetFormatter formatter = new NetFormatter()
+				.withNodeNamesInverse(parser.getNodeNames())
+				.withAscii(true);
 		assertThat(formatter.format(net)).isEqualTo("(([_b=<ix>], _a=<nop>), ((_b, _b), [_a]))");
 		verifyNoMoreInteractions(eventHandler);
 	}
