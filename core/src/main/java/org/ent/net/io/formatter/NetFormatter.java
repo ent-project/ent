@@ -42,12 +42,22 @@ public class NetFormatter {
 		});
 	}
 
+	public NetFormatter withNodeNamesInverse(Map<String, Node> nodeNames) {
+		setNodeNamesInverse(nodeNames);
+		return this;
+	}
+
 	public boolean isAscii() {
 		return ascii;
 	}
 
 	public void setAscii(boolean ascii) {
 		this.ascii = ascii;
+	}
+
+	public NetFormatter withAscii(boolean ascii) {
+		this.ascii = ascii;
+		return this;
 	}
 
 	public String format(Net net) {

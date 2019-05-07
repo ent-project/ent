@@ -59,8 +59,7 @@ public class NetRunnerTest {
 		}
 		Net net = parser.parse(netStr);
 
-		NetFormatter formatter = new NetFormatter();
-		formatter.setAscii(true);
+		NetFormatter formatter = new NetFormatter().withAscii(true);
 		String out0 = formatter.format(net);
 		assertThat(out0).isEqualTo(netStr);
 
