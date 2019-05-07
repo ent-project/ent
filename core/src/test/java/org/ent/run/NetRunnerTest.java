@@ -41,6 +41,14 @@ public class NetRunnerTest {
 				"A=(A, (<ix>, A))"));
 	}
 
+	@Test
+	public void testNetRunner4() throws Exception {
+		doTestNetRunner(false, StepResult.FATAL, Arrays.asList(
+				"(A=(_a=</dup*>, B=((C=(A, a=[([(((</dup*>, a), [_b=</:\\\\>]), _a)], _b)]), B), _a)), C)",
+				"((_a=</dup*>, B=((</dup*>, B), _a)), a=[([(((</dup*>, a), [_b=</:\\\\>]), _a)], _b)])",
+				"a=[([(((</dup*>, a), [_b=</:\\\\>]), </dup*>)], _b)]"));
+	}
+
 	private void doTestNetRunner(boolean allowMarker, StepResult expectedFinalResult,
 			List<String> steps) throws Exception {
 		String netStr = steps.get(0);
