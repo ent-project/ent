@@ -6,6 +6,7 @@ import org.ent.dev.Level0.NetInfoLevel0;
 import org.ent.dev.Level1.NetInfoLevel1;
 import org.ent.dev.StepsExam.StepsExamResult;
 import org.ent.dev.plan.NetInfo;
+import org.ent.dev.plan.Processor;
 import org.ent.dev.plan.Supplier;
 import org.ent.net.Net;
 import org.ent.net.io.HexConverter;
@@ -13,7 +14,7 @@ import org.ent.net.io.formatter.NetFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Level1 implements Supplier<NetInfoLevel1> {
+public class Level1 implements Processor<NetInfoLevel0, NetInfoLevel1> {
 
 	private static final Logger log = LoggerFactory.getLogger(Level1.class);
 	private static final Logger logReject = LoggerFactory.getLogger(Level1.class.getName() + ".reject");
@@ -30,7 +31,7 @@ public class Level1 implements Supplier<NetInfoLevel1> {
 
 	private static final int LEVEL1_SEARCH_LIMIT = 100_000_000;
 
-	private final Supplier<NetInfoLevel0> level0;
+	private Supplier<NetInfoLevel0> upstream;
 
 	private Level1EventListener listener;
 
@@ -99,8 +100,26 @@ public class Level1 implements Supplier<NetInfoLevel1> {
 		}
 	}
 
+	public Level1() {
+	}
+
 	public Level1(Level0 level0) {
-		this.level0 = level0;
+		this.upstream = level0;
+	}
+
+	@Override
+	public void setUpstream(Supplier<NetInfoLevel0> upstream) {
+		this.upstream = upstream;
+	}
+
+	public Level1 withUpstream(Supplier<NetInfoLevel0> upstream) {
+		setUpstream(upstream);
+		return this;
+	}
+
+	@Override
+	public Supplier<NetInfoLevel0> getUpstream() {
+		return upstream;
 	}
 
 	public Level1EventListener getLevel1EventListener() {
@@ -111,10 +130,15 @@ public class Level1 implements Supplier<NetInfoLevel1> {
 		this.listener = listener;
 	}
 
+	public Level1 withLevel1EventListener(Level1EventListener listener) {
+		setLevel1EventListener(listener);
+		return this;
+	}
+
 	@Override
 	public NetInfoLevel1 next() {
 		for (int tries = 1; tries < LEVEL1_SEARCH_LIMIT; tries++) {
-			NetInfoLevel0 candidate = level0.next();
+			NetInfoLevel0 candidate = upstream.next();
 
 			StepsExam exam = new StepsExam(getRunSetup());
 			Net netExamSpecimen = candidate.getReplicator().getNewSpecimen();

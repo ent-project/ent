@@ -1,15 +1,16 @@
-package org.ent.dev;
+package org.ent.dev.plan;
 
 import java.util.Random;
 
+import org.ent.dev.Level0;
 import org.ent.dev.Level0.NetInfoLevel0;
+import org.ent.dev.Level1;
 import org.ent.dev.Level1.Level1EventListener;
 import org.ent.dev.Level1.NetInfoLevel1;
+import org.ent.dev.Level2;
 import org.ent.dev.Level2.Level2EventListener;
 import org.ent.dev.Level2.NetInfoLevel2;
 import org.ent.dev.StepsExam.StepsExamResult;
-import org.ent.dev.plan.PipeSupplier;
-import org.ent.dev.plan.TrimPipe;
 import org.ent.net.Net;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ public class DevelopmentPlan {
 		System.err.println(String.format("execution time: %.3f s", ((double) diff) / 1000));
 	}
 
-	private static class StatCounter implements Level1EventListener {
+	private static class Level1StatCounter implements Level1EventListener {
 
 		int passes;
 		int fails;
@@ -89,27 +90,23 @@ public class DevelopmentPlan {
 	public void execute() {
 		initialize();
 
-		Level0 level0 = new Level0(newRandom());
-		Level1 level1 = new Level1(level0);
-		TrimPipe<NetInfoLevel1> trimPipe = new TrimPipe<>();
-		PipeSupplier<NetInfoLevel1, NetInfoLevel1> trimPipeSupplier = new PipeSupplier<>(level1, trimPipe);
-		Level2 level2 = new Level2(trimPipeSupplier, newRandom());
+		Level1StatCounter level1Stat = new Level1StatCounter();
 		Level2Listener level2Listener = new Level2Listener();
-		level2.setEventListener(level2Listener);
-		TrimPipe<NetInfoLevel2> trimPipe2 = new TrimPipe<>();
-		PipeSupplier<NetInfoLevel2, NetInfoLevel2> trimPipeSupplier2 = new PipeSupplier<>(level2, trimPipe2);
 
+		Supplier<NetInfoLevel2> poller = new Level0(newRandom())
+				.connect(new Level1().withLevel1EventListener(level1Stat))
+				.connect(new Trimmer<>())
+				.connect(new Level2(newRandom()).withEventListener(level2Listener))
+				.connect(new Trimmer<>());
 
-		StatCounter stat = new StatCounter();
-		level1.setLevel1EventListener(stat);
-		for (int i = 1; i <= 10; i++) {
-			NetInfoLevel2 next = trimPipeSupplier2.next();
+		for (int i = 1; i <= 100; i++) {
+			NetInfoLevel2 next = poller.next();
 			log.trace("Result {}:", i);
 			next.log(log);
 		}
-		int total = stat.passes + stat.fails;
+		int total = level1Stat.passes + level1Stat.fails;
 		log.info("Summary:\n---");
-		log.info("level1: passed {}/{} ({} %)", stat.passes, total, String.format("%.2f", ((double) stat.passes) / total * 100));
+		log.info("level1: passed {}/{} ({} %)", level1Stat.passes, total, String.format("%.2f", ((double) level1Stat.passes) / total * 100));
 		int total2 = level2Listener.noPasses + level2Listener.noFails;
 		log.info("level2: passed {}/{} ({} %)", level2Listener.noPasses, total2,
 				String.format("%.2f", ((double) level2Listener.noPasses) / total2 * 100));
