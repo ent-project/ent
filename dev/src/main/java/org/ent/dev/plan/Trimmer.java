@@ -7,9 +7,9 @@ import org.ent.net.io.formatter.NetFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TrimPipe<T extends NetInfo> implements Pipe<T, T> {
+public class Trimmer<T extends NetInfo> implements Pipe<T, T> {
 
-	private static final Logger log = LoggerFactory.getLogger(TrimPipe.class);
+	private static final Logger log = LoggerFactory.getLogger(Trimmer.class);
 
 	private static final int STEP_LIMIT = 6;
 

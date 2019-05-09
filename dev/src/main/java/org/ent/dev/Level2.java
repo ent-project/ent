@@ -10,13 +10,14 @@ import org.ent.dev.Level1.NetInfoLevel1;
 import org.ent.dev.Level2.NetInfoLevel2;
 import org.ent.dev.StepsExam.StepsExamResult;
 import org.ent.dev.plan.NetInfo;
+import org.ent.dev.plan.Processor;
 import org.ent.dev.plan.Supplier;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.util.NetCopy;
 import org.slf4j.Logger;
 
-public class Level2 implements Supplier<NetInfoLevel2> {
+public class Level2 implements Processor<NetInfoLevel1, NetInfoLevel2> {
 
 	private static final int LEVEL2_SEARCH_LIMIT = 10_000_000;
 
@@ -55,7 +56,7 @@ public class Level2 implements Supplier<NetInfoLevel2> {
 
 	private final List<PoolNetInfo> pool;
 
-	private final Supplier<NetInfoLevel1> upstream;
+	private Supplier<NetInfoLevel1> upstream;
 
 	private Level2EventListener listener;
 
@@ -126,6 +127,10 @@ public class Level2 implements Supplier<NetInfoLevel2> {
 		}
 	}
 
+	public Level2(Random rand) {
+		this(null, rand);
+	}
+
 	public Level2(Supplier<NetInfoLevel1> upstream, Random rand) {
 		this.upstream = upstream;
 		this.rand = rand;
@@ -135,8 +140,28 @@ public class Level2 implements Supplier<NetInfoLevel2> {
 		}
 	}
 
+	@Override
+	public void setUpstream(Supplier<NetInfoLevel1> upstream) {
+		this.upstream = upstream;
+	}
+
+	public Level2 withUpstream(Supplier<NetInfoLevel1> upstream) {
+		setUpstream(upstream);
+		return this;
+	}
+
+	@Override
+	public Supplier<NetInfoLevel1> getUpstream() {
+		return upstream;
+	}
+
 	public void setEventListener(Level2EventListener listener) {
 		this.listener = listener;
+	}
+
+	public Level2 withEventListener(Level2EventListener listener) {
+		setEventListener(listener);
+		return this;
 	}
 
 	@Override
