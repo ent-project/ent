@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
+import org.ent.dev.Level0.NetInfoLevel0;
+import org.ent.dev.plan.NetInfo;
+import org.ent.dev.plan.Supplier;
 import org.ent.dev.randnet.CommandCandidate;
 import org.ent.dev.randnet.CommandDrawing;
 import org.ent.dev.randnet.CommandDrawingImpl;
@@ -18,7 +21,7 @@ import org.ent.net.node.cmd.CommandFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Level0 {
+public class Level0 implements Supplier<NetInfoLevel0> {
 
 	private static final Logger log = LoggerFactory.getLogger(Level0.class);
 
@@ -36,17 +39,21 @@ public class Level0 {
 
 	private List<CommandCandidate> commandCandidates;
 
-	public class NetInfoLevel0 {
+	public class NetInfoLevel0 implements NetInfo {
 
 		private final Net net;
 
 		private final long seed;
 
+		private final NetReplicator replicator;
+
 		public NetInfoLevel0(Net net, long seed) {
 			this.net = net;
 			this.seed = seed;
+			this.replicator = new CopyReplicator(net);
 		}
 
+		@Override
 		public Net getNet() {
 			return net;
 		}
@@ -55,7 +62,11 @@ public class Level0 {
 			return seed;
 		}
 
-		public Net getNewSpecimen() {
+		public NetReplicator getReplicator() {
+			return replicator;
+		}
+
+		public Net getNewSpecimenFromSeed() {
 			return drawNet(seed).get();
 		}
 
@@ -72,6 +83,7 @@ public class Level0 {
 		this.commandCandidates = setupCommandCandidates();
 	}
 
+	@Override
 	public NetInfoLevel0 next() {
 		for (int tries = 0; tries < LEVEL0_SEARCH_LIMIT; tries++) {
 			long netSeed = randNetSeeds.nextLong();

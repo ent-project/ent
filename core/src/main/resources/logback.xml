@@ -24,5 +24,7 @@
 	
 	<logger name="org.ent.dev.Level1" level="TRACE"/>
 	<logger name="org.ent.dev.Level1.reject" level="INFO"/>
+	<logger name="org.ent.dev.Level2" level="INFO"/>
+	<logger name="org.ent.dev.DevelopmentPlan" level="TRACE"/>
 	
 </configuration>

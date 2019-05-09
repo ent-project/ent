@@ -3,13 +3,17 @@ package org.ent.dev;
 import static org.ent.net.io.HexConverter.toHex;
 
 import org.ent.dev.Level0.NetInfoLevel0;
+import org.ent.dev.Level1.NetInfoLevel1;
+import org.ent.dev.StepsExam.StepsExamResult;
+import org.ent.dev.plan.NetInfo;
+import org.ent.dev.plan.Supplier;
 import org.ent.net.Net;
 import org.ent.net.io.HexConverter;
 import org.ent.net.io.formatter.NetFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Level1 {
+public class Level1 implements Supplier<NetInfoLevel1> {
 
 	private static final Logger log = LoggerFactory.getLogger(Level1.class);
 	private static final Logger logReject = LoggerFactory.getLogger(Level1.class.getName() + ".reject");
@@ -26,33 +30,72 @@ public class Level1 {
 
 	private static final int LEVEL1_SEARCH_LIMIT = 100_000_000;
 
-	private final Level0 level0;
+	private final Supplier<NetInfoLevel0> level0;
 
 	private Level1EventListener listener;
 
-	private class ExamResult {
-		boolean passed;
-		int steps;
-	}
+	private int serialNumberCounter;
 
 	public interface Level1EventListener {
 		void netExam(int steps, boolean passed, NetInfoLevel0 net0);
 	}
 
-	public class NetInfoLevel1  {
-		NetInfoLevel0 net0;
+	public class NetInfoLevel1 implements NetInfo {
 
-		int steps;
+		private final Net net;
 
-		public NetInfoLevel1(NetInfoLevel0 net0) {
-			this.net0 = net0;
+		private final long seed;
+
+		private long serialNumber;
+
+		private final NetReplicator replicator;
+
+		private StepsExamResult stepsExamResult;
+
+		public NetInfoLevel1(NetInfoLevel0 netInfo0) {
+			this.net = netInfo0.getNet();
+			this.seed = netInfo0.getSeed();
+			this.replicator = netInfo0.getReplicator();
+			serialNumberCounter++;
+			this.serialNumber = serialNumberCounter;
 		}
 
-		public void log() {
-			if (log.isTraceEnabled()) {
+		@Override
+		public Net getNet() {
+			return net;
+		}
+
+		public NetReplicator getReplicator() {
+			return replicator;
+		}
+
+		public StepsExamResult getStepExamResult() {
+			return stepsExamResult;
+		}
+
+		public long getSeed() {
+			return seed;
+		}
+
+		public void log(Logger logger, String prefix) {
+			if (logger.isTraceEnabled()) {
 				NetFormatter formatter = new NetFormatter();
-				log.trace("#{} [{}] {}", toHex(net0.getSeed()), steps, formatter.format(net0.getNet()));
+				logger.trace("{}#{} 0x{} [{}] {}",
+						prefix, serialNumber, toHex(seed), stepsExamResult.getSteps(), formatter.format(net));
 			}
+		}
+
+		public void log(Logger logger) {
+			log(logger, "");
+		}
+
+		public long getSerialNumber() {
+			return serialNumber;
+		}
+
+		public void setSerialNumber(long serialNumber) {
+			this.serialNumber = serialNumber;
+
 		}
 	}
 
@@ -68,14 +111,22 @@ public class Level1 {
 		this.listener = listener;
 	}
 
+	@Override
 	public NetInfoLevel1 next() {
 		for (int tries = 1; tries < LEVEL1_SEARCH_LIMIT; tries++) {
 			NetInfoLevel0 candidate = level0.next();
-			ExamResult examResult = examine(candidate);
-			if (examResult.passed) {
+
+			StepsExam exam = new StepsExam(getRunSetup());
+			Net netExamSpecimen = candidate.getReplicator().getNewSpecimen();
+			StepsExamResult result = exam.examine(netExamSpecimen);
+			boolean passed = passes(result);
+			if (listener != null) {
+				listener.netExam(result.getSteps(), passed, candidate);
+			}
+			if (passed) {
 				NetInfoLevel1 graduate = new NetInfoLevel1(candidate);
-				graduate.steps = examResult.steps;
-				graduate.log();
+				graduate.stepsExamResult = result;
+				graduate.log(log);
 				return graduate;
 			} else {
 				if (log.isTraceEnabled()) {
@@ -86,19 +137,8 @@ public class Level1 {
 		throw new RuntimeException("Level1 search limit exceeded (" + LEVEL1_SEARCH_LIMIT + ")");
 	}
 
-	public ExamResult examine(NetInfoLevel0 candidate) {
-		Net net = candidate.getNewSpecimen();
-		RunSetup setup = getRunSetup();
-		ManagedRun run = new ManagedRun(setup).withNet(net);
-		run.perform();
-		int steps = run.getNoSteps();
-		ExamResult result = new ExamResult();
-		result.steps = steps;
-		result.passed = passesThreshold(steps);
-		if (listener != null) {
-			listener.netExam(result.steps, result.passed, candidate);
-		}
-		return result;
+	private boolean passes(StepsExamResult result) {
+		return passesThreshold(result.getSteps());
 	}
 
 	private RunSetup getRunSetup() {
