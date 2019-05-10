@@ -5,7 +5,12 @@ import static org.ent.net.io.HexConverter.toHex;
 import org.ent.dev.Level0.NetInfoLevel0;
 import org.ent.dev.Level1.NetInfoLevel1;
 import org.ent.dev.StepsExam.StepsExamResult;
-import org.ent.dev.plan.NetInfo;
+import org.ent.dev.plan.Data.PropNet;
+import org.ent.dev.plan.Data.PropReplicator;
+import org.ent.dev.plan.Data.PropSeed;
+import org.ent.dev.plan.Data.PropSerialNumber;
+import org.ent.dev.plan.Data.PropStepsExamResult;
+import org.ent.dev.plan.DataImpl;
 import org.ent.dev.plan.Processor;
 import org.ent.dev.plan.Supplier;
 import org.ent.net.Net;
@@ -35,68 +40,35 @@ public class Level1 implements Processor<NetInfoLevel0, NetInfoLevel1> {
 
 	private Level1EventListener listener;
 
-	private int serialNumberCounter;
+	private long serialNumberCounter;
 
 	public interface Level1EventListener {
 		void netExam(int steps, boolean passed, NetInfoLevel0 net0);
 	}
 
-	public class NetInfoLevel1 implements NetInfo {
-
-		private final Net net;
-
-		private final long seed;
-
-		private long serialNumber;
-
-		private final NetReplicator replicator;
-
-		private StepsExamResult stepsExamResult;
+	public class NetInfoLevel1 extends DataImpl implements
+			PropNet,
+			PropSeed,
+			PropReplicator,
+			PropSerialNumber,
+			PropStepsExamResult {
 
 		public NetInfoLevel1(NetInfoLevel0 netInfo0) {
-			this.net = netInfo0.getNet();
-			this.seed = netInfo0.getSeed();
-			this.replicator = netInfo0.getReplicator();
+			super(netInfo0.getProperties());
 			serialNumberCounter++;
-			this.serialNumber = serialNumberCounter;
-		}
-
-		@Override
-		public Net getNet() {
-			return net;
-		}
-
-		public NetReplicator getReplicator() {
-			return replicator;
-		}
-
-		public StepsExamResult getStepExamResult() {
-			return stepsExamResult;
-		}
-
-		public long getSeed() {
-			return seed;
+			setSerialNumber(serialNumberCounter);
 		}
 
 		public void log(Logger logger, String prefix) {
 			if (logger.isTraceEnabled()) {
 				NetFormatter formatter = new NetFormatter();
 				logger.trace("{}#{} 0x{} [{}] {}",
-						prefix, serialNumber, toHex(seed), stepsExamResult.getSteps(), formatter.format(net));
+						prefix, getSerialNumber(), toHex(getSeed()), getStepsExamResult().getSteps(), formatter.format(getNet()));
 			}
 		}
 
 		public void log(Logger logger) {
 			log(logger, "");
-		}
-
-		public long getSerialNumber() {
-			return serialNumber;
-		}
-
-		public void setSerialNumber(long serialNumber) {
-			this.serialNumber = serialNumber;
-
 		}
 	}
 
@@ -149,7 +121,7 @@ public class Level1 implements Processor<NetInfoLevel0, NetInfoLevel1> {
 			}
 			if (passed) {
 				NetInfoLevel1 graduate = new NetInfoLevel1(candidate);
-				graduate.stepsExamResult = result;
+				graduate.setStepsExamResult(result);
 				graduate.log(log);
 				return graduate;
 			} else {

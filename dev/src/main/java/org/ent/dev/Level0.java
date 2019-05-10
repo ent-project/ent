@@ -8,7 +8,10 @@ import java.util.Optional;
 import java.util.Random;
 
 import org.ent.dev.Level0.NetInfoLevel0;
-import org.ent.dev.plan.NetInfo;
+import org.ent.dev.plan.Data.PropNet;
+import org.ent.dev.plan.Data.PropReplicator;
+import org.ent.dev.plan.Data.PropSeed;
+import org.ent.dev.plan.DataImpl;
 import org.ent.dev.plan.Supplier;
 import org.ent.dev.randnet.CommandCandidate;
 import org.ent.dev.randnet.CommandDrawing;
@@ -39,41 +42,25 @@ public class Level0 implements Supplier<NetInfoLevel0> {
 
 	private List<CommandCandidate> commandCandidates;
 
-	public class NetInfoLevel0 implements NetInfo {
-
-		private final Net net;
-
-		private final long seed;
-
-		private final NetReplicator replicator;
+	public class NetInfoLevel0 extends DataImpl implements
+		PropNet,
+		PropSeed,
+		PropReplicator {
 
 		public NetInfoLevel0(Net net, long seed) {
-			this.net = net;
-			this.seed = seed;
-			this.replicator = new CopyReplicator(net);
-		}
-
-		@Override
-		public Net getNet() {
-			return net;
-		}
-
-		public long getSeed() {
-			return seed;
-		}
-
-		public NetReplicator getReplicator() {
-			return replicator;
+			setNet(net);
+			setSeed(seed);
+			setReplicator(new CopyReplicator(net));
 		}
 
 		public Net getNewSpecimenFromSeed() {
-			return drawNet(seed).get();
+			return drawNet(getSeed()).get();
 		}
 
 		public void log() {
 			if (log.isTraceEnabled()) {
 				NetFormatter formatter = new NetFormatter();
-				log.trace("#{} {}", toHex(seed), formatter.format(net));
+				log.trace("#{} {}", toHex(getSeed()), formatter.format(getNet()));
 			}
 		}
 	}

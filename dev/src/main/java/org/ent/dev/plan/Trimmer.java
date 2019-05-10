@@ -1,13 +1,14 @@
 package org.ent.dev.plan;
 
 import org.ent.dev.RunSetup;
+import org.ent.dev.plan.Data.PropNet;
 import org.ent.dev.trim.NetTrimmer;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Trimmer<T extends NetInfo> implements Pipe<T, T> {
+public class Trimmer<T extends PropNet> implements Pipe<T, T> {
 
 	private static final Logger log = LoggerFactory.getLogger(Trimmer.class);
 
