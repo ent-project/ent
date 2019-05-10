@@ -9,7 +9,11 @@ import java.util.Random;
 import org.ent.dev.Level1.NetInfoLevel1;
 import org.ent.dev.Level2.NetInfoLevel2;
 import org.ent.dev.StepsExam.StepsExamResult;
-import org.ent.dev.plan.NetInfo;
+import org.ent.dev.plan.Data.PropNet;
+import org.ent.dev.plan.Data.PropReplicator;
+import org.ent.dev.plan.Data.PropSourceInfo;
+import org.ent.dev.plan.Data.PropStepsExamResult;
+import org.ent.dev.plan.DataImpl;
 import org.ent.dev.plan.Processor;
 import org.ent.dev.plan.Supplier;
 import org.ent.net.Net;
@@ -78,51 +82,28 @@ public class Level2 implements Processor<NetInfoLevel1, NetInfoLevel2> {
 		}
 	}
 
-	public static class NetInfoLevel2 implements NetInfo {
-
-		private Net net;
-
-		private NetReplicator replicator;
-
-		private StepsExamResult stepsExamResult;
-
-		private String sourceInfo;
+	public static class NetInfoLevel2 extends DataImpl implements
+			PropNet,
+			PropStepsExamResult,
+			PropReplicator,
+			PropSourceInfo {
 
 		public NetInfoLevel2(Net net, StepsExamResult stepsExamResult, String sourceInfo) {
-			this.net = net;
-			this.replicator = new CopyReplicator(net);
-			this.stepsExamResult = stepsExamResult;
-			this.sourceInfo = sourceInfo;
+			setNet(net);
+			setReplicator(new CopyReplicator(net));
+			setStepsExamResult(stepsExamResult);
+			setSourceInfo(sourceInfo);
 		}
 
 		public NetInfoLevel2(NetInfoLevel1 netInfoLevel1) {
-			this.net = netInfoLevel1.getNet();
-			this.replicator = netInfoLevel1.getReplicator();
-			this.stepsExamResult = netInfoLevel1.getStepExamResult();
-			this.sourceInfo = "#" + netInfoLevel1.getSerialNumber();
-		}
-
-		@Override
-		public Net getNet() {
-			return net;
-		}
-
-		public NetReplicator getReplicator() {
-			return replicator;
-		}
-
-		public StepsExamResult getStepsExamResult() {
-			return stepsExamResult;
-		}
-
-		public String getSourceInfo() {
-			return sourceInfo;
+			super(netInfoLevel1.getProperties());
+			setSourceInfo("#" + netInfoLevel1.getSerialNumber());
 		}
 
 		public void log(Logger log) {
 			if (log.isTraceEnabled()) {
 				NetFormatter formatter = new NetFormatter();
-				log.trace("{} [{}] {}", sourceInfo, stepsExamResult.getSteps(), formatter.format(net));
+				log.trace("{} [{}] {}", getSourceInfo(), getStepsExamResult().getSteps(), formatter.format(getNet()));
 			}
 		}
 	}
@@ -226,7 +207,7 @@ public class Level2 implements Processor<NetInfoLevel1, NetInfoLevel2> {
 			if (listener != null) {
 				listener.fetchFromPreviousLevel(nextLevel1);
 			}
-			if (passes(nextLevel1.getStepExamResult())) {
+			if (passes(nextLevel1.getStepsExamResult())) {
 				if (listener != null) {
 					listener.directPass(nextLevel1);
 				}

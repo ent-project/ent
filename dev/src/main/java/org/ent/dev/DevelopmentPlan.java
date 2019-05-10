@@ -1,16 +1,15 @@
-package org.ent.dev.plan;
+package org.ent.dev;
 
 import java.util.Random;
 
-import org.ent.dev.Level0;
 import org.ent.dev.Level0.NetInfoLevel0;
-import org.ent.dev.Level1;
 import org.ent.dev.Level1.Level1EventListener;
 import org.ent.dev.Level1.NetInfoLevel1;
-import org.ent.dev.Level2;
 import org.ent.dev.Level2.Level2EventListener;
 import org.ent.dev.Level2.NetInfoLevel2;
 import org.ent.dev.StepsExam.StepsExamResult;
+import org.ent.dev.plan.Supplier;
+import org.ent.dev.plan.Trimmer;
 import org.ent.net.Net;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
