@@ -1,7 +1,7 @@
 
 apply plugin: 'application'
 
-mainClassName = 'org.ent.dev.plan.DevelopmentPlan'
+mainClassName = 'org.ent.dev.DevelopmentPlan'
 
 dependencies {
     implementation project(':core')

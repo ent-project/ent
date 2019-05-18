@@ -3,7 +3,21 @@ package org.ent.dev.plan;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DataImpl implements Data {
+import org.ent.dev.plan.DataProperties.PropNet;
+import org.ent.dev.plan.DataProperties.PropReplicator;
+import org.ent.dev.plan.DataProperties.PropSeed;
+import org.ent.dev.plan.DataProperties.PropSerialNumber;
+import org.ent.dev.plan.DataProperties.PropSourceInfo;
+import org.ent.dev.plan.DataProperties.PropStepsExamResult;
+import org.ent.dev.unit.Data;
+
+public class DataImpl implements Data,
+		PropNet,
+		PropSeed,
+		PropReplicator,
+		PropSerialNumber,
+		PropStepsExamResult,
+		PropSourceInfo {
 
 	private final Map<String, Object> properties;
 

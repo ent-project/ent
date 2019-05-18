@@ -1,4 +1,4 @@
-package org.ent.dev;
+package org.ent.dev.plan;
 
 import static org.ent.net.io.HexConverter.toHex;
 
@@ -7,16 +7,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-import org.ent.dev.Level0.NetInfoLevel0;
-import org.ent.dev.plan.Data.PropNet;
-import org.ent.dev.plan.Data.PropReplicator;
-import org.ent.dev.plan.Data.PropSeed;
-import org.ent.dev.plan.DataImpl;
-import org.ent.dev.plan.Supplier;
+import org.ent.dev.CopyReplicator;
+import org.ent.dev.plan.DataProperties.PropNet;
+import org.ent.dev.plan.DataProperties.PropReplicator;
+import org.ent.dev.plan.DataProperties.PropSeed;
 import org.ent.dev.randnet.CommandCandidate;
 import org.ent.dev.randnet.CommandDrawing;
 import org.ent.dev.randnet.CommandDrawingImpl;
 import org.ent.dev.randnet.RandomNetCreator;
+import org.ent.dev.unit.Source;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
@@ -24,9 +23,9 @@ import org.ent.net.node.cmd.CommandFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Level0 implements Supplier<NetInfoLevel0> {
+public class RandomNetSource implements Source {
 
-	private static final Logger log = LoggerFactory.getLogger(Level0.class);
+	private static final Logger log = LoggerFactory.getLogger(RandomNetSource.class);
 
 	private static final int RANDOM_NET_CREATOR_NUMBER_OF_NODES = 15;
 
@@ -42,12 +41,13 @@ public class Level0 implements Supplier<NetInfoLevel0> {
 
 	private List<CommandCandidate> commandCandidates;
 
-	public class NetInfoLevel0 extends DataImpl implements
-		PropNet,
-		PropSeed,
-		PropReplicator {
+	public interface RandomNetSourceProperties extends PropNet, PropSeed, PropReplicator {
+		void log();
+	}
 
-		public NetInfoLevel0(Net net, long seed) {
+	public class RandomNetSourceData extends DataImpl implements RandomNetSourceProperties {
+
+		public RandomNetSourceData(Net net, long seed) {
 			setNet(net);
 			setSeed(seed);
 			setReplicator(new CopyReplicator(net));
@@ -57,6 +57,7 @@ public class Level0 implements Supplier<NetInfoLevel0> {
 			return drawNet(getSeed()).get();
 		}
 
+		@Override
 		public void log() {
 			if (log.isTraceEnabled()) {
 				NetFormatter formatter = new NetFormatter();
@@ -65,18 +66,18 @@ public class Level0 implements Supplier<NetInfoLevel0> {
 		}
 	}
 
-	public Level0(Random randNetSeeds) {
+	public RandomNetSource(Random randNetSeeds) {
 		this.randNetSeeds = randNetSeeds;
 		this.commandCandidates = setupCommandCandidates();
 	}
 
 	@Override
-	public NetInfoLevel0 next() {
+	public RandomNetSourceProperties get() {
 		for (int tries = 0; tries < LEVEL0_SEARCH_LIMIT; tries++) {
 			long netSeed = randNetSeeds.nextLong();
 			Optional<Net> maybeNet = drawNet(netSeed);
 			if (maybeNet.isPresent()) {
-				NetInfoLevel0 netInfo = new NetInfoLevel0(maybeNet.get(), netSeed);
+				RandomNetSourceProperties netInfo = new RandomNetSourceData(maybeNet.get(), netSeed);
 				netInfo.log();
 				return netInfo;
 			} else {
