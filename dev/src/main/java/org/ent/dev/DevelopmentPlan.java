@@ -1,16 +1,29 @@
 package org.ent.dev;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.Random;
 
-import org.ent.dev.Level0.NetInfoLevel0;
-import org.ent.dev.Level1.Level1EventListener;
-import org.ent.dev.Level1.NetInfoLevel1;
-import org.ent.dev.Level2.Level2EventListener;
-import org.ent.dev.Level2.NetInfoLevel2;
-import org.ent.dev.StepsExam.StepsExamResult;
-import org.ent.dev.plan.Supplier;
+import org.ent.dev.plan.Counter;
+import org.ent.dev.plan.DataProperties.PropNet;
+import org.ent.dev.plan.DataProperties.PropReplicator;
+import org.ent.dev.plan.DataProperties.PropSerialNumber;
+import org.ent.dev.plan.DataProperties.PropStepsExamResult;
+import org.ent.dev.plan.Pool;
+import org.ent.dev.plan.RandomNetSource;
+import org.ent.dev.plan.StepsExam;
+import org.ent.dev.plan.StepsExamResult;
+import org.ent.dev.plan.StepsFilter;
 import org.ent.dev.plan.Trimmer;
+import org.ent.dev.unit.Data;
+import org.ent.dev.unit.DeliveryStash;
+import org.ent.dev.unit.FilterWrapper.FilterListener;
+import org.ent.dev.unit.Proc;
+import org.ent.dev.unit.Req;
+import org.ent.dev.unit.SkewSplitter;
+import org.ent.dev.unit.Sup;
 import org.ent.net.Net;
+import org.ent.net.io.formatter.NetFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,88 +43,156 @@ public class DevelopmentPlan {
 		System.err.println(String.format("execution time: %.3f s", ((double) diff) / 1000));
 	}
 
-	private static class Level1StatCounter implements Level1EventListener {
+	public class Poller implements Req {
 
-		int passes;
-		int fails;
+		private Sup upstream;
+
+		private Queue<Data> queue = new ArrayDeque<>();
 
 		@Override
-		public void netExam(int steps, boolean passed, NetInfoLevel0 net0) {
-			if (passed) {
-				passes++;
-			} else {
-				fails++;
+		public void setUpstream(Sup upstream) {
+			this.upstream = upstream;
+		}
+
+		public void poll() {
+			upstream.requestNext();
+		}
+
+		@Override
+		public void receiveNext(Data next) {
+			queue.add(next);
+		}
+
+		public Data getFromQueue() {
+			return queue.remove();
+		}
+
+		public boolean queueIsEmpty() {
+			return queue.isEmpty();
+		}
+	}
+
+	public class Output implements Proc {
+
+		String prefix;
+
+		public Output(String prefix) {
+			this.prefix = prefix;
+		}
+
+		@Override
+		public void accept(Data input) {
+			Net net = ((PropNet) input).getNet();
+			StepsExamResult stepsExamResult = ((PropStepsExamResult) input).getStepsExamResult();
+			log.trace("{}#{} [{}] {}", prefix, ((PropSerialNumber) input).getSerialNumber(), stepsExamResult.getSteps(), new NetFormatter().format(net));
+		}
+
+	}
+
+	public class AddCopyReplicator implements Proc {
+
+		@Override
+		public void accept(Data input) {
+			Net net = ((PropNet) input).getNet();
+			CopyReplicator replicator = new CopyReplicator(net);
+			((PropReplicator) input).setReplicator(replicator);
+		}
+
+	}
+
+	class FailuresLimit implements FilterListener {
+
+		private final int maxConsecutiveFailures;
+
+		private int consecutiveFailures;
+
+		public FailuresLimit(int maxConsecutiveFailures) {
+			this.maxConsecutiveFailures = maxConsecutiveFailures;
+		}
+
+		@Override
+		public void success(Data data) {
+			consecutiveFailures = 0;
+		}
+
+		@Override
+		public void failure(Data data) {
+			consecutiveFailures++;
+			if (consecutiveFailures > maxConsecutiveFailures) {
+				throw new RuntimeException("Maximum number of consecutive failures exceeded (" + maxConsecutiveFailures + ")");
 			}
 		}
-
 	}
 
-	private static class Level2Listener implements Level2EventListener {
-
-		int noFetchedFromLevel1;
-		int noPassedDirectly;
-		int noPasses;
-		int noFails;
-
-		@Override
-		public void fetchFromPreviousLevel(NetInfoLevel1 netInfo) {
-			noFetchedFromLevel1++;
-			netInfo.log(log, "add to pool: ");
-		}
-
-		@Override
-		public void removeFromPool(NetInfoLevel1 netInfo) {
-			log.trace("remove from pool: #{}", netInfo.getSerialNumber());
-		}
-
-		@Override
-		public void directPass(NetInfoLevel1 netInfo) {
-			noPassedDirectly++;
-			log.trace("DIRECT PASS: #{}", netInfo.getSerialNumber());
-		}
-
-		@Override
-		public void examPassed(StepsExamResult result, Net candidate, NetInfoLevel1 netInfoPrimary,
-				NetInfoLevel1 netInfoJoining) {
-			noPasses++;
-			log.trace("EXAM PASSED: #{}+#{}", netInfoPrimary.getSerialNumber(), netInfoJoining.getSerialNumber());
-		}
-
-		@Override
-		public void examFailed(StepsExamResult result, Net candidate, NetInfoLevel1 netInfoPrimary,
-				NetInfoLevel1 netInfoJoining) {
-			noFails++;
-			log.trace("exam failed: #{}+#{}", netInfoPrimary.getSerialNumber(), netInfoJoining.getSerialNumber());
-		}
-
-	}
+	private int level0total;
+	private int level1total;
+	private int level2directPasses;
+	private int level2total;
+	private int level2heavyLaneTotal;
+	private int level2heavyLanePasses;
 
 	public void execute() {
 		initialize();
 
-		Level1StatCounter level1Stat = new Level1StatCounter();
-		Level2Listener level2Listener = new Level2Listener();
+		Poller poller = new RandomNetSource(newRandom()).toSup()
+		.combineProc(data -> {level0total++;})
+		.combineProc(new StepsExam(getRunSetup()))
+		.combineFilter(new StepsFilter(1).with(new FailuresLimit(1000)))
+		.combineProc(data -> {level1total++;})
+		.combineProc(new Trimmer(getRunSetup()))
+		.combineProc(new Counter())
+		.combineProc(new Output("level1: "))
+		.combineDan(new SkewSplitter()
+			.withSorter(new StepsFilter(2))
+			.withLightLane(
+				new Output("in light lane: ")
+				.combineProc(data -> {level2directPasses++;})
+				)
+			.withHeavyLane(
+				new Pool(newRandom()).withFeedback(
+					new AddCopyReplicator()
+					.combineProc(new Counter())
+					.combineProc(data -> {level2heavyLaneTotal++;})
+					.combineProc(new StepsExam(getRunSetup()))
+					.combineProc(new Output("in heavy lane: "))
+					.combineFilter(new StepsFilter(2))
+					.combineProc(data -> {level2heavyLanePasses++;})
+					)
+				.combinePipe(new Output("Passed the heavy lane: "))
+				.combinePipe(new Trimmer(getRunSetup()))
+				.combinePipe(new Output("trimmed: "))
+			)
+		)
+		.combineProc(data -> {level2total++;})
+		.connectReq(new Poller());
 
-		Supplier<NetInfoLevel2> poller = new Level0(newRandom())
-				.connect(new Level1().withLevel1EventListener(level1Stat))
-				.connect(new Trimmer<>())
-				.connect(new Level2(newRandom()).withEventListener(level2Listener))
-				.connect(new Trimmer<>());
-
+		Output output = new Output("Result: ");
 		for (int i = 1; i <= 100; i++) {
-			NetInfoLevel2 next = poller.next();
-			log.trace("Result {}:", i);
-			next.log(log);
+			poller.poll();
+			while (DeliveryStash.instance.hasWork()) {
+				DeliveryStash.instance.work();
+			}
+			Data data = poller.getFromQueue();
+			output.accept(data);
+			System.out.println();
 		}
-		int total = level1Stat.passes + level1Stat.fails;
+
 		log.info("Summary:\n---");
-		log.info("level1: passed {}/{} ({} %)", level1Stat.passes, total, String.format("%.2f", ((double) level1Stat.passes) / total * 100));
-		int total2 = level2Listener.noPasses + level2Listener.noFails;
-		log.info("level2: passed {}/{} ({} %)", level2Listener.noPasses, total2,
-				String.format("%.2f", ((double) level2Listener.noPasses) / total2 * 100));
-		log.info("level2: passed directly: {}/{} ({} %)",
-				level2Listener.noPassedDirectly, level2Listener.noFetchedFromLevel1,
-				String.format("%.2f", ((double) level2Listener.noPassedDirectly) / level2Listener.noFetchedFromLevel1 * 100));
+		log.info("level1: passed        {}/{} ({} %)", level1total, level0total, String.format("%.2f", ((double) level1total) / level0total * 100));
+		log.info("level2 direct passes: {}/{} ({} %)", level2directPasses, level1total,
+				String.format("%.2f", ((double) level2directPasses) / level1total * 100));
+		log.info("level2 pool lane:     {}/{} ({} %)",
+				level2heavyLanePasses, level2heavyLaneTotal,
+				String.format("%.2f", ((double) level2heavyLanePasses) / level2heavyLaneTotal * 100));
+	}
+
+	private RunSetup getRunSetup() {
+		return new RunSetup.Builder()
+				.withCommandExecutionFailedIsFatal(true)
+				.withInvalidCommandBranchIsFatal(true)
+				.withInvalidCommandNodeIsFatal(true)
+				.withMaxSteps(6)
+				.build();
 	}
 
 	private void initialize() {
