@@ -2,17 +2,15 @@ package org.ent.dev.plan;
 
 import org.ent.dev.ManagedRun;
 import org.ent.dev.RunSetup;
-import org.ent.dev.plan.DataProperties.PropReplicator;
-import org.ent.dev.plan.DataProperties.PropStepsExamResult;
-import org.ent.dev.unit.Data;
-import org.ent.dev.unit.Proc;
+import org.ent.dev.unit.TypedProc;
 import org.ent.net.Net;
 
-public class StepsExam implements Proc {
+public class StepsExam extends TypedProc<StepsExamData> {
 
 	private final RunSetup runSetup;
 
 	public StepsExam(RunSetup runSetup) {
+		super(new StepsExamData());
 		this.runSetup = runSetup;
 	}
 
@@ -21,11 +19,11 @@ public class StepsExam implements Proc {
 	}
 
 	@Override
-	public void accept(Data data) {
-		Net netExamSpecimen = ((PropReplicator) data).getReplicator().getNewSpecimen();
+	protected void doAccept(StepsExamData data) {
+		Net netExamSpecimen = data.getReplicator().getNewSpecimen();
 		StepsExamResult result = examine(netExamSpecimen);
 
-		((PropStepsExamResult) data).setStepsExamResult(result);
+		data.setStepsExamResult(result);
 	}
 
 

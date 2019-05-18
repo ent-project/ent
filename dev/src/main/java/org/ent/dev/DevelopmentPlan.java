@@ -16,12 +16,13 @@ import org.ent.dev.plan.StepsExamResult;
 import org.ent.dev.plan.StepsFilter;
 import org.ent.dev.plan.Trimmer;
 import org.ent.dev.unit.Data;
+import org.ent.dev.unit.DataProxy;
 import org.ent.dev.unit.DeliveryStash;
 import org.ent.dev.unit.FilterWrapper.FilterListener;
-import org.ent.dev.unit.Proc;
 import org.ent.dev.unit.Req;
 import org.ent.dev.unit.SkewSplitter;
 import org.ent.dev.unit.Sup;
+import org.ent.dev.unit.TypedProc;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
 import org.slf4j.Logger;
@@ -72,33 +73,42 @@ public class DevelopmentPlan {
 		}
 	}
 
-	public class Output implements Proc {
+	public class Output extends TypedProc<OutputData> {
 
 		String prefix;
 
 		public Output(String prefix) {
+			super(new OutputData());
 			this.prefix = prefix;
 		}
 
 		@Override
-		public void accept(Data input) {
-			Net net = ((PropNet) input).getNet();
-			StepsExamResult stepsExamResult = ((PropStepsExamResult) input).getStepsExamResult();
-			log.trace("{}#{} [{}] {}", prefix, ((PropSerialNumber) input).getSerialNumber(), stepsExamResult.getSteps(), new NetFormatter().format(net));
+		public void doAccept(OutputData input) {
+			Net net = input.getNet();
+			StepsExamResult stepsExamResult = input.getStepsExamResult();
+			log.trace("{}#{} [{}] {}", prefix, input.getSerialNumber(), stepsExamResult.getSteps(), new NetFormatter().format(net));
 		}
 
 	}
 
-	public class AddCopyReplicator implements Proc {
+	private class OutputData extends DataProxy implements PropNet, PropStepsExamResult, PropSerialNumber{}
+
+	public class AddCopyReplicator extends TypedProc<AddCopyReplicatorData> {
+
+		public AddCopyReplicator() {
+			super(new AddCopyReplicatorData());
+		}
 
 		@Override
-		public void accept(Data input) {
-			Net net = ((PropNet) input).getNet();
+		public void doAccept(AddCopyReplicatorData input) {
+			Net net = input.getNet();
 			CopyReplicator replicator = new CopyReplicator(net);
-			((PropReplicator) input).setReplicator(replicator);
+			input.setReplicator(replicator);
 		}
 
 	}
+
+	private class AddCopyReplicatorData extends DataProxy implements PropNet, PropReplicator{}
 
 	class FailuresLimit implements FilterListener {
 
@@ -147,7 +157,7 @@ public class DevelopmentPlan {
 			.withLightLane(
 				new Output("in light lane: ")
 				.combineProc(data -> {level2directPasses++;})
-				)
+			)
 			.withHeavyLane(
 				new Pool(newRandom()).withFeedback(
 					new AddCopyReplicator()
@@ -157,7 +167,7 @@ public class DevelopmentPlan {
 					.combineProc(new Output("in heavy lane: "))
 					.combineFilter(new StepsFilter(2))
 					.combineProc(data -> {level2heavyLanePasses++;})
-					)
+				)
 				.combinePipe(new Output("Passed the heavy lane: "))
 				.combinePipe(new Trimmer(getRunSetup()))
 				.combinePipe(new Output("trimmed: "))

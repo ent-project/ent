@@ -1,23 +1,22 @@
 package org.ent.dev.plan;
 
 import org.ent.dev.RunSetup;
-import org.ent.dev.plan.DataProperties.PropNet;
 import org.ent.dev.trim.NetTrimmer;
-import org.ent.dev.unit.Data;
-import org.ent.dev.unit.Proc;
+import org.ent.dev.unit.TypedProc;
 import org.ent.net.Net;
 
-public class Trimmer implements Proc {
+public class Trimmer extends TypedProc<TrimmerData> {
 
 	private final RunSetup runSetup;
 
 	public Trimmer(RunSetup runSetup) {
+		super(new TrimmerData());
 		this.runSetup = runSetup;
 	}
 
 	@Override
-	public void accept(Data data) {
-		Net net = ((PropNet) data).getNet();
+	public void doAccept(TrimmerData data) {
+		Net net = data.getNet();
 		NetTrimmer trimmer = new NetTrimmer(net, getRunSetup());
 		trimmer.runTrimmer();
 	}

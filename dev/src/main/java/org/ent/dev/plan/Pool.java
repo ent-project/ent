@@ -11,6 +11,8 @@ import org.ent.dev.plan.DataProperties.PropNet;
 import org.ent.dev.plan.DataProperties.PropReplicator;
 import org.ent.dev.unit.Dan;
 import org.ent.dev.unit.Data;
+import org.ent.dev.unit.DataImpl;
+import org.ent.dev.unit.DataProxy;
 import org.ent.dev.unit.Filter;
 import org.ent.dev.unit.Req;
 import org.ent.dev.unit.Sup;
@@ -43,7 +45,7 @@ public class Pool {
 		EXCLUDE_RATE_JOINING.put(false, EXCLUDE_RATE_JOINING_FAIL);
 	}
 
-	private final List<PoolNetInfo> pool;
+	private final List<PoolData> pool;
 
 	private Sup upstream;
 
@@ -87,25 +89,15 @@ public class Pool {
 		}
 	}
 
-	private class PoolNetInfo {
-		PropReplicator level1Info;
-
-		public PoolNetInfo(PropReplicator level1Info) {
-			this.level1Info = level1Info;
+	private class PoolData extends DataProxy implements PropReplicator{
+		public PoolData(Data data) {
+			super(data);
 		}
 	}
 
-	public Pool(Random rand) {
-		this.rand = rand;
-		this.pool = new ArrayList<>(POOL_SIZE);
-		for (int i = 0; i < POOL_SIZE; i++) {
-			this.pool.add(null);
-		}
-		this.poolProc = new PoolProc();
-		reset();
-	}
+	private static class PoolOutputDataImpl extends DataImpl implements PropNet {}
 
-	class PoolFeedback implements Filter {
+	private class PoolFeedback implements Filter {
 
 		private Filter delegate;
 
@@ -128,6 +120,16 @@ public class Pool {
 			reset();
 			return passed;
 		}
+	}
+
+	public Pool(Random rand) {
+		this.rand = rand;
+		this.pool = new ArrayList<>(POOL_SIZE);
+		for (int i = 0; i < POOL_SIZE; i++) {
+			this.pool.add(null);
+		}
+		this.poolProc = new PoolProc();
+		reset();
 	}
 
 	private void maybeRemoveFromPool(int idx, Double propability) {
@@ -157,15 +159,13 @@ public class Pool {
 
 	private void receiveNext(Data next) {
 		log.trace("entering receiveNext");
-		PropReplicator repl = (PropReplicator) next;
-		PoolNetInfo poolInfo = new PoolNetInfo(repl);
 		switch (state) {
 		case WAITING_FOR_PRIMARY:
-			pool.set(idxPrimary, poolInfo);
+			pool.set(idxPrimary, new PoolData(next));
 			stage2();
 			break;
 		case WAITING_FOR_JOINING:
-			pool.set(idxJoining, poolInfo);
+			pool.set(idxJoining, new PoolData(next));
 			stage3();
 			break;
 		default:
@@ -176,8 +176,8 @@ public class Pool {
 	private void stage1() {
 		log.trace("entering stage1");
 		idxPrimary = rand.nextInt(POOL_SIZE);
-		PoolNetInfo poolInfoPrimary = pool.get(idxPrimary);
-		if (poolInfoPrimary == null) {
+		Data dataPrimary = pool.get(idxPrimary);
+		if (dataPrimary == null) {
 			state = State.WAITING_FOR_PRIMARY;
 			upstream.requestNext();
 		} else {
@@ -191,8 +191,8 @@ public class Pool {
 		if (idxJoining >= idxPrimary) {
 			idxJoining++;
 		}
-		PoolNetInfo poolInfoJoining = pool.get(idxJoining);
-		if (poolInfoJoining == null) {
+		Data dataJoining = pool.get(idxJoining);
+		if (dataJoining == null) {
 			state = State.WAITING_FOR_JOINING;
 			upstream.requestNext();
 		} else {
@@ -202,20 +202,20 @@ public class Pool {
 
 	private void stage3() {
 		log.trace("entering stage3");
-		PoolNetInfo poolInfoPrimary = pool.get(idxPrimary);
-		PoolNetInfo poolInfoJoining = pool.get(idxJoining);
+		PoolData poolDataPrimary = pool.get(idxPrimary);
+		PoolData poolDataJoining = pool.get(idxJoining);
 
-		Net candidate = produceCandidate(poolInfoPrimary, poolInfoJoining);
-		PropNet nn = new DataImpl();
-		nn.setNet(candidate);
+		Net offspring = produceOffspring(poolDataPrimary, poolDataJoining);
+		PropNet offspringData = new PoolOutputDataImpl();
+		offspringData.setNet(offspring);
 		state = State.ACCEPTING_FEEDBACK;
-		downstream.deliver(nn);
+		downstream.deliver(offspringData);
 	}
 
-	private Net produceCandidate(PoolNetInfo infoPrimary, PoolNetInfo infoJoining) {
+	private Net produceOffspring(PoolData infoPrimary, PoolData infoJoining) {
 
-		Net primaryNetReplica = infoPrimary.level1Info.getReplicator().getNewSpecimen();
-		Net joiningNetReplica = infoJoining.level1Info.getReplicator().getNewSpecimen();
+		Net primaryNetReplica = infoPrimary.getReplicator().getNewSpecimen();
+		Net joiningNetReplica = infoJoining.getReplicator().getNewSpecimen();
 
 		NetMixer mixer = new NetMixer(rand, primaryNetReplica, joiningNetReplica);
 
