@@ -15,6 +15,7 @@ import org.ent.dev.randnet.CommandCandidate;
 import org.ent.dev.randnet.CommandDrawing;
 import org.ent.dev.randnet.CommandDrawingImpl;
 import org.ent.dev.randnet.RandomNetCreator;
+import org.ent.dev.unit.DataImpl;
 import org.ent.dev.unit.Source;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
@@ -41,11 +42,7 @@ public class RandomNetSource implements Source {
 
 	private List<CommandCandidate> commandCandidates;
 
-	public interface RandomNetSourceProperties extends PropNet, PropSeed, PropReplicator {
-		void log();
-	}
-
-	public class RandomNetSourceData extends DataImpl implements RandomNetSourceProperties {
+	public class RandomNetSourceData extends DataImpl implements PropNet, PropSeed, PropReplicator {
 
 		public RandomNetSourceData(Net net, long seed) {
 			setNet(net);
@@ -57,7 +54,6 @@ public class RandomNetSource implements Source {
 			return drawNet(getSeed()).get();
 		}
 
-		@Override
 		public void log() {
 			if (log.isTraceEnabled()) {
 				NetFormatter formatter = new NetFormatter();
@@ -72,12 +68,12 @@ public class RandomNetSource implements Source {
 	}
 
 	@Override
-	public RandomNetSourceProperties get() {
+	public RandomNetSourceData get() {
 		for (int tries = 0; tries < LEVEL0_SEARCH_LIMIT; tries++) {
 			long netSeed = randNetSeeds.nextLong();
 			Optional<Net> maybeNet = drawNet(netSeed);
 			if (maybeNet.isPresent()) {
-				RandomNetSourceProperties netInfo = new RandomNetSourceData(maybeNet.get(), netSeed);
+				RandomNetSourceData netInfo = new RandomNetSourceData(maybeNet.get(), netSeed);
 				netInfo.log();
 				return netInfo;
 			} else {

@@ -1,18 +1,20 @@
 package org.ent.dev.plan;
 
-import org.ent.dev.plan.DataProperties.PropSerialNumber;
-import org.ent.dev.unit.Data;
-import org.ent.dev.unit.Proc;
+import org.ent.dev.unit.TypedProc;
 
-public class Counter implements Proc {
+public class Counter extends TypedProc<CounterData> {
 
 	private long currentNumber;
 
+	public Counter() {
+		super(new CounterData());
+	}
+
 	@Override
-	public void accept(Data input) {
+	public void doAccept(CounterData data) {
 		currentNumber++;
 
-		((PropSerialNumber) input).setSerialNumber(currentNumber);
+		data.setSerialNumber(currentNumber);
 	}
 
 }
