@@ -34,11 +34,15 @@ public class DevelopmentPlan {
 
 	private static final long RANDOM_MASTER_SEED = 0xfa1afeL;
 
+	public static final int BATCH_EXECUTION_SIZE_INFINITY = -1;
+
 	private Random randMaster;
 
 	private Output output;
 
 	private Poller poller;
+
+	private volatile boolean stopped;
 
 	private int level0total;
 	private int level1total;
@@ -140,6 +144,8 @@ public class DevelopmentPlan {
 	public DevelopmentPlan() {
 		this.randMaster = new Random(RANDOM_MASTER_SEED);
 		this.output = new Output("Result: ");
+		this.poller = buildPoller();
+
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -151,12 +157,17 @@ public class DevelopmentPlan {
 	}
 
 	public void executeBatch(int batchSize) {
-		buildPoller();
-
-		for (int i = 1; i <= batchSize; i++) {
-			executeOne();
+		stopped = false;
+		if (batchSize == BATCH_EXECUTION_SIZE_INFINITY) {
+			while (!stopped) {
+				executeOne();
+			}
+		} else {
+			for (int i = 1; i <= batchSize; i++) {
+				if (stopped) return;
+				executeOne();
+			}
 		}
-
 		dumpStats();
 	}
 
@@ -170,7 +181,7 @@ public class DevelopmentPlan {
 		System.out.println();
 	}
 
-	private void dumpStats() {
+	public void dumpStats() {
 		log.info("Summary:\n---");
 		log.info("level1: passed        {}/{} ({} %)", level1total, level0total, String.format("%.2f", ((double) level1total) / level0total * 100));
 		log.info("level2 direct passes: {}/{} ({} %)", level2directPasses, level1total,
@@ -180,8 +191,8 @@ public class DevelopmentPlan {
 				String.format("%.2f", ((double) level2heavyLanePasses) / level2heavyLaneTotal * 100));
 	}
 
-	private void buildPoller() {
-		poller = new RandomNetSource(newRandom()).toSup()
+	private Poller buildPoller() {
+		return new RandomNetSource(newRandom()).toSup()
 		.combineProc(data -> {level0total++;})
 		.combineProc(new StepsExam(getRunSetup()))
 		.combineFilter(new StepsFilter(1).with(new FailuresLimit(1000)))
@@ -227,4 +238,7 @@ public class DevelopmentPlan {
 		return new Random(randMaster.nextLong());
 	}
 
+	public void stop() {
+		stopped = true;
+	}
 }
