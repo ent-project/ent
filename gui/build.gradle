@@ -1,0 +1,9 @@
+
+apply plugin: 'application'
+
+mainClassName = 'org.ent.gui.Main'
+
+dependencies {
+    implementation project(':dev')
+}
+
