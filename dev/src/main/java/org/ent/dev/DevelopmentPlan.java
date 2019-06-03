@@ -36,13 +36,16 @@ public class DevelopmentPlan {
 
 	private Random randMaster;
 
-	public static void main(String[] args) throws Exception {
-		DevelopmentPlan plan = new DevelopmentPlan();
-		long start = System.currentTimeMillis();
-		plan.execute();
-		long diff = System.currentTimeMillis() - start;
-		System.err.println(String.format("execution time: %.3f s", ((double) diff) / 1000));
-	}
+	private Output output;
+
+	private Poller poller;
+
+	private int level0total;
+	private int level1total;
+	private int level2directPasses;
+	private int level2total;
+	private int level2heavyLaneTotal;
+	private int level2heavyLanePasses;
 
 	public class Poller implements Req {
 
@@ -134,17 +137,51 @@ public class DevelopmentPlan {
 		}
 	}
 
-	private int level0total;
-	private int level1total;
-	private int level2directPasses;
-	private int level2total;
-	private int level2heavyLaneTotal;
-	private int level2heavyLanePasses;
+	public DevelopmentPlan() {
+		this.randMaster = new Random(RANDOM_MASTER_SEED);
+		this.output = new Output("Result: ");
+	}
 
-	public void execute() {
-		initialize();
+	public static void main(String[] args) throws Exception {
+		DevelopmentPlan plan = new DevelopmentPlan();
+		long start = System.currentTimeMillis();
+		plan.executeBatch(100);
+		long diff = System.currentTimeMillis() - start;
+		System.err.println(String.format("execution time: %.3f s", ((double) diff) / 1000));
+	}
 
-		Poller poller = new RandomNetSource(newRandom()).toSup()
+	public void executeBatch(int batchSize) {
+		buildPoller();
+
+		for (int i = 1; i <= batchSize; i++) {
+			executeOne();
+		}
+
+		dumpStats();
+	}
+
+	private void executeOne() {
+		poller.poll();
+		while (DeliveryStash.instance.hasWork()) {
+			DeliveryStash.instance.work();
+		}
+		Data data = poller.getFromQueue();
+		output.accept(data);
+		System.out.println();
+	}
+
+	private void dumpStats() {
+		log.info("Summary:\n---");
+		log.info("level1: passed        {}/{} ({} %)", level1total, level0total, String.format("%.2f", ((double) level1total) / level0total * 100));
+		log.info("level2 direct passes: {}/{} ({} %)", level2directPasses, level1total,
+				String.format("%.2f", ((double) level2directPasses) / level1total * 100));
+		log.info("level2 pool lane:     {}/{} ({} %)",
+				level2heavyLanePasses, level2heavyLaneTotal,
+				String.format("%.2f", ((double) level2heavyLanePasses) / level2heavyLaneTotal * 100));
+	}
+
+	private void buildPoller() {
+		poller = new RandomNetSource(newRandom()).toSup()
 		.combineProc(data -> {level0total++;})
 		.combineProc(new StepsExam(getRunSetup()))
 		.combineFilter(new StepsFilter(1).with(new FailuresLimit(1000)))
@@ -175,25 +212,6 @@ public class DevelopmentPlan {
 		)
 		.combineProc(data -> {level2total++;})
 		.connectReq(new Poller());
-
-		Output output = new Output("Result: ");
-		for (int i = 1; i <= 100; i++) {
-			poller.poll();
-			while (DeliveryStash.instance.hasWork()) {
-				DeliveryStash.instance.work();
-			}
-			Data data = poller.getFromQueue();
-			output.accept(data);
-			System.out.println();
-		}
-
-		log.info("Summary:\n---");
-		log.info("level1: passed        {}/{} ({} %)", level1total, level0total, String.format("%.2f", ((double) level1total) / level0total * 100));
-		log.info("level2 direct passes: {}/{} ({} %)", level2directPasses, level1total,
-				String.format("%.2f", ((double) level2directPasses) / level1total * 100));
-		log.info("level2 pool lane:     {}/{} ({} %)",
-				level2heavyLanePasses, level2heavyLaneTotal,
-				String.format("%.2f", ((double) level2heavyLanePasses) / level2heavyLaneTotal * 100));
 	}
 
 	private RunSetup getRunSetup() {
@@ -203,10 +221,6 @@ public class DevelopmentPlan {
 				.withInvalidCommandNodeIsFatal(true)
 				.withMaxSteps(6)
 				.build();
-	}
-
-	private void initialize() {
-		randMaster = new Random(RANDOM_MASTER_SEED);
 	}
 
 	private Random newRandom() {
