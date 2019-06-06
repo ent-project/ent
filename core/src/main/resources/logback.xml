@@ -23,5 +23,6 @@
 	</logger>
 	
 	<logger name="org.ent.dev.DevelopmentPlan" level="TRACE"/>
+	<logger name="org.ent.gui.pref.EntPreferences" level="TRACE"/>
 	
 </configuration>
