@@ -5,5 +5,7 @@ mainClassName = 'org.ent.gui.Main'
 
 dependencies {
     implementation project(':dev')
+    
+    implementation group: 'org.jfree', name: 'jfreechart', version: '1.5.0'
 }
 

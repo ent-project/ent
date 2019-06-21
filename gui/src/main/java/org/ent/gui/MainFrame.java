@@ -1,8 +1,12 @@
 package org.ent.gui;
 
+import static javax.swing.LayoutStyle.ComponentPlacement.UNRELATED;
+
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -11,8 +15,11 @@ import java.util.concurrent.Executors;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
 import org.ent.dev.DevelopmentPlan;
@@ -25,12 +32,21 @@ public class MainFrame extends JFrame {
 
 	private ExecutorService executor;
 
-	public MainFrame() throws HeadlessException {
+	private JToggleButton btnPlots;
+
+	public MainFrame(DevelopmentPlan plan) throws HeadlessException {
 		super("Ent");
 
-		this.plan = new DevelopmentPlan();
+		this.plan = plan;
 		this.executor = Executors.newFixedThreadPool(1);
-
+		Main.addPlotDialogCreatedListener(plotDialog -> {
+			plotDialog.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent e) {
+					btnPlots.setSelected(false);
+				}
+			});
+		});
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		build();
 		pack();
@@ -61,6 +77,16 @@ public class MainFrame extends JFrame {
 	}
 
 	private void build() {
+
+		JToolBar toolbarMain = new JToolBar();
+		toolbarMain.setFloatable(false);
+		toolbarMain.setRollover(true);
+		toolbarMain.setBorderPainted(false);
+
+		btnPlots = new JToggleButton();
+		btnPlots.addActionListener(this::togglePlotDialog);
+		btnPlots.setIcon(new ImageIcon(getClass().getResource("/icons/plot.png")));
+		toolbarMain.add(btnPlots);
 
 		JToolBar toolbarCtrl = new JToolBar();
 		toolbarCtrl.setFloatable(false);
@@ -104,15 +130,26 @@ public class MainFrame extends JFrame {
 		GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
 
-		layout.setHorizontalGroup(layout.createParallelGroup().addComponent(toolbarCtrl));
+		layout.setHorizontalGroup(layout.createParallelGroup()
+				.addComponent(toolbarMain)
+				.addGroup(layout.createSequentialGroup()
+						.addContainerGap()
+						.addComponent(toolbarCtrl)
+						.addContainerGap())
+				);
 
-		layout.setVerticalGroup(layout.createSequentialGroup().addComponent(toolbarCtrl));
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addComponent(toolbarMain)
+				.addPreferredGap(UNRELATED)
+				.addComponent(toolbarCtrl)
+				.addContainerGap()
+				);
 	}
 
 	private void styleToolBarButton(JButton toolBarButton) {
 		toolBarButton.setFocusable(false);
-		toolBarButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-		toolBarButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+		toolBarButton.setHorizontalTextPosition(SwingConstants.CENTER);
+		toolBarButton.setVerticalTextPosition(SwingConstants.BOTTOM);
 	}
 
     private void stop(ActionEvent evt) {
@@ -122,5 +159,15 @@ public class MainFrame extends JFrame {
     private void stats(ActionEvent evt) {
     	plan.dumpStats();
     }
+
+	private void togglePlotDialog(ActionEvent evt) {
+		boolean visible = btnPlots.isSelected();
+		JDialog plotDialog = Main.getPlotDialog();
+		if (visible && !plotDialog.isVisible()) {
+			plotDialog.setVisible(true);
+		} else if (!visible && plotDialog.isVisible()) {
+			plotDialog.setVisible(false);
+		}
+	}
 
 }

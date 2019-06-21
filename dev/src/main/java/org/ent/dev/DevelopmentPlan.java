@@ -15,6 +15,9 @@ import org.ent.dev.plan.StepsExam;
 import org.ent.dev.plan.StepsExamResult;
 import org.ent.dev.plan.StepsFilter;
 import org.ent.dev.plan.Trimmer;
+import org.ent.dev.stat.BinaryStats;
+import org.ent.dev.stat.FilterPassRecord;
+import org.ent.dev.stat.PlotRegistry;
 import org.ent.dev.unit.Data;
 import org.ent.dev.unit.DataProxy;
 import org.ent.dev.unit.DeliveryStash;
@@ -50,6 +53,14 @@ public class DevelopmentPlan {
 	private int level2total;
 	private int level2heavyLaneTotal;
 	private int level2heavyLanePasses;
+
+	private BinaryStats level1PassingStats;
+
+	private RoundListener roundListener;
+
+	public interface RoundListener {
+		void roundCompleted(Data data);
+	}
 
 	public class Poller implements Req {
 
@@ -141,15 +152,26 @@ public class DevelopmentPlan {
 		}
 	}
 
-	public DevelopmentPlan() {
+	public DevelopmentPlan(PlotRegistry plotRegistry) {
 		this.randMaster = new Random(RANDOM_MASTER_SEED);
+		this.level1PassingStats = new BinaryStats(10000);
 		this.output = new Output("Result: ");
 		this.poller = buildPoller();
+		if (plotRegistry != null) {
+			plotRegistry.addFractionPlot(level1PassingStats);
+		}
+	}
 
+	public RoundListener getRoundListener() {
+		return roundListener;
+	}
+
+	public void setRoundListener(RoundListener roundListener) {
+		this.roundListener = roundListener;
 	}
 
 	public static void main(String[] args) throws Exception {
-		DevelopmentPlan plan = new DevelopmentPlan();
+		DevelopmentPlan plan = new DevelopmentPlan(null);
 		long start = System.currentTimeMillis();
 		plan.executeBatch(100);
 		long diff = System.currentTimeMillis() - start;
@@ -179,6 +201,10 @@ public class DevelopmentPlan {
 		Data data = poller.getFromQueue();
 		output.accept(data);
 		System.out.println();
+
+		if (roundListener != null) {
+			roundListener.roundCompleted(data);
+		}
 	}
 
 	public void dumpStats() {
@@ -195,7 +221,10 @@ public class DevelopmentPlan {
 		return new RandomNetSource(newRandom()).toSup()
 		.combineProc(data -> {level0total++;})
 		.combineProc(new StepsExam(getRunSetup()))
-		.combineFilter(new StepsFilter(1).with(new FailuresLimit(1000)))
+		.combineFilter(new StepsFilter(1)
+				.with(new FailuresLimit(1000))
+				.with(new FilterPassRecord(level1PassingStats))
+				)
 		.combineProc(data -> {level1total++;})
 		.combineProc(new Trimmer(getRunSetup()))
 		.combineProc(new Counter())
