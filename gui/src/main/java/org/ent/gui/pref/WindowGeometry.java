@@ -2,20 +2,19 @@ package org.ent.gui.pref;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Window;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.prefs.Preferences;
 
-import javax.swing.JFrame;
-
 public class WindowGeometry {
 
-	private JFrame frame;
+	private Window window;
 
 	private String preferenceKey;
 
-	public WindowGeometry(JFrame frame, String name) {
-		this.frame = frame;
+	public WindowGeometry(Window window, String name) {
+		this.window = window;
 		this.preferenceKey = "gui." + name + ".geometry";
 	}
 
@@ -27,14 +26,14 @@ public class WindowGeometry {
 		int y = pref.getInt(preferenceKey + ".y", -1);
 
 		if (width != -1) {
-			frame.setLocation(x, y);
-			frame.setSize(width, height);
+			window.setLocation(x, y);
+			window.setSize(width, height);
 		}
 		return this;
 	}
 
 	public void monitor() {
-		frame.addComponentListener(new ComponentAdapter() {
+		window.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
 				save();
@@ -48,8 +47,8 @@ public class WindowGeometry {
 	}
 
 	private void save() {
-		Point location = frame.getLocation();
-		Dimension size = frame.getSize();
+		Point location = window.getLocation();
+		Dimension size = window.getSize();
 
 		Preferences pref = Preferences.userRoot();
 		pref.putInt(preferenceKey + ".width", size.width);
