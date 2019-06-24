@@ -47,8 +47,6 @@ public class DevelopmentPlan {
 
 	private volatile boolean stopped;
 
-	private int level0total;
-	private int level1total;
 	private int level2directPasses;
 	private int level2total;
 	private int level2heavyLaneTotal;
@@ -208,6 +206,9 @@ public class DevelopmentPlan {
 	}
 
 	public void dumpStats() {
+		long level0total = level1PassingStats.getNoEvents();
+		long level1total = level1PassingStats.getTotalHits();
+
 		log.info("Summary:\n---");
 		log.info("level1: passed        {}/{} ({} %)", level1total, level0total, String.format("%.2f", ((double) level1total) / level0total * 100));
 		log.info("level2 direct passes: {}/{} ({} %)", level2directPasses, level1total,
@@ -219,13 +220,11 @@ public class DevelopmentPlan {
 
 	private Poller buildPoller() {
 		return new RandomNetSource(newRandom()).toSup()
-		.combineProc(data -> {level0total++;})
 		.combineProc(new StepsExam(getRunSetup()))
 		.combineFilter(new StepsFilter(1)
 				.with(new FailuresLimit(1000))
 				.with(new FilterPassRecord(level1PassingStats))
 				)
-		.combineProc(data -> {level1total++;})
 		.combineProc(new Trimmer(getRunSetup()))
 		.combineProc(new Counter())
 		.combineProc(new Output("level1: "))
