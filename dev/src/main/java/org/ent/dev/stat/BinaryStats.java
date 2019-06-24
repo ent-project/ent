@@ -43,12 +43,25 @@ public class BinaryStats {
 		}
 	}
 
-	public int getSize() {
+	public int getNoBins() {
 		return data.size();
+	}
+
+	public long getNoEvents() {
+		return data.size() * binSize + idx;
 	}
 
 	public int getHits(int bin) {
 		return data.get(bin);
+	}
+
+	public long getTotalHits() {
+		long hits = 0;
+		for (int i = 0; i < data.size(); i++) {
+			hits += data.get(i);
+		}
+		hits += currentBinHits;
+		return hits;
 	}
 
 	public double getFractionOfHits(int bin) {

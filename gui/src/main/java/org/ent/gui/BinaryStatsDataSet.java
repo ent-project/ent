@@ -48,7 +48,7 @@ public class BinaryStatsDataSet extends AbstractIntervalXYDataset {
 	}
 
 	private int getBin(int item) {
-		int size = stats.getSize();
+		int size = stats.getNoBins();
 		if (size <= numBinsDisplayed) {
 			return item;
 		} else {
@@ -59,7 +59,7 @@ public class BinaryStatsDataSet extends AbstractIntervalXYDataset {
 	@Override
 	public Number getY(int series, int item) {
 		int bin = getBin(item);
-		if (bin >= stats.getSize()) {
+		if (bin >= stats.getNoBins()) {
 			return null;
 		}
 		return stats.getFractionOfHits(bin);
