@@ -28,13 +28,13 @@ public class RandomNetSource implements Source {
 
 	private static final Logger log = LoggerFactory.getLogger(RandomNetSource.class);
 
-	private static final int RANDOM_NET_CREATOR_NUMBER_OF_NODES = 15;
+	private int noNodes = 15;
 
-	private static final double RANDOM_NET_CREATOR_FRACTION_CNODES = 0.2;
+	private double fractionCNodes = 0.2;
 
-	private static final double RANDOM_NET_CREATOR_FRACTION_UNODES = 0.5;
+	private double fractionUNodes = 0.5;
 
-	private static final double RANDOM_NET_CREATOR_FRACTION_BNODES = 0.3;
+	private double fractionBNodes = 0.3;
 
 	private static final int LEVEL0_SEARCH_LIMIT = 100_000;
 
@@ -87,10 +87,10 @@ public class RandomNetSource implements Source {
 		Random rand = new Random(netSeed);
 		CommandDrawing drawing = new CommandDrawingImpl(rand, commandCandidates);
 		RandomNetCreator creator = new RandomNetCreator(rand, drawing);
-		creator.setNumberOfNodes(RANDOM_NET_CREATOR_NUMBER_OF_NODES);
-		creator.setFractionBNodes(RANDOM_NET_CREATOR_FRACTION_BNODES);
-		creator.setFractionUNodes(RANDOM_NET_CREATOR_FRACTION_UNODES);
-		creator.setFractionCNodes(RANDOM_NET_CREATOR_FRACTION_CNODES);
+		creator.setNumberOfNodes(noNodes);
+		creator.setFractionBNodes(fractionBNodes);
+		creator.setFractionUNodes(fractionUNodes);
+		creator.setFractionCNodes(fractionCNodes);
 		return creator.drawNet();
 	}
 
@@ -129,6 +129,38 @@ public class RandomNetSource implements Source {
 			}
 		}
 		return commandCandidates;
+	}
+
+	public int getNoNodes() {
+		return noNodes;
+	}
+
+	public void setNoNodes(int noNodes) {
+		this.noNodes = noNodes;
+	}
+
+	public double getFractionCNodes() {
+		return fractionCNodes;
+	}
+
+	public void setFractionCNodes(double fractionCNodes) {
+		this.fractionCNodes = fractionCNodes;
+	}
+
+	public double getFractionUNodes() {
+		return fractionUNodes;
+	}
+
+	public void setFractionUNodes(double fractionUNodes) {
+		this.fractionUNodes = fractionUNodes;
+	}
+
+	public double getFractionBNodes() {
+		return fractionBNodes;
+	}
+
+	public void setFractionBNodes(double fractionBNodes) {
+		this.fractionBNodes = fractionBNodes;
 	}
 
 }
