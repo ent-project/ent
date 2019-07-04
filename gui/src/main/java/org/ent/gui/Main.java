@@ -2,7 +2,6 @@ package org.ent.gui;
 
 import java.awt.EventQueue;
 import java.beans.PropertyChangeSupport;
-import java.util.function.Consumer;
 
 import javax.swing.JDialog;
 
@@ -14,6 +13,10 @@ import org.slf4j.LoggerFactory;
 public class Main {
 
 	private static final Logger log = LoggerFactory.getLogger(Main.class);
+
+	public static final String PLOT_DIALOG = "plotDialog";
+
+	public static final String PARAMETERS_DIALOG = "parametersDialog";
 
 	private static final PlotRegistryImpl plotRegistry = new PlotRegistryImpl();
 
@@ -27,7 +30,7 @@ public class Main {
 
 	private static ParametersDialog parametersDialog;
 
-	private static PropertyChangeSupport plotDialogCreated = new PropertyChangeSupport(Main.class);
+	private static PropertyChangeSupport dialogCreated = new PropertyChangeSupport(Main.class);
 
 	public static void main(String[] args) {
 		plan = new DevelopmentPlan(plotRegistry, hyperRegistry);
@@ -44,18 +47,25 @@ public class Main {
 		if (plotDialog == null) {
 			plotDialog = new PlotDialog(mainFrame, plan);
 			new WindowGeometry(plotDialog, "plot").restore().monitor();
-			plotDialogCreated.firePropertyChange("plotDialog", null, plotDialog);
+			dialogCreated.firePropertyChange(PLOT_DIALOG, null, plotDialog);
 		}
 		return plotDialog;
 	}
 
-	public static void addPlotDialogCreatedListener(Consumer<JDialog> listener) {
-		plotDialogCreated.addPropertyChangeListener(pcl -> listener.accept((JDialog) pcl.getNewValue()));
+	public static void addDialogCreatedListener(DialogCreatedListener listener) {
+		dialogCreated.addPropertyChangeListener(pcl -> {
+			listener.dialogCreated(pcl.getPropertyName(), (JDialog) pcl.getNewValue());
+		});
 	}
 
 	public static ParametersDialog getParametersDialog() {
 		if (parametersDialog == null) {
 			parametersDialog = new ParametersDialog(mainFrame);
+			new WindowGeometry(parametersDialog, "parameters")
+				.withManageSize(false)
+				.restore()
+				.monitor();
+			dialogCreated.firePropertyChange(PARAMETERS_DIALOG, null, parametersDialog);
 		}
 		return parametersDialog;
 	}

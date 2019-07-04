@@ -9,25 +9,64 @@ import java.util.prefs.Preferences;
 
 public class WindowGeometry {
 
+	private static final int UNINITIALIZED = -99999;
+
 	private Window window;
 
 	private String preferenceKey;
 
+	private boolean managePosition;
+
+	private boolean manageSize;
+
 	public WindowGeometry(Window window, String name) {
 		this.window = window;
 		this.preferenceKey = "gui." + name + ".geometry";
+		this.managePosition = true;
+		this.manageSize = true;
+	}
+
+	public boolean isManagePosition() {
+		return managePosition;
+	}
+
+	public void setManagePosition(boolean managePosition) {
+		this.managePosition = managePosition;
+	}
+
+	public WindowGeometry withManagePosition(boolean managePosition) {
+		setManagePosition(managePosition);
+		return this;
+	}
+
+	public boolean isManageSize() {
+		return manageSize;
+	}
+
+	public void setManageSize(boolean manageSize) {
+		this.manageSize = manageSize;
+	}
+
+	public WindowGeometry withManageSize(boolean manageSize) {
+		setManageSize(manageSize);
+		return this;
 	}
 
 	public WindowGeometry restore() {
 		Preferences pref = Preferences.userRoot();
-		int width = pref.getInt(preferenceKey + ".width", -1);
-		int height = pref.getInt(preferenceKey + ".height", -1);
-		int x = pref.getInt(preferenceKey + ".x", -1);
-		int y = pref.getInt(preferenceKey + ".y", -1);
-
-		if (width != -1) {
-			window.setLocation(x, y);
-			window.setSize(width, height);
+		if (managePosition) {
+			int x = pref.getInt(preferenceKey + ".x", UNINITIALIZED);
+			int y = pref.getInt(preferenceKey + ".y", UNINITIALIZED);
+			if (x != UNINITIALIZED) {
+				window.setLocation(x, y);
+			}
+		}
+		if (manageSize) {
+			int width = pref.getInt(preferenceKey + ".width", UNINITIALIZED);
+			int height = pref.getInt(preferenceKey + ".height", UNINITIALIZED);
+			if (width != UNINITIALIZED) {
+				window.setSize(width, height);
+			}
 		}
 		return this;
 	}
@@ -47,14 +86,17 @@ public class WindowGeometry {
 	}
 
 	private void save() {
-		Point location = window.getLocation();
-		Dimension size = window.getSize();
-
 		Preferences pref = Preferences.userRoot();
-		pref.putInt(preferenceKey + ".width", size.width);
-		pref.putInt(preferenceKey + ".height", size.height);
-		pref.putInt(preferenceKey + ".x", location.x);
-		pref.putInt(preferenceKey + ".y", location.y);
+		if (managePosition) {
+			Point location = window.getLocation();
+			pref.putInt(preferenceKey + ".x", location.x);
+			pref.putInt(preferenceKey + ".y", location.y);
+		}
+		if (manageSize) {
+			Dimension size = window.getSize();
+			pref.putInt(preferenceKey + ".width", size.width);
+			pref.putInt(preferenceKey + ".height", size.height);
+		}
 	}
 
 }
