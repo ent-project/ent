@@ -2,6 +2,7 @@ package org.ent.gui;
 
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.Frame;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -34,7 +35,8 @@ public class PlotDialog extends JDialog implements RoundListener {
 
     private BinaryStatsDataSet dataset;
 
-	public PlotDialog(DevelopmentPlan plan) {
+	public PlotDialog(Frame parent, DevelopmentPlan plan) {
+		super(parent);
 		setTitle("Plots");
 		this.updatePlotTimer = new Timer("plotUpdate", true);
 		this.updateRequired = true;

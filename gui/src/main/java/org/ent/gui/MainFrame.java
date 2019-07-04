@@ -33,6 +33,7 @@ public class MainFrame extends JFrame {
 	private ExecutorService executor;
 
 	private JToggleButton btnPlots;
+	private JToggleButton btnParameters;
 
 	public MainFrame(DevelopmentPlan plan) throws HeadlessException {
 		super("Ent");
@@ -87,6 +88,11 @@ public class MainFrame extends JFrame {
 		btnPlots.addActionListener(this::togglePlotDialog);
 		btnPlots.setIcon(new ImageIcon(getClass().getResource("/icons/plot.png")));
 		toolbarMain.add(btnPlots);
+
+		btnParameters = new JToggleButton();
+		btnParameters.addActionListener(this::toggleParametersDialog);
+		btnParameters.setIcon(new ImageIcon(getClass().getResource("/icons/parameters.png")));
+		toolbarMain.add(btnParameters);
 
 		JToolBar toolbarCtrl = new JToolBar();
 		toolbarCtrl.setFloatable(false);
@@ -170,4 +176,13 @@ public class MainFrame extends JFrame {
 		}
 	}
 
+	private void toggleParametersDialog(ActionEvent evt) {
+		boolean visible = btnParameters.isSelected();
+		ParametersDialog parametersDialog = Main.getParametersDialog();
+		if (visible && !parametersDialog.isVisible()) {
+			parametersDialog.setVisible(true);
+		} else if (!visible && parametersDialog.isVisible()) {
+			parametersDialog.setVisible(false);
+		}
+	}
 }

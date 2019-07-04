@@ -1,9 +1,13 @@
 package org.ent.dev;
 
+import java.beans.PropertyChangeListener;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.Random;
 
+import org.ent.dev.hyper.FloatHyperparameter;
+import org.ent.dev.hyper.HyperRegistry;
+import org.ent.dev.hyper.IntegerHyperparameter;
 import org.ent.dev.plan.Counter;
 import org.ent.dev.plan.DataProperties.PropNet;
 import org.ent.dev.plan.DataProperties.PropReplicator;
@@ -38,6 +42,8 @@ public class DevelopmentPlan {
 	private static final long RANDOM_MASTER_SEED = 0xfa1afeL;
 
 	public static final int BATCH_EXECUTION_SIZE_INFINITY = -1;
+
+	private HyperRegistry hyperRegistry;
 
 	private Random randMaster;
 
@@ -150,7 +156,8 @@ public class DevelopmentPlan {
 		}
 	}
 
-	public DevelopmentPlan(PlotRegistry plotRegistry) {
+	public DevelopmentPlan(PlotRegistry plotRegistry, HyperRegistry hyperRegistry) {
+		this.hyperRegistry = hyperRegistry;
 		this.randMaster = new Random(RANDOM_MASTER_SEED);
 		this.level1PassingStats = new BinaryStats(10000);
 		this.output = new Output("Result: ");
@@ -169,7 +176,7 @@ public class DevelopmentPlan {
 	}
 
 	public static void main(String[] args) throws Exception {
-		DevelopmentPlan plan = new DevelopmentPlan(null);
+		DevelopmentPlan plan = new DevelopmentPlan(null, null);
 		long start = System.currentTimeMillis();
 		plan.executeBatch(100);
 		long diff = System.currentTimeMillis() - start;
@@ -219,10 +226,60 @@ public class DevelopmentPlan {
 	}
 
 	private Poller buildPoller() {
-		return new RandomNetSource(newRandom()).toSup()
+
+		RandomNetSource randomNetSource = new RandomNetSource(newRandom());
+
+		IntegerHyperparameter noNodesHyper = new IntegerHyperparameter(15, "Number of nodes");
+		noNodesHyper.setMinimumValue(0);
+		noNodesHyper.setMaximumValue(40);
+
+		FloatHyperparameter fractionCNodes = new FloatHyperparameter(0.2f, "Fraction of C-nodes");
+		fractionCNodes.setMinimumValue(0f);
+		fractionCNodes.setMaximumValue(1f);
+
+		FloatHyperparameter fractionUNodes = new FloatHyperparameter(0.5f, "Fraction of U-nodes");
+		fractionUNodes.setMinimumValue(0f);
+		fractionUNodes.setMaximumValue(1f);
+
+		FloatHyperparameter fractionBNodes = new FloatHyperparameter(0.3f, "Fraction of B-nodes");
+		fractionBNodes.setMinimumValue(0f);
+		fractionBNodes.setMaximumValue(1f);
+
+		noNodesHyper.addPropertyChangeListener(e -> {
+			int noNodes = (int) e.getNewValue();
+			randomNetSource.setNoNodes(noNodes);
+		});
+		PropertyChangeListener updateFractions = e -> {
+			float valC = fractionCNodes.getValue();
+			float valU = fractionUNodes.getValue();
+			float valB = fractionBNodes.getValue();
+			float sum = valC + valU + valB;
+			if (sum == 0) {
+				valC = valU = valB = 1f;
+				sum = 3f;
+			}
+			valC /= sum;
+			valU /= sum;
+			valB /= sum;
+			randomNetSource.setFractionCNodes(valC);
+			randomNetSource.setFractionUNodes(valU);
+			randomNetSource.setFractionBNodes(valB);
+		};
+		fractionCNodes.addPropertyChangeListener(updateFractions);
+		fractionUNodes.addPropertyChangeListener(updateFractions);
+		fractionBNodes.addPropertyChangeListener(updateFractions);
+
+		if (hyperRegistry != null) {
+			hyperRegistry.addHyperparameter(noNodesHyper);
+			hyperRegistry.addHyperparameter(fractionCNodes);
+			hyperRegistry.addHyperparameter(fractionUNodes);
+			hyperRegistry.addHyperparameter(fractionBNodes);
+		}
+
+		return randomNetSource.toSup()
 		.combineProc(new StepsExam(getRunSetup()))
 		.combineFilter(new StepsFilter(1)
-				.with(new FailuresLimit(1000))
+				.with(new FailuresLimit(100000))
 				.with(new FilterPassRecord(level1PassingStats))
 				)
 		.combineProc(new Trimmer(getRunSetup()))
