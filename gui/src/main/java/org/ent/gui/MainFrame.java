@@ -40,14 +40,29 @@ public class MainFrame extends JFrame {
 
 		this.plan = plan;
 		this.executor = Executors.newFixedThreadPool(1);
-		Main.addPlotDialogCreatedListener(plotDialog -> {
-			plotDialog.addWindowListener(new WindowAdapter() {
-				@Override
-				public void windowClosing(WindowEvent e) {
-					btnPlots.setSelected(false);
+		Main.addDialogCreatedListener((String dialogName, JDialog dialog) ->
+			{
+				JToggleButton button;
+				switch (dialogName) {
+				case Main.PLOT_DIALOG:
+					button = btnPlots;
+					break;
+				case Main.PARAMETERS_DIALOG:
+					button = btnParameters;
+					break;
+				default:
+					throw new AssertionError("unexpected dialogName: " + dialogName);
 				}
-			});
-		});
+				dialog.addWindowListener(new WindowAdapter() {
+					@Override
+					public void windowClosing(WindowEvent e) {
+
+						button.setSelected(false);
+					}
+				});
+			}
+		);
+
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		build();
 		pack();
