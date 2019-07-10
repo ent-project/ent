@@ -36,8 +36,6 @@ import org.ent.net.node.Node;
  */
 public class NetParser {
 
-    private final Node placeholderNode = new MarkerNode();
-
     private Map<String, Node> nodeNames;
 
     private final Set<Node> allNodes = new HashSet<>();

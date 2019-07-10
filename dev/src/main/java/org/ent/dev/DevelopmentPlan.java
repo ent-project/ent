@@ -21,6 +21,7 @@ import org.ent.dev.plan.StepsFilter;
 import org.ent.dev.plan.Trimmer;
 import org.ent.dev.stat.BinaryStats;
 import org.ent.dev.stat.FilterPassRecord;
+import org.ent.dev.stat.MovingAverage;
 import org.ent.dev.stat.PlotRegistry;
 import org.ent.dev.unit.Data;
 import org.ent.dev.unit.DataProxy;
@@ -59,6 +60,7 @@ public class DevelopmentPlan {
 	private int level2heavyLanePasses;
 
 	private BinaryStats level1PassingStats;
+	private BinaryStats level2DirectPassesStats;
 
 	private RoundListener roundListener;
 
@@ -159,11 +161,15 @@ public class DevelopmentPlan {
 	public DevelopmentPlan(PlotRegistry plotRegistry, HyperRegistry hyperRegistry) {
 		this.hyperRegistry = hyperRegistry;
 		this.randMaster = new Random(RANDOM_MASTER_SEED);
-		this.level1PassingStats = new BinaryStats(10000);
+		this.level1PassingStats = new BinaryStats(10_000);
+		this.level1PassingStats.setTitle("Fraction passing level 1");
+		this.level2DirectPassesStats = new BinaryStats(100);
 		this.output = new Output("Result: ");
 		this.poller = buildPoller();
 		if (plotRegistry != null) {
 			plotRegistry.addFractionPlot(level1PassingStats);
+			plotRegistry.addFractionPlot(level2DirectPassesStats);
+			plotRegistry.addFractionPlot(new MovingAverage(level2DirectPassesStats, 7));
 		}
 	}
 
@@ -223,6 +229,8 @@ public class DevelopmentPlan {
 		log.info("level2 pool lane:     {}/{} ({} %)",
 				level2heavyLanePasses, level2heavyLaneTotal,
 				String.format("%.2f", ((double) level2heavyLanePasses) / level2heavyLaneTotal * 100));
+
+		log.info("level2 direct passes (from stats): {}/{}",level2DirectPassesStats.getTotalHits(), level2DirectPassesStats.getNoEvents());
 	}
 
 	private Poller buildPoller() {
@@ -286,7 +294,10 @@ public class DevelopmentPlan {
 		.combineProc(new Counter())
 		.combineProc(new Output("level1: "))
 		.combineDan(new SkewSplitter()
-			.withSorter(new StepsFilter(2))
+			.withSorter(new StepsFilter(2)
+					.with(new FailuresLimit(100000))
+					.with(new FilterPassRecord(level2DirectPassesStats))
+					)
 			.withLightLane(
 				new Output("in light lane: ")
 				.combineProc(data -> {level2directPasses++;})

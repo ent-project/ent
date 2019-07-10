@@ -3,15 +3,20 @@ package org.ent.gui;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Frame;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.ParallelGroup;
+import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import org.ent.dev.DevelopmentPlan;
 import org.ent.dev.DevelopmentPlan.RoundListener;
+import org.ent.dev.stat.BinnedStats;
 import org.ent.dev.unit.Data;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -31,9 +36,43 @@ public class PlotDialog extends JDialog implements RoundListener {
 
 	private Timer updatePlotTimer;
 
-    private JFreeChart chart;
+	private static class Plot {
 
-    private BinaryStatsDataSet dataset;
+		private BinnedStats stats;
+
+	    private BinnedStatsDataSet dataset;
+
+	    private JFreeChart chart;
+
+	    private JPanel chartPanel;
+
+	    public Plot(BinnedStats stats) {
+			this.stats = stats;
+			this.dataset = new BinnedStatsDataSet(stats);
+			initializeChart();
+			chartPanel = new ChartPanel(chart);
+	    }
+
+		public void initializeChart() {
+			chart = ChartFactory.createXYBarChart(stats.getTitle(), null, false, null,
+					dataset);
+			chart.removeLegend();
+			XYPlot xyPlot = chart.getXYPlot();
+	    	xyPlot.getRangeAxis().setRange(new Range(0, 0.1), true, false);
+			xyPlot.setBackgroundPaint(new Color(233, 233, 233));
+			XYBarRenderer renderer = (XYBarRenderer) xyPlot.getRenderer();
+			StandardXYBarPainter painter = new StandardXYBarPainter();
+			renderer.setBarPainter(painter);
+		}
+
+		public void update() {
+	    	XYPlot xyPlot = chart.getXYPlot();
+	    	xyPlot.getDomainAxis().setRange(new Range(dataset.getStartX(0, 0), dataset.getEndX(0, dataset.getItemCount(0))), true, false);
+	    	chart.fireChartChanged();
+		}
+	}
+
+	private List<Plot> plots;
 
 	public PlotDialog(Frame parent, DevelopmentPlan plan) {
 		super(parent);
@@ -41,6 +80,7 @@ public class PlotDialog extends JDialog implements RoundListener {
 		this.updatePlotTimer = new Timer("plotUpdate", true);
 		this.updateRequired = true;
 		plan.setRoundListener(this);
+		this.plots = new ArrayList<>();
 
 		build();
 		pack();
@@ -51,7 +91,7 @@ public class PlotDialog extends JDialog implements RoundListener {
 				if (updateRequired) {
 					updateRequired = false;
 					EventQueue.invokeLater(() -> {
-						updatePlot();
+						updatePlots();
 					});
 				}
 			}
@@ -60,44 +100,33 @@ public class PlotDialog extends JDialog implements RoundListener {
 	}
 
 	private void build() {
-        JPanel chartPanel = buildChartPanel();
+
+		for (BinnedStats stat : Main.getPlotRegistry().plots) {
+			Plot plot = new Plot(stat);
+			plots.add(plot);
+		}
 
 		GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
 
-        layout.setHorizontalGroup(layout.createParallelGroup()
-        		.addGroup(layout.createSequentialGroup()
-        				.addContainerGap()
-        				.addComponent(chartPanel, MIN_PLOT_SIZE, 512, Short.MAX_VALUE)
-        				.addContainerGap()
-        				)
-				);
 
-		layout.setVerticalGroup(layout.createSequentialGroup()
+        ParallelGroup horGroup = layout.createParallelGroup();
+        plots.forEach(plot -> horGroup.addGroup(
+    		layout.createSequentialGroup()
 				.addContainerGap()
-				.addComponent(chartPanel, MIN_PLOT_SIZE, 412, Short.MAX_VALUE)
+				.addComponent(plot.chartPanel, MIN_PLOT_SIZE, 512, Short.MAX_VALUE)
 				.addContainerGap()
-				);
+			)
+		);
+		layout.setHorizontalGroup(horGroup);
 
-	}
+		SequentialGroup vertGroup = layout.createSequentialGroup().addContainerGap();
+		plots.forEach(plot ->
+			vertGroup.addComponent(plot.chartPanel, MIN_PLOT_SIZE, 412, Short.MAX_VALUE)
+		);
+		vertGroup.addContainerGap();
 
-	private JPanel buildChartPanel() {
-		initializeChart();
-		return new ChartPanel(chart);
-	}
-
-
-	public void initializeChart() {
-		dataset = new BinaryStatsDataSet(Main.getPlotRegistry().plot1);
-		chart = ChartFactory.createXYBarChart("Fraction passing level 1", null, false, null,
-				dataset);
-		chart.removeLegend();
-		XYPlot xyPlot = chart.getXYPlot();
-    	xyPlot.getRangeAxis().setRange(new Range(0, 0.3), true, false);
-		xyPlot.setBackgroundPaint(new Color(233, 233, 233));
-		XYBarRenderer renderer = (XYBarRenderer) xyPlot.getRenderer();
-		StandardXYBarPainter painter = new StandardXYBarPainter();
-		renderer.setBarPainter(painter);
+		layout.setVerticalGroup(vertGroup);
 	}
 
 	@Override
@@ -105,11 +134,8 @@ public class PlotDialog extends JDialog implements RoundListener {
 		updateRequired = true;
 	}
 
-    private void updatePlot() {
-    	XYPlot xyPlot = chart.getXYPlot();
-    	xyPlot.getDomainAxis().setRange(new Range(dataset.getStartX(0, 0), dataset.getEndX(0, dataset.getItemCount(0))), true, false);
-    	chart.fireChartChanged();
+    private void updatePlots() {
+    	plots.forEach(Plot::update);
     }
-
 
 }

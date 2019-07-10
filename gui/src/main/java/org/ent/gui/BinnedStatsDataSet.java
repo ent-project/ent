@@ -1,18 +1,22 @@
 package org.ent.gui;
 
-import org.ent.dev.stat.BinaryStats;
+import org.ent.dev.stat.BinnedStats;
 import org.jfree.data.DomainOrder;
 import org.jfree.data.xy.AbstractIntervalXYDataset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class BinaryStatsDataSet extends AbstractIntervalXYDataset {
+public class BinnedStatsDataSet extends AbstractIntervalXYDataset {
+
+	private static final Logger log = LoggerFactory.getLogger(BinnedStatsDataSet.class);
 
 	private static final long serialVersionUID = 1L;
 
-	BinaryStats stats;
+	BinnedStats stats;
 
 	int numBinsDisplayed = 100;
 
-	public BinaryStatsDataSet(BinaryStats stats) {
+	public BinnedStatsDataSet(BinnedStats stats) {
 		this.stats = stats;
 	}
 
@@ -60,9 +64,12 @@ public class BinaryStatsDataSet extends AbstractIntervalXYDataset {
 	public Number getY(int series, int item) {
 		int bin = getBin(item);
 		if (bin >= stats.getNoBins()) {
+			log.trace("getY(item={}) -> bin={}, out of bounds", item, bin);
 			return null;
 		}
-		return stats.getFractionOfHits(bin);
+		double result = stats.getValue(bin);
+		log.trace("getY(item={}) -> bin={}, value={}", item, bin, result);
+		return result;
 	}
 
 	@Override
