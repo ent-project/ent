@@ -3,9 +3,16 @@ package org.ent.dev.stat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BinaryStats {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class BinaryStats implements BinnedStats {
+
+	private static final Logger log = LoggerFactory.getLogger(BinaryStats.class);
 
 	private List<Integer> data;
+
+	private String title;
 
 	private int idx;
 
@@ -21,6 +28,16 @@ public class BinaryStats {
 		this.data = new ArrayList<>();
 	}
 
+	@Override
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	@Override
 	public int getBinSize() {
 		return binSize;
 	}
@@ -43,6 +60,7 @@ public class BinaryStats {
 		}
 	}
 
+	@Override
 	public int getNoBins() {
 		return data.size();
 	}
@@ -62,6 +80,11 @@ public class BinaryStats {
 		}
 		hits += currentBinHits;
 		return hits;
+	}
+
+	@Override
+	public double getValue(int bin) {
+		return getFractionOfHits(bin);
 	}
 
 	public double getFractionOfHits(int bin) {
