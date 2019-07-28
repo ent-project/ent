@@ -22,12 +22,13 @@ public class BinnedStatsDataSet extends AbstractIntervalXYDataset {
 
 	@Override
 	public Double getStartX(int series, int item) {
-		return getX(series, item);
+		int bin = getBin(item);
+		return (double) bin * stats.getBinSize();
 	}
 
 	@Override
 	public Double getEndX(int series, int item) {
-		return getX(series, item + 1);
+		return getStartX(series, item + 1);
 	}
 
 	@Override
@@ -47,8 +48,7 @@ public class BinnedStatsDataSet extends AbstractIntervalXYDataset {
 
 	@Override
 	public Double getX(int series, int item) {
-		int bin = getBin(item);
-		return (double) bin * stats.getBinSize();
+		return (getStartX(series, item) + getEndX(series, item)) / 2;
 	}
 
 	private int getBin(int item) {
