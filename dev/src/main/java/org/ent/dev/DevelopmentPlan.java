@@ -178,9 +178,7 @@ public class DevelopmentPlan {
 					.withRangeMax(0.1));
 			plotRegistry.addPlot(new PlotInfo("level2-direc-passes-moving-average")
 					.withStats(new MovingAverage(level2DirectPassesStats, 7))
-					.withTitle("Direct passes for level 2: moving average")
-					.withRangeAxisLabel("%")
-					.withRangeMax(0.1));
+					.withSubplotOf("level2-direct-passes"));
 		}
 	}
 
