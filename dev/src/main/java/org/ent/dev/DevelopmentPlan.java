@@ -209,7 +209,7 @@ public class DevelopmentPlan {
 					.withRangeAxisLabel("%")
 					.withRangeMax(0.1));
 			plotRegistry.addPlot(new PlotInfo("level2-direc-passes-moving-average")
-					.withStats(new MovingAverage(level2DirectPassesStats, 7))
+					.withStats(new MovingAverage(level2DirectPassesStats, 20))
 					.withSubplotOf("level2-direct-passes"));
 			plotRegistry.addPlot(new PlotInfo("stopwatch")
 					.withStats(stopwatchStats)
