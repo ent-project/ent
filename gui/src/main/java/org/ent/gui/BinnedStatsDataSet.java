@@ -14,7 +14,7 @@ public class BinnedStatsDataSet extends AbstractIntervalXYDataset {
 
 	BinnedStats stats;
 
-	int numBinsDisplayed = 100;
+	int numBinsDisplayed = 80;
 
 	public BinnedStatsDataSet(BinnedStats stats) {
 		this.stats = stats;
