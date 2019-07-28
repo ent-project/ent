@@ -12,11 +12,6 @@ public class MovingAverage implements BinnedStats {
 	}
 
 	@Override
-	public String getTitle() {
-		return delegate.getTitle();
-	}
-
-	@Override
 	public int getBinSize() {
 		return delegate.getBinSize();
 	}

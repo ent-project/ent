@@ -16,7 +16,7 @@ import javax.swing.JPanel;
 
 import org.ent.dev.DevelopmentPlan;
 import org.ent.dev.DevelopmentPlan.RoundListener;
-import org.ent.dev.stat.BinnedStats;
+import org.ent.dev.stat.PlotInfo;
 import org.ent.dev.unit.Data;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -38,7 +38,7 @@ public class PlotDialog extends JDialog implements RoundListener {
 
 	private static class Plot {
 
-		private BinnedStats stats;
+		private PlotInfo plotInfo;
 
 	    private BinnedStatsDataSet dataset;
 
@@ -46,19 +46,26 @@ public class PlotDialog extends JDialog implements RoundListener {
 
 	    private JPanel chartPanel;
 
-	    public Plot(BinnedStats stats) {
-			this.stats = stats;
-			this.dataset = new BinnedStatsDataSet(stats);
+	    public Plot(PlotInfo plotInfo) {
+	    	this.plotInfo = plotInfo;
+			this.dataset = new BinnedStatsDataSet(plotInfo.getStats());
 			initializeChart();
 			chartPanel = new ChartPanel(chart);
 	    }
 
 		public void initializeChart() {
-			chart = ChartFactory.createXYBarChart(stats.getTitle(), null, false, null,
+			chart = ChartFactory.createXYBarChart(
+					plotInfo.getTitle(),
+					plotInfo.getDomainAxisLabel(),
+					false,
+					plotInfo.getRangeAxisLabel(),
 					dataset);
 			chart.removeLegend();
 			XYPlot xyPlot = chart.getXYPlot();
-	    	xyPlot.getRangeAxis().setRange(new Range(0, 0.1), true, false);
+	    	Double yMax = plotInfo.getRangeMax();
+	    	if (yMax != null) {
+	    		xyPlot.getRangeAxis().setRange(new Range(0, yMax), true, false);
+	    	}
 			xyPlot.setBackgroundPaint(new Color(233, 233, 233));
 			XYBarRenderer renderer = (XYBarRenderer) xyPlot.getRenderer();
 			StandardXYBarPainter painter = new StandardXYBarPainter();
@@ -101,8 +108,8 @@ public class PlotDialog extends JDialog implements RoundListener {
 
 	private void build() {
 
-		for (BinnedStats stat : Main.getPlotRegistry().plots) {
-			Plot plot = new Plot(stat);
+		for (PlotInfo plotInfo : Main.getPlotRegistry().plots) {
+			Plot plot = new Plot(plotInfo);
 			plots.add(plot);
 		}
 
