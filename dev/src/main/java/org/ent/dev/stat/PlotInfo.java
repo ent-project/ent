@@ -1,5 +1,7 @@
 package org.ent.dev.stat;
 
+import java.awt.Color;
+
 public class PlotInfo {
 
 	private final String id;
@@ -15,6 +17,8 @@ public class PlotInfo {
 	private String rangeAxisLabel;
 
 	private String subplotOf;
+
+	private Color color;
 
 	public PlotInfo(String id) {
 		this.id = id;
@@ -99,6 +103,19 @@ public class PlotInfo {
 
 	public PlotInfo withSubplotOf(String subplotOf) {
 		setSubplotOf(subplotOf);
+		return this;
+	}
+
+	public Color getColor() {
+		return color;
+	}
+
+	public void setColor(Color color) {
+		this.color = color;
+	}
+
+	public PlotInfo withColor(Color color) {
+		setColor(color);
 		return this;
 	}
 

@@ -70,12 +70,14 @@ public class PlotDialog extends JDialog implements RoundListener {
 					dataset);
 			chart.removeLegend();
 			XYPlot xyPlot = chart.getXYPlot();
-	    	Double yMax = plotInfo.getRangeMax();
-	    	if (yMax != null) {
-	    		xyPlot.getRangeAxis().setRange(new Range(0, yMax), true, false);
+	    	if (plotInfo.getRangeMax() != null) {
+	    		xyPlot.getRangeAxis().setRange(new Range(0, plotInfo.getRangeMax()), true, false);
 	    	}
 			xyPlot.setBackgroundPaint(new Color(233, 233, 233));
 			XYBarRenderer renderer = (XYBarRenderer) xyPlot.getRenderer();
+			if (plotInfo.getColor() != null) {
+				renderer.setSeriesPaint(0, plotInfo.getColor());
+			}
 			StandardXYBarPainter painter = new StandardXYBarPainter();
 			renderer.setBarPainter(painter);
 		}
@@ -88,6 +90,9 @@ public class PlotDialog extends JDialog implements RoundListener {
 			XYPlot xyPlot = chart.getXYPlot();
 			xyPlot.setDataset(1, datasetSecondary);
 			XYLineAndShapeRenderer renderer2 = new XYLineAndShapeRenderer(true, false);
+			if (plotInfoSecondary.getColor() != null) {
+				renderer2.setSeriesPaint(0, plotInfoSecondary.getColor());
+			}
 			renderer2.setSeriesStroke(0, new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
 			xyPlot.setRenderer(1, renderer2);
 			xyPlot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
