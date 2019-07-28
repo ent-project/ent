@@ -1,5 +1,6 @@
 package org.ent.gui;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Frame;
@@ -16,14 +17,17 @@ import javax.swing.JPanel;
 
 import org.ent.dev.DevelopmentPlan;
 import org.ent.dev.DevelopmentPlan.RoundListener;
+import org.ent.dev.stat.BinnedStats;
 import org.ent.dev.stat.PlotInfo;
 import org.ent.dev.unit.Data;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.DatasetRenderingOrder;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.Range;
 
 public class PlotDialog extends JDialog implements RoundListener {
@@ -40,7 +44,11 @@ public class PlotDialog extends JDialog implements RoundListener {
 
 		private PlotInfo plotInfo;
 
+		private PlotInfo plotInfoSecondary;
+
 	    private BinnedStatsDataSet dataset;
+
+	    private BinnedStatsDataSet datasetSecondary;
 
 	    private JFreeChart chart;
 
@@ -70,6 +78,19 @@ public class PlotDialog extends JDialog implements RoundListener {
 			XYBarRenderer renderer = (XYBarRenderer) xyPlot.getRenderer();
 			StandardXYBarPainter painter = new StandardXYBarPainter();
 			renderer.setBarPainter(painter);
+		}
+
+		public void addSecondaryPlot(PlotInfo plotInfoSecondary) {
+			this.plotInfoSecondary = plotInfoSecondary;
+	    	BinnedStats statsSecondary = plotInfoSecondary.getStats();
+			this.datasetSecondary = new BinnedStatsDataSet(statsSecondary);
+
+			XYPlot xyPlot = chart.getXYPlot();
+			xyPlot.setDataset(1, datasetSecondary);
+			XYLineAndShapeRenderer renderer2 = new XYLineAndShapeRenderer(true, false);
+			renderer2.setSeriesStroke(0, new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
+			xyPlot.setRenderer(1, renderer2);
+			xyPlot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
 		}
 
 		public void update() {
@@ -107,10 +128,17 @@ public class PlotDialog extends JDialog implements RoundListener {
 	}
 
 	private void build() {
-
 		for (PlotInfo plotInfo : Main.getPlotRegistry().plots) {
-			Plot plot = new Plot(plotInfo);
-			plots.add(plot);
+			if (plotInfo.getSubplotOf() == null) {
+				plots.add(new Plot(plotInfo));
+			}
+		}
+		for (PlotInfo plotInfo : Main.getPlotRegistry().plots) {
+			String subplotOf = plotInfo.getSubplotOf();
+			if (subplotOf != null) {
+				Plot parentPlot = plots.stream().filter(p -> p.plotInfo.getId().equals(subplotOf)).findAny().get();
+				parentPlot.addSecondaryPlot(plotInfo);
+			}
 		}
 
 		GroupLayout layout = new GroupLayout(getContentPane());
