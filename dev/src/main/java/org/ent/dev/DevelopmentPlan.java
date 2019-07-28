@@ -21,6 +21,7 @@ import org.ent.dev.plan.StepsFilter;
 import org.ent.dev.plan.Trimmer;
 import org.ent.dev.stat.BinaryStats;
 import org.ent.dev.stat.FilterPassRecord;
+import org.ent.dev.stat.LongStats;
 import org.ent.dev.stat.MovingAverage;
 import org.ent.dev.stat.PlotInfo;
 import org.ent.dev.stat.PlotRegistry;
@@ -61,6 +62,7 @@ public class DevelopmentPlan {
 
 	private BinaryStats level1PassingStats;
 	private BinaryStats level2DirectPassesStats;
+	private StopwatchStats stopwatchStats;
 
 	private RoundListener roundListener;
 
@@ -158,11 +160,40 @@ public class DevelopmentPlan {
 		}
 	}
 
+	private static class StopwatchStats extends LongStats {
+
+		private Long lastTime;
+
+		public StopwatchStats(int binSize) {
+			super(binSize);
+		}
+
+		private long getCurrentTime() {
+			return System.currentTimeMillis();
+		}
+
+		public void newRound() {
+			long now = getCurrentTime();
+			long delta = now - lastTime;
+			lastTime = now;
+			putValue(delta);
+		}
+
+		public void start() {
+			lastTime = getCurrentTime();
+		}
+
+		public void stop() {
+			lastTime = null;
+		}
+	}
+
 	public DevelopmentPlan(PlotRegistry plotRegistry, HyperRegistry hyperRegistry) {
 		this.hyperRegistry = hyperRegistry;
 		this.randMaster = new Random(RANDOM_MASTER_SEED);
 		this.level1PassingStats = new BinaryStats(10_000);
 		this.level2DirectPassesStats = new BinaryStats(100);
+		this.stopwatchStats = new StopwatchStats(10);
 		this.output = new Output("Result: ");
 		this.poller = buildPoller();
 		if (plotRegistry != null) {
@@ -179,6 +210,14 @@ public class DevelopmentPlan {
 			plotRegistry.addPlot(new PlotInfo("level2-direc-passes-moving-average")
 					.withStats(new MovingAverage(level2DirectPassesStats, 7))
 					.withSubplotOf("level2-direct-passes"));
+			plotRegistry.addPlot(new PlotInfo("stopwatch")
+					.withStats(stopwatchStats)
+					.withTitle("Execution time for toplevel events")
+					.withRangeAxisLabel("ms")
+					.withRangeMax(1000.));
+			plotRegistry.addPlot(new PlotInfo("stopwatch-moving-average")
+					.withSubplotOf("stopwatch")
+					.withStats(new MovingAverage(stopwatchStats, 30)));
 		}
 	}
 
@@ -200,6 +239,7 @@ public class DevelopmentPlan {
 
 	public void executeBatch(int batchSize) {
 		stopped = false;
+		stopwatchStats.start();
 		if (batchSize == BATCH_EXECUTION_SIZE_INFINITY) {
 			while (!stopped) {
 				executeOne();
@@ -210,6 +250,7 @@ public class DevelopmentPlan {
 				executeOne();
 			}
 		}
+		stopwatchStats.stop();
 		dumpStats();
 	}
 
@@ -326,7 +367,11 @@ public class DevelopmentPlan {
 				.combinePipe(new Output("trimmed: "))
 			)
 		)
-		.combineProc(data -> {level2total++;})
+		.combineProc(data -> {
+				level2total++;
+				stopwatchStats.newRound();
+			}
+		)
 		.connectReq(new Poller());
 
 		FloatHyperparameter excludeRatePrimarySuccess = new FloatHyperparameter(1f, "Pool exclude rate: primary success");
