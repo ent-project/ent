@@ -54,7 +54,6 @@ public class DevelopmentPlan {
 
 	private volatile boolean stopped;
 
-	private int level2directPasses;
 	private int level2total;
 	private int level2heavyLaneTotal;
 	private int level2heavyLanePasses;
@@ -221,6 +220,7 @@ public class DevelopmentPlan {
 	public void dumpStats() {
 		long level0total = level1PassingStats.getNoEvents();
 		long level1total = level1PassingStats.getTotalHits();
+		long level2directPasses = level2DirectPassesStats.getTotalHits();
 
 		log.info("Summary:\n---");
 		log.info("level1: passed        {}/{} ({} %)", level1total, level0total, String.format("%.2f", ((double) level1total) / level0total * 100));
@@ -229,8 +229,6 @@ public class DevelopmentPlan {
 		log.info("level2 pool lane:     {}/{} ({} %)",
 				level2heavyLanePasses, level2heavyLaneTotal,
 				String.format("%.2f", ((double) level2heavyLanePasses) / level2heavyLaneTotal * 100));
-
-		log.info("level2 direct passes (from stats): {}/{}",level2DirectPassesStats.getTotalHits(), level2DirectPassesStats.getNoEvents());
 	}
 
 	private Poller buildPoller() {
@@ -300,7 +298,6 @@ public class DevelopmentPlan {
 					)
 			.withLightLane(
 				new Output("in light lane: ")
-				.combineProc(data -> {level2directPasses++;})
 			)
 			.withHeavyLane(
 				new Pool(newRandom()).withFeedback(
