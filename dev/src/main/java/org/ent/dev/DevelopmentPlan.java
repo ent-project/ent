@@ -1,5 +1,6 @@
 package org.ent.dev;
 
+import java.awt.Color;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -214,10 +215,12 @@ public class DevelopmentPlan {
 					.withStats(stopwatchStats)
 					.withTitle("Execution time for toplevel events")
 					.withRangeAxisLabel("ms")
-					.withRangeMax(1000.));
+					.withRangeMax(1000.)
+					.withColor(Color.BLUE));
 			plotRegistry.addPlot(new PlotInfo("stopwatch-moving-average")
 					.withSubplotOf("stopwatch")
-					.withStats(new MovingAverage(stopwatchStats, 30)));
+					.withStats(new MovingAverage(stopwatchStats, 30))
+					.withColor(Color.BLACK));
 		}
 	}
 
