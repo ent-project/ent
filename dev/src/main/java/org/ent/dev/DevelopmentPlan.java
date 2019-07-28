@@ -22,6 +22,7 @@ import org.ent.dev.plan.Trimmer;
 import org.ent.dev.stat.BinaryStats;
 import org.ent.dev.stat.FilterPassRecord;
 import org.ent.dev.stat.MovingAverage;
+import org.ent.dev.stat.PlotInfo;
 import org.ent.dev.stat.PlotRegistry;
 import org.ent.dev.unit.Data;
 import org.ent.dev.unit.DataProxy;
@@ -161,14 +162,25 @@ public class DevelopmentPlan {
 		this.hyperRegistry = hyperRegistry;
 		this.randMaster = new Random(RANDOM_MASTER_SEED);
 		this.level1PassingStats = new BinaryStats(10_000);
-		this.level1PassingStats.setTitle("Fraction passing level 1");
 		this.level2DirectPassesStats = new BinaryStats(100);
 		this.output = new Output("Result: ");
 		this.poller = buildPoller();
 		if (plotRegistry != null) {
-			plotRegistry.addFractionPlot(level1PassingStats);
-			plotRegistry.addFractionPlot(level2DirectPassesStats);
-			plotRegistry.addFractionPlot(new MovingAverage(level2DirectPassesStats, 7));
+			plotRegistry.addPlot(new PlotInfo("level1-passing")
+					.withStats(level1PassingStats)
+					.withTitle("Level 1 passes")
+					.withRangeAxisLabel("%")
+					.withRangeMax(0.1));
+			plotRegistry.addPlot(new PlotInfo("level2-direct-passes")
+					.withStats(level2DirectPassesStats)
+					.withTitle("Direct passes for level 2")
+					.withRangeAxisLabel("%")
+					.withRangeMax(0.1));
+			plotRegistry.addPlot(new PlotInfo("level2-direc-passes-moving-average")
+					.withStats(new MovingAverage(level2DirectPassesStats, 7))
+					.withTitle("Direct passes for level 2: moving average")
+					.withRangeAxisLabel("%")
+					.withRangeMax(0.1));
 		}
 	}
 

@@ -12,8 +12,6 @@ public class BinaryStats implements BinnedStats {
 
 	private List<Integer> data;
 
-	private String title;
-
 	private int idx;
 
 	private int currentBinHits;
@@ -26,15 +24,6 @@ public class BinaryStats implements BinnedStats {
 		}
 		this.binSize = binSize;
 		this.data = new ArrayList<>();
-	}
-
-	@Override
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
 	}
 
 	@Override
