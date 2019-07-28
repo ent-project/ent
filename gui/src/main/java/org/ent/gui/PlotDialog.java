@@ -95,7 +95,7 @@ public class PlotDialog extends JDialog implements RoundListener {
 
 		public void update() {
 	    	XYPlot xyPlot = chart.getXYPlot();
-	    	xyPlot.getDomainAxis().setRange(new Range(dataset.getStartX(0, 0), dataset.getEndX(0, dataset.getItemCount(0))), true, false);
+	    	xyPlot.getDomainAxis().setRange(new Range(dataset.getStartX(0, 0), dataset.getEndX(0, dataset.getItemCount(0) - 1)), true, false);
 	    	chart.fireChartChanged();
 		}
 	}
