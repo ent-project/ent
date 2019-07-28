@@ -282,7 +282,9 @@ public class DevelopmentPlan {
 			hyperRegistry.addHyperparameter(fractionBNodes);
 		}
 
-		return randomNetSource.toSup()
+		Pool pool;
+
+		Poller poller = randomNetSource.toSup()
 		.combineProc(new StepsExam(getRunSetup()))
 		.combineFilter(new StepsFilter(1)
 				.with(new FailuresLimit(100000))
@@ -300,7 +302,7 @@ public class DevelopmentPlan {
 				new Output("in light lane: ")
 			)
 			.withHeavyLane(
-				new Pool(newRandom()).withFeedback(
+				(pool = new Pool(newRandom())).withFeedback(
 					new AddCopyReplicator()
 					.combineProc(new Counter())
 					.combineProc(data -> {level2heavyLaneTotal++;})
@@ -316,6 +318,45 @@ public class DevelopmentPlan {
 		)
 		.combineProc(data -> {level2total++;})
 		.connectReq(new Poller());
+
+		FloatHyperparameter excludeRatePrimarySuccess = new FloatHyperparameter(1f, "Pool exclude rate: primary success");
+		excludeRatePrimarySuccess.setMinimumValue(0f);
+		excludeRatePrimarySuccess.setMaximumValue(1f);
+		excludeRatePrimarySuccess.addPropertyChangeListener(prop ->
+				pool.setExcludeRatePrimarySuccess(excludeRatePrimarySuccess.getValue()));
+
+		FloatHyperparameter excludeRatePrimaryFail = new FloatHyperparameter(1f / 10, "Pool exclude rate: primary failure");
+		excludeRatePrimaryFail.setMinimumValue(0f);
+		excludeRatePrimaryFail.setMaximumValue(1f);
+		excludeRatePrimaryFail.addPropertyChangeListener(prop ->
+				pool.setExcludeRatePrimaryFail(excludeRatePrimaryFail.getValue()));
+
+		FloatHyperparameter excludeRateJoiningSuccess = new FloatHyperparameter(1f / 2, "Pool exclude rate: joining success");
+		excludeRateJoiningSuccess.setMinimumValue(0f);
+		excludeRateJoiningSuccess.setMaximumValue(1f);
+		excludeRateJoiningSuccess.addPropertyChangeListener(prop ->
+				pool.setExcludeRateJoiningSuccess(excludeRateJoiningSuccess.getValue()));
+
+		FloatHyperparameter excludeRateJoiningFail = new FloatHyperparameter(1f / 50, "Pool exclude rate: joining failure");
+		excludeRateJoiningFail.setMinimumValue(0f);
+		excludeRateJoiningFail.setMaximumValue(1f);
+		excludeRateJoiningFail.addPropertyChangeListener(prop ->
+				pool.setExcludeRateJoiningFail(excludeRateJoiningFail.getValue()));
+
+		FloatHyperparameter rewireFraction = new FloatHyperparameter(0.2f, "Pool rewire fraction");
+		rewireFraction.setMinimumValue(0f);
+		rewireFraction.setMaximumValue(1f);
+		rewireFraction.addPropertyChangeListener(prop ->
+				pool.setRewireFraction(rewireFraction.getValue()));
+
+		if (hyperRegistry != null) {
+			hyperRegistry.addHyperparameter(excludeRatePrimarySuccess);
+			hyperRegistry.addHyperparameter(excludeRatePrimaryFail);
+			hyperRegistry.addHyperparameter(excludeRateJoiningSuccess);
+			hyperRegistry.addHyperparameter(excludeRateJoiningFail);
+			hyperRegistry.addHyperparameter(rewireFraction);
+		}
+		return poller;
 	}
 
 	private RunSetup getRunSetup() {
