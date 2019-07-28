@@ -41,9 +41,13 @@ public class BinnedStatsDataSet extends AbstractIntervalXYDataset {
 		return null;
 	}
 
+	public int getNumBinsDisplayed() {
+		return numBinsDisplayed;
+	}
+
 	@Override
 	public int getItemCount(int series) {
-		return numBinsDisplayed;
+		return Math.min(stats.getNoBins(), numBinsDisplayed + 1);
 	}
 
 	@Override
@@ -56,7 +60,16 @@ public class BinnedStatsDataSet extends AbstractIntervalXYDataset {
 		if (size <= numBinsDisplayed) {
 			return item;
 		} else {
-			return size - numBinsDisplayed + item;
+			return size - (numBinsDisplayed + 1) + item;
+		}
+	}
+
+	public int getFirstItemDisplayed() {
+		int size = stats.getNoBins();
+		if (size <= numBinsDisplayed) {
+			return 0;
+		} else {
+			return 1;
 		}
 	}
 
