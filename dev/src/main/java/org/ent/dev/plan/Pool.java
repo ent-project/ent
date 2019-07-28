@@ -26,24 +26,19 @@ public class Pool {
 
 	private static final int POOL_SIZE = 20;
 
-	private static final double EXCLUDE_RATE_PRIMARY_SUCCESS = 1;
+	private double excludeRatePrimarySuccess = 1;
 
-	private static final double EXCLUDE_RATE_PRIMARY_FAIL = 1. / 10;
+	private double excludeRatePrimaryFail = 1. / 10;
 
-	private static final double EXCLUDE_RATE_JOINING_SUCCESS = 1. / 2;
+	private double excludeRateJoiningSuccess = 1. / 2;
 
-	private static final double EXCLUDE_RATE_JOINING_FAIL = 1. / 50;
+	private double excludeRateJoiningFail = 1. / 50;
 
-	private static final Map<Boolean, Double> EXCLUDE_RATE_PRIMARY = new HashMap<>();
+	private double rewireFraction = 0.2;
 
-	private static final Map<Boolean, Double> EXCLUDE_RATE_JOINING = new HashMap<>();
+	private final Map<Boolean, Double> excludeRatePrimary = new HashMap<>();
 
-	static {
-		EXCLUDE_RATE_PRIMARY.put(true, EXCLUDE_RATE_PRIMARY_SUCCESS);
-		EXCLUDE_RATE_PRIMARY.put(false, EXCLUDE_RATE_PRIMARY_FAIL);
-		EXCLUDE_RATE_JOINING.put(true, EXCLUDE_RATE_JOINING_SUCCESS);
-		EXCLUDE_RATE_JOINING.put(false, EXCLUDE_RATE_JOINING_FAIL);
-	}
+	private final Map<Boolean, Double> excludeRateJoining = new HashMap<>();
 
 	private final List<PoolData> pool;
 
@@ -114,8 +109,8 @@ public class Pool {
 			if (state != State.ACCEPTING_FEEDBACK) {
 				throw new AssertionError("Providing feedback to pool, but is not in state to accept feedback; current state=" + state);
 			}
-			maybeRemoveFromPool(idxPrimary, EXCLUDE_RATE_PRIMARY.get(passed));
-			maybeRemoveFromPool(idxJoining, EXCLUDE_RATE_JOINING.get(passed));
+			maybeRemoveFromPool(idxPrimary, excludeRatePrimary.get(passed));
+			maybeRemoveFromPool(idxJoining, excludeRateJoining.get(passed));
 
 			reset();
 			return passed;
@@ -129,7 +124,52 @@ public class Pool {
 			this.pool.add(null);
 		}
 		this.poolProc = new PoolProc();
+		initializeRateMaps();
 		reset();
+	}
+
+	public double getExcludeRatePrimarySuccess() {
+		return excludeRatePrimarySuccess;
+	}
+
+	public void setExcludeRatePrimarySuccess(double excludeRatePrimarySuccess) {
+		this.excludeRatePrimarySuccess = excludeRatePrimarySuccess;
+		initializeRateMaps();
+	}
+
+	public double getExcludeRatePrimaryFail() {
+		return excludeRatePrimaryFail;
+	}
+
+	public void setExcludeRatePrimaryFail(double excludeRatePrimaryFail) {
+		this.excludeRatePrimaryFail = excludeRatePrimaryFail;
+		initializeRateMaps();
+	}
+
+	public double getExcludeRateJoiningSuccess() {
+		return excludeRateJoiningSuccess;
+	}
+
+	public void setExcludeRateJoiningSuccess(double excludeRateJoiningSuccess) {
+		this.excludeRateJoiningSuccess = excludeRateJoiningSuccess;
+		initializeRateMaps();
+	}
+
+	public double getExcludeRateJoiningFail() {
+		return excludeRateJoiningFail;
+	}
+
+	public void setExcludeRateJoiningFail(double excludeRateJoiningFail) {
+		this.excludeRateJoiningFail = excludeRateJoiningFail;
+		initializeRateMaps();
+	}
+
+	public double getRewireFraction() {
+		return rewireFraction;
+	}
+
+	public void setRewireFraction(double rewireFraction) {
+		this.rewireFraction = rewireFraction;
 	}
 
 	private void maybeRemoveFromPool(int idx, Double propability) {
@@ -218,6 +258,7 @@ public class Pool {
 		Net joiningNetReplica = infoJoining.getReplicator().getNewSpecimen();
 
 		NetMixer mixer = new NetMixer(rand, primaryNetReplica, joiningNetReplica);
+		mixer.setRewireFraction(rewireFraction);
 
 		mixer.join();
 
@@ -230,4 +271,10 @@ public class Pool {
 		idxJoining = null;
 	}
 
+	private void initializeRateMaps() {
+		excludeRatePrimary.put(true, excludeRatePrimarySuccess);
+		excludeRatePrimary.put(false, excludeRatePrimaryFail);
+		excludeRateJoining.put(true, excludeRateJoiningSuccess);
+		excludeRateJoining.put(false, excludeRateJoiningFail);
+	}
 }

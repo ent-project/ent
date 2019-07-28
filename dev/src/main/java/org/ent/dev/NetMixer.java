@@ -15,7 +15,7 @@ import org.ent.util.ModifiedPoisson;
 
 public class NetMixer {
 
-	private static final double REWIRE_FRACTION = 0.2;
+	private double rewireFraction = 0.2;
 
 	private final Random rand;
 
@@ -33,6 +33,14 @@ public class NetMixer {
 		this.joiningNet = joiningNet;
 		this.controller = new DefaultNetController(primaryNet);
 		validate();
+	}
+
+	public double getRewireFraction() {
+		return rewireFraction;
+	}
+
+	public void setRewireFraction(double rewireFraction) {
+		this.rewireFraction = rewireFraction;
 	}
 
 	private void validate() {
@@ -65,7 +73,7 @@ public class NetMixer {
 	}
 
 	private void randomlyRewireArrows() {
-		int numToRewire = ModifiedPoisson.getModifiedPoisson(nodesList.size() * REWIRE_FRACTION)
+		int numToRewire = ModifiedPoisson.getModifiedPoisson(nodesList.size() * rewireFraction)
 				.drawModifiedPoisson(rand);
 
 		for (int i = 0; i < numToRewire; i++) {
