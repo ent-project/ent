@@ -1,5 +1,8 @@
 package org.ent.dev.unit;
 
+/**
+ * "Sup": short for supplier
+ */
 public interface Sup {
 
 	void setDownstream(Req downstream);
