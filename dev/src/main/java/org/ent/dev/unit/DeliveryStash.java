@@ -38,7 +38,7 @@ public class DeliveryStash {
 	}
 
 	public void submit(Data data, Req req) {
-		if (!stack.isEmpty()) throw new RuntimeException("stack must not have more than one element");
+		if (!stack.isEmpty()) throw new AssertionError("stack must be empty when submitting an element");
 		stack.push(new Packet(data, req));
 	}
 
@@ -51,7 +51,7 @@ public class DeliveryStash {
 		Data data = packet.getData();
 		Req req = packet.getReq();
 		if (log.isTraceEnabled()) {
-			log.trace("{} -> {}", data, req);
+			log.trace("work {} -> {}", data, req);
 		}
 		req.receiveNext(data);
 	}

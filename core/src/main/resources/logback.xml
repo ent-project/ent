@@ -25,5 +25,7 @@
 	<logger name="org.ent.dev.DevelopmentPlan" level="TRACE"/>
 	<logger name="org.ent.gui.pref.EntPreferences" level="INFO"/>
 	<logger name="org.ent.gui.BinaryStatsDataSet" level="INFO"/>
+	<logger name="org.ent.dev.unit.DeliveryStash" level="INFO"/>
+	
 	
 </configuration>
