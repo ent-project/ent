@@ -1,6 +1,8 @@
-package org.ent.dev.unit;
+package org.ent.dev.unit.local;
 
-import org.ent.dev.unit.FilterWrapper.FilterListener;
+import org.ent.dev.unit.combine.FilterWithProc;
+import org.ent.dev.unit.data.Data;
+import org.ent.dev.unit.local.FilterWrapper.FilterListener;
 
 public interface Filter {
 

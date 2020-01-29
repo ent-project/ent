@@ -1,7 +1,7 @@
 package org.ent.dev.plan;
 
 import org.ent.dev.NetReplicator;
-import org.ent.dev.unit.Data;
+import org.ent.dev.unit.data.Data;
 import org.ent.net.Net;
 
 public interface DataProperties {

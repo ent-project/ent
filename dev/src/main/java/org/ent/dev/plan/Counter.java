@@ -1,6 +1,6 @@
 package org.ent.dev.plan;
 
-import org.ent.dev.unit.TypedProc;
+import org.ent.dev.unit.local.TypedProc;
 
 public class Counter extends TypedProc<CounterData> {
 

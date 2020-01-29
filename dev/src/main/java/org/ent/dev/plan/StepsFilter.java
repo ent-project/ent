@@ -1,6 +1,6 @@
 package org.ent.dev.plan;
 
-import org.ent.dev.unit.TypedFilter;
+import org.ent.dev.unit.local.TypedFilter;
 
 public class StepsFilter extends TypedFilter<StepsFilterData> {
 

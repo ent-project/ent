@@ -1,4 +1,8 @@
-package org.ent.dev.unit;
+package org.ent.dev.unit.combine;
+
+import org.ent.dev.unit.data.Data;
+import org.ent.dev.unit.local.Filter;
+import org.ent.dev.unit.local.Pipe;
 
 public class PipeFilter implements Filter {
 

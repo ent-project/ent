@@ -1,4 +1,7 @@
-package org.ent.dev.unit;
+package org.ent.dev.unit.local;
+
+import org.ent.dev.unit.data.Data;
+import org.ent.dev.unit.data.DataProxy;
 
 public abstract class TypedFilter<T extends DataProxy> implements Filter {
 
