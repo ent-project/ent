@@ -1,4 +1,4 @@
-package org.ent.dev.unit;
+package org.ent.dev.unit.data;
 
 import java.util.Map;
 

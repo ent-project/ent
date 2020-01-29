@@ -1,5 +1,7 @@
 package org.ent.dev.unit;
 
+import org.ent.dev.unit.data.Data;
+
 public interface Req {
 
 	void setUpstream(Sup upstream);

@@ -1,4 +1,7 @@
-package org.ent.dev.unit;
+package org.ent.dev.unit.combine;
+
+import org.ent.dev.unit.data.Data;
+import org.ent.dev.unit.local.Proc;
 
 public class ProcProc implements Proc {
 

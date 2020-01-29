@@ -2,7 +2,7 @@ package org.ent.dev.plan;
 
 import org.ent.dev.ManagedRun;
 import org.ent.dev.RunSetup;
-import org.ent.dev.unit.TypedProc;
+import org.ent.dev.unit.local.TypedProc;
 import org.ent.net.Net;
 
 public class StepsExam extends TypedProc<StepsExamData> {

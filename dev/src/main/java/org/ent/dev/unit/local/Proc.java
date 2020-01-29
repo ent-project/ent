@@ -1,5 +1,12 @@
-package org.ent.dev.unit;
+package org.ent.dev.unit.local;
 
+import org.ent.dev.unit.combine.ProcProc;
+import org.ent.dev.unit.data.Data;
+
+/**
+ * Special case of Pipe, where the same data object (possibly modified)
+ * is forwarded.
+ */
 public interface Proc extends Pipe {
 
 	void accept(Data data);

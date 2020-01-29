@@ -19,7 +19,7 @@ import org.ent.dev.DevelopmentPlan;
 import org.ent.dev.DevelopmentPlan.RoundListener;
 import org.ent.dev.stat.BinnedStats;
 import org.ent.dev.stat.PlotInfo;
-import org.ent.dev.unit.Data;
+import org.ent.dev.unit.data.Data;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
