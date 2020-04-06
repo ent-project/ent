@@ -18,7 +18,7 @@ java {
 }
 
 ext {
-    mockitoVersion = '2.22.0'
+    mockitoVersion = '3.3.3'
     junitVersion = '5.6.1'
 }
 
@@ -29,14 +29,14 @@ subprojects {
     }
 
     dependencies {
-        implementation group: 'org.slf4j', name:'slf4j-api', version: '1.7.25'
+        implementation group: 'org.slf4j', name:'slf4j-api', version: '1.7.30'
         implementation group: 'ch.qos.logback', name:'logback-classic', version: '1.2.3'
         implementation group: 'ch.qos.logback', name:'logback-core', version: '1.2.3'
 
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: junitVersion
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: junitVersion
-        testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.11.1'
-        testImplementation group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '2.4.5'
+        testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.15.0'
+        testImplementation group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.1.13'
         testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
         testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: mockitoVersion
         testImplementation group: 'org.mockito', name: 'mockito-inline', version: mockitoVersion
