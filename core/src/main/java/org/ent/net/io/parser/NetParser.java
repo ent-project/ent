@@ -22,7 +22,7 @@ import org.ent.net.node.Node;
  * <p>
  * In the net DSL, a binary node is represented as "(X1,X2)", where X1 and X2 are the child nodes.
  * A unary node is written as "[X]" with child node X. A command is given as "&lt;<i>cmdname</i>&gt;".
- * A node can be prefixed by "<i>ident</i>=", which introduces a variable name for the given node.
+ * A node can be prefixed by "<i>ident</i>=", which introduces a name for the given node.
  * The identifier can then be used anywhere in place of a node.
  * <p>
  * Multiple node descriptions may be concatenated, separated by a semicolon.

@@ -47,3 +47,9 @@ subprojects {
     }
 
 }
+
+// task for gradle wrapper upgrade: change gradleVersion here, then run "./gradlew wrapper"
+tasks.named('wrapper') {
+   gradleVersion = '6.6.1'
+   distributionType = Wrapper.DistributionType.ALL
+}
