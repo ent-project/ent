@@ -21,7 +21,7 @@ import org.ent.dev.unit.local.Pipe;
  *
  * From the heavy lane's perspective, a requests does not necessarily trigger a
  * response. The request may be silently ignored (i.e. when the element from upstream passes
- * the sorter).  * The heavy lane must be prepared to "pause" at this point and wait for
+ * the sorter). The heavy lane must be prepared to "pause" at this point and wait for
  * another request from downstream.
  * It shall then repeat its request to upstream and carry on in case it gets a response
  * this time.

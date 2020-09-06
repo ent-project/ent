@@ -19,7 +19,7 @@ public class EvalOperation implements BiOperation<Node, Node> {
 	public EvalOperation(int evalLevel) {
 		this.evalLevel = evalLevel;
 		this.shortName = "🞜" + toSuperscriptNumber(evalLevel);
-		this.shortNameAscii = "eval" + String.valueOf(evalLevel);
+		this.shortNameAscii = "eval" + evalLevel;
 	}
 
 	@Override

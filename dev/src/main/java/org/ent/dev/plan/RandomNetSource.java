@@ -50,10 +50,6 @@ public class RandomNetSource implements Source {
 			setReplicator(new CopyReplicator(net));
 		}
 
-		public Net getNewSpecimenFromSeed() {
-			return drawNet(getSeed()).get();
-		}
-
 		public void log() {
 			if (log.isTraceEnabled()) {
 				NetFormatter formatter = new NetFormatter();
@@ -101,7 +97,7 @@ public class RandomNetSource implements Source {
 	}
 
 	private List<CommandCandidate> setupCommandCandidates() {
-		List<CommandCandidate> commandCandidates = new ArrayList<>();
+		List<CommandCandidate> candidates = new ArrayList<>();
 
 		double N1 = 1.0;
 		double N3 = N1 / 3;
@@ -109,26 +105,26 @@ public class RandomNetSource implements Source {
 		int MAX_EVAL_LEVEL = 5;
 		double N_EVAL = N1 / MAX_EVAL_LEVEL;
 
-		commandCandidates.add(new CommandCandidate(CommandFactory.createNopCommand(), N1));
+		candidates.add(new CommandCandidate(CommandFactory.createNopCommand(), N1));
 		for (ArrowDirection left : ArrowDirection.values()) {
-			commandCandidates.add(new CommandCandidate(CommandFactory.createSetCommandL(left), N3));
+			candidates.add(new CommandCandidate(CommandFactory.createSetCommandL(left), N3));
 			for (ArrowDirection right : ArrowDirection.values()) {
-				commandCandidates.add(new CommandCandidate(CommandFactory.createSetCommandLR(left, right), N9));
+				candidates.add(new CommandCandidate(CommandFactory.createSetCommandLR(left, right), N9));
 			}
 		}
 		for (ArrowDirection left : ArrowDirection.values()) {
-			commandCandidates.add(new CommandCandidate(CommandFactory.createDupCommand(left), N3));
+			candidates.add(new CommandCandidate(CommandFactory.createDupCommand(left), N3));
 		}
-		commandCandidates.add(new CommandCandidate(CommandFactory.createAncestorSwapCommand(), N1));
+		candidates.add(new CommandCandidate(CommandFactory.createAncestorSwapCommand(), N1));
 		for (int evalLevel = 1; evalLevel <= MAX_EVAL_LEVEL; evalLevel++) {
-			commandCandidates.add(new CommandCandidate(CommandFactory.createEvalCommand(evalLevel), N_EVAL));
+			candidates.add(new CommandCandidate(CommandFactory.createEvalCommand(evalLevel), N_EVAL));
 		}
 		for (ArrowDirection left : ArrowDirection.values()) {
 			for (ArrowDirection right : ArrowDirection.values()) {
-				commandCandidates.add(new CommandCandidate(CommandFactory.createIsIdenticalCommand(left, right), N9));
+				candidates.add(new CommandCandidate(CommandFactory.createIsIdenticalCommand(left, right), N9));
 			}
 		}
-		return commandCandidates;
+		return candidates;
 	}
 
 	public int getNoNodes() {

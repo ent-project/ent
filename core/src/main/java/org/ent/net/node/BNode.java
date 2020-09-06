@@ -106,30 +106,22 @@ public class BNode extends Node {
 
 	@Override
 	public Arrow getArrow(ArrowDirection arrowDirection) {
-		switch (arrowDirection) {
-		case LEFT:
-			return leftArrow;
-		case RIGHT:
-			return rightArrow;
-		case DOWN:
-			throw new IllegalArgumentException();
-		default:
-			throw new AssertionError();
-		}
+		return switch (arrowDirection) {
+			case LEFT -> leftArrow;
+			case RIGHT -> rightArrow;
+			case DOWN -> throw new IllegalArgumentException();
+			default -> throw new AssertionError();
+		};
 	}
 
 	@Override
 	public Optional<Arrow> getArrowMaybe(ArrowDirection arrowDirection) {
-		switch (arrowDirection) {
-		case LEFT:
-			return Optional.of(leftArrow);
-		case RIGHT:
-			return Optional.of(rightArrow);
-		case DOWN:
-			return Optional.empty();
-		default:
-			throw new AssertionError();
-		}
+		return switch (arrowDirection) {
+			case LEFT -> Optional.of(leftArrow);
+			case RIGHT -> Optional.of(rightArrow);
+			case DOWN -> Optional.empty();
+			default -> throw new AssertionError();
+		};
 	}
 
 	@Override

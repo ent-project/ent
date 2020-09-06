@@ -30,12 +30,7 @@ public class ModifiedPoisson {
 	private final double maxP;
 
 	public static ModifiedPoisson getModifiedPoisson(double lambda) {
-		ModifiedPoisson result = cache.get(lambda);
-		if (result == null) {
-			result = new ModifiedPoisson(lambda);
-			cache.put(lambda, result);
-		}
-		return result;
+		return cache.computeIfAbsent(lambda, ModifiedPoisson::new);
 	}
 
     private ModifiedPoisson(double lambda) {
@@ -50,15 +45,15 @@ public class ModifiedPoisson {
 	}
 
 	private double[] buildCdf() {
-		double[] cdf = new double[cutoff + 1];
+		double[] cdfLocal = new double[cutoff + 1];
 		final double normalizer = Math.exp(-lambda);
-		cdf[0] = normalizer;
+		cdfLocal[0] = normalizer;
 		double p = 1.0;
 		for (int i = 1; i <= cutoff; i++) {
 		    p *= lambda / i;
-		    cdf[i] = cdf[i - 1] + p * normalizer;
+		    cdfLocal[i] = cdfLocal[i - 1] + p * normalizer;
 		}
-		return cdf;
+		return cdfLocal;
 	}
 
     public int drawModifiedPoisson(Random rand) {

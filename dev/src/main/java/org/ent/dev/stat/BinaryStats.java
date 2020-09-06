@@ -8,8 +8,6 @@ import org.slf4j.LoggerFactory;
 
 public class BinaryStats implements BinnedStats {
 
-	private static final Logger log = LoggerFactory.getLogger(BinaryStats.class);
-
 	private List<Integer> data;
 
 	private int idx;
@@ -55,7 +53,7 @@ public class BinaryStats implements BinnedStats {
 	}
 
 	public long getNoEvents() {
-		return data.size() * binSize + idx;
+		return ((long) data.size()) * binSize + idx;
 	}
 
 	public int getHits(int bin) {

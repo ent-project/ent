@@ -11,7 +11,7 @@ public abstract class TypedFilter<T extends DataProxy> implements Filter {
 		this.accessor = accessor;
 	}
 
-	protected abstract boolean doTest(T Data);
+	protected abstract boolean doTest(T data);
 
 	@Override
 	public boolean test(Data data) {

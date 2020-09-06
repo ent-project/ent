@@ -1,6 +1,7 @@
 package org.ent.net;
 
 import java.util.EnumMap;
+import java.util.Map;
 
 import org.ent.net.node.BNode;
 import org.ent.net.node.UNode;
@@ -16,14 +17,14 @@ import org.ent.net.node.UNode;
 public enum ArrowDirection {
 	DOWN, LEFT, RIGHT;
 
-	public static final EnumMap<ArrowDirection, String> ARROW_SYMBOLS = new EnumMap<>(ArrowDirection.class);
+	public static final Map<ArrowDirection, String> ARROW_SYMBOLS = new EnumMap<>(ArrowDirection.class);
 	static {
 		ARROW_SYMBOLS.put(ArrowDirection.DOWN, "↓");
 		ARROW_SYMBOLS.put(ArrowDirection.LEFT, "↙");
 		ARROW_SYMBOLS.put(ArrowDirection.RIGHT, "↘");
 	}
 
-	public static final EnumMap<ArrowDirection, String> ARROW_SYMBOLS_ASCII = new EnumMap<>(ArrowDirection.class);
+	public static final Map<ArrowDirection, String> ARROW_SYMBOLS_ASCII = new EnumMap<>(ArrowDirection.class);
 	static {
 		ARROW_SYMBOLS_ASCII.put(ArrowDirection.DOWN, "|");
 		ARROW_SYMBOLS_ASCII.put(ArrowDirection.LEFT, "/");

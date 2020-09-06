@@ -125,9 +125,7 @@ public class PlotDialog extends JDialog implements RoundListener {
 			public void run() {
 				if (updateRequired) {
 					updateRequired = false;
-					EventQueue.invokeLater(() -> {
-						updatePlots();
-					});
+					EventQueue.invokeLater(() -> updatePlots());
 				}
 			}
 		};

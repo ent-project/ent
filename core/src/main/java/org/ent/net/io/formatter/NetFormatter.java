@@ -37,9 +37,7 @@ public class NetFormatter {
 	}
 
 	public void setNodeNamesInverse(Map<String, Node> nodeNames) {
-		nodeNames.entrySet().forEach(entry -> {
-			givenNodeNames.put(entry.getValue(), entry.getKey());
-		});
+		nodeNames.entrySet().forEach(entry -> givenNodeNames.put(entry.getValue(), entry.getKey()));
 	}
 
 	public NetFormatter withNodeNamesInverse(Map<String, Node> nodeNames) {

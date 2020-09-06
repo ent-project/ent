@@ -47,13 +47,13 @@ public class DevelopmentPlan {
 
 	public static final int BATCH_EXECUTION_SIZE_INFINITY = -1;
 
-	private HyperRegistry hyperRegistry;
+	private final HyperRegistry hyperRegistry;
 
-	private Random randMaster;
+	private final Random randMaster;
 
-	private Output output;
+	private final Output output;
 
-	private Poller poller;
+	private final Poller poller;
 
 	private volatile boolean stopped;
 
@@ -61,9 +61,9 @@ public class DevelopmentPlan {
 	private int level2heavyLaneTotal;
 	private int level2heavyLanePasses;
 
-	private BinaryStats level1PassingStats;
-	private BinaryStats level2DirectPassesStats;
-	private StopwatchStats stopwatchStats;
+	private final BinaryStats level1PassingStats;
+	private final BinaryStats level2DirectPassesStats;
+	private final StopwatchStats stopwatchStats;
 
 	private RoundListener roundListener;
 
@@ -71,11 +71,11 @@ public class DevelopmentPlan {
 		void roundCompleted(Data data);
 	}
 
-	public class Poller implements Req {
+	public static class Poller implements Req {
 
 		private Sup upstream;
 
-		private Queue<Data> queue = new ArrayDeque<>();
+		private final Queue<Data> queue = new ArrayDeque<>();
 
 		@Override
 		public void setUpstream(Sup upstream) {
@@ -100,7 +100,7 @@ public class DevelopmentPlan {
 		}
 	}
 
-	public class Output extends TypedProc<OutputData> {
+	public static class Output extends TypedProc<OutputData> {
 
 		String prefix;
 
@@ -118,9 +118,9 @@ public class DevelopmentPlan {
 
 	}
 
-	private class OutputData extends DataProxy implements PropNet, PropStepsExamResult, PropSerialNumber{}
+	private static class OutputData extends DataProxy implements PropNet, PropStepsExamResult, PropSerialNumber{}
 
-	public class AddCopyReplicator extends TypedProc<AddCopyReplicatorData> {
+	public static class AddCopyReplicator extends TypedProc<AddCopyReplicatorData> {
 
 		public AddCopyReplicator() {
 			super(new AddCopyReplicatorData());
@@ -135,9 +135,9 @@ public class DevelopmentPlan {
 
 	}
 
-	private class AddCopyReplicatorData extends DataProxy implements PropNet, PropReplicator{}
+	private static class AddCopyReplicatorData extends DataProxy implements PropNet, PropReplicator{}
 
-	class FailuresLimit implements FilterListener {
+	static class FailuresLimit implements FilterListener {
 
 		private final int maxConsecutiveFailures;
 
@@ -213,7 +213,7 @@ public class DevelopmentPlan {
 					.withSubplotOf("level2-direct-passes"));
 			plotRegistry.addPlot(new PlotInfo("stopwatch")
 					.withStats(stopwatchStats)
-					.withTitle("Execution time for toplevel events")
+					.withTitle("Execution time for top level events")
 					.withRangeAxisLabel("ms")
 					.withRangeMax(1000.)
 					.withColor(Color.BLUE));
@@ -232,12 +232,12 @@ public class DevelopmentPlan {
 		this.roundListener = roundListener;
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 		DevelopmentPlan plan = new DevelopmentPlan(null, null);
 		long start = System.currentTimeMillis();
 		plan.executeBatch(100);
 		long diff = System.currentTimeMillis() - start;
-		System.err.println(String.format("execution time: %.3f s", ((double) diff) / 1000));
+		System.err.printf("execution time: %.3f s%n", ((double) diff) / 1000);
 	}
 
 	public void executeBatch(int batchSize) {

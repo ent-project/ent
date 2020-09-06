@@ -35,7 +35,7 @@ public class PipeDan implements Dan {
 
 	@Override
 	public void receiveNext(Data next) {
-		Data result = (Data) delegate.apply(next);
+		Data result = delegate.apply(next);
 		downstream.deliver(result);
 	}
 

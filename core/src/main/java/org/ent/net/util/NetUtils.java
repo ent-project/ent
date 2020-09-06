@@ -8,9 +8,12 @@ import org.ent.net.NetController;
 import org.ent.net.ReadOnlyNetController;
 import org.ent.net.node.Node;
 
-public class NetUtils {
+public final class NetUtils {
 
     private static NetController readController = new ReadOnlyNetController();
+
+    private NetUtils() {
+    }
 
     public static Set<Node> collectReachable(Node root) {
         Set<Node> reachableNodes = new LinkedHashSet<>();

@@ -26,7 +26,7 @@ public class ManagedRun {
 
 	private NetFormatter formatter;
 
-	private enum EvaluationStepResult { CONTINUE, STOP };
+	private enum EvaluationStepResult { CONTINUE, STOP }
 
 	public ManagedRun(RunSetup runSetup, ExecutionEventHandler evaluator) {
 		this.runSetup = runSetup;

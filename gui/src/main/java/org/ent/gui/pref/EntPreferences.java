@@ -90,7 +90,7 @@ public class EntPreferences extends AbstractPreferences {
 		try {
 			flush();
 		} catch (BackingStoreException e) {
-			log.error("Unable to flush after putting " + key, e);
+			log.error("Unable to flush after putting {}", key, e);
 		}
 	}
 

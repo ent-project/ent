@@ -19,13 +19,16 @@ import org.ent.net.node.cmd.operation.EvalOperation;
 import org.ent.net.node.cmd.operation.IsIdenticalOperation;
 import org.ent.net.node.cmd.operation.SetOperation;
 
-public class CommandFactory {
+public final class CommandFactory {
 
 	private static final int MAX_EVAL_LEVEL = 5;
 
-	private final static List<Command> allCommands = collectAllCommands();
+	private static final List<Command> allCommands = collectAllCommands();
 
-	private final static Map<String, Command> commandsByName = buildCommandsByName();
+	private static final Map<String, Command> commandsByName = buildCommandsByName();
+
+	private CommandFactory() {
+	}
 
 	private static List<Command> collectAllCommands() {
 		List<Command> result = new ArrayList<>();

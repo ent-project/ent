@@ -29,9 +29,7 @@ public class PtrPtrNodeAccessor implements Accessor<Node> {
 		return node.getArrowMaybe(direction1).flatMap(arrow -> {
 			Node child = arrow.getTarget(controller);
 			return child.getArrowMaybe(this.direction2);
-		}).map(childArrow -> {
-			return childArrow.getTarget(controller);
-		});
+		}).map(childArrow -> childArrow.getTarget(controller));
 	}
 
 	@Override

@@ -32,7 +32,7 @@ public class RandomNetCreator {
 
 	private DrawResult result;
 
-	private enum DrawResult { SUCCESS, REJECT };
+	private enum DrawResult { SUCCESS, REJECT }
 
 	public RandomNetCreator(Random rand, CommandDrawing commandDrawing) {
 		this.rand = rand;

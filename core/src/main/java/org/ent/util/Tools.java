@@ -2,7 +2,10 @@ package org.ent.util;
 
 import java.util.Arrays;
 
-public class Tools {
+public final class Tools {
+
+	private Tools() {
+	}
 
 	/**
 	 * Performs a binary search of value x in sorted array a.

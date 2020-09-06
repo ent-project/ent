@@ -92,39 +92,46 @@ public class Net {
 		if (!this.nodes.contains(root)) {
 			throw new AssertionError("Root must be one of the net nodes");
 		}
-
 		for (Node node : nodes) {
-			if (node instanceof MarkerNode) {
-				throw new AssertionError("Net node must not be a marker node");
-			}
-			for (Arrow arrow : node.getArrows()) {
-				Node child = arrow.getTarget(internalNetController);
-				if (child instanceof MarkerNode) {
-					if (!markerNodePermitted) {
-						throw new AssertionError("Child of node is marker node, but they are not permitted");
-					} else if (child != markerNode) {
-						throw new AssertionError("Child of node is marker node, but not the designated one");
-					}
-				} else {
-					if (!nodes.contains(child)) {
-						throw new AssertionError("Child of node must be part of the net");
-					}
+			consistencyTest(node);
+		}
+	}
 
-					Hub childHub = child.getHub();
-					if (!childHub.getInverseReferences().contains(arrow)) {
-						throw new AssertionError("Child nodes must be aware of their parents");
-					}
-				}
+	private void consistencyTest(Node node) {
+		if (node instanceof MarkerNode) {
+			throw new AssertionError("Net node must not be a marker node");
+		}
+		for (Arrow arrow : node.getArrows()) {
+			consistencyTest(arrow);
+		}
+
+		Hub hub = node.getHub();
+		for (Arrow arrow : hub.getInverseReferences()) {
+			if (!nodes.contains(arrow.getOrigin()))
+				throw new AssertionError("Nodes referencing a net node must be part of the net");
+			Node childOfParent = arrow.getTarget(internalNetController);
+			if (childOfParent != node) {
+				throw new AssertionError("Node must be child of its parent");
+			}
+		}
+	}
+
+	private void consistencyTest(Arrow arrow) {
+		Node child = arrow.getTarget(internalNetController);
+		if (child instanceof MarkerNode) {
+			if (!markerNodePermitted) {
+				throw new AssertionError("Child of node is marker node, but they are not permitted");
+			} else if (child != markerNode) {
+				throw new AssertionError("Child of node is marker node, but not the designated one");
+			}
+		} else {
+			if (!nodes.contains(child)) {
+				throw new AssertionError("Child of node must be part of the net");
 			}
 
-			Hub hub = node.getHub();
-			for (Arrow arrow : hub.getInverseReferences()) {
-				if (!nodes.contains(arrow.getOrigin()))
-					throw new AssertionError("Nodes referencing a net node must be part of the net");
-				Node childOfParent = arrow.getTarget(internalNetController);
-				if (childOfParent != node) {
-					throw new AssertionError("Node must be child of its parent");
-				}
+			Hub childHub = child.getHub();
+			if (!childHub.getInverseReferences().contains(arrow)) {
+				throw new AssertionError("Child nodes must be aware of their parents");
 			}
 		}
 	}

@@ -22,9 +22,7 @@ public class PtrNodeAccessor implements Accessor<Node> {
 
 	@Override
 	public Optional<Node> get(NetController controller, Node node) {
-		return node.getArrowMaybe(direction).map(childArrow -> {
-			return childArrow.getTarget(controller);
-		});
+		return node.getArrowMaybe(direction).map(childArrow -> childArrow.getTarget(controller));
 	}
 
 	@Override

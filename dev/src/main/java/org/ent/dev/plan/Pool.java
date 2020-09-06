@@ -40,7 +40,7 @@ public class Pool {
 
 	private final Map<Boolean, Double> excludeRateJoining = new HashMap<>();
 
-	private final List<PoolData> pool;
+	private final List<PoolData> members;
 
 	private Sup upstream;
 
@@ -57,7 +57,7 @@ public class Pool {
 	private final PoolProc poolProc;
 
 	private enum State {
-		START, WAITING_FOR_PRIMARY, WAITING_FOR_JOINING, ACCEPTING_FEEDBACK;
+		START, WAITING_FOR_PRIMARY, WAITING_FOR_JOINING, ACCEPTING_FEEDBACK
 	}
 
 	private class PoolProc implements Dan {
@@ -84,7 +84,7 @@ public class Pool {
 		}
 	}
 
-	private class PoolData extends DataProxy implements PropReplicator{
+	private static class PoolData extends DataProxy implements PropReplicator{
 		public PoolData(Data data) {
 			super(data);
 		}
@@ -94,7 +94,7 @@ public class Pool {
 
 	private class PoolFeedback implements Filter {
 
-		private Filter delegate;
+		private final Filter delegate;
 
 		public PoolFeedback(Filter delegate) {
 			this.delegate = delegate;
@@ -104,7 +104,7 @@ public class Pool {
 		public boolean test(Data element) {
 			log.trace("PoolFeedback: passes?");
 			boolean passed = delegate.test(element);
-			log.trace("PoolFeedback: delegate:" + passed);
+			log.trace("PoolFeedback: delegate: {}", passed);
 
 			if (state != State.ACCEPTING_FEEDBACK) {
 				throw new AssertionError("Providing feedback to pool, but is not in state to accept feedback; current state=" + state);
@@ -119,9 +119,9 @@ public class Pool {
 
 	public Pool(Random rand) {
 		this.rand = rand;
-		this.pool = new ArrayList<>(POOL_SIZE);
+		this.members = new ArrayList<>(POOL_SIZE);
 		for (int i = 0; i < POOL_SIZE; i++) {
-			this.pool.add(null);
+			this.members.add(null);
 		}
 		this.poolProc = new PoolProc();
 		initializeRateMaps();
@@ -172,9 +172,9 @@ public class Pool {
 		this.rewireFraction = rewireFraction;
 	}
 
-	private void maybeRemoveFromPool(int idx, Double propability) {
-		if (rand.nextDouble() < propability) {
-			pool.set(idx, null);
+	private void maybeRemoveFromPool(int idx, Double probability) {
+		if (rand.nextDouble() < probability) {
+			members.set(idx, null);
 		}
 	}
 
@@ -185,38 +185,31 @@ public class Pool {
 	private void requestNext() {
 		log.trace("entering requestNext");
 		switch (state) {
-		case START:
-			stage1();
-			break;
-		case WAITING_FOR_PRIMARY:
-		case WAITING_FOR_JOINING:
-			upstream.requestNext();
-			break;
-		default:
-			throw new AssertionError();
+			case START -> stage1();
+			case WAITING_FOR_PRIMARY, WAITING_FOR_JOINING -> upstream.requestNext();
+			default -> throw new AssertionError();
 		}
 	}
 
 	private void receiveNext(Data next) {
 		log.trace("entering receiveNext");
 		switch (state) {
-		case WAITING_FOR_PRIMARY:
-			pool.set(idxPrimary, new PoolData(next));
-			stage2();
-			break;
-		case WAITING_FOR_JOINING:
-			pool.set(idxJoining, new PoolData(next));
-			stage3();
-			break;
-		default:
-			throw new AssertionError("Not waiting for next from upstream");
+			case WAITING_FOR_PRIMARY -> {
+				members.set(idxPrimary, new PoolData(next));
+				stage2();
+			}
+			case WAITING_FOR_JOINING -> {
+				members.set(idxJoining, new PoolData(next));
+				stage3();
+			}
+			default -> throw new AssertionError("Not waiting for next from upstream");
 		}
 	}
 
 	private void stage1() {
 		log.trace("entering stage1");
 		idxPrimary = rand.nextInt(POOL_SIZE);
-		Data dataPrimary = pool.get(idxPrimary);
+		Data dataPrimary = members.get(idxPrimary);
 		if (dataPrimary == null) {
 			state = State.WAITING_FOR_PRIMARY;
 			upstream.requestNext();
@@ -231,7 +224,7 @@ public class Pool {
 		if (idxJoining >= idxPrimary) {
 			idxJoining++;
 		}
-		Data dataJoining = pool.get(idxJoining);
+		Data dataJoining = members.get(idxJoining);
 		if (dataJoining == null) {
 			state = State.WAITING_FOR_JOINING;
 			upstream.requestNext();
@@ -242,8 +235,8 @@ public class Pool {
 
 	private void stage3() {
 		log.trace("entering stage3");
-		PoolData poolDataPrimary = pool.get(idxPrimary);
-		PoolData poolDataJoining = pool.get(idxJoining);
+		PoolData poolDataPrimary = members.get(idxPrimary);
+		PoolData poolDataJoining = members.get(idxJoining);
 
 		Net offspring = produceOffspring(poolDataPrimary, poolDataJoining);
 		PropNet offspringData = new PoolOutputDataImpl();

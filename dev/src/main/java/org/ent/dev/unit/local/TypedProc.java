@@ -11,7 +11,7 @@ public abstract class TypedProc<T extends DataProxy> implements Proc {
 		this.accessor = accessor;
 	}
 
-	protected abstract void doAccept(T Data);
+	protected abstract void doAccept(T data);
 
 	@Override
 	public void accept(Data data) {

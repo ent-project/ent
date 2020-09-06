@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.commons.math3.util.ArithmeticUtils;
 
-public class VariableNameHelper {
+public final class VariableNameHelper {
 
 	private static final int RADIX = 26; // number of letters 'a' .. 'z'
 
@@ -15,6 +15,9 @@ public class VariableNameHelper {
 
 	static {
 		summedBlockSizes.add(0);
+	}
+
+	private VariableNameHelper() {
 	}
 
 	/**

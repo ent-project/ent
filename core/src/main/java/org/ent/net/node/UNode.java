@@ -15,7 +15,7 @@ import org.ent.net.NetController;
  */
 public class UNode extends Node {
 
-	public Hub childHub;
+	private Hub childHub;
 
 	private final Arrow arrow;
 

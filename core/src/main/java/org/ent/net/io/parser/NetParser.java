@@ -17,6 +17,8 @@ import org.ent.net.NetController;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * A parser that creates a collection of nodes from a text-description in a domain-specific language.
  * <p>
@@ -119,9 +121,6 @@ public class NetParser {
             Node node = templateNodeMap.get(template);
             for (Arrow arrow : node.getArrows()) {
             	Node child = resolveNode(template.getChild(arrow.getDirection()));
-            	if (child == null) {
-            		throw new ParserException();
-            	}
             	arrow.setTarget(controller, child);
             }
             allNodes.add(node);
@@ -150,7 +149,7 @@ public class NetParser {
 		return result;
 	}
 
-	private Node resolveNode(NodeTemplate template) throws ParserException {
+	private @NotNull Node resolveNode(NodeTemplate template) throws ParserException {
 		NodeTemplate resolvedTemplate;
 		if (template instanceof IdentifierNodeTemplate) {
 			resolvedTemplate = firstPassNetParser.resolveIdentifier((IdentifierNodeTemplate) template);

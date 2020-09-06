@@ -1,6 +1,9 @@
 package org.ent.net.io;
 
-public class HexConverter {
+public final class HexConverter {
+
+	private HexConverter() {
+	}
 
 	public static String toHex(long n) {
 		return String.format("%016x", n);
