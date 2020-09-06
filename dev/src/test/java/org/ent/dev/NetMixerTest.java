@@ -8,10 +8,10 @@ import org.ent.net.io.parser.NetParser;
 import org.ent.net.node.MarkerNode;
 import org.junit.jupiter.api.Test;
 
-public class NetMixerTest {
+class NetMixerTest {
 
 	@Test
-	public void join() throws Exception {
+	void join() throws Exception {
 		MarkerNode marker = new MarkerNode();
 		Net net1 = new NetParser().permitMarkerNodes(marker).parse("A=((<ix>, ([#], A)), [#])");
 		Net net2 = new NetParser().permitMarkerNodes(marker).parse("((<nop>, [#]), <eval3>)");

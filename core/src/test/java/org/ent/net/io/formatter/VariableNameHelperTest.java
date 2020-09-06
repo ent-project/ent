@@ -10,15 +10,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class VariableNameHelperTest {
+class VariableNameHelperTest {
 
 	@ParameterizedTest(name = "{index} => getLetterBasedVariableNameForIndex({0}) should return {1}")
 	@MethodSource("getLetterBasedVariableNameForIndex_testData")
-	public void getLetterBasedVariableNameForIndex(int index, String variableName) throws Exception {
+	void getLetterBasedVariableNameForIndex(int index, String variableName) {
 		assertThat(VariableNameHelper.getLetterBasedVariableNameForIndex(index)).isEqualTo(variableName);
 	}
 
-	@SuppressWarnings("unused")
 	private static Stream<Arguments> getLetterBasedVariableNameForIndex_testData() {
 	    return Stream.of(
 			of(0, "a"),

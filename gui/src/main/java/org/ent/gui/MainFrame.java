@@ -35,7 +35,7 @@ public class MainFrame extends JFrame {
 	private JToggleButton btnPlots;
 	private JToggleButton btnParameters;
 
-	public MainFrame(DevelopmentPlan plan) throws HeadlessException {
+	public MainFrame(DevelopmentPlan plan) {
 		super("Ent");
 
 		this.plan = plan;

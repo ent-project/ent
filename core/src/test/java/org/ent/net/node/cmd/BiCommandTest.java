@@ -25,7 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class BiCommandTest {
+class BiCommandTest {
 
 	private BiCommand<Arrow, Node> command;
 
@@ -39,12 +39,12 @@ public class BiCommandTest {
 	private BiOperation<Arrow, Node> operation;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		command = new BiCommand<>(accessor1, accessor2, operation);
 	}
 
 	@Test
-	public void execute_error_noBNode() throws Exception {
+	void execute_error_noBNode() throws Exception {
 		Net net = new NetParser().parse("A=[A]");
 		NetController controller = new DefaultNetController(net);
 
@@ -54,7 +54,7 @@ public class BiCommandTest {
 	}
 
 	@Test
-	public void execute_error_accessor1Empty() throws Exception {
+	void execute_error_accessor1Empty() throws Exception {
 		Net net = new NetParser().parse("A=(A,A)");
 		NetController controller = new DefaultNetController(net);
 		Node node = net.getRoot();
@@ -66,7 +66,7 @@ public class BiCommandTest {
 	}
 
 	@Test
-	public void execute_error_accessor2Empty() throws Exception {
+	void execute_error_accessor2Empty() throws Exception {
 		Net net = new NetParser().parse("A=(A,A)");
 		NetController controller = new DefaultNetController(net);
 		Node node = net.getRoot();
@@ -81,7 +81,7 @@ public class BiCommandTest {
 	}
 
 	@Test
-	public void execute_okay() throws Exception {
+	void execute_okay() throws Exception {
 		Net net = new NetParser().parse("A=(A,A)");
 		NetController controller = new DefaultNetController(net);
 		Node node = net.getRoot();
@@ -100,7 +100,7 @@ public class BiCommandTest {
 	}
 
 	@Test
-	public void getShortName() throws Exception {
+	void getShortName() throws Exception {
 		when(accessor1.getShortName()).thenReturn("a");
 		when(operation.getShortName()).thenReturn("x");
 		when(accessor2.getShortName()).thenReturn("b");

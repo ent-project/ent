@@ -15,7 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ManagedRunTest {
+class ManagedRunTest {
 
 	private static final int MAX_STEPS = 5;
 
@@ -26,7 +26,7 @@ public class ManagedRunTest {
 	NetRunner netRunner;
 
 	@Test
-	public void perform_okay() {
+	void perform_okay() {
 		doReturn(SUCCESS).when(netRunner).step();
 		doReturn(MAX_STEPS).when(setup).getMaxSteps();
 		ManagedRun run = new ManagedRun(setup).withNetRunner(netRunner);
@@ -38,18 +38,18 @@ public class ManagedRunTest {
 	}
 
 	@Test
-	public void perform_stop_fatal() {
+	void perform_stop_fatal() {
 		doReturn(FATAL).when(netRunner).step();
 		ManagedRun run = new ManagedRun(setup).withNetRunner(netRunner);
 
 		run.perform();
 
 		verify(netRunner, times(1)).step();
-		assertThat(run.getNoSteps()).isEqualTo(0);
+		assertThat(run.getNoSteps()).isZero();
 	}
 
 	@Test
-	public void perform_okay_commandExecutionFailedIsNotFatal() {
+	void perform_okay_commandExecutionFailedIsNotFatal() {
 		doReturn(SUCCESS, SUCCESS, COMMAND_EXECUTION_FAILED).when(netRunner).step();
 		doReturn(false).when(setup).isCommandExecutionFailedIsFatal();
 		doReturn(MAX_STEPS).when(setup).getMaxSteps();
@@ -62,7 +62,7 @@ public class ManagedRunTest {
 	}
 
 	@Test
-	public void perform_stop_commandExecutionFailed() {
+	void perform_stop_commandExecutionFailed() {
 		doReturn(SUCCESS, SUCCESS, COMMAND_EXECUTION_FAILED).when(netRunner).step();
 		doReturn(MAX_STEPS).when(setup).getMaxSteps();
 		doReturn(true).when(setup).isCommandExecutionFailedIsFatal();

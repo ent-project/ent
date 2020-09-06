@@ -15,18 +15,18 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class NetCopyTest {
+class NetCopyTest {
 
 	private static NetTestData testData;
 
 	@BeforeAll
-	public static void setUpTestData() {
+	static void setUpTestData() {
 		testData = new NetTestData();
 	}
 
 	@ParameterizedTest(name = "{index} => runCopy(...) on {1}")
 	@MethodSource("netData")
-	public void createCopy(Net net, String str) throws Exception {
+	void createCopy(Net net, String str) throws Exception {
 		NetCopy copy = new NetCopy(net);
 
 		copy.createCopy();
@@ -36,13 +36,12 @@ public class NetCopyTest {
 		assertThat(new NetFormatter().format(clone)).isEqualTo(new NetFormatter().format(net));
 	}
 
-	@SuppressWarnings("unused")
 	private static Stream<Arguments> netData() {
 		return testData.all.stream().map(nws -> Arguments.of(nws.getNet(), nws.getStringRepresentation()));
 	}
 
 	@Test
-	public void createCopy_withMarker() throws Exception {
+	void createCopy_withMarker() throws Exception {
 		MarkerNode markerNode = new MarkerNode();
 		Net net = new NetParser().permitMarkerNodes(markerNode).parse("[#]");
 		NetCopy copy = new NetCopy(net);

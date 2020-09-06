@@ -13,11 +13,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class NetTrimmerTest {
+class NetTrimmerTest {
 
 	@ParameterizedTest(name = "{index} => runTrimmer(...) should return {1}")
 	@MethodSource("runTrimmer_testData")
-	public void runTrimmer(String original, String expectedTrimmed) throws Exception {
+	void runTrimmer(String original, String expectedTrimmed) throws Exception {
 		NetParser parser = new NetParser();
 		Net net = parser.parse(original);
 
@@ -41,7 +41,6 @@ public class NetTrimmerTest {
 
 	}
 
-	@SuppressWarnings("unused")
 	private static Stream<Arguments> runTrimmer_testData() {
 	    return Stream.of(
 			of(	"(A=(<nop>, [B=(A, [A])]), B)",

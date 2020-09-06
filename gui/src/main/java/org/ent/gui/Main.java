@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory;
 
 public class Main {
 
-	private static final Logger log = LoggerFactory.getLogger(Main.class);
-
 	public static final String PLOT_DIALOG = "plotDialog";
 
 	public static final String PARAMETERS_DIALOG = "parametersDialog";
@@ -53,9 +51,9 @@ public class Main {
 	}
 
 	public static void addDialogCreatedListener(DialogCreatedListener listener) {
-		dialogCreated.addPropertyChangeListener(pcl -> {
-			listener.dialogCreated(pcl.getPropertyName(), (JDialog) pcl.getNewValue());
-		});
+		dialogCreated.addPropertyChangeListener(pcl ->
+			listener.dialogCreated(pcl.getPropertyName(), (JDialog) pcl.getNewValue())
+		);
 	}
 
 	public static ParametersDialog getParametersDialog() {

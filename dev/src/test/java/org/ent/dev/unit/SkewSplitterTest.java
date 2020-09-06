@@ -19,13 +19,13 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class SkewSplitterTest {
+class SkewSplitterTest {
 
-	private Data dataUpstream = new DataImpl();
-	private Data dataHeavyLane = new DataImpl();
-	private Data dataLightLane = new DataImpl();
+	private final Data dataUpstream = new DataImpl();
+	private final Data dataHeavyLane = new DataImpl();
+	private final Data dataLightLane = new DataImpl();
 
-	private SkewSplitter skewSplitter = new SkewSplitter();
+	private final SkewSplitter skewSplitter = new SkewSplitter();
 
 	@Spy
 	private Sup upstream = new SourceSup(() -> dataUpstream);
@@ -40,7 +40,7 @@ public class SkewSplitterTest {
 	private SinkReq downstream = new SinkReq(data -> {});
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		skewSplitter.setHeavyLane(heavyLane);
 		skewSplitter.setLightLane(lightLane);
 
@@ -49,7 +49,7 @@ public class SkewSplitterTest {
 	}
 
 	@Test
-	public void integration_pass_pipedThroughLightLane() {
+	void integration_pass_pipedThroughLightLane() {
 		when(lightLane.apply(dataUpstream)).thenReturn(dataLightLane);
 		Filter sorter = data -> true;
 		skewSplitter.setSorter(sorter);
@@ -76,7 +76,7 @@ public class SkewSplitterTest {
 	}
 
 	@Test
-	public void integration_noPass_deliveredToHeavyLane() {
+	void integration_noPass_deliveredToHeavyLane() {
 		Filter sorter = data -> false;
 		skewSplitter.setSorter(sorter);
 

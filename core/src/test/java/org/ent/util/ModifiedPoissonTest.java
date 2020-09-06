@@ -6,10 +6,10 @@ import static org.assertj.core.api.Assertions.within;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.junit.jupiter.api.Test;
 
-public class ModifiedPoissonTest {
+class ModifiedPoissonTest {
 
 	@Test
-	public void getCdf() throws Exception {
+	void getCdf() throws Exception {
 		double lambda = 5.7;
 		PoissonDistribution poissonDistr = new PoissonDistribution(lambda);
 		ModifiedPoisson modifiedPoisson = ModifiedPoisson.getModifiedPoisson(lambda);
@@ -23,7 +23,7 @@ public class ModifiedPoissonTest {
 	}
 
 	@Test
-	public void inverseCdfLookup() throws Exception {
+	void inverseCdfLookup() throws Exception {
 		double lambda = 1.2;
 		ModifiedPoisson mp = ModifiedPoisson.getModifiedPoisson(lambda);
 		PoissonDistribution pd = new PoissonDistribution(lambda);
@@ -35,9 +35,9 @@ public class ModifiedPoissonTest {
 
 		double epsilon = 1e-7;
 
-		assertThat(mp.inverseCdfLookup(0)).isEqualTo(0);
-		assertThat(mp.inverseCdfLookup(epsilon)).isEqualTo(0);
-		assertThat(mp.inverseCdfLookup(p0 - epsilon)).isEqualTo(0);
+		assertThat(mp.inverseCdfLookup(0)).isZero();
+		assertThat(mp.inverseCdfLookup(epsilon)).isZero();
+		assertThat(mp.inverseCdfLookup(p0 - epsilon)).isZero();
 		assertThat(mp.inverseCdfLookup(p0 + epsilon)).isEqualTo(1);
 		assertThat(mp.inverseCdfLookup(p0 + p1 - epsilon)).isEqualTo(1);
 		assertThat(mp.inverseCdfLookup(p0 + p1 + epsilon)).isEqualTo(2);
@@ -48,7 +48,7 @@ public class ModifiedPoissonTest {
 	}
 
 	@Test
-	public void getCutoffValue() throws Exception {
+	void getCutoffValue() throws Exception {
 		assertThat(ModifiedPoisson.getModifiedPoisson(0.5).getCutoffValue()).isEqualTo(21);
 		assertThat(ModifiedPoisson.getModifiedPoisson(6.7).getCutoffValue()).isEqualTo(21);
 		assertThat(ModifiedPoisson.getModifiedPoisson(7.9).getCutoffValue()).isEqualTo(24);

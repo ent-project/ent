@@ -8,11 +8,14 @@ import org.ent.dev.stat.PlotRegistry;
 
 public class PlotRegistryImpl implements PlotRegistry {
 
-	public List<PlotInfo> plots = new ArrayList<>();
+	private final List<PlotInfo> plots = new ArrayList<>();
 
 	@Override
 	public void addPlot(PlotInfo plotInfo) {
 		plots.add(plotInfo);
 	}
 
+	public List<PlotInfo> getPlots() {
+		return plots;
+	}
 }

@@ -13,10 +13,10 @@ import org.ent.net.io.parser.NetParser;
 import org.ent.net.node.MarkerNode;
 import org.junit.jupiter.api.Test;
 
-public class NetRunnerTest {
+class NetRunnerTest {
 
 	@Test
-	public void testNetRunner1() throws Exception {
+	void testNetRunner1() throws Exception {
 		doTestNetRunner(true, StepResult.FATAL, Arrays.asList(
 				"((<eval1>, (<\\==|>, [#])), A=(B=(<\\==|>, (A, [B])), [#]))",
 				"A=(B=(<\\==|>, (A, [B])), [#])",
@@ -24,7 +24,7 @@ public class NetRunnerTest {
 	}
 
 	@Test
-	public void testNetRunner2() throws Exception {
+	void testNetRunner2() throws Exception {
 		doTestNetRunner(false, StepResult.FATAL, Arrays.asList(
 				"A=((_a=<|dup*>, B=([B], C=(_a, C))), ((<ix>, (A, _b=<eval5>)), _b))",
 				"D=((<ix>, (((_a=<|dup*>, ([(_a, C=(_a, C))], C)), D), _b=<eval5>)), _b)",
@@ -34,7 +34,7 @@ public class NetRunnerTest {
 	}
 
 	@Test
-	public void testNetRunner3() throws Exception {
+	void testNetRunner3() throws Exception {
 		doTestNetRunner(false, StepResult.INVALID_COMMAND_NODE, Arrays.asList(
 				"A=(B=(<ix>, B), (A, B))",
 				"C=((_a=<ix>, C), _a)",
@@ -42,7 +42,7 @@ public class NetRunnerTest {
 	}
 
 	@Test
-	public void testNetRunner4() throws Exception {
+	void testNetRunner4() throws Exception {
 		doTestNetRunner(false, StepResult.FATAL, Arrays.asList(
 				"(A=(_a=</dup*>, B=((C=(A, a=[([(((</dup*>, a), [_b=</:\\\\>]), _a)], _b)]), B), _a)), C)",
 				"((_a=</dup*>, B=((</dup*>, B), _a)), a=[([(((</dup*>, a), [_b=</:\\\\>]), _a)], _b)])",

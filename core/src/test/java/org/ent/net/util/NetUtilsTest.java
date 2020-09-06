@@ -14,24 +14,23 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class NetUtilsTest {
+class NetUtilsTest {
 
 	public static NetTestData data;
 
 	@BeforeAll
-	public static void setUp() {
+	static void setUp() {
 		data = new NetTestData();
 	}
 
 	@ParameterizedTest(name = "{index} => run()")
 	@MethodSource("collectReachable_testData")
-	public void collectReachable(Net net) throws Exception {
+	void collectReachable(Net net) throws Exception {
 		Set<Node> nodes = NetUtils.collectReachable(net.getRoot());
 
 		assertThat(nodes).isEqualTo(net.getNodes());
 	}
 
-	@SuppressWarnings("unused")
 	private static Stream<Arguments> collectReachable_testData() {
 		return data.all.stream().map(netRep -> of(netRep.getNet()));
 	}

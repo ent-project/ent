@@ -9,11 +9,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class HexConverterTest {
+class HexConverterTest {
 
 	@ParameterizedTest(name = "{index} => run()")
 	@MethodSource("hexConverter_testData")
-	public void toHex(long value, String hexExpected) throws Exception {
+	void toHex(long value, String hexExpected) throws Exception {
 		String hexActual = HexConverter.toHex(value);
 
 		assertThat(hexActual).isEqualTo(hexExpected);
@@ -21,13 +21,12 @@ public class HexConverterTest {
 
 	@ParameterizedTest(name = "{index} => run()")
 	@MethodSource("hexConverter_testData")
-	public void fromHex(long valueExpected, String hexString) throws Exception {
+	void fromHex(long valueExpected, String hexString) throws Exception {
 		long valueActual = HexConverter.fromHex(hexString);
 
 		assertThat(valueActual).isEqualTo(valueExpected);
 	}
 
-	@SuppressWarnings("unused")
 	private static Stream<Arguments> hexConverter_testData() {
 		return Stream.of(
 				of(2772360572640341275L,  	"267967409186ad1b"),

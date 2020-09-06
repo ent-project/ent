@@ -22,7 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class NetFormatterTest {
+class NetFormatterTest {
 
 	private static NetTestData testData;
 
@@ -34,14 +34,14 @@ public class NetFormatterTest {
 	}
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		formatter = new NetFormatter();
 		formatter.setAscii(true);
 	}
 
 	@ParameterizedTest(name = "{index} => format(...) should return {1}")
 	@MethodSource("format_testData")
-	public void format(Net net, String stringRepresentation) throws Exception {
+	void format(Net net, String stringRepresentation) throws Exception {
 		String str = formatter.format(net);
 
 		assertThat(str).isEqualTo(stringRepresentation);
@@ -53,7 +53,7 @@ public class NetFormatterTest {
 	}
 
 	@Test
-	public void format_2Calls() {
+	void format_2Calls() {
 		Net net = new Net();
 		NetController controller = new DefaultNetController(net);
 		net.runWithMarkerNode(dummy -> {
@@ -78,7 +78,7 @@ public class NetFormatterTest {
 	}
 
 	@Test
-	public void format_3Calls() {
+	void format_3Calls() {
 		String str0 = formatter.format(testData.net0.getNet());
 		String str1 = formatter.format(testData.net1.getNet());
 		String str2 = formatter.format(testData.net2.getNet());
@@ -89,7 +89,7 @@ public class NetFormatterTest {
 	}
 
 	@Test
-	public void format_multipleRoots() {
+	void format_multipleRoots() {
 		Net net = new Net();
 		NetController controller = new DefaultNetController(net);
 		net.runWithMarkerNode(dummy -> {
@@ -109,7 +109,7 @@ public class NetFormatterTest {
 	}
 
 	@Test
-	public void format_setNodeNames() {
+	void format_setNodeNames() {
 		Net net = new Net();
 		NetController controller = new DefaultNetController(net);
 
@@ -125,7 +125,7 @@ public class NetFormatterTest {
 	}
 
 	@Test
-	public void format_maxDepth() {
+	void format_maxDepth() {
 		Net net = testData.buildNetDeep().getNet();
 		formatter.setMaxDepth(3);
 

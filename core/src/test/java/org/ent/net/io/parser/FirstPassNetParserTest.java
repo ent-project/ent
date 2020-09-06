@@ -11,19 +11,19 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-public class FirstPassNetParserTest {
+class FirstPassNetParserTest {
 
 	@Test
-	public void resolveIdentifier_chain() throws Exception {
+	void resolveIdentifier_chain() throws Exception {
 		String input = "A=B; B=C; C=<nop>";
 		FirstPassNetParser parser = new FirstPassNetParser(new StringReader(input));
 		List<NodeTemplate> mainNodeTemplates = parser.parseAll();
 
-		assertThat(mainNodeTemplates.size()).isEqualTo(3);
+		assertThat(mainNodeTemplates).hasSize(3);
 		Set<NodeTemplate> allEntries = parser.getAllEntries();
-		assertThat(allEntries.size()).isEqualTo(3);
+		assertThat(allEntries).hasSize(3);
 		Map<String, NodeTemplate> identifierMapping = parser.getIdentifierMapping();
-		assertThat(identifierMapping.size()).isEqualTo(3);
+		assertThat(identifierMapping).hasSize(3);
 		assertThat(identifierMapping).containsOnlyKeys("A", "B", "C");
 
 		NodeTemplate template1 = identifierMapping.get("A");
@@ -47,7 +47,7 @@ public class FirstPassNetParserTest {
 	}
 
 	@Test
-	public void parseAll_okay_semicolons() throws Exception {
+	void parseAll_okay_semicolons() throws Exception {
 		String input = "; <nop> ;;; <nop>;";
 		FirstPassNetParser parser = new FirstPassNetParser(new StringReader(input));
 		parser.parseAll();
@@ -55,7 +55,7 @@ public class FirstPassNetParserTest {
 	}
 
 	@Test
-	public void resolveIdentifier_error_cycle() throws Exception {
+	void resolveIdentifier_error_cycle() throws Exception {
 		String input = "A=B; B=C; C=A";
 		FirstPassNetParser parser = new FirstPassNetParser(new StringReader(input));
 		parser.parseAll();
@@ -67,7 +67,7 @@ public class FirstPassNetParserTest {
 	}
 
 	@Test
-	public void parseAll_error_duplicateName() throws Exception {
+	void parseAll_error_duplicateName() throws Exception {
 		String input = "(A=<nop>, A=[<nop>])";
 		FirstPassNetParser parser = new FirstPassNetParser(new StringReader(input));
 		assertThatThrownBy(() -> parser.parseAll())

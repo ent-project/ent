@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class DefaultNetControllerTest {
+class DefaultNetControllerTest {
 
 	@Mock
 	private ExecutionEventHandler eventHandler;
@@ -30,14 +30,14 @@ public class DefaultNetControllerTest {
 	private UNode externalNode;
 
 	@BeforeEach
-	private void setUp() throws Exception {
+	void setUp() throws Exception {
 		parser = new NetParser();
 		parser.parse("a=[a]");
 		externalNode = (UNode) parser.getNodeNames().get("a");
 	}
 
 	@Test
-	public void getTarget() throws Exception {
+	void getTarget() throws Exception {
 		Net net = parser.parse("u=[_a=<nop>]");
 		UNode u = (UNode) parser.getNodeNames().get("u");
 		CNode nop = (CNode) parser.getNodeNames().get("_a");
@@ -51,7 +51,7 @@ public class DefaultNetControllerTest {
 	}
 
 	@Test
-	public void getTarget_error() throws Exception {
+	void getTarget_error() throws Exception {
 		Net net = new Net();
 		DefaultNetController controller = new DefaultNetController(net);
 
@@ -61,7 +61,7 @@ public class DefaultNetControllerTest {
 	}
 
 	@Test
-	public void setTarget() throws Exception {
+	void setTarget() throws Exception {
 		Net net = parser.parse("u=[<nop>]; _b=<ix>");
 		UNode u = (UNode) parser.getNodeNames().get("u");
 		CNode ix = (CNode) parser.getNodeNames().get("_b");
@@ -75,7 +75,7 @@ public class DefaultNetControllerTest {
 	}
 
 	@Test
-	public void setTarget_error_rogueOrigin() throws Exception {
+	void setTarget_error_rogueOrigin() throws Exception {
 		Net net = parser.parse("_a=<nop>");
 		CNode a = (CNode) parser.getNodeNames().get("_a");
 		DefaultNetController controller = new DefaultNetController(net);
@@ -86,7 +86,7 @@ public class DefaultNetControllerTest {
 	}
 
 	@Test
-	public void setTarget_error_rogueTarget() throws Exception {
+	void setTarget_error_rogueTarget() throws Exception {
 		Net net = parser.parse("u=[<nop>]");
 		UNode u = (UNode) parser.getNodeNames().get("u");
 		DefaultNetController controller = new DefaultNetController(net);
@@ -97,7 +97,7 @@ public class DefaultNetControllerTest {
 	}
 
 	@Test
-	public void newUNode() throws Exception {
+	void newUNode() throws Exception {
 		Net net = new Net();
 		DefaultNetController controller = new DefaultNetController(net, eventHandler);
 
@@ -110,7 +110,7 @@ public class DefaultNetControllerTest {
 	}
 
 	@Test
-	public void newUNode_childArg() throws Exception {
+	void newUNode_childArg() throws Exception {
 		Net net = parser.parse("_a=<nop>");
 		Node nop = parser.getNodeNames().get("_a");
 		DefaultNetController controller = new DefaultNetController(net, eventHandler);
@@ -124,7 +124,7 @@ public class DefaultNetControllerTest {
 	}
 
 	@Test
-	public void newUNode_childArg_error() throws Exception {
+	void newUNode_childArg_error() throws Exception {
 		Net net = new Net();
 		DefaultNetController controller = new DefaultNetController(net);
 
@@ -134,7 +134,7 @@ public class DefaultNetControllerTest {
 	}
 
 	@Test
-	public void newBNode() throws Exception {
+	void newBNode() throws Exception {
 		Net net = new Net();
 		DefaultNetController controller = new DefaultNetController(net, eventHandler);
 
@@ -148,7 +148,7 @@ public class DefaultNetControllerTest {
 	}
 
 	@Test
-	public void newBNode_childArgs() throws Exception {
+	void newBNode_childArgs() throws Exception {
 		Net net = parser.parse("_a=<nop>; _b=<ix>");
 		Node nop = parser.getNodeNames().get("_a");
 		Node ix = parser.getNodeNames().get("_b");
@@ -164,7 +164,7 @@ public class DefaultNetControllerTest {
 	}
 
 	@Test
-	public void newBNode_childArgs_error_left() throws Exception {
+	void newBNode_childArgs_error_left() throws Exception {
 		Net net = parser.parse("_a=<nop>");
 		Node nop = parser.getNodeNames().get("_a");
 		DefaultNetController controller = new DefaultNetController(net);
@@ -175,7 +175,7 @@ public class DefaultNetControllerTest {
 	}
 
 	@Test
-	public void newBNode_childArgs_error_right() throws Exception {
+	void newBNode_childArgs_error_right() throws Exception {
 		Net net = parser.parse("_a=<nop>");
 		Node nop = parser.getNodeNames().get("_a");
 		DefaultNetController controller = new DefaultNetController(net);
@@ -186,7 +186,7 @@ public class DefaultNetControllerTest {
 	}
 
 	@Test
-	public void newCNode() throws Exception {
+	void newCNode() throws Exception {
 		Net net = new Net();
 		DefaultNetController controller = new DefaultNetController(net, eventHandler);
 
@@ -198,7 +198,7 @@ public class DefaultNetControllerTest {
 	}
 
 	@Test
-	public void ancestorSwap() throws Exception {
+	void ancestorSwap() throws Exception {
 		Net net = parser.parse("(([_a=<nop>], _b=<ix>), ((_a, _a), [_b]))");
 		Node a = parser.getNodeNames().get("_a");
 		Node b = parser.getNodeNames().get("_b");
@@ -214,7 +214,7 @@ public class DefaultNetControllerTest {
 	}
 
 	@Test
-	public void ancestorSwap_error_first() throws Exception {
+	void ancestorSwap_error_first() throws Exception {
 		Net net = parser.parse("_a=<nop>");
 		Node nop = parser.getNodeNames().get("_a");
 		DefaultNetController controller = new DefaultNetController(net);
@@ -225,7 +225,7 @@ public class DefaultNetControllerTest {
 	}
 
 	@Test
-	public void ancestorSwap_error_second() throws Exception {
+	void ancestorSwap_error_second() throws Exception {
 		Net net = parser.parse("_a=<nop>");
 		Node nop = parser.getNodeNames().get("_a");
 		DefaultNetController controller = new DefaultNetController(net);

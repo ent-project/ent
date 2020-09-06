@@ -8,10 +8,10 @@ import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.CommandFactory;
 import org.junit.jupiter.api.Test;
 
-public class CommandDrawingImplTest {
+class CommandDrawingImplTest {
 
 	@Test
-	public void randomValueToIndex() throws Exception {
+	void randomValueToIndex() throws Exception {
 		Command nopCommand = CommandFactory.createNopCommand();
 		CommandDrawingImpl commandDrawing = new CommandDrawingImpl(RandomTestUtil.newRandom(),
 				Arrays.asList(
@@ -19,10 +19,10 @@ public class CommandDrawingImplTest {
 						new CommandCandidate(nopCommand, 5.0),
 						new CommandCandidate(nopCommand, 10.0)));
 
-		assertThat(commandDrawing.randomValueToIndex(0.0)).isEqualTo(0);
-		assertThat(commandDrawing.randomValueToIndex(0.1)).isEqualTo(0);
-		assertThat(commandDrawing.randomValueToIndex(1.9)).isEqualTo(0);
-		assertThat(commandDrawing.randomValueToIndex(2.0)).isEqualTo(0);
+		assertThat(commandDrawing.randomValueToIndex(0.0)).isZero();
+		assertThat(commandDrawing.randomValueToIndex(0.1)).isZero();
+		assertThat(commandDrawing.randomValueToIndex(1.9)).isZero();
+		assertThat(commandDrawing.randomValueToIndex(2.0)).isZero();
 		assertThat(commandDrawing.randomValueToIndex(2.1)).isEqualTo(1);
 		assertThat(commandDrawing.randomValueToIndex(6.9)).isEqualTo(1);
 		assertThat(commandDrawing.randomValueToIndex(7.0)).isEqualTo(1);
@@ -33,7 +33,7 @@ public class CommandDrawingImplTest {
 	}
 
 	@Test
-	public void drawCommand() throws Exception {
+	void drawCommand() throws Exception {
 		Command nopCommand = CommandFactory.createNopCommand();
 		Command ixCommand = CommandFactory.createAncestorSwapCommand();
 		Command evalCommand = CommandFactory.createEvalCommand(0);

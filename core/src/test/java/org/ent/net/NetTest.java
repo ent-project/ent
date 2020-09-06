@@ -13,16 +13,16 @@ import org.ent.net.node.UNode;
 import org.ent.net.node.cmd.NopCommand;
 import org.junit.jupiter.api.Test;
 
-public class NetTest {
+class NetTest {
 
 	@Test
-	public void consistencyTest_okay() throws Exception {
+	void consistencyTest_okay() throws Exception {
 		Net net = new NetParser().parse("A=[A]");
 		assertThatCode(() -> net.consistencyTest()).doesNotThrowAnyException();
 	}
 
 	@Test
-	public void consistencyTest_error_rootNull() throws Exception {
+	void consistencyTest_error_rootNull() throws Exception {
 		Net net = new NetParser().parse("A=[A]");
 		net.setRoot(null);
 		assertThatThrownBy(() -> net.consistencyTest()).isInstanceOf(AssertionError.class)
@@ -30,7 +30,7 @@ public class NetTest {
 	}
 
 	@Test
-	public void consistencyTest_error_rootNotInNet() throws Exception {
+	void consistencyTest_error_rootNotInNet() throws Exception {
 		Net net = new NetParser().parse("A=[A]");
 		Net net2 = new NetParser().parse("x=(x,x)");
 		net.setRoot(net2.getNodes().iterator().next());
@@ -39,7 +39,7 @@ public class NetTest {
 	}
 
 	@Test
-	public void consistencyTest_error_rogueChild() throws Exception {
+	void consistencyTest_error_rogueChild() throws Exception {
 		Net net = new NetParser().parse("A=[A]");
 		Net net2 = new NetParser().parse("x=(x,x)");
 
@@ -51,7 +51,7 @@ public class NetTest {
 	}
 
 	@Test
-	public void consistencyTest_error_rogueParent() throws Exception {
+	void consistencyTest_error_rogueParent() throws Exception {
 		Net net = new NetParser().parse("A=[A]");
 		Net net2 = new NetParser().parse("x=(x,x)");
 
@@ -63,7 +63,7 @@ public class NetTest {
 	}
 
 	@Test
-	public void consistencyTest_error_markerInNet() throws Exception {
+	void consistencyTest_error_markerInNet() throws Exception {
 		Net net = new NetParser().parse("A=[A]");
 		net.addNode(new MarkerNode());
 
@@ -72,7 +72,7 @@ public class NetTest {
 	}
 
 	@Test
-	public void consistencyTest_error_wrongMarker() throws Exception {
+	void consistencyTest_error_wrongMarker() throws Exception {
 		MarkerNode markerNode = new MarkerNode();
 		Net net = new NetParser().permitMarkerNodes(markerNode).parse("[#]");
 		MarkerNode markerNode2 = new MarkerNode();
@@ -83,7 +83,7 @@ public class NetTest {
 	}
 
 	@Test
-	public void consistencyTest_error_markerNotPermitted() throws Exception {
+	void consistencyTest_error_markerNotPermitted() throws Exception {
 		Net net = new NetParser().permitMarkerNodes(new MarkerNode()).parse("A=[#]");
 		net.forbidMarkerNode();
 
@@ -92,7 +92,7 @@ public class NetTest {
 	}
 
 	@Test
-	public void addNodes() throws Exception {
+	void addNodes() throws Exception {
 		Net net = new NetParser().parse("A=[A]");
 		assertThat(net.getNodes().size()).isEqualTo(1);
 		Net net2 = new NetParser().parse("x=(x,x)");
@@ -104,7 +104,7 @@ public class NetTest {
 	}
 
 	@Test
-	public void belongsToNet() throws Exception {
+	void belongsToNet() throws Exception {
 		NetParser parser = new NetParser();
 		Net net = parser.parse("A=[A]");
 		Node a = parser.getNodeNames().get("A");
@@ -115,7 +115,7 @@ public class NetTest {
 	}
 
 	@Test
-	public void belongsToNet_marker() throws Exception {
+	void belongsToNet_marker() throws Exception {
 		Net net = new Net();
 		MarkerNode marker = new MarkerNode();
 		net.permitMarkerNode(marker);
@@ -126,7 +126,7 @@ public class NetTest {
 	}
 
 	@Test
-	public void runWithMarkerNode() throws Exception {
+	void runWithMarkerNode() throws Exception {
 		final Net net = new Net();
 		assertThat(net.isMarkerNodePermitted()).isFalse();
 		net.runWithMarkerNode(marker -> {

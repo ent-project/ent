@@ -19,20 +19,20 @@ import org.ent.net.node.cmd.CommandFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class NetParserTest {
+class NetParserTest {
 
 	NetController controller;
 
 	NetParser parser;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		controller = ReadOnlyNetController.getInstance();
 		parser = new NetParser();
 	}
 
 	@Test
-	public void parse_okay_example() throws Exception {
+	void parse_okay_example() throws Exception {
 		Net net = parser.parse("(<nop>, [<nop>])");
 
 		Set<Node> nodes = net.getNodes();
@@ -52,7 +52,7 @@ public class NetParserTest {
 	}
 
 	@Test
-	public void parse_okay_chain() throws Exception {
+	void parse_okay_chain() throws Exception {
 		Net net = parser.parse("A=B; B=C; C=<nop>");
 
 		Set<Node> nodes = net.getNodes();
@@ -60,7 +60,7 @@ public class NetParserTest {
 	}
 
 	@Test
-	public void parse_okay_selfReference() throws Exception {
+	void parse_okay_selfReference() throws Exception {
 		Net net = parser.parse("A=[A]");
 
 		Set<Node> nodes = net.getNodes();
@@ -73,7 +73,7 @@ public class NetParserTest {
 	}
 
 	@Test
-	public void parse_okay_comment() throws Exception {
+	void parse_okay_comment() throws Exception {
 		Net net = parser.parse("A=[B]; @ definition of B follows\nB=A");
 
 		Set<Node> nodes = net.getNodes();
@@ -81,7 +81,7 @@ public class NetParserTest {
 	}
 
 	@Test
-	public void parse_okay_marker() throws Exception {
+	void parse_okay_marker() throws Exception {
 		parser.permitMarkerNodes(new MarkerNode());
 		Net net = parser.parse("A=[#]");
 
@@ -90,32 +90,32 @@ public class NetParserTest {
 	}
 
 	@Test
-	public void parse_error_markerNotPermitted() throws Exception {
+	void parse_error_markerNotPermitted() throws Exception {
 		assertThatThrownBy(() -> parser.parse("A=[#]")).isInstanceOf(ParserException.class)
 				.hasMessage("Found marker node in line 1, column 6, but is not permitted");
 	}
 
 	@Test
-	public void parse_error_markerTopLevel() throws Exception {
+	void parse_error_markerTopLevel() throws Exception {
 		parser.permitMarkerNodes(new MarkerNode());
 		assertThatThrownBy(() -> parser.parse("<nop>; #")).isInstanceOf(ParserException.class)
 				.hasMessage("Top level node must not be a marker node");
 	}
 
 	@Test
-	public void parse_error_tokenizer() throws Exception {
+	void parse_error_tokenizer() throws Exception {
 		assertThatThrownBy(() -> parser.parse("A=[B];\nC=]")).isInstanceOf(ParserException.class)
 				.hasMessageContaining("Unexpected token ']' in line 2, column 5");
 	}
 
 	@Test
-	public void parse_error_unknownIdentifier() throws Exception {
+	void parse_error_unknownIdentifier() throws Exception {
 		assertThatThrownBy(() -> parser.parse("(A,B); B=A")).isInstanceOf(ParserException.class)
 				.hasMessage("Unkown identifier: 'A'");
 	}
 
 	@Test
-	public void getNodeNames() throws Exception {
+	void getNodeNames() throws Exception {
 		Net net = parser.parse("(nop=<nop>, [[C]]); C=[nop];");
 
 		Map<String, Node> nodeNames = parser.getNodeNames();
@@ -124,7 +124,7 @@ public class NetParserTest {
 	}
 
 	@Test
-	public void getMainNodes() throws Exception {
+	void getMainNodes() throws Exception {
 		parser.parse("T=(x=[(x,x)],K);K=((<nop>,F),F);F=x");
 
 		List<Node> mainNodes = parser.getMainNodes();

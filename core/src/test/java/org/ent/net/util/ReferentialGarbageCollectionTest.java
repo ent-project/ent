@@ -14,11 +14,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class ReferentialGarbageCollectionTest {
+class ReferentialGarbageCollectionTest {
 
 	@ParameterizedTest(name = "{index} => run()")
 	@MethodSource("run_testData")
-	public void run(Net net, Net netExtraNodes) throws Exception {
+	void run(Net net, Net netExtraNodes) throws Exception {
 		Set<Node> originalNodes = new HashSet<>(net.getNodes());
 		for (Node n : netExtraNodes.getNodes()) {
 			net.addNode(n);
@@ -29,7 +29,6 @@ public class ReferentialGarbageCollectionTest {
 		assertThat(net.getNodes()).isEqualTo(originalNodes);
 	}
 
-	@SuppressWarnings("unused")
 	private static Stream<Arguments> run_testData() {
 		return Stream.of(
 				of(NetTestData.buildNet0().getNet(), NetTestData.buildNet1().getNet()),

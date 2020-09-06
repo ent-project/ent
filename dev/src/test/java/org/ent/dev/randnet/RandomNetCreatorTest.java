@@ -12,14 +12,14 @@ import org.ent.net.node.cmd.CommandFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class RandomNetCreatorTest {
+class RandomNetCreatorTest {
 
 	private static final int NO_DRAWS = 100;
 
 	private RandomNetCreator netCreator;
 
 	@BeforeEach
-	public void setUpRandomNetCreator() {
+	void setUpRandomNetCreator() {
 		Random randMaster = RandomTestUtil.newRandom();
 		Random randCommandDrawing = new Random(randMaster.nextLong());
 		Random randNetCreator = new Random(randMaster.nextLong());
@@ -28,7 +28,7 @@ public class RandomNetCreatorTest {
 	}
 
 	@Test
-	public void drawNet() throws Exception {
+	void drawNet() throws Exception {
 		for (int i = 0; i < NO_DRAWS; i++) {
 			Optional<Net> drawnNet = netCreator.drawNet();
 
@@ -37,7 +37,7 @@ public class RandomNetCreatorTest {
 	}
 
 	@Test
-	public void drawNet_noBNodes() throws Exception {
+	void drawNet_noBNodes() throws Exception {
 		netCreator.setFractionBNodes(0.0);
 		netCreator.setFractionCNodes(0.5);
 		netCreator.setFractionUNodes(0.5);

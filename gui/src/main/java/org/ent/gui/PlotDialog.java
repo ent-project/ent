@@ -133,12 +133,12 @@ public class PlotDialog extends JDialog implements RoundListener {
 	}
 
 	private void build() {
-		for (PlotInfo plotInfo : Main.getPlotRegistry().plots) {
+		for (PlotInfo plotInfo : Main.getPlotRegistry().getPlots()) {
 			if (plotInfo.getSubplotOf() == null) {
 				plots.add(new Plot(plotInfo));
 			}
 		}
-		for (PlotInfo plotInfo : Main.getPlotRegistry().plots) {
+		for (PlotInfo plotInfo : Main.getPlotRegistry().getPlots()) {
 			String subplotOf = plotInfo.getSubplotOf();
 			if (subplotOf != null) {
 				Plot parentPlot = plots.stream().filter(p -> p.plotInfo.getId().equals(subplotOf)).findAny().get();
