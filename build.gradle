@@ -13,12 +13,12 @@ allprojects {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_14
-    targetCompatibility = JavaVersion.VERSION_14
+    sourceCompatibility = JavaVersion.VERSION_15
+    targetCompatibility = JavaVersion.VERSION_15
 }
 
 ext {
-    mockitoVersion = '3.3.3'
+    mockitoVersion = '3.5.10'
     junitVersion = '5.6.1'
 }
 
@@ -46,6 +46,13 @@ subprojects {
         useJUnitPlatform()
     }
 
+    tasks.withType(JavaCompile) {
+        options.compilerArgs += '--enable-preview'
+    }
+
+    tasks.withType(Test) {
+        jvmArgs += "--enable-preview"
+    }
 }
 
 // task for gradle wrapper upgrade: change gradleVersion here, then run "./gradlew wrapper"
