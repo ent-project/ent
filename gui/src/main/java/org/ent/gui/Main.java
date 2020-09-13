@@ -1,14 +1,11 @@
 package org.ent.gui;
 
-import java.awt.EventQueue;
-import java.beans.PropertyChangeSupport;
-
-import javax.swing.JDialog;
-
 import org.ent.dev.DevelopmentPlan;
 import org.ent.gui.pref.WindowGeometry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import javax.swing.JDialog;
+import java.awt.EventQueue;
+import java.beans.PropertyChangeSupport;
 
 public class Main {
 

@@ -60,7 +60,7 @@ class FirstPassNetParserTest {
 		FirstPassNetParser parser = new FirstPassNetParser(new StringReader(input));
 		parser.parseAll();
 		Map<String, NodeTemplate> identifierMapping = parser.getIdentifierMapping();
-		assertThat(identifierMapping.size()).isEqualTo(3);
+		assertThat(identifierMapping).hasSize(3);
 		NodeTemplate template1 = identifierMapping.get("A");
 		assertThatThrownBy(() -> parser.resolveIdentifier((IdentifierNodeTemplate) template1))
 				.isInstanceOf(ParserException.class).hasMessage("Cyclic identifier binding");

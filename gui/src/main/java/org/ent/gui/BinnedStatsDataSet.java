@@ -12,9 +12,9 @@ public class BinnedStatsDataSet extends AbstractIntervalXYDataset {
 
 	private static final long serialVersionUID = 1L;
 
-	BinnedStats stats;
+	private BinnedStats stats;
 
-	int numBinsDisplayed = 80;
+	private int numBinsDisplayed = 80;
 
 	public BinnedStatsDataSet(BinnedStats stats) {
 		this.stats = stats;
