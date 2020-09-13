@@ -13,7 +13,7 @@ class HexConverterTest {
 
 	@ParameterizedTest(name = "{index} => run()")
 	@MethodSource("hexConverter_testData")
-	void toHex(long value, String hexExpected) throws Exception {
+	void toHex(long value, String hexExpected) {
 		String hexActual = HexConverter.toHex(value);
 
 		assertThat(hexActual).isEqualTo(hexExpected);
@@ -21,7 +21,7 @@ class HexConverterTest {
 
 	@ParameterizedTest(name = "{index} => run()")
 	@MethodSource("hexConverter_testData")
-	void fromHex(long valueExpected, String hexString) throws Exception {
+	void fromHex(long valueExpected, String hexString) {
 		long valueActual = HexConverter.fromHex(hexString);
 
 		assertThat(valueActual).isEqualTo(valueExpected);

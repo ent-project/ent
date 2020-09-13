@@ -29,26 +29,22 @@ public class NetRunner {
 
 	public StepResult step() {
 		Node root = net.getRoot();
-		if (!(root instanceof BNode)) {
+		if (!(root instanceof BNode executionPointer)) {
 			return StepResult.FATAL;
 		}
-		BNode executionPointer = (BNode) root;
 		StepResult result = doStep(executionPointer);
 		advanceExecutionPointer(executionPointer);
 		return result;
 	}
 
 	private StepResult doStep(BNode executionPointer) {
-		Node commandBranchNode = executionPointer.getLeftChild(controller);
-		if (!(commandBranchNode instanceof BNode)) {
+		if (!(executionPointer.getLeftChild(controller) instanceof BNode commandBranch)) {
 			return StepResult.INVALID_COMMAND_BRANCH;
 		}
-		BNode commandBranch = (BNode) commandBranchNode;
-		Node commandNode = commandBranch.getLeftChild(controller);
-		if (!(commandNode instanceof CNode)) {
+		if (!(commandBranch.getLeftChild(controller) instanceof CNode commandNode)) {
 			return StepResult.INVALID_COMMAND_NODE;
 		}
-		Command command = ((CNode) commandNode).getCommand();
+		Command command = commandNode.getCommand();
 		Node parameters = commandBranch.getRightChild(controller);
 
 		ExecutionResult executeResult = command.execute(controller, parameters);
@@ -57,11 +53,10 @@ public class NetRunner {
 	}
 
 	private StepResult convertToStepResult(ExecutionResult executeResult) throws AssertionError {
-		switch (executeResult) {
-		case NORMAL: return StepResult.SUCCESS;
-		case ERROR: return StepResult.COMMAND_EXECUTION_FAILED;
-		default: throw new AssertionError("Unexpected execution result: " + executeResult);
-		}
+		return switch (executeResult) {
+			case NORMAL -> StepResult.SUCCESS;
+			case ERROR -> StepResult.COMMAND_EXECUTION_FAILED;
+		};
 	}
 
 	private void advanceExecutionPointer(BNode executionPointer) {

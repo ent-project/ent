@@ -25,7 +25,7 @@ class NetUtilsTest {
 
 	@ParameterizedTest(name = "{index} => run()")
 	@MethodSource("collectReachable_testData")
-	void collectReachable(Net net) throws Exception {
+	void collectReachable(Net net) {
 		Set<Node> nodes = NetUtils.collectReachable(net.getRoot());
 
 		assertThat(nodes).isEqualTo(net.getNodes());

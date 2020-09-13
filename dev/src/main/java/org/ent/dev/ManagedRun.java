@@ -77,7 +77,7 @@ public class ManagedRun {
 
 	public void perform() {
 		initializeEvaluation();
-		EvaluationStepResult evaluationStepResult = null;
+		EvaluationStepResult evaluationStepResult;
 
 		do {
 			evaluationStepResult = doStep();

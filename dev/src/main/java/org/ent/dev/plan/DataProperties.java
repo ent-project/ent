@@ -6,8 +6,8 @@ import org.ent.net.Net;
 
 public interface DataProperties {
 
-	public interface PropNet extends Data {
-		static final String KEY = "net";
+	interface PropNet extends Data {
+		String KEY = "net";
 
 		default Net getNet() {
 			return (Net) getProperty(KEY);
@@ -18,8 +18,8 @@ public interface DataProperties {
 		}
 	}
 
-	public interface PropSeed extends Data {
-		static final String KEY = "seed";
+	interface PropSeed extends Data {
+		String KEY = "seed";
 
 		default Long getSeed() {
 			return (Long) getProperty(KEY);
@@ -30,8 +30,8 @@ public interface DataProperties {
 		}
 	}
 
-	public interface PropReplicator extends Data {
-		static final String KEY = "replicator";
+	interface PropReplicator extends Data {
+		String KEY = "replicator";
 
 		default NetReplicator getReplicator() {
 			return (NetReplicator) getProperty(KEY);
@@ -42,8 +42,8 @@ public interface DataProperties {
 		}
 	}
 
-	public interface PropSerialNumber extends Data {
-		static final String KEY = "serialNumber";
+	interface PropSerialNumber extends Data {
+		String KEY = "serialNumber";
 
 		default Long getSerialNumber() {
 			return (Long) getProperty(KEY);
@@ -54,8 +54,8 @@ public interface DataProperties {
 		}
 	}
 
-	public interface PropStepsExamResult extends Data {
-		static final String KEY = "stepsExamResult";
+	interface PropStepsExamResult extends Data {
+		String KEY = "stepsExamResult";
 
 		default StepsExamResult getStepsExamResult() {
 			return (StepsExamResult) getProperty(KEY);
@@ -63,18 +63,6 @@ public interface DataProperties {
 
 		default void setStepsExamResult(StepsExamResult stepsExamResult) {
 			setProperty(KEY, stepsExamResult);
-		}
-	}
-
-	public interface PropSourceInfo extends Data {
-		static final String KEY = "sourceInfo";
-
-		default String getSourceInfo() {
-			return (String) getProperty(KEY);
-		}
-
-		default void setSourceInfo(String sourceInfo) {
-			setProperty(KEY, sourceInfo);
 		}
 	}
 

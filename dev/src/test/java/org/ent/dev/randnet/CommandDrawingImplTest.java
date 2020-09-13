@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 class CommandDrawingImplTest {
 
 	@Test
-	void randomValueToIndex() throws Exception {
+	void randomValueToIndex() {
 		Command nopCommand = CommandFactory.createNopCommand();
 		CommandDrawingImpl commandDrawing = new CommandDrawingImpl(RandomTestUtil.newRandom(),
 				Arrays.asList(

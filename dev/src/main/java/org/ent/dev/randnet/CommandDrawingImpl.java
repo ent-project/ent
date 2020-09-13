@@ -22,7 +22,7 @@ public class CommandDrawingImpl implements CommandDrawing {
 		this.summedWeights = new double[commandCandidates.size()];
 		double weightSum = 0;
 		for (int i = 0; i < commandCandidates.size(); i++) {
-			weightSum += commandCandidates.get(i).getWeight();
+			weightSum += commandCandidates.get(i).weight();
 			summedWeights[i] = weightSum;
 		}
 		this.totalWeight = weightSum;
@@ -32,7 +32,7 @@ public class CommandDrawingImpl implements CommandDrawing {
 	public Command drawCommand() {
 		double p = rand.nextDouble() * totalWeight;
 		int idx = randomValueToIndex(p);
-		return commandCandidates.get(idx).getCommand();
+		return commandCandidates.get(idx).command();
 	}
 
 	int randomValueToIndex(double p) {

@@ -124,7 +124,7 @@ class DefaultNetControllerTest {
 	}
 
 	@Test
-	void newUNode_childArg_error() throws Exception {
+	void newUNode_childArg_error() {
 		Net net = new Net();
 		DefaultNetController controller = new DefaultNetController(net);
 
@@ -134,7 +134,7 @@ class DefaultNetControllerTest {
 	}
 
 	@Test
-	void newBNode() throws Exception {
+	void newBNode() {
 		Net net = new Net();
 		DefaultNetController controller = new DefaultNetController(net, eventHandler);
 
@@ -186,7 +186,7 @@ class DefaultNetControllerTest {
 	}
 
 	@Test
-	void newCNode() throws Exception {
+	void newCNode() {
 		Net net = new Net();
 		DefaultNetController controller = new DefaultNetController(net, eventHandler);
 
