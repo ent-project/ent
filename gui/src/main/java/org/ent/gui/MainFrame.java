@@ -44,19 +44,16 @@ public class MainFrame extends JFrame {
 			{
 				JToggleButton button;
 				switch (dialogName) {
-				case Main.PLOT_DIALOG:
+				case Main.PLOT_DIALOG ->
 					button = btnPlots;
-					break;
-				case Main.PARAMETERS_DIALOG:
+				case Main.PARAMETERS_DIALOG ->
 					button = btnParameters;
-					break;
-				default:
+				default ->
 					throw new AssertionError("unexpected dialogName: " + dialogName);
 				}
 				dialog.addWindowListener(new WindowAdapter() {
 					@Override
 					public void windowClosing(WindowEvent e) {
-
 						button.setSelected(false);
 					}
 				});

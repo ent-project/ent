@@ -120,34 +120,33 @@ public class ManagedRun {
 	}
 
 	private boolean isStepResultFatal(StepResult result) throws AssertionError {
-		switch (result) {
-		case SUCCESS:
-			return false;
-		case FATAL:
-			return true;
-		case COMMAND_EXECUTION_FAILED:
-			if (runSetup.isCommandExecutionFailedIsFatal()) {
-				log.debug("Command execution failed in step {} - end evaluation", noSteps);
-				return true;
-			} else {
-				return false;
+		return switch (result) {
+			case SUCCESS -> false;
+			case FATAL -> true;
+			case COMMAND_EXECUTION_FAILED -> {
+				if (runSetup.isCommandExecutionFailedIsFatal()) {
+					log.debug("Command execution failed in step {} - end evaluation", noSteps);
+					yield true;
+				} else {
+					yield false;
+				}
 			}
-		case INVALID_COMMAND_BRANCH:
-			if (runSetup.isInvalidCommandBranchIsFatal()) {
-				log.debug("Invalid command branch in step {} - end evaluation", noSteps);
-				return true;
-			} else {
-				return false;
+			case INVALID_COMMAND_BRANCH -> {
+				if (runSetup.isInvalidCommandBranchIsFatal()) {
+					log.debug("Invalid command branch in step {} - end evaluation", noSteps);
+					yield true;
+				} else {
+					yield false;
+				}
 			}
-		case INVALID_COMMAND_NODE:
-			if (runSetup.isInvalidCommandNodeIsFatal()) {
-				log.debug("Invalid command node in step {} - end evaluation", noSteps);
-				return true;
-			} else {
-				return false;
+			case INVALID_COMMAND_NODE -> {
+				if (runSetup.isInvalidCommandNodeIsFatal()) {
+					log.debug("Invalid command node in step {} - end evaluation", noSteps);
+					yield true;
+				} else {
+					yield false;
+				}
 			}
-		default:
-			throw new AssertionError("Unexpected StepResult: " + result);
-		}
+		};
 	}
 }

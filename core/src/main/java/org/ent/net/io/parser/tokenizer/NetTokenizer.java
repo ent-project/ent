@@ -27,7 +27,6 @@ public class NetTokenizer {
     private final Reader reader;
     private int ch;
     private final Deque<Token> queue = new ArrayDeque<>();
-    private String value;
     private int line;
     private int column;
 
@@ -81,44 +80,54 @@ public class NetTokenizer {
             }
         }
         switch (this.ch) {
-            case -1:
+            case -1 -> {
                 nextChar();
                 return TOKEN_EOF;
-            case '(':
+            }
+            case '(' -> {
                 nextChar();
                 return TOKEN_LEFT_PARENTHESIS;
-            case ')':
+            }
+            case ')' -> {
                 nextChar();
                 return TOKEN_RIGHT_PARENTHESIS;
-            case '[':
+            }
+            case '[' -> {
                 nextChar();
                 return TOKEN_LEFT_SQUARE_BRACKET;
-            case ']':
+            }
+            case ']' -> {
                 nextChar();
                 return TOKEN_RIGHT_SQUARE_BRACKET;
-            case '=':
+            }
+            case '=' -> {
                 nextChar();
                 return TOKEN_EQUALS;
-            case '#': // fall through
-            case '●':
+            }
+            case '#', '●' -> {
             	nextChar();
             	return TOKEN_MARKER;
-            case ',':
+            }
+            case ',' -> {
                 nextChar();
                 return TOKEN_COMMA;
-            case ';':
+            }
+            case ';' -> {
                 nextChar();
                 return TOKEN_SEMICOLON;
-            case '<':
+            }
+            case '<' -> {
                 nextChar();
                 return parseCommand();
-            default:
+            }
+            default -> {
                 if (isIdentifierStartChar(this.ch)) {
                     return parseIdentifier();
                 } else {
                     throw new ParserException(
                             "Unexpected character '" + (char) this.ch + "' in line " + this.line + " column " + this.column);
                 }
+            }
         }
     }
 
@@ -133,10 +142,6 @@ public class NetTokenizer {
             this.queue.add(tkn);
         }
         return (new ArrayList<>(queue)).get(n - 1);
-    }
-
-    public String getValue() {
-        return this.value;
     }
 
     private static boolean isLetter(int ch) {

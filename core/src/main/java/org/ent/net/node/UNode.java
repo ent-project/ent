@@ -70,28 +70,18 @@ public class UNode extends Node {
 
 	@Override
 	public Arrow getArrow(ArrowDirection arrowDirection) {
-		switch (arrowDirection) {
-		case DOWN:
-			return arrow;
-		case LEFT:
-		case RIGHT:
-			throw new IllegalArgumentException();
-		default:
-			throw new AssertionError();
-		}
+		return switch (arrowDirection) {
+			case DOWN -> arrow;
+			case LEFT, RIGHT -> throw new IllegalArgumentException();
+		};
 	}
 
 	@Override
 	public Optional<Arrow> getArrowMaybe(ArrowDirection arrowDirection) {
-		switch (arrowDirection) {
-		case DOWN:
-			return Optional.of(arrow);
-		case LEFT:
-		case RIGHT:
-			return Optional.empty();
-		default:
-			throw new AssertionError();
-		}
+		return switch (arrowDirection) {
+			case DOWN -> Optional.of(arrow);
+			case LEFT, RIGHT -> Optional.empty();
+		};
 	}
 
 	@Override

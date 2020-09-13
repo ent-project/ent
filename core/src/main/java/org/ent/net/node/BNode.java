@@ -110,7 +110,6 @@ public class BNode extends Node {
 			case LEFT -> leftArrow;
 			case RIGHT -> rightArrow;
 			case DOWN -> throw new IllegalArgumentException();
-			default -> throw new AssertionError();
 		};
 	}
 
@@ -120,7 +119,6 @@ public class BNode extends Node {
 			case LEFT -> Optional.of(leftArrow);
 			case RIGHT -> Optional.of(rightArrow);
 			case DOWN -> Optional.empty();
-			default -> throw new AssertionError();
 		};
 	}
 

@@ -15,12 +15,11 @@ class BNodeTemplate implements NodeTemplate {
 
     @Override
     public NodeTemplate getChild(ArrowDirection arrowDirection) {
-    	switch (arrowDirection) {
-    	case LEFT: return leftChild;
-    	case RIGHT: return rightChild;
-    	case DOWN: throw new IllegalArgumentException();
-    	default: throw new AssertionError();
-    	}
+    	return switch (arrowDirection) {
+    		case LEFT -> leftChild;
+    		case RIGHT -> rightChild;
+    		case DOWN -> throw new IllegalArgumentException();
+    	};
     }
 
 	@Override
