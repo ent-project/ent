@@ -4,7 +4,7 @@ import org.ent.net.ArrowDirection;
 import org.ent.net.node.CNode;
 import org.ent.net.node.Node;
 
-public interface ExecutionEventHandler {
+public interface ExecutionEventListener {
 
 	void fireExecutionStart();
 

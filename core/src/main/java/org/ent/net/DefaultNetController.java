@@ -1,6 +1,6 @@
 package org.ent.net;
 
-import org.ent.ExecutionEventHandler;
+import org.ent.ExecutionEventListener;
 import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
 import org.ent.net.node.Hub;
@@ -15,7 +15,7 @@ public class DefaultNetController implements NetController {
 
 	private final Net net;
 
-	private final ExecutionEventHandler eventHandler;
+	private final ExecutionEventListener eventListener;
 
 	private final MarkerNode placeHolder = new MarkerNode();
 
@@ -23,9 +23,9 @@ public class DefaultNetController implements NetController {
 		this(net, null);
 	}
 
-	public DefaultNetController(Net net, ExecutionEventHandler eventHandler) {
+	public DefaultNetController(Net net, ExecutionEventListener eventListener) {
 		this.net = net;
-		this.eventHandler = eventHandler;
+		this.eventListener = eventListener;
 	}
 
 	@Override
@@ -35,8 +35,8 @@ public class DefaultNetController implements NetController {
 				throw new IllegalStateException("arrow origin does not belong to controlled net");
 			}
 		}
-		if (eventHandler != null) {
-			eventHandler.fireGetChild(arrow.getOrigin(), arrow.getDirection());
+		if (eventListener != null) {
+			eventListener.fireGetChild(arrow.getOrigin(), arrow.getDirection());
 		}
 		return arrow.getTargetForNetControllerOnly();
 	}
@@ -51,8 +51,8 @@ public class DefaultNetController implements NetController {
 				throw new IllegalStateException("target does not belong to controlled net");
 			}
 		}
-		if (eventHandler != null) {
-			eventHandler.fireSetChild(arrow.getOrigin(), arrow.getDirection(), target);
+		if (eventListener != null) {
+			eventListener.fireSetChild(arrow.getOrigin(), arrow.getDirection(), target);
 		}
 		arrow.setTargetForNetControllerOnly(target);
 	}
@@ -62,8 +62,8 @@ public class DefaultNetController implements NetController {
 		UNode unaryNode = new UNode(placeHolder);
 		net.addNode(unaryNode);
 		unaryNode.getArrow().setTargetForNetControllerOnly(unaryNode);
-		if (eventHandler != null) {
-			eventHandler.fireNewNode(unaryNode);
+		if (eventListener != null) {
+			eventListener.fireNewNode(unaryNode);
 		}
 		return unaryNode;
 	}
@@ -76,8 +76,8 @@ public class DefaultNetController implements NetController {
 			}
 		}
 		UNode unaryNode = new UNode(child);
-		if (eventHandler != null) {
-			eventHandler.fireNewNode(unaryNode);
+		if (eventListener != null) {
+			eventListener.fireNewNode(unaryNode);
 		}
 		net.addNode(unaryNode);
 		return unaryNode;
@@ -89,8 +89,8 @@ public class DefaultNetController implements NetController {
 		net.addNode(binaryNode);
 		binaryNode.getLeftArrow().setTargetForNetControllerOnly(binaryNode);
 		binaryNode.getRightArrow().setTargetForNetControllerOnly(binaryNode);
-		if (eventHandler != null) {
-			eventHandler.fireNewNode(binaryNode);
+		if (eventListener != null) {
+			eventListener.fireNewNode(binaryNode);
 		}
 		return binaryNode;
 	}
@@ -106,8 +106,8 @@ public class DefaultNetController implements NetController {
 			}
 		}
 		BNode binaryNode = new BNode(leftChild, rightChild);
-		if (eventHandler != null) {
-			eventHandler.fireNewNode(binaryNode);
+		if (eventListener != null) {
+			eventListener.fireNewNode(binaryNode);
 		}
 		net.addNode(binaryNode);
 		return binaryNode;
@@ -116,8 +116,8 @@ public class DefaultNetController implements NetController {
 	@Override
 	public CNode newCNode(Command command) {
 		CNode commandNode = new CNode(command);
-		if (eventHandler != null) {
-			eventHandler.fireNewNode(commandNode);
+		if (eventListener != null) {
+			eventListener.fireNewNode(commandNode);
 		}
 		net.addNode(commandNode);
 		return commandNode;

@@ -1,6 +1,6 @@
 package org.ent.dev;
 
-import org.ent.ExecutionEventHandler;
+import org.ent.ExecutionEventListener;
 import org.ent.net.DefaultNetController;
 import org.ent.net.Net;
 import org.ent.net.NetController;
@@ -22,15 +22,15 @@ public class ManagedRun {
 
 	private Net net;
 
-	private ExecutionEventHandler evaluator;
+	private ExecutionEventListener eventListener;
 
 	private NetFormatter formatter;
 
 	private enum EvaluationStepResult { CONTINUE, STOP }
 
-	public ManagedRun(RunSetup runSetup, ExecutionEventHandler evaluator) {
+	public ManagedRun(RunSetup runSetup, ExecutionEventListener eventListener) {
 		this.runSetup = runSetup;
-		this.evaluator = evaluator;
+		this.eventListener = eventListener;
 	}
 
 	public ManagedRun(RunSetup runSetup) {
@@ -63,14 +63,6 @@ public class ManagedRun {
 		return this;
 	}
 
-	public ExecutionEventHandler getEvaluator() {
-		return evaluator;
-	}
-
-	public void setEvaluator(ExecutionEventHandler evaluator) {
-		this.evaluator = evaluator;
-	}
-
 	public int getNoSteps() {
 		return noSteps;
 	}
@@ -94,7 +86,7 @@ public class ManagedRun {
 		if (net == null) {
 			net = netRunner.getNet();
 		}
-		NetController controller = new DefaultNetController(net, evaluator);
+		NetController controller = new DefaultNetController(net, eventListener);
 		if (netRunner == null) {
 			netRunner = new NetRunner(net, controller);
 		}

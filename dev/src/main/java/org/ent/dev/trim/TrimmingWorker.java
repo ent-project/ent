@@ -11,12 +11,12 @@ class TrimmingWorker {
 
 	private final RunSetup runSetup;
 
-	private TrimmingExecutionEventHandler evaluator = new TrimmingExecutionEventHandler();
+	private TrimmingExecutionEventListener evaluator = new TrimmingExecutionEventListener();
 
 	public TrimmingWorker(Net net, RunSetup runSetup) {
 		this.net = net;
 		this.runSetup = runSetup;
-		this.evaluator = new TrimmingExecutionEventHandler();
+		this.evaluator = new TrimmingExecutionEventListener();
 	}
 
 	public void runTrimmer() {

@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import org.ent.ExecutionEventHandler;
+import org.ent.ExecutionEventListener;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.io.parser.NetParser;
 import org.ent.net.node.BNode;
@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class DefaultNetControllerTest {
 
 	@Mock
-	private ExecutionEventHandler eventHandler;
+	private ExecutionEventListener eventListener;
 
 	private NetParser parser = new NetParser();
 
@@ -41,13 +41,13 @@ class DefaultNetControllerTest {
 		Net net = parser.parse("u=[_a=<nop>]");
 		UNode u = (UNode) parser.getNodeNames().get("u");
 		CNode nop = (CNode) parser.getNodeNames().get("_a");
-		DefaultNetController controller = new DefaultNetController(net, eventHandler);
+		DefaultNetController controller = new DefaultNetController(net, eventListener);
 
 		Node uTarget = controller.getTarget(u.getArrow());
 
 		assertThat(uTarget).isSameAs(nop);
-		verify(eventHandler).fireGetChild(u, ArrowDirection.DOWN);
-		verifyNoMoreInteractions(eventHandler);
+		verify(eventListener).fireGetChild(u, ArrowDirection.DOWN);
+		verifyNoMoreInteractions(eventListener);
 	}
 
 	@Test
@@ -65,13 +65,13 @@ class DefaultNetControllerTest {
 		Net net = parser.parse("u=[<nop>]; _b=<ix>");
 		UNode u = (UNode) parser.getNodeNames().get("u");
 		CNode ix = (CNode) parser.getNodeNames().get("_b");
-		DefaultNetController controller = new DefaultNetController(net, eventHandler);
+		DefaultNetController controller = new DefaultNetController(net, eventListener);
 
 		controller.setTarget(u.getArrow(), ix);
 
 		assertThat(u.getArrow().getTargetForNetControllerOnly()).isSameAs(ix);
-		verify(eventHandler).fireSetChild(u, ArrowDirection.DOWN, ix);
-		verifyNoMoreInteractions(eventHandler);
+		verify(eventListener).fireSetChild(u, ArrowDirection.DOWN, ix);
+		verifyNoMoreInteractions(eventListener);
 	}
 
 	@Test
@@ -99,28 +99,28 @@ class DefaultNetControllerTest {
 	@Test
 	void newUNode() throws Exception {
 		Net net = new Net();
-		DefaultNetController controller = new DefaultNetController(net, eventHandler);
+		DefaultNetController controller = new DefaultNetController(net, eventListener);
 
 		UNode uNode = controller.newUNode();
 
 		assertThat(net.belongsToNet(uNode)).isTrue();
 		assertThat(uNode.getArrow().getTargetForNetControllerOnly()).isEqualTo(uNode);
-		verify(eventHandler).fireNewNode(uNode);
-		verifyNoMoreInteractions(eventHandler);
+		verify(eventListener).fireNewNode(uNode);
+		verifyNoMoreInteractions(eventListener);
 	}
 
 	@Test
 	void newUNode_childArg() throws Exception {
 		Net net = parser.parse("_a=<nop>");
 		Node nop = parser.getNodeNames().get("_a");
-		DefaultNetController controller = new DefaultNetController(net, eventHandler);
+		DefaultNetController controller = new DefaultNetController(net, eventListener);
 
 		UNode uNode = controller.newUNode(nop);
 
 		assertThat(net.belongsToNet(uNode)).isTrue();
 		assertThat(uNode.getArrow().getTargetForNetControllerOnly()).isEqualTo(nop);
-		verify(eventHandler).fireNewNode(uNode);
-		verifyNoMoreInteractions(eventHandler);
+		verify(eventListener).fireNewNode(uNode);
+		verifyNoMoreInteractions(eventListener);
 	}
 
 	@Test
@@ -136,15 +136,15 @@ class DefaultNetControllerTest {
 	@Test
 	void newBNode() {
 		Net net = new Net();
-		DefaultNetController controller = new DefaultNetController(net, eventHandler);
+		DefaultNetController controller = new DefaultNetController(net, eventListener);
 
 		BNode bNode = controller.newBNode();
 
 		assertThat(net.belongsToNet(bNode)).isTrue();
 		assertThat(bNode.getLeftArrow().getTargetForNetControllerOnly()).isEqualTo(bNode);
 		assertThat(bNode.getRightArrow().getTargetForNetControllerOnly()).isEqualTo(bNode);
-		verify(eventHandler).fireNewNode(bNode);
-		verifyNoMoreInteractions(eventHandler);
+		verify(eventListener).fireNewNode(bNode);
+		verifyNoMoreInteractions(eventListener);
 	}
 
 	@Test
@@ -152,15 +152,15 @@ class DefaultNetControllerTest {
 		Net net = parser.parse("_a=<nop>; _b=<ix>");
 		Node nop = parser.getNodeNames().get("_a");
 		Node ix = parser.getNodeNames().get("_b");
-		DefaultNetController controller = new DefaultNetController(net, eventHandler);
+		DefaultNetController controller = new DefaultNetController(net, eventListener);
 
 		BNode bNode = controller.newBNode(nop, ix);
 
 		assertThat(net.belongsToNet(bNode)).isTrue();
 		assertThat(bNode.getLeftArrow().getTargetForNetControllerOnly()).isEqualTo(nop);
 		assertThat(bNode.getRightArrow().getTargetForNetControllerOnly()).isEqualTo(ix);
-		verify(eventHandler).fireNewNode(bNode);
-		verifyNoMoreInteractions(eventHandler);
+		verify(eventListener).fireNewNode(bNode);
+		verifyNoMoreInteractions(eventListener);
 	}
 
 	@Test
@@ -188,13 +188,13 @@ class DefaultNetControllerTest {
 	@Test
 	void newCNode() {
 		Net net = new Net();
-		DefaultNetController controller = new DefaultNetController(net, eventHandler);
+		DefaultNetController controller = new DefaultNetController(net, eventListener);
 
 		CNode cNode = controller.newCNode(new NopCommand());
 
 		assertThat(net.belongsToNet(cNode)).isTrue();
-		verify(eventHandler).fireNewNode(cNode);
-		verifyNoMoreInteractions(eventHandler);
+		verify(eventListener).fireNewNode(cNode);
+		verifyNoMoreInteractions(eventListener);
 	}
 
 	@Test
@@ -202,7 +202,7 @@ class DefaultNetControllerTest {
 		Net net = parser.parse("(([_a=<nop>], _b=<ix>), ((_a, _a), [_b]))");
 		Node a = parser.getNodeNames().get("_a");
 		Node b = parser.getNodeNames().get("_b");
-		DefaultNetController controller = new DefaultNetController(net, eventHandler);
+		DefaultNetController controller = new DefaultNetController(net, eventListener);
 
 		controller.ancestorSwap(a, b);
 
@@ -210,7 +210,7 @@ class DefaultNetControllerTest {
 				.withNodeNamesInverse(parser.getNodeNames())
 				.withAscii(true);
 		assertThat(formatter.format(net)).isEqualTo("(([_b=<ix>], _a=<nop>), ((_b, _b), [_a]))");
-		verifyNoMoreInteractions(eventHandler);
+		verifyNoMoreInteractions(eventListener);
 	}
 
 	@Test

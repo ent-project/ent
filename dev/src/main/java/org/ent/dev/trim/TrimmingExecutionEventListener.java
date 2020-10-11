@@ -3,19 +3,19 @@ package org.ent.dev.trim;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.ent.ExecutionEventHandler;
+import org.ent.ExecutionEventListener;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.node.CNode;
 import org.ent.net.node.Node;
 
-class TrimmingExecutionEventHandler implements ExecutionEventHandler {
+class TrimmingExecutionEventListener implements ExecutionEventListener {
 
 	private final Set<Arrow> requiredArrows;
 
 	private final Set<Arrow> overrriddenArrows;
 
-	public TrimmingExecutionEventHandler() {
+	public TrimmingExecutionEventListener() {
 		this.requiredArrows = new HashSet<>();
 		this.overrriddenArrows = new HashSet<>();
 	}
