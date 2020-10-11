@@ -66,4 +66,15 @@ public interface DataProperties {
 		}
 	}
 
+	interface PropVariabilityExamResult extends Data {
+		String KEY = "variabilityExamResult";
+
+		default VariabilityExamResult getVariabilityExamResult() {
+			return (VariabilityExamResult) getProperty(KEY);
+		}
+
+		default void setVariabilityExamResult(VariabilityExamResult variabilityExamResult) {
+			setProperty(KEY, variabilityExamResult);
+		}
+	}
 }
