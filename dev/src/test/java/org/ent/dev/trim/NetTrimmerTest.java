@@ -5,6 +5,7 @@ import static org.junit.jupiter.params.provider.Arguments.of;
 
 import java.util.stream.Stream;
 
+import org.ent.dev.DefaultTestRunSetup;
 import org.ent.dev.RunSetup;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
@@ -21,14 +22,7 @@ class NetTrimmerTest {
 		NetParser parser = new NetParser();
 		Net net = parser.parse(original);
 
-		RunSetup runSetup = new RunSetup.Builder()
-				.withCommandExecutionFailedIsFatal(true)
-				.withInvalidCommandBranchIsFatal(true)
-				.withInvalidCommandNodeIsFatal(true)
-				.withMaxSteps(20)
-				.build();
-
-		NetTrimmer trimmer = new NetTrimmer(net, runSetup);
+		NetTrimmer trimmer = new NetTrimmer(net, DefaultTestRunSetup.RUN_SETUP);
 		trimmer.runTrimmer();
 
 		NetFormatter formatter = new NetFormatter()
