@@ -31,9 +31,8 @@ public class BiCommand<H1, H2> implements Command {
 
 	@Override
 	public ExecutionResult execute(NetController controller, Node parameters) {
-        if (!(parameters instanceof BNode)) return ExecutionResult.ERROR;
-        BNode top = (BNode) parameters;
-        return executeImpl(controller, top.getLeftChild(controller), top.getRightChild(controller));
+        if (!(parameters instanceof BNode top)) return ExecutionResult.ERROR;
+		return executeImpl(controller, top.getLeftChild(controller), top.getRightChild(controller));
 	}
 
 	private ExecutionResult executeImpl(NetController controller, Node arg1, Node arg2) {
