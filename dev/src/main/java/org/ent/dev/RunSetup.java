@@ -1,5 +1,10 @@
 package org.ent.dev;
 
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
+
 public final class RunSetup {
 
 	private final Integer maxSteps;
@@ -51,6 +56,10 @@ public final class RunSetup {
 		this.commandExecutionFailedIsFatal = commandExecutionFailedIsFatal;
 		this.invalidCommandBranchIsFatal = invalidCommandBranchIsFatal;
 		this.invalidCommandNodeIsFatal = invalidCommandNodeIsFatal;
+	}
+
+	public static RunSetup create(UnaryOperator<Builder> consumer) {
+		return consumer.apply(new Builder()).build();
 	}
 
 	public boolean isCommandExecutionFailedIsFatal() {

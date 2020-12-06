@@ -31,8 +31,6 @@ class NetTrimmerTest {
 		String actualTrimmed = formatter.format(net);
 
 		assertThat(actualTrimmed).isEqualTo(expectedTrimmed);
-
-
 	}
 
 	private static Stream<Arguments> runTrimmer_testData() {

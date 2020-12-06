@@ -1,29 +1,30 @@
 package org.ent.dev.plan;
 
+import org.assertj.core.api.Assertions;
 import org.ent.dev.DefaultTestRunSetup;
-import org.ent.dev.NetReplicator;
+import org.ent.dev.unit.data.DataImpl;
 import org.ent.net.Net;
 import org.ent.net.io.parser.NetParser;
 import org.ent.net.io.parser.ParserException;
-import org.junit.jupiter.api.Disabled;
+import org.ent.net.node.MarkerNode;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 class VariabilityExamTest {
 
     @Test
-    @Disabled
     void doAccept() throws ParserException {
         VariabilityExam exam = new VariabilityExam(DefaultTestRunSetup.RUN_SETUP);
-        NetReplicator replicator = Mockito.mock(NetReplicator.class);
 
         NetParser parser = new NetParser();
-        Net net = parser.parse("");
+        parser.permitMarkerNodes(new MarkerNode());
+        Net net = parser.parse("((<nop>, (#,#)), #)");
 
-        Mockito.when(replicator.getNewSpecimen()).thenReturn(net);
-        VariabilityExamData data = new VariabilityExamData();
-        data.setReplicator(replicator);
+        VariabilityExamData data = new VariabilityExamData(new DataImpl());
+        data.setReplicator(() -> net);
 
-        exam.doAccept(data);
+        exam.accept(data);
+
+        VariabilityExamResult result = data.getVariabilityExamResult();
+        Assertions.assertThat(result.getPoints()).isEqualTo(1000L);
     }
 }

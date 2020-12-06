@@ -24,7 +24,7 @@ public class ManagedRun {
 
 	private ExecutionEventListener eventListener;
 
-	private NetFormatter formatter;
+	private NetFormatter formatter = new NetFormatter();
 
 	private enum EvaluationStepResult { CONTINUE, STOP }
 
@@ -86,13 +86,12 @@ public class ManagedRun {
 		if (net == null) {
 			net = netRunner.getNet();
 		}
-		NetController controller = new DefaultNetController(net, eventListener);
 		if (netRunner == null) {
+			NetController controller = new DefaultNetController(net, eventListener);
 			netRunner = new NetRunner(net, controller);
 		}
 		noSteps = 0;
 		if (log.isTraceEnabled()) {
-			formatter = new NetFormatter();
 			log.trace("before: {}", formatter.format(net));
 		}
 	}
@@ -141,4 +140,14 @@ public class ManagedRun {
 			}
 		};
 	}
+
+	void setFormatter(NetFormatter formatter) {
+		this.formatter = formatter;
+	}
+
+	ManagedRun withFormatter(NetFormatter formatter) {
+		setFormatter(formatter);
+		return this;
+	}
+
 }

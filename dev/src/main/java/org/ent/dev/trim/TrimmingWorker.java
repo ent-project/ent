@@ -11,7 +11,7 @@ class TrimmingWorker {
 
 	private final RunSetup runSetup;
 
-	private TrimmingExecutionEventListener evaluator = new TrimmingExecutionEventListener();
+	private TrimmingExecutionEventListener evaluator;
 
 	public TrimmingWorker(Net net, RunSetup runSetup) {
 		this.net = net;

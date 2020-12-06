@@ -24,10 +24,9 @@ public class EvalOperation implements BiOperation<Node, Node> {
 
 	@Override
 	public ExecutionResult apply(NetController controller, Node node1, Node node2) {
-		if (!(node1 instanceof CNode)) {
+		if (!(node1 instanceof CNode cNode)) {
 			return ExecutionResult.ERROR;
 		}
-		CNode cNode = (CNode) node1;
 		Command command = cNode.getCommand();
 		if (command.getEvalLevel() >= evalLevel) {
 			return ExecutionResult.ERROR;

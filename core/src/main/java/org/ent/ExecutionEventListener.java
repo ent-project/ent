@@ -14,6 +14,4 @@ public interface ExecutionEventListener {
 
 	void fireNewNode(Node n);
 
-	void fireCommandExecuted(CNode cmd);
-
 }

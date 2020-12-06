@@ -1,5 +1,13 @@
 package org.ent.dev;
 
+import org.ent.net.io.formatter.NetFormatter;
+import org.ent.run.NetRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.ent.run.StepResult.COMMAND_EXECUTION_FAILED;
 import static org.ent.run.StepResult.FATAL;
@@ -8,28 +16,22 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import org.ent.run.NetRunner;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 @ExtendWith(MockitoExtension.class)
 class ManagedRunTest {
 
 	private static final int MAX_STEPS = 5;
 
 	@Mock
-	RunSetup setup;
+	NetRunner netRunner;
 
 	@Mock
-	NetRunner netRunner;
+	NetFormatter netFormatter;
 
 	@Test
 	void perform_okay() {
-		doReturn(SUCCESS).when(netRunner).step();
-		doReturn(MAX_STEPS).when(setup).getMaxSteps();
-		ManagedRun run = new ManagedRun(setup).withNetRunner(netRunner);
+		Mockito.doReturn(SUCCESS).when(netRunner).step();
+		ManagedRun run = new ManagedRun(RunSetup.create(s -> s.withMaxSteps(MAX_STEPS)))
+                .withNetRunner(netRunner).withFormatter(netFormatter);
 
 		run.perform();
 
@@ -40,7 +42,7 @@ class ManagedRunTest {
 	@Test
 	void perform_stop_fatal() {
 		doReturn(FATAL).when(netRunner).step();
-		ManagedRun run = new ManagedRun(setup).withNetRunner(netRunner);
+		ManagedRun run = new ManagedRun(RunSetup.create(s -> s)).withNetRunner(netRunner).withFormatter(netFormatter);
 
 		run.perform();
 
@@ -51,9 +53,12 @@ class ManagedRunTest {
 	@Test
 	void perform_okay_commandExecutionFailedIsNotFatal() {
 		doReturn(SUCCESS, SUCCESS, COMMAND_EXECUTION_FAILED).when(netRunner).step();
-		doReturn(false).when(setup).isCommandExecutionFailedIsFatal();
-		doReturn(MAX_STEPS).when(setup).getMaxSteps();
-		ManagedRun run = new ManagedRun(setup).withNetRunner(netRunner);
+		ManagedRun run = new ManagedRun(
+		            RunSetup.create(s -> s
+                        .withCommandExecutionFailedIsFatal(false)
+                        .withMaxSteps(MAX_STEPS)))
+                .withNetRunner(netRunner)
+                .withFormatter(netFormatter);
 
 		run.perform();
 
@@ -64,9 +69,12 @@ class ManagedRunTest {
 	@Test
 	void perform_stop_commandExecutionFailed() {
 		doReturn(SUCCESS, SUCCESS, COMMAND_EXECUTION_FAILED).when(netRunner).step();
-		doReturn(MAX_STEPS).when(setup).getMaxSteps();
-		doReturn(true).when(setup).isCommandExecutionFailedIsFatal();
-		ManagedRun run = new ManagedRun(setup).withNetRunner(netRunner);
+		ManagedRun run = new ManagedRun(
+                    RunSetup.create(s -> s
+                        .withCommandExecutionFailedIsFatal(true)
+                        .withMaxSteps(MAX_STEPS)))
+                .withNetRunner(netRunner)
+                .withFormatter(netFormatter);
 
 		run.perform();
 

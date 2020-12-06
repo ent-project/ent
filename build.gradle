@@ -20,6 +20,7 @@ java {
 ext {
     mockitoVersion = '3.5.10'
     junitVersion = '5.6.1'
+    guavaVersion = '11.0.2'
 }
 
 subprojects {

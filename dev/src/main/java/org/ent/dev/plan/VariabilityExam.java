@@ -1,13 +1,12 @@
 package org.ent.dev.plan;
 
-import org.ent.ExecutionEventListener;
 import org.ent.dev.ManagedRun;
 import org.ent.dev.RunSetup;
 import org.ent.dev.unit.local.TypedProc;
-import org.ent.net.ArrowDirection;
+import org.ent.net.DefaultNetController;
 import org.ent.net.Net;
-import org.ent.net.node.CNode;
-import org.ent.net.node.Node;
+import org.ent.net.NetController;
+import org.ent.run.NetRunner;
 
 public class VariabilityExam extends TypedProc<VariabilityExamData> {
 
@@ -16,34 +15,6 @@ public class VariabilityExam extends TypedProc<VariabilityExamData> {
     public VariabilityExam(RunSetup runSetup) {
         super(new VariabilityExamData());
         this.runSetup = runSetup;
-    }
-
-    private static class VariabilityEvaluator implements ExecutionEventListener {
-
-        @Override
-        public void fireExecutionStart() {
-
-        }
-
-        @Override
-        public void fireGetChild(Node n, ArrowDirection arrowDirection) {
-
-        }
-
-        @Override
-        public void fireSetChild(Node from, ArrowDirection arrowDirection, Node to) {
-
-        }
-
-        @Override
-        public void fireNewNode(Node n) {
-
-        }
-
-        @Override
-        public void fireCommandExecuted(CNode cmd) {
-
-        }
     }
 
     public RunSetup getRunSetup() {
@@ -60,9 +31,11 @@ public class VariabilityExam extends TypedProc<VariabilityExamData> {
 
     private VariabilityExamResult examine(Net net) {
         VariabilityEvaluator evaluator = new VariabilityEvaluator();
-        ManagedRun run = new ManagedRun(runSetup, evaluator).withNet(net);
+        NetController controller = new DefaultNetController(net, evaluator);
+        NetRunner runner = new NetRunner(net, controller);
+        runner.setNetRunnerListener(evaluator);
+        ManagedRun run = new ManagedRun(runSetup, evaluator).withNetRunner(runner);
         run.perform();
-        int steps = run.getNoSteps();
-        return new VariabilityExamResult();
+        return new VariabilityExamResult(evaluator.getPoints());
     }
 }

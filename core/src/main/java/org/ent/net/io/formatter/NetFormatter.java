@@ -14,6 +14,8 @@ import org.ent.net.ReadOnlyNetController;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 
+import javax.validation.constraints.NotNull;
+
 public class NetFormatter {
 
 	private final NetController controller = new ReadOnlyNetController();
@@ -58,7 +60,7 @@ public class NetFormatter {
 		return this;
 	}
 
-	public String format(Net net) {
+	public String format(@NotNull Net net) {
         Set<Node> collected = new LinkedHashSet<>();
         List<Node> rootNodes = new ArrayList<>();
         rootNodes.add(net.getRoot());

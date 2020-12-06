@@ -21,7 +21,9 @@
 	<logger name="plain" level="DEBUG" additivity="false">
 		<appender-ref ref="PLAIN" />
 	</logger>
-	
+
+	<logger name="org.ent.run.NetRunner" level="TRACE"/>
+	<logger name="org.ent.dev.ManagedRun" level="TRACE"/>
 	<logger name="org.ent.dev.DevelopmentPlan" level="TRACE"/>
 	<logger name="org.ent.gui.pref.EntPreferences" level="INFO"/>
 	<logger name="org.ent.gui.BinaryStatsDataSet" level="INFO"/>
