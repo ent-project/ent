@@ -20,7 +20,7 @@ public class VariabilityEvaluator implements ExecutionEventListener, NetRunnerLi
     private static final long[] CUMULATIVE_POINTS_DECAYING = new long[MAX_LEVEL_YIELDING_POINTS + 1];
     static {
         for (int i = 0; i < CUMULATIVE_POINTS_DECAYING.length; i++) {
-            CUMULATIVE_POINTS_DECAYING[i] = caluculateCumliativePointsDecaying(i);
+            CUMULATIVE_POINTS_DECAYING[i] = calculateCumulativePointsDecaying(i);
         }
     }
 
@@ -70,23 +70,18 @@ public class VariabilityEvaluator implements ExecutionEventListener, NetRunnerLi
     }
 
     private CommandData getCommandData(Command command) {
-        CommandData commandData = commandDataMap.get(command);
-        if (commandData == null) {
-            commandData = new CommandData(command);
-            commandDataMap.put(command, commandData);
-        }
-        return commandData;
+        return commandDataMap.computeIfAbsent(command, $ -> new CommandData(command));
     }
 
     public long getPoints() {
         return commandDataMap.entrySet().stream()
                 .map(e -> e.getValue().getTimesExecuted())
-                .map(level -> getCumliativePointsDecaying(level))
+                .map(level -> getCumulativePointsDecaying(level))
                 .mapToLong(Long::longValue)
                 .sum();
     }
 
-    public static long getDecayingPoints(int level) {
+    static long getDecayingPoints(int level) {
         if (level < 1) {
             throw new IllegalArgumentException("Argument must be >= 1, but was " + level);
         }
@@ -97,7 +92,7 @@ public class VariabilityEvaluator implements ExecutionEventListener, NetRunnerLi
         }
     }
 
-    public static long getCumliativePointsDecaying(int level) {
+    public static long getCumulativePointsDecaying(int level) {
         if (level > MAX_LEVEL_YIELDING_POINTS) {
             return CUMULATIVE_POINTS_DECAYING[CUMULATIVE_POINTS_DECAYING.length - 1];
         } else {
@@ -105,7 +100,7 @@ public class VariabilityEvaluator implements ExecutionEventListener, NetRunnerLi
         }
     }
 
-    private static long caluculateCumliativePointsDecaying(int level) {
+    private static long calculateCumulativePointsDecaying(int level) {
         if (level < 0) {
             throw new IllegalArgumentException("Argument must be >= 0, but was " + level);
         }

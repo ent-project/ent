@@ -76,8 +76,8 @@ public class NetFormatter {
             rootNodes.add(nextRoot);
         }
 
-        FormattingWorker worker = new FormattingWorker(rootNodes, givenNodeNames, maxDepth);
-        worker.setAscii(ascii);
+        FormattingWorker worker = new FormattingWorker(rootNodes, givenNodeNames, maxDepth)
+				.withAscii(ascii);
 
         String result = worker.formatRecursively();
 

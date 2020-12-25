@@ -1,6 +1,5 @@
 package org.ent.dev.plan;
 
-import org.assertj.core.api.Assertions;
 import org.ent.net.node.CNode;
 import org.ent.net.node.cmd.CommandFactory;
 import org.ent.net.node.cmd.ExecutionResult;
@@ -11,7 +10,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class VariabilityEvaluatorTest {
@@ -28,27 +27,27 @@ class VariabilityEvaluatorTest {
             evaluator.fireCommandExecuted(cNode, ExecutionResult.NORMAL);
         }
 
-        Assertions.assertThat(evaluator.getPoints()).isEqualTo(pointsExpected);
+        assertThat(evaluator.getPoints()).isEqualTo(pointsExpected);
     }
 
     private static Stream<Arguments> getPoints() {
         return Stream.of(
-                arguments(asList(), 0),
-                arguments(asList(cNodeNop), 1000),
-                arguments(asList(cNodeNop, cNodeIx), 2000),
-                arguments(asList(cNodeNop, cNodeNop), 1500),
-                arguments(asList(cNodeNop, cNodeNop, cNodeNop), 1750),
-                arguments(asList(cNodeNop, cNodeIx, cNodeNop), 2500),
-                arguments(asList(cNodeNop, cNodeIx, cNodeNop, cNodeIx), 3000)
+                arguments(List.of(), 0),
+                arguments(List.of(cNodeNop), 1000),
+                arguments(List.of(cNodeNop, cNodeIx), 2000),
+                arguments(List.of(cNodeNop, cNodeNop), 1500),
+                arguments(List.of(cNodeNop, cNodeNop, cNodeNop), 1750),
+                arguments(List.of(cNodeNop, cNodeIx, cNodeNop), 2500),
+                arguments(List.of(cNodeNop, cNodeIx, cNodeNop, cNodeIx), 3000)
         );
     }
 
     @ParameterizedTest
     @MethodSource("getDecayingPoints")
-    void getDecayingPoints(int stage, long expectedValue) {
-        long actualValue = VariabilityEvaluator.getDecayingPoints(stage);
+    void getDecayingPoints(int level, long expectedValue) {
+        long actualValue = VariabilityEvaluator.getDecayingPoints(level);
 
-        Assertions.assertThat(actualValue).isEqualTo(expectedValue);
+        assertThat(actualValue).isEqualTo(expectedValue);
     }
 
     private static Stream<Arguments> getDecayingPoints() {
@@ -71,14 +70,14 @@ class VariabilityEvaluatorTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getCumliativePointsDecaying")
-    void getCumliativePointsDecaying(int stage, long expectedValue) {
-        long actualValue = VariabilityEvaluator.getCumliativePointsDecaying(stage);
+    @MethodSource("getCumulativePointsDecaying")
+    void getCumulativePointsDecaying(int level, long expectedValue) {
+        long actualValue = VariabilityEvaluator.getCumulativePointsDecaying(level);
 
-        Assertions.assertThat(actualValue).isEqualTo(expectedValue);
+        assertThat(actualValue).isEqualTo(expectedValue);
     }
 
-    private static Stream<Arguments> getCumliativePointsDecaying() {
+    private static Stream<Arguments> getCumulativePointsDecaying() {
         return Stream.of(
                 arguments(0, 0),
                 arguments(1, 1000),

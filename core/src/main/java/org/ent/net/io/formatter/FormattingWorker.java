@@ -56,6 +56,11 @@ public class FormattingWorker {
 		this.ascii = ascii;
 	}
 
+	public FormattingWorker withAscii(boolean ascii) {
+		setAscii(ascii);
+		return this;
+	}
+
 	public String formatRecursively() {
 
         String delimiter = null;
@@ -94,21 +99,18 @@ public class FormattingWorker {
     		variableBindings.put(node, variableName);
         }
 
-        if (node instanceof BNode) {
-            BNode bnode = (BNode) node;
-            stringBuilder.append("(");
+        if (node instanceof BNode bnode) {
+			stringBuilder.append("(");
             doFormatRecursively(bnode.getLeftChild(controller), level + 1);
             stringBuilder.append(", ");
             doFormatRecursively(bnode.getRightChild(controller), level + 1);
             stringBuilder.append(")");
-        } else if (node instanceof UNode) {
-            UNode unode = (UNode) node;
-            stringBuilder.append("[");
+        } else if (node instanceof UNode unode) {
+			stringBuilder.append("[");
             doFormatRecursively(unode.getChild(controller), level + 1);
             stringBuilder.append("]");
-        } else if (node instanceof CNode) {
-            CNode cnode = (CNode) node;
-            stringBuilder.append("<");
+        } else if (node instanceof CNode cnode) {
+			stringBuilder.append("<");
 			stringBuilder.append(ascii ? cnode.getCommand().getShortNameAscii() : cnode.getCommand().getShortName());
             stringBuilder.append(">");
         } else if (node instanceof MarkerNode) {
