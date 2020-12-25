@@ -3,6 +3,7 @@ package org.ent.dev.plan;
 import org.ent.net.node.CNode;
 import org.ent.net.node.cmd.CommandFactory;
 import org.ent.net.node.cmd.ExecutionResult;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -13,24 +14,30 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-class VariabilityEvaluatorTest {
+class VariabilityRaterTest {
 
     private static final CNode cNodeNop = new CNode(CommandFactory.createNopCommand());
     private static final CNode cNodeIx = new CNode(CommandFactory.createAncestorSwapCommand());
 
-    @ParameterizedTest
-    @MethodSource("getPoints")
-    void getPoints(List<CNode> commandsExecuted, long pointsExpected) {
-        VariabilityEvaluator evaluator = new VariabilityEvaluator();
+    @Nested
+    class Integration {
 
-        for (CNode cNode : commandsExecuted) {
-            evaluator.fireCommandExecuted(cNode, ExecutionResult.NORMAL);
+        @ParameterizedTest
+        @MethodSource("org.ent.dev.plan.VariabilityRaterTest#integration_getPoints")
+        void getPoints (List < CNode > commandsExecuted,long pointsExpected){
+            VariabilityCollector collector = new VariabilityCollector();
+            for (CNode cNode : commandsExecuted) {
+                collector.fireCommandExecuted(cNode, ExecutionResult.NORMAL);
+            }
+            VariabilityRater rater = new VariabilityRater(collector);
+
+            long pointsActual = rater.getPoints();
+
+            assertThat(pointsActual).isEqualTo(pointsExpected);
         }
-
-        assertThat(evaluator.getPoints()).isEqualTo(pointsExpected);
     }
 
-    private static Stream<Arguments> getPoints() {
+    private static Stream<Arguments> integration_getPoints() {
         return Stream.of(
                 arguments(List.of(), 0),
                 arguments(List.of(cNodeNop), 1000),
@@ -45,7 +52,7 @@ class VariabilityEvaluatorTest {
     @ParameterizedTest
     @MethodSource("getDecayingPoints")
     void getDecayingPoints(int level, long expectedValue) {
-        long actualValue = VariabilityEvaluator.getDecayingPoints(level);
+        long actualValue = VariabilityRater.getDecayingPoints(level);
 
         assertThat(actualValue).isEqualTo(expectedValue);
     }
@@ -72,7 +79,7 @@ class VariabilityEvaluatorTest {
     @ParameterizedTest
     @MethodSource("getCumulativePointsDecaying")
     void getCumulativePointsDecaying(int level, long expectedValue) {
-        long actualValue = VariabilityEvaluator.getCumulativePointsDecaying(level);
+        long actualValue = VariabilityRater.getCumulativePointsDecaying(level);
 
         assertThat(actualValue).isEqualTo(expectedValue);
     }

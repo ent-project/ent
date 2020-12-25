@@ -30,12 +30,13 @@ public class VariabilityExam extends TypedProc<VariabilityExamData> {
     }
 
     private VariabilityExamResult examine(Net net) {
-        VariabilityEvaluator evaluator = new VariabilityEvaluator();
-        NetController controller = new DefaultNetController(net, evaluator);
+        VariabilityCollector collector = new VariabilityCollector();
+        NetController controller = new DefaultNetController(net, collector);
         NetRunner runner = new NetRunner(net, controller);
-        runner.setNetRunnerListener(evaluator);
-        ManagedRun run = new ManagedRun(runSetup, evaluator).withNetRunner(runner);
+        runner.setNetRunnerListener(collector);
+        ManagedRun run = new ManagedRun(runSetup, collector).withNetRunner(runner);
         run.perform();
-        return new VariabilityExamResult(evaluator.getPoints());
+        VariabilityRater rater = new VariabilityRater(collector);
+        return new VariabilityExamResult(rater.getPoints());
     }
 }
