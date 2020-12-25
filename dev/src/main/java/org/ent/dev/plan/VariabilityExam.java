@@ -1,5 +1,6 @@
 package org.ent.dev.plan;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.ent.dev.ManagedRun;
 import org.ent.dev.RunSetup;
 import org.ent.dev.unit.local.TypedProc;
@@ -11,6 +12,7 @@ import org.ent.run.NetRunner;
 public class VariabilityExam extends TypedProc<VariabilityExamData> {
 
     private final RunSetup runSetup;
+    private VariabilityCollector collector;
 
     public VariabilityExam(RunSetup runSetup) {
         super(new VariabilityExamData());
@@ -30,7 +32,7 @@ public class VariabilityExam extends TypedProc<VariabilityExamData> {
     }
 
     private VariabilityExamResult examine(Net net) {
-        VariabilityCollector collector = new VariabilityCollector();
+        collector = new VariabilityCollector();
         NetController controller = new DefaultNetController(net, collector);
         NetRunner runner = new NetRunner(net, controller);
         runner.setNetRunnerListener(collector);
@@ -38,5 +40,10 @@ public class VariabilityExam extends TypedProc<VariabilityExamData> {
         run.perform();
         VariabilityRater rater = new VariabilityRater(collector);
         return new VariabilityExamResult(rater.getPoints());
+    }
+
+    @VisibleForTesting
+    VariabilityCollector getCollector() {
+        return collector;
     }
 }

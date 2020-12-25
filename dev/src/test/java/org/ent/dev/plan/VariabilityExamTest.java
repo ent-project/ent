@@ -1,6 +1,5 @@
 package org.ent.dev.plan;
 
-import org.assertj.core.api.Assertions;
 import org.ent.dev.DefaultTestRunSetup;
 import org.ent.dev.unit.data.DataImpl;
 import org.ent.net.Net;
@@ -8,6 +7,8 @@ import org.ent.net.io.parser.NetParser;
 import org.ent.net.io.parser.ParserException;
 import org.ent.net.node.MarkerNode;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class VariabilityExamTest {
 
@@ -25,6 +26,7 @@ class VariabilityExamTest {
         exam.accept(data);
 
         VariabilityExamResult result = data.getVariabilityExamResult();
-        Assertions.assertThat(result.getPoints()).isEqualTo(1000L);
+        assertThat(result.getPoints()).isEqualTo(1000L);
     }
+
 }

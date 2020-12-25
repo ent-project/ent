@@ -1,13 +1,6 @@
 package org.ent.net.node.cmd;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
-import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.ArrowAccessor;
 import org.ent.net.node.cmd.accessor.NodeAccessor;
 import org.ent.net.node.cmd.accessor.PtrArrowAccessor;
@@ -19,20 +12,24 @@ import org.ent.net.node.cmd.operation.EvalOperation;
 import org.ent.net.node.cmd.operation.IsIdenticalOperation;
 import org.ent.net.node.cmd.operation.SetOperation;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public final class CommandFactory {
+
+	public static final Command NOP_COMMAND = createNopCommand();
+	public static final Command ANCESTOR_SWAP_COMMAND = createAncestorSwapCommand();
 
 	private static final int MAX_EVAL_LEVEL = 5;
 
-	private static final List<Command> allCommands = collectAllCommands();
+	private static final List<Command> allCommands;
 
-	private static final Map<String, Command> commandsByName = buildCommandsByName();
 
-	private CommandFactory() {
-	}
-
-	private static List<Command> collectAllCommands() {
+	static {
 		List<Command> result = new ArrayList<>();
-		result.add(createNopCommand());
+		result.add(NOP_COMMAND);
 		for (ArrowDirection left : ArrowDirection.values()) {
 			result.add(createSetCommandL(left));
 			for (ArrowDirection right : ArrowDirection.values()) {
@@ -60,7 +57,7 @@ public final class CommandFactory {
 		for (ArrowDirection left : ArrowDirection.values()) {
 			result.add(createDupCommand(left));
 		}
-		result.add(createAncestorSwapCommand());
+		result.add(ANCESTOR_SWAP_COMMAND);
 		for (ArrowDirection left : ArrowDirection.values()) {
 			for (ArrowDirection right : ArrowDirection.values()) {
 				result.add(createAncestorSwapCommandLR(left, right));
@@ -79,7 +76,12 @@ public final class CommandFactory {
 				result.add(createIsIdenticalCommand(left, right));
 			}
 		}
-		return result;
+		allCommands = result;
+	}
+
+	private static final Map<String, Command> commandsByName = buildCommandsByName();
+
+	private CommandFactory() {
 	}
 
 	private static Map<String, Command> buildCommandsByName() {
@@ -110,54 +112,54 @@ public final class CommandFactory {
 	}
 
 	public static Command createSetCommandL(ArrowDirection left) {
-		return new BiCommand<Arrow, Node>(new ArrowAccessor(left), new NodeAccessor(), new SetOperation());
+		return new BiCommand<>(new ArrowAccessor(left), new NodeAccessor(), new SetOperation());
 	}
 
 	public static Command createSetCommandLL(ArrowDirection left1, ArrowDirection left2) {
-		return new BiCommand<Arrow, Node>(new PtrArrowAccessor(left1, left2), new NodeAccessor(), new SetOperation());
+		return new BiCommand<>(new PtrArrowAccessor(left1, left2), new NodeAccessor(), new SetOperation());
 	}
 
 	public static Command createSetCommandLR(ArrowDirection left, ArrowDirection right) {
-		return new BiCommand<Arrow, Node>(new ArrowAccessor(left), new PtrNodeAccessor(right), new SetOperation());
+		return new BiCommand<>(new ArrowAccessor(left), new PtrNodeAccessor(right), new SetOperation());
 	}
 
 	public static Command createSetCommandLRR(ArrowDirection left, ArrowDirection right1, ArrowDirection right2) {
-		return new BiCommand<Arrow, Node>(new ArrowAccessor(left), new PtrPtrNodeAccessor(right1, right2),
+		return new BiCommand<>(new ArrowAccessor(left), new PtrPtrNodeAccessor(right1, right2),
 				new SetOperation());
 	}
 
 	public static Command createSetCommandLLR(ArrowDirection left1, ArrowDirection left2, ArrowDirection right) {
-		return new BiCommand<Arrow, Node>(new PtrArrowAccessor(left1, left2), new PtrNodeAccessor(right),
+		return new BiCommand<>(new PtrArrowAccessor(left1, left2), new PtrNodeAccessor(right),
 				new SetOperation());
 	}
 
 	public static Command createSetCommandLLRR(ArrowDirection left1, ArrowDirection left2, ArrowDirection right1, ArrowDirection right2) {
-		return new BiCommand<Arrow, Node>(new PtrArrowAccessor(left1, left2), new PtrPtrNodeAccessor(right1, right2),
+		return new BiCommand<>(new PtrArrowAccessor(left1, left2), new PtrPtrNodeAccessor(right1, right2),
 				new SetOperation());
 	}
 
 	public static Command createDupCommand(ArrowDirection left) {
-		return new BiCommand<Arrow, Node>(new ArrowAccessor(left), new NodeAccessor(), new DupOperation());
+		return new BiCommand<>(new ArrowAccessor(left), new NodeAccessor(), new DupOperation());
 	}
 
 	public static Command createAncestorSwapCommand() {
-		return new BiCommand<Node, Node>(new NodeAccessor(), new NodeAccessor(), new AncestorSwapOperation());
+		return new BiCommand<>(new NodeAccessor(), new NodeAccessor(), new AncestorSwapOperation());
 	}
 
 	public static Command createAncestorSwapCommandLR(ArrowDirection left, ArrowDirection right) {
-		return new BiCommand<Node, Node>(new PtrNodeAccessor(left), new PtrNodeAccessor(right), new AncestorSwapOperation());
+		return new BiCommand<>(new PtrNodeAccessor(left), new PtrNodeAccessor(right), new AncestorSwapOperation());
 	}
 
 	public static Command createEvalCommand(int evalLevel) {
-		return new BiCommand<Node, Node>(new NodeAccessor(), new NodeAccessor(), new EvalOperation(evalLevel));
+		return new BiCommand<>(new NodeAccessor(), new NodeAccessor(), new EvalOperation(evalLevel));
 	}
 
 	public static Command createEvalCommandLR(int evalLevel, ArrowDirection left, ArrowDirection right) {
-		return new BiCommand<Node, Node>(new PtrNodeAccessor(left), new PtrNodeAccessor(right), new EvalOperation(evalLevel));
+		return new BiCommand<>(new PtrNodeAccessor(left), new PtrNodeAccessor(right), new EvalOperation(evalLevel));
 	}
 
 	public static Command createIsIdenticalCommand(ArrowDirection left, ArrowDirection right) {
-		return new BiCommand<Arrow, Arrow>(new ArrowAccessor(left), new ArrowAccessor(right), new IsIdenticalOperation());
+		return new BiCommand<>(new ArrowAccessor(left), new ArrowAccessor(right), new IsIdenticalOperation());
 	}
 
 }

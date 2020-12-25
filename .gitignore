@@ -7,3 +7,4 @@ bin/
 .gitignore
 save
 .idea
+out
