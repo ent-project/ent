@@ -103,8 +103,8 @@ public class ManagedRun {
 			return EvaluationStepResult.STOP;
 		}
 		noSteps++;
-		if (runSetup.getMaxSteps() != null && noSteps >= runSetup.getMaxSteps()) {
-			log.debug("Max steps {} exceeded - end evaluation.", runSetup.getMaxSteps());
+		if (runSetup.maxSteps() != null && noSteps >= runSetup.maxSteps()) {
+			log.debug("Max steps {} exceeded - end evaluation.", runSetup.maxSteps());
 			return EvaluationStepResult.STOP;
 		}
 		return EvaluationStepResult.CONTINUE;
@@ -115,7 +115,7 @@ public class ManagedRun {
 			case SUCCESS -> false;
 			case FATAL -> true;
 			case COMMAND_EXECUTION_FAILED -> {
-				if (runSetup.isCommandExecutionFailedIsFatal()) {
+				if (runSetup.commandExecutionFailedIsFatal()) {
 					log.debug("Command execution failed in step {} - end evaluation", noSteps);
 					yield true;
 				} else {
@@ -123,7 +123,7 @@ public class ManagedRun {
 				}
 			}
 			case INVALID_COMMAND_BRANCH -> {
-				if (runSetup.isInvalidCommandBranchIsFatal()) {
+				if (runSetup.invalidCommandBranchIsFatal()) {
 					log.debug("Invalid command branch in step {} - end evaluation", noSteps);
 					yield true;
 				} else {
@@ -131,7 +131,7 @@ public class ManagedRun {
 				}
 			}
 			case INVALID_COMMAND_NODE -> {
-				if (runSetup.isInvalidCommandNodeIsFatal()) {
+				if (runSetup.invalidCommandNodeIsFatal()) {
 					log.debug("Invalid command node in step {} - end evaluation", noSteps);
 					yield true;
 				} else {

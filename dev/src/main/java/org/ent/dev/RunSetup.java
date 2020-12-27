@@ -2,24 +2,17 @@ package org.ent.dev;
 
 import java.util.function.UnaryOperator;
 
-public final class RunSetup {
-
-	private final Integer maxSteps;
-
-	private final boolean commandExecutionFailedIsFatal;
-
-	private final boolean invalidCommandBranchIsFatal;
-
-	private final boolean invalidCommandNodeIsFatal;
+public final record RunSetup(
+		Integer maxSteps,
+		boolean commandExecutionFailedIsFatal,
+		boolean invalidCommandBranchIsFatal,
+		boolean invalidCommandNodeIsFatal) {
 
 	public static class Builder {
 
 		private Integer maxSteps;
-
 		private boolean commandExecutionFailedIsFatal;
-
 		private boolean invalidCommandBranchIsFatal;
-
 		private boolean invalidCommandNodeIsFatal;
 
 		public Builder withMaxSteps(Integer maxSteps) {
@@ -47,66 +40,8 @@ public final class RunSetup {
 		}
 	}
 
-	public RunSetup(Integer maxSteps, boolean commandExecutionFailedIsFatal, boolean invalidCommandBranchIsFatal,
-			boolean invalidCommandNodeIsFatal) {
-		this.maxSteps = maxSteps;
-		this.commandExecutionFailedIsFatal = commandExecutionFailedIsFatal;
-		this.invalidCommandBranchIsFatal = invalidCommandBranchIsFatal;
-		this.invalidCommandNodeIsFatal = invalidCommandNodeIsFatal;
-	}
-
 	public static RunSetup create(UnaryOperator<Builder> consumer) {
 		return consumer.apply(new Builder()).build();
-	}
-
-	public boolean isCommandExecutionFailedIsFatal() {
-		return commandExecutionFailedIsFatal;
-	}
-
-	public boolean isInvalidCommandBranchIsFatal() {
-		return invalidCommandBranchIsFatal;
-	}
-
-	public boolean isInvalidCommandNodeIsFatal() {
-		return invalidCommandNodeIsFatal;
-	}
-
-	public Integer getMaxSteps() {
-		return maxSteps;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (commandExecutionFailedIsFatal ? 1231 : 1237);
-		result = prime * result + (invalidCommandBranchIsFatal ? 1231 : 1237);
-		result = prime * result + (invalidCommandNodeIsFatal ? 1231 : 1237);
-		result = prime * result + ((maxSteps == null) ? 0 : maxSteps.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		RunSetup other = (RunSetup) obj;
-		if (commandExecutionFailedIsFatal != other.commandExecutionFailedIsFatal)
-			return false;
-		if (invalidCommandBranchIsFatal != other.invalidCommandBranchIsFatal)
-			return false;
-		if (invalidCommandNodeIsFatal != other.invalidCommandNodeIsFatal)
-			return false;
-		if (maxSteps == null) {
-			if (other.maxSteps != null)
-				return false;
-		} else if (!maxSteps.equals(other.maxSteps))
-			return false;
-		return true;
 	}
 
 }
