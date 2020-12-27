@@ -34,12 +34,14 @@ public class UNode extends Node {
 
 		@Override
 		public Node getTargetForNetControllerOnly() {
-			return UNode.this.getChildForController();
+			return childHub.getNode();
 		}
 
 		@Override
 		public void setTargetForNetControllerOnly(Node target) {
-			UNode.this.setChildForController(target);
+			childHub.removeInverseReference(arrow);
+			childHub = target.getHub();
+			childHub.addInverseReference(arrow);
 		}
 	}
 
@@ -87,16 +89,6 @@ public class UNode extends Node {
 	@Override
 	public boolean isInternal() {
 		return true;
-	}
-
-	private Node getChildForController() {
-		return childHub.getNode();
-	}
-
-	private void setChildForController(Node node) {
-		this.childHub.removeInverseReference(arrow);
-		this.childHub = node.getHub();
-		this.childHub.addInverseReference(arrow);
 	}
 
 }

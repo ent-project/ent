@@ -85,11 +85,11 @@ public class FirstPassNetParser {
     	}
     	NodeTemplate mappedTemplate = identifierMapping.get(template.getName());
         if (mappedTemplate == null) {
-            throw new ParserException("Unkown identifier: '" + template.getName() + "'");
+            throw new ParserException("Unknown identifier: '" + template.getName() + "'");
         }
 
-        if (mappedTemplate instanceof IdentifierNodeTemplate) {
-        	return doResolveIdentifier((IdentifierNodeTemplate) mappedTemplate, level + 1);
+        if (mappedTemplate instanceof IdentifierNodeTemplate identifierNodeTemplate) {
+        	return doResolveIdentifier(identifierNodeTemplate, level + 1);
         } else {
         	return mappedTemplate;
         }
@@ -97,13 +97,13 @@ public class FirstPassNetParser {
 
     private NodeTemplate parseNodeExpression() throws ParserException {
         Token token = tokenizer.peek();
-        if (token instanceof IdentifierToken) {
+        if (token instanceof IdentifierToken identifierToken) {
             Token tokenNext = tokenizer.peek(2);
             if (tokenNext == TOKEN_EQUALS) {
                 tokenizer.next();
                 tokenizer.next();
                 NodeTemplate value = parsePlainNodeExpression();
-                String name = ((IdentifierToken) token).getName();
+                String name = identifierToken.getName();
                 if (identifierMapping.containsKey(name))
                     throw new ParserException("Identifier '" + name + "' bound more than once.");
                 identifierMapping.put(name, value);

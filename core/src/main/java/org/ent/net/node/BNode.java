@@ -33,12 +33,14 @@ public class BNode extends Node {
 
 		@Override
 		public Node getTargetForNetControllerOnly() {
-			return BNode.this.getLeftChildForController();
+			return leftChildHub.getNode();
 		}
 
 		@Override
 		public void setTargetForNetControllerOnly(Node target) {
-			BNode.this.setLeftChildForController(target);
+			leftChildHub.removeInverseReference(leftArrow);
+			leftChildHub = target.getHub();
+			leftChildHub.addInverseReference(leftArrow);
 		}
 	}
 
@@ -55,12 +57,14 @@ public class BNode extends Node {
 
 		@Override
 		public Node getTargetForNetControllerOnly() {
-			return BNode.this.getRightChildForController();
+			return rightChildHub.getNode();
 		}
 
 		@Override
 		public void setTargetForNetControllerOnly(Node target) {
-			BNode.this.setRightChildForController(target);
+			rightChildHub.removeInverseReference(rightArrow);
+			rightChildHub = target.getHub();
+			rightChildHub.addInverseReference(rightArrow);
 		}
 	}
 
@@ -125,26 +129,6 @@ public class BNode extends Node {
 	@Override
 	public boolean isInternal() {
 		return true;
-	}
-
-	private Node getLeftChildForController() {
-		return leftChildHub.getNode();
-	}
-
-	private Node getRightChildForController() {
-		return rightChildHub.getNode();
-	}
-
-	private void setLeftChildForController(Node child) {
-		this.leftChildHub.removeInverseReference(leftArrow);
-		this.leftChildHub = child.getHub();
-		this.leftChildHub.addInverseReference(leftArrow);
-	}
-
-	private void setRightChildForController(Node child) {
-		this.rightChildHub.removeInverseReference(rightArrow);
-		this.rightChildHub = child.getHub();
-		this.rightChildHub.addInverseReference(rightArrow);
 	}
 
 }

@@ -13,7 +13,7 @@ public abstract class AbstractHyperparameter<T> implements Hyperparameter<T> {
 
 	private PropertyChangeSupport changeSupport;
 
-	public AbstractHyperparameter(T defaultValue, String description) {
+	protected AbstractHyperparameter(T defaultValue, String description) {
 		this.defaultValue = defaultValue;
 		this.value = defaultValue;
 		this.description = description;

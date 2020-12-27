@@ -29,11 +29,14 @@ class DefaultNetControllerTest {
 
 	private UNode externalNode;
 
+	private Arrow externalArrow;
+
 	@BeforeEach
 	void setUp() throws Exception {
 		parser = new NetParser();
 		parser.parse("a=[a]");
 		externalNode = (UNode) parser.getNodeNames().get("a");
+		externalArrow = externalNode.getArrow();
 	}
 
 	@Test
@@ -55,7 +58,7 @@ class DefaultNetControllerTest {
 		Net net = new Net();
 		DefaultNetController controller = new DefaultNetController(net);
 
-		assertThatThrownBy(() -> controller.getTarget(externalNode.getArrow()))
+		assertThatThrownBy(() -> controller.getTarget(externalArrow))
 				.isInstanceOf(IllegalStateException.class)
 				.hasMessage("arrow origin does not belong to controlled net");
 	}
@@ -80,7 +83,7 @@ class DefaultNetControllerTest {
 		CNode a = (CNode) parser.getNodeNames().get("_a");
 		DefaultNetController controller = new DefaultNetController(net);
 
-		assertThatThrownBy(() -> controller.setTarget(externalNode.getArrow(), a))
+		assertThatThrownBy(() -> controller.setTarget(externalArrow, a))
 				.isInstanceOf(IllegalStateException.class)
 				.hasMessage("arrow origin does not belong to controlled net");
 	}
@@ -89,9 +92,10 @@ class DefaultNetControllerTest {
 	void setTarget_error_rogueTarget() throws Exception {
 		Net net = parser.parse("u=[<nop>]");
 		UNode u = (UNode) parser.getNodeNames().get("u");
+		Arrow uArrow = u.getArrow();
 		DefaultNetController controller = new DefaultNetController(net);
 
-		assertThatThrownBy(() -> controller.setTarget(u.getArrow(), externalNode))
+		assertThatThrownBy(() -> controller.setTarget(uArrow, externalNode))
 				.isInstanceOf(IllegalStateException.class)
 				.hasMessage("target does not belong to controlled net");
 	}

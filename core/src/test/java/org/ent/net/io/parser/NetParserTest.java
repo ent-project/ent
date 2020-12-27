@@ -111,7 +111,7 @@ class NetParserTest {
 	@Test
 	void parse_error_unknownIdentifier() throws Exception {
 		assertThatThrownBy(() -> parser.parse("(A,B); B=A")).isInstanceOf(ParserException.class)
-				.hasMessage("Unkown identifier: 'A'");
+				.hasMessage("Unknown identifier: 'A'");
 	}
 
 	@Test
