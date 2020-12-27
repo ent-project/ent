@@ -95,9 +95,7 @@ class VariabilityCollectorTest {
 
             NetParser parser = new NetParser()
                     .permitMarkerNodes(new MarkerNode());
-            Net net = parser.parse("outer=(command1=(<|:*>, arguments=(toSet=[#], <nop>)), toSet)");
-            BNode nodeOuter = (BNode) parser.getNodeNames().get("outer");
-            BNode nodeCommand1 = (BNode) parser.getNodeNames().get("command1");
+            Net net = parser.parse("((<|:*>, arguments=(toSet=[#], <nop>)), toSet)");
             BNode nodeArguments = (BNode) parser.getNodeNames().get("arguments");
             UNode nodeToSet = (UNode) parser.getNodeNames().get("toSet");
 
@@ -114,22 +112,18 @@ class VariabilityCollectorTest {
             VariabilityCollector collector = exam.getCollector();
             assertThat(collector.arrowDataMap).containsOnlyKeys(
                     nodeToSet.getArrow(),
-                    nodeOuter.getLeftArrow(),
-                    nodeOuter.getRightArrow(),
-                    nodeCommand1.getLeftArrow(),
-                    nodeCommand1.getRightArrow(),
                     nodeArguments.getLeftArrow(),
                     nodeArguments.getRightArrow()
             );
             ArrowData arrowToSet = collector.arrowDataMap.get(nodeToSet.getArrow());
             assertThat(arrowToSet.getTimesRead()).isZero();
             assertThat(arrowToSet.getTimesWritten()).isEqualTo(1);
-            ArrowData arrowOuterLeft = collector.arrowDataMap.get(nodeOuter.getLeftArrow());
-            assertThat(arrowOuterLeft.getTimesRead()).isEqualTo(1);
-            assertThat(arrowOuterLeft.getTimesWritten()).isZero();
-            ArrowData arrowOuterRight = collector.arrowDataMap.get(nodeOuter.getRightArrow());
-            assertThat(arrowOuterRight.getTimesRead()).isEqualTo(1);
-            assertThat(arrowOuterRight.getTimesWritten()).isZero();
+            ArrowData arrowArgumentsLeft = collector.arrowDataMap.get(nodeArguments.getLeftArrow());
+            assertThat(arrowArgumentsLeft.getTimesRead()).isEqualTo(1);
+            assertThat(arrowArgumentsLeft.getTimesWritten()).isZero();
+            ArrowData arrowArgumentsRight = collector.arrowDataMap.get(nodeArguments.getRightArrow());
+            assertThat(arrowArgumentsRight.getTimesRead()).isEqualTo(1);
+            assertThat(arrowArgumentsRight.getTimesWritten()).isZero();
         }
 
     }

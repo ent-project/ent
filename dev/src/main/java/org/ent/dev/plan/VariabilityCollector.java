@@ -72,14 +72,18 @@ public class VariabilityCollector implements ExecutionEventListener, NetRunnerLi
 
     @Override
     public void fireGetChild(Node node, ArrowDirection arrowDirection, ExecutionContext context) {
-        ArrowData arrowData = getArrowData(node.getArrow(arrowDirection));
-        arrowData.wasRead();
+        if (context == ExecutionContext.COMMAND) {
+            ArrowData arrowData = getArrowData(node.getArrow(arrowDirection));
+            arrowData.wasRead();
+        }
     }
 
     @Override
     public void fireSetChild(Node from, ArrowDirection arrowDirection, Node to, ExecutionContext context) {
-        ArrowData arrowData = getArrowData(from.getArrow(arrowDirection));
-        arrowData.wasWritten();
+        if (context == ExecutionContext.COMMAND) {
+            ArrowData arrowData = getArrowData(from.getArrow(arrowDirection));
+            arrowData.wasWritten();
+        }
     }
 
     @Override
