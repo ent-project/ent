@@ -2,6 +2,7 @@ package org.ent.run;
 
 import org.ent.net.Net;
 import org.ent.net.NetController;
+import org.ent.net.ExecutionContext;
 import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
 import org.ent.net.node.Node;
@@ -42,6 +43,7 @@ public class NetRunner {
 	}
 
 	public StepResult step() {
+		controller.setContext(ExecutionContext.TECHNICAL);
 		Node root = net.getRoot();
 		if (!(root instanceof BNode executionPointer)) {
 			return StepResult.FATAL;
@@ -61,14 +63,14 @@ public class NetRunner {
 		Command command = commandNode.getCommand();
 		Node parameters = commandBranch.getRightChild(controller);
 
+		controller.setContext(ExecutionContext.COMMAND);
 		ExecutionResult executeResult = command.execute(controller, parameters);
+		controller.setContext(ExecutionContext.TECHNICAL);
 		StepResult stepResult = convertToStepResult(executeResult);
-
 		log.trace("command {} executed: {}", command, executeResult);
 		if (netRunnerListener != null) {
 			netRunnerListener.fireCommandExecuted(commandNode, executeResult);
 		}
-
 		return stepResult;
 	}
 

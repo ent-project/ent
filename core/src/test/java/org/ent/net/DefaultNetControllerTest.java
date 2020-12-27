@@ -46,12 +46,12 @@ class DefaultNetControllerTest {
 		Node uTarget = controller.getTarget(u.getArrow());
 
 		assertThat(uTarget).isSameAs(nop);
-		verify(eventListener).fireGetChild(u, ArrowDirection.DOWN);
+		verify(eventListener).fireGetChild(u, ArrowDirection.DOWN, null);
 		verifyNoMoreInteractions(eventListener);
 	}
 
 	@Test
-	void getTarget_error() throws Exception {
+	void getTarget_error() {
 		Net net = new Net();
 		DefaultNetController controller = new DefaultNetController(net);
 
@@ -70,7 +70,7 @@ class DefaultNetControllerTest {
 		controller.setTarget(u.getArrow(), ix);
 
 		assertThat(u.getArrow().getTargetForNetControllerOnly()).isSameAs(ix);
-		verify(eventListener).fireSetChild(u, ArrowDirection.DOWN, ix);
+		verify(eventListener).fireSetChild(u, ArrowDirection.DOWN, ix, null);
 		verifyNoMoreInteractions(eventListener);
 	}
 

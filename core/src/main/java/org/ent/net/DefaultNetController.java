@@ -19,6 +19,8 @@ public class DefaultNetController implements NetController {
 
 	private final MarkerNode placeHolder = new MarkerNode();
 
+	private ExecutionContext context;
+
 	public DefaultNetController(Net net) {
 		this(net, null);
 	}
@@ -36,7 +38,7 @@ public class DefaultNetController implements NetController {
 			}
 		}
 		if (eventListener != null) {
-			eventListener.fireGetChild(arrow.getOrigin(), arrow.getDirection());
+			eventListener.fireGetChild(arrow.getOrigin(), arrow.getDirection(), context);
 		}
 		return arrow.getTargetForNetControllerOnly();
 	}
@@ -52,7 +54,7 @@ public class DefaultNetController implements NetController {
 			}
 		}
 		if (eventListener != null) {
-			eventListener.fireSetChild(arrow.getOrigin(), arrow.getDirection(), target);
+			eventListener.fireSetChild(arrow.getOrigin(), arrow.getDirection(), target, context);
 		}
 		arrow.setTargetForNetControllerOnly(target);
 	}
@@ -139,6 +141,11 @@ public class DefaultNetController implements NetController {
 		hub2.setNode(node1);
 		node2.setHub(hub1);
 		hub1.setNode(node2);
+	}
+
+	@Override
+	public void setContext(ExecutionContext context) {
+		this.context = context;
 	}
 
 }

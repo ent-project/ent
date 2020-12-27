@@ -54,4 +54,9 @@ public class ReadOnlyNetController implements NetController {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public void setContext(ExecutionContext context) {
+		throw new UnsupportedOperationException();
+	}
+
 }

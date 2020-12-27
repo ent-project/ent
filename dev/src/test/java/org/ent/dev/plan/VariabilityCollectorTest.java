@@ -6,6 +6,7 @@ import org.ent.dev.unit.data.DataImpl;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.DefaultNetController;
+import org.ent.net.ExecutionContext;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.io.parser.NetParser;
@@ -62,8 +63,8 @@ class VariabilityCollectorTest {
         void fireSetChild() {
             VariabilityCollector collector = new VariabilityCollector();
 
-            collector.fireSetChild(uNode, ArrowDirection.DOWN, cNodeNop);
-            collector.fireSetChild(uNode, ArrowDirection.DOWN, cNodeNop);
+            collector.fireSetChild(uNode, ArrowDirection.DOWN, cNodeNop, ExecutionContext.COMMAND);
+            collector.fireSetChild(uNode, ArrowDirection.DOWN, cNodeNop, ExecutionContext.COMMAND);
 
             Map<Arrow, ArrowData> arrowDataMap = collector.arrowDataMap;
             assertThat(arrowDataMap).containsOnlyKeys(uNode.getArrow());
@@ -75,7 +76,7 @@ class VariabilityCollectorTest {
         void fireGetChild() {
             VariabilityCollector collector = new VariabilityCollector();
 
-            collector.fireGetChild(uNode, ArrowDirection.DOWN);
+            collector.fireGetChild(uNode, ArrowDirection.DOWN, ExecutionContext.COMMAND);
 
             Map<Arrow, ArrowData> arrowDataMap = collector.arrowDataMap;
             assertThat(arrowDataMap).containsOnlyKeys(uNode.getArrow());

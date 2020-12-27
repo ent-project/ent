@@ -6,6 +6,7 @@ import java.util.Set;
 import org.ent.ExecutionEventListener;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
+import org.ent.net.ExecutionContext;
 import org.ent.net.node.Node;
 
 class TrimmingExecutionEventListener implements ExecutionEventListener {
@@ -24,7 +25,7 @@ class TrimmingExecutionEventListener implements ExecutionEventListener {
 	}
 
 	@Override
-	public void fireGetChild(Node n, ArrowDirection arrowDirection) {
+	public void fireGetChild(Node n, ArrowDirection arrowDirection, ExecutionContext context) {
 		Arrow arrow = n.getArrow(arrowDirection);
 		if (!overriddenArrows.contains(arrow)) {
 			requiredArrows.add(arrow);
@@ -32,7 +33,7 @@ class TrimmingExecutionEventListener implements ExecutionEventListener {
 	}
 
 	@Override
-	public void fireSetChild(Node from, ArrowDirection arrowDirection, Node to) {
+	public void fireSetChild(Node from, ArrowDirection arrowDirection, Node to, ExecutionContext context) {
 		Arrow arrow = from.getArrow(arrowDirection);
 		overriddenArrows.add(arrow);
 	}

@@ -23,4 +23,6 @@ public interface NetController {
 	CNode newCNode(Command command);
 
 	void ancestorSwap(Node x, Node y);
+
+	void setContext(ExecutionContext context);
 }
