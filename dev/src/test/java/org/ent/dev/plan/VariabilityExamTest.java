@@ -26,7 +26,7 @@ class VariabilityExamTest {
         exam.accept(data);
 
         VariabilityExamResult result = data.getVariabilityExamResult();
-        assertThat(result.getPoints()).isEqualTo(1000L);
+        assertThat(result.getPoints()).isEqualTo(1800L);
     }
 
 }

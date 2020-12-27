@@ -16,15 +16,15 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class VariabilityRaterTest {
 
-    private static final CNode cNodeNop = new CNode(CommandFactory.createNopCommand());
-    private static final CNode cNodeIx = new CNode(CommandFactory.createAncestorSwapCommand());
+    private static final CNode cNodeNop = new CNode(CommandFactory.NOP_COMMAND);
+    private static final CNode cNodeIx = new CNode(CommandFactory.ANCESTOR_SWAP_COMMAND);
 
     @Nested
     class Integration {
 
         @ParameterizedTest
         @MethodSource("org.ent.dev.plan.VariabilityRaterTest#integration_getPoints")
-        void getPoints (List < CNode > commandsExecuted,long pointsExpected){
+        void getPoints_command(List < CNode > commandsExecuted,long pointsExpected){
             VariabilityCollector collector = new VariabilityCollector();
             for (CNode cNode : commandsExecuted) {
                 collector.fireCommandExecuted(cNode, ExecutionResult.NORMAL);

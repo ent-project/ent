@@ -22,11 +22,29 @@ public class VariabilityRater {
     }
 
     public long getPoints() {
-        return variabilityCollector.commandDataMap.entrySet().stream()
-                .map(e -> e.getValue().getTimesExecuted())
-                .map(level -> getCumulativePointsDecaying(level))
+        return getPointsForCommandExecution() + getPointsForArrowAccess();
+    }
+
+    private long getPointsForCommandExecution() {
+        return variabilityCollector.commandDataMap.values().stream()
+                .map(VariabilityCollector.CommandData::getTimesExecuted)
+                .map(VariabilityRater::getCumulativePointsDecaying)
                 .mapToLong(Long::longValue)
                 .sum();
+    }
+
+    private long getPointsForArrowAccess() {
+        long readBase = variabilityCollector.arrowDataMap.values().stream()
+                .map(VariabilityCollector.ArrowData::getTimesRead)
+                .map(VariabilityRater::getCumulativePointsDecaying)
+                .mapToLong(Long::longValue)
+                .sum();
+        long writeBase = variabilityCollector.arrowDataMap.values().stream()
+                .map(VariabilityCollector.ArrowData::getTimesWritten)
+                .map(VariabilityRater::getCumulativePointsDecaying)
+                .mapToLong(Long::longValue)
+                .sum();
+        return Math.round(0.4 * writeBase) + Math.round(0.2 * readBase);
     }
 
     static long getDecayingPoints(int level) {
