@@ -1,8 +1,7 @@
 package org.ent.run;
 
 import org.ent.net.Net;
-import org.ent.net.NetController;
-import org.ent.net.ExecutionContext;
+import org.ent.net.Manner;
 import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
 import org.ent.net.node.Node;
@@ -17,21 +16,14 @@ public class NetRunner {
 
 	private final Net net;
 
-	private final NetController controller;
-
 	private NetRunnerListener netRunnerListener;
 
-	public NetRunner(Net net, NetController controller) {
+	public NetRunner(Net net) {
 		this.net = net;
-		this.controller = controller;
 	}
 
 	public Net getNet() {
 		return net;
-	}
-
-	public NetController getController() {
-		return controller;
 	}
 
 	public NetRunnerListener getNetRunnerListener() {
@@ -43,7 +35,6 @@ public class NetRunner {
 	}
 
 	public StepResult step() {
-		controller.setContext(ExecutionContext.TECHNICAL);
 		Node root = net.getRoot();
 		if (!(root instanceof BNode executionPointer)) {
 			return StepResult.FATAL;
@@ -54,18 +45,16 @@ public class NetRunner {
 	}
 
 	private StepResult doStep(BNode executionPointer) {
-		if (!(executionPointer.getLeftChild(controller) instanceof BNode commandBranch)) {
+		if (!(executionPointer.getLeftChild(Manner.RUNNER) instanceof BNode commandBranch)) {
 			return StepResult.INVALID_COMMAND_BRANCH;
 		}
-		if (!(commandBranch.getLeftChild(controller) instanceof CNode commandNode)) {
+		if (!(commandBranch.getLeftChild(Manner.RUNNER) instanceof CNode commandNode)) {
 			return StepResult.INVALID_COMMAND_NODE;
 		}
 		Command command = commandNode.getCommand();
-		Node parameters = commandBranch.getRightChild(controller);
+		Node parameters = commandBranch.getRightChild(Manner.RUNNER);
 
-		controller.setContext(ExecutionContext.COMMAND);
-		ExecutionResult executeResult = command.execute(controller, parameters);
-		controller.setContext(ExecutionContext.TECHNICAL);
+		ExecutionResult executeResult = command.execute(parameters);
 		StepResult stepResult = convertToStepResult(executeResult);
 		log.trace("command {} executed: {}", command, executeResult);
 		if (netRunnerListener != null) {
@@ -82,7 +71,7 @@ public class NetRunner {
 	}
 
 	private void advanceExecutionPointer(BNode executionPointer) {
-		Node newExecutionPointer = executionPointer.getRightChild(controller);
+		Node newExecutionPointer = executionPointer.getRightChild(Manner.RUNNER);
 		net.setRoot(newExecutionPointer);
 	}
 }

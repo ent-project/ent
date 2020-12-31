@@ -8,7 +8,6 @@ import org.ent.net.Net;
 import org.ent.net.NetTestData;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.io.parser.NetParser;
-import org.ent.net.node.MarkerNode;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -42,8 +41,7 @@ class NetCopyTest {
 
 	@Test
 	void createCopy_withMarker() throws Exception {
-		MarkerNode markerNode = new MarkerNode();
-		Net net = new NetParser().permitMarkerNodes(markerNode).parse("[#]");
+		Net net = new NetParser().permitMarkerNodes().parse("[#]");
 		NetCopy copy = new NetCopy(net);
 
 		copy.createCopy();
@@ -52,7 +50,7 @@ class NetCopyTest {
 		clone.consistencyTest();
 		assertThat(new NetFormatter().withAscii(true).format(clone)).isEqualTo("[#]");
 		assertThat(clone.isMarkerNodePermitted()).isTrue();
-		assertThat(clone.getMarkerNode()).isNotSameAs(markerNode);
+		assertThat(clone.getMarkerNode()).isNotSameAs(net.getMarkerNode());
 	}
 
 }

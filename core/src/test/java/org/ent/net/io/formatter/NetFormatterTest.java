@@ -6,14 +6,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.ent.net.DefaultNetController;
+import org.ent.net.Manner;
 import org.ent.net.Net;
-import org.ent.net.NetController;
 import org.ent.net.NetTestData;
 import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.UNode;
+import org.ent.net.node.cmd.CommandFactory;
 import org.ent.net.node.cmd.NopCommand;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,22 +55,21 @@ class NetFormatterTest {
 	@Test
 	void format_2Calls() {
 		Net net = new Net();
-		NetController controller = new DefaultNetController(net);
 		net.runWithMarkerNode(dummy -> {
-			BNode b1 = controller.newBNode(dummy, dummy);
-			UNode u1 = controller.newUNode(dummy);
-			UNode u2 = controller.newUNode(dummy);
+			BNode b1 = net.newBNode(dummy, dummy);
+			UNode u1 = net.newUNode(dummy);
+			UNode u2 = net.newUNode(dummy);
 
-			b1.setLeftChild(controller, u1);
-			b1.setRightChild(controller, u2);
-			u1.setChild(controller, u1);
-			u2.setChild(controller, u2);
+			b1.setLeftChild(u1, Manner.DIRECT);
+			b1.setRightChild(u2, Manner.DIRECT);
+			u1.setChild(u1, Manner.DIRECT);
+			u2.setChild(u2, Manner.DIRECT);
 
 			net.setRoot(b1);
 
 			assertThat(formatter.format(net)).isEqualTo("(a=[a], b=[b])");
 
-			b1.setLeftChild(controller, controller.newCNode(new NopCommand()));
+			b1.setLeftChild(net.newCNode(CommandFactory.NOP_COMMAND), Manner.DIRECT);
 			net.getNodes().remove(u1);
 
 			assertThat(formatter.format(net)).isEqualTo("(<nop>, b=[b])");
@@ -91,17 +90,16 @@ class NetFormatterTest {
 	@Test
 	void format_multipleRoots() {
 		Net net = new Net();
-		NetController controller = new DefaultNetController(net);
 		net.runWithMarkerNode(dummy -> {
-			BNode b1 = controller.newBNode(dummy, dummy);
-			UNode u1 = controller.newUNode(dummy);
-			CNode nop = controller.newCNode(new NopCommand());
+			BNode b1 = net.newBNode(dummy, dummy);
+			UNode u1 = net.newUNode(dummy);
+			CNode nop = net.newCNode(new NopCommand());
 
-			b1.setLeftChild(controller, u1);
-			b1.setRightChild(controller, nop);
-			u1.setChild(controller, u1);
+			b1.setLeftChild(u1, Manner.DIRECT);
+			b1.setRightChild(nop, Manner.DIRECT);
+			u1.setChild(u1, Manner.DIRECT);
 
-			controller.newUNode(b1);
+			net.newUNode(b1);
 			net.setRoot(b1);
 		});
 
@@ -111,9 +109,8 @@ class NetFormatterTest {
 	@Test
 	void format_setNodeNames() {
 		Net net = new Net();
-		NetController controller = new DefaultNetController(net);
 
-		UNode u1 = controller.newUNode();
+		UNode u1 = net.newUNode();
 
 		net.setRoot(u1);
 

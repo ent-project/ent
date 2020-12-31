@@ -1,43 +1,58 @@
 package org.ent.net;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.Validate;
+import org.ent.ExecutionEventListener;
+import org.ent.net.node.BNode;
+import org.ent.net.node.CNode;
 import org.ent.net.node.Hub;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
+import org.ent.net.node.UNode;
+import org.ent.net.node.cmd.Command;
 import org.ent.net.util.ReferentialGarbageCollection;
 
+import javax.validation.constraints.NotNull;
+
 public class Net {
+
+	private static final boolean VALIDATE = true;
 
 	private Set<Node> nodes;
 
 	private Node root;
 
-	private NetController internalNetController;
-
 	private boolean markerNodePermitted;
 
 	private MarkerNode markerNode;
 
+	Set<ExecutionEventListener> eventListeners = new HashSet<>();
+
 	public Net() {
 		this.nodes = new LinkedHashSet<>();
-		this.internalNetController = new ReadOnlyNetController();
 	}
 
 	public Set<Node> getNodes() {
 		return nodes;
 	}
 
-	public boolean addNode(Node node) {
-		return nodes.add(node);
+	public void addNode(Node node) {
+		if (node.getNet() != null) {
+			throw new IllegalArgumentException("net in node must be unset");
+		}
+		node.setNet(this);
+		addNodeInternal(node);
 	}
 
-	public boolean addNodes(Collection<Node> nodes) {
-		return this.nodes.addAll(nodes);
+	public void addNodes(Collection<Node> nodes) {
+		nodes.forEach(this::addNode);
 	}
 
 	public boolean removeNode(Node node) {
@@ -46,6 +61,13 @@ public class Net {
 
 	public boolean removeNodeIf(Predicate<? super Node> filter) {
 		return nodes.removeIf(filter);
+	}
+
+	public Set<Node> removeAllNodes() {
+		HashSet<Node> formerNodes = new HashSet<>(this.nodes);
+		formerNodes.forEach(n -> n.setNet(null));
+		nodes.clear();
+		return formerNodes;
 	}
 
 	public void clearNodes() {
@@ -60,19 +82,29 @@ public class Net {
 		this.root = root;
 	}
 
-	public boolean belongsToNet(Node node) {
-		if (node == null) {
-			throw new IllegalArgumentException("node must not be null");
+	@VisibleForTesting
+	void validateBelongsToNet(@NotNull Node node) {
+		Validate.notNull(node);
+		if (VALIDATE) {
+			if (node.getNet() != this) {
+				throw new IllegalStateException("node belongs to another net");
+			}
+			if (node != markerNode && !nodes.contains(node)) {
+				throw new IllegalStateException("node does not belong to this net");
+			}
 		}
-		return node == markerNode || nodes.contains(node);
 	}
 
-	public void permitMarkerNode(MarkerNode markerNode) {
+	public MarkerNode permitMarkerNode() {
 		this.markerNodePermitted = true;
-		this.markerNode = markerNode;
+		this.markerNode = new MarkerNode(this);
+		return this.markerNode;
 	}
 
 	public void forbidMarkerNode() {
+		if (VALIDATE) {
+			consistencyTest(); // check marker is not referenced
+		}
 		this.markerNodePermitted = false;
 		this.markerNode = null;
 	}
@@ -98,8 +130,12 @@ public class Net {
 	}
 
 	private void consistencyTest(Node node) {
+
 		if (node instanceof MarkerNode) {
 			throw new AssertionError("Net node must not be a marker node");
+		}
+		if (node.getNet() != this) {
+			throw new AssertionError("Node belongs to another net");
 		}
 		for (Arrow arrow : node.getArrows()) {
 			consistencyTest(arrow);
@@ -109,7 +145,7 @@ public class Net {
 		for (Arrow arrow : hub.getInverseReferences()) {
 			if (!nodes.contains(arrow.getOrigin()))
 				throw new AssertionError("Nodes referencing a net node must be part of the net");
-			Node childOfParent = arrow.getTarget(internalNetController);
+			Node childOfParent = arrow.getTarget(Manner.DIRECT);
 			if (childOfParent != node) {
 				throw new AssertionError("Node must be child of its parent");
 			}
@@ -117,7 +153,7 @@ public class Net {
 	}
 
 	private void consistencyTest(Arrow arrow) {
-		Node child = arrow.getTarget(internalNetController);
+		Node child = arrow.getTarget(Manner.DIRECT);
 		if (child instanceof MarkerNode) {
 			if (!markerNodePermitted) {
 				throw new AssertionError("Child of node is marker node, but they are not permitted");
@@ -141,10 +177,92 @@ public class Net {
 	}
 
 	public void runWithMarkerNode(Consumer<MarkerNode> consumer) {
-		MarkerNode marker = new MarkerNode();
-		permitMarkerNode(marker);
+		MarkerNode marker = permitMarkerNode();
 		consumer.accept(marker);
 		forbidMarkerNode();
+	}
+
+	public static void ancestorSwap(Node node1, Node node2) {
+		Net net = node1.getNet();
+		net.validateBelongsToNet(node2);
+		Hub hub1 = node1.getHub();
+		Hub hub2 = node2.getHub();
+		node1.setHub(hub2);
+		hub2.setNode(node1);
+		node2.setHub(hub1);
+		hub1.setNode(node2);
+	}
+
+	public UNode newUNode() {
+		UNode uNode = new UNode(this);
+		addNodeInternal(uNode);
+		fireNewNodeCall(uNode);
+		return uNode;
+	}
+
+	public UNode newUNode(Node child) {
+		validateBelongsToNet(child);
+		UNode uNode = new UNode(this, child);
+		addNodeInternal(uNode);
+		fireNewNodeCall(uNode);
+		return uNode;
+	}
+
+	public BNode newBNode() {
+		BNode bNode = new BNode(this);
+		addNodeInternal(bNode);
+		fireNewNodeCall(bNode);
+		return bNode;
+	}
+
+	public BNode newBNode(Node leftChild, Node rightChild) {
+		validateBelongsToNet(leftChild);
+		validateBelongsToNet(rightChild);
+		BNode bNode = new BNode(this, leftChild, rightChild);
+		addNodeInternal(bNode);
+		fireNewNodeCall(bNode);
+		return bNode;
+	}
+
+	public CNode newCNode(Command command) {
+		CNode cNode = new CNode(this, command);
+		addNodeInternal(cNode);
+		fireNewNodeCall(cNode);
+		return cNode;
+	}
+
+	public void addNodeInternal(Node node) {
+		nodes.add(node);
+	}
+
+	public void addExecutionEventListener(ExecutionEventListener listener) {
+		eventListeners.add(listener);
+	}
+
+	public void removeExecutionEventListener(ExecutionEventListener listener) {
+		eventListeners.remove(listener);
+	}
+
+	public void withExecutionEventListener(ExecutionEventListener listener, Runnable runnable) {
+		addExecutionEventListener(listener);
+		try {
+			runnable.run();
+		} finally {
+			removeExecutionEventListener(listener);
+		}
+	}
+
+	public void fireGetTargetCall(Node n, ArrowDirection arrowDirection, Manner manner) {
+		eventListeners.forEach(listener -> listener.fireGetChild(n, arrowDirection, manner));
+	}
+
+	public void fireSetTargetCall(Node from, ArrowDirection arrowDirection, Node to, Manner manner) {
+		validateBelongsToNet(to);
+		eventListeners.forEach(listener -> listener.fireSetChild(from, arrowDirection, to, manner));
+	}
+
+	public void fireNewNodeCall(Node n) {
+		eventListeners.forEach(listener -> listener.fireNewNode(n));
 	}
 
 }

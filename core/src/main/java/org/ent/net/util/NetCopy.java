@@ -4,9 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.ent.net.Arrow;
-import org.ent.net.DefaultNetController;
+import org.ent.net.Manner;
 import org.ent.net.Net;
-import org.ent.net.NetController;
 import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
 import org.ent.net.node.MarkerNode;
@@ -19,17 +18,11 @@ public class NetCopy {
 
 	private final Net netClone;
 
-	private final NetController controllerOrig;
-
-	private final NetController controllerClone;
-
 	private final Map<Node, Node> originalToCloneMap;
 
 	public NetCopy(Net original) {
 		this.netOrig = original;
 		this.netClone = new Net();
-		this.controllerOrig = new DefaultNetController(netOrig);
-		this.controllerClone = new DefaultNetController(netClone);
 		this.originalToCloneMap = new HashMap<>();
 	}
 
@@ -44,13 +37,12 @@ public class NetCopy {
 	private void copyNodes() throws AssertionError {
 		for (Node nodeOrig : netOrig.getNodes()) {
 			Node nodeClone;
-			if (nodeOrig instanceof CNode) {
-				CNode cNodeOrig = (CNode) nodeOrig;
-				nodeClone = controllerClone.newCNode(cNodeOrig.getCommand());
+			if (nodeOrig instanceof CNode cNodeOrig) {
+				nodeClone = netClone.newCNode(cNodeOrig.getCommand());
 			} else if (nodeOrig instanceof UNode) {
-				nodeClone = controllerClone.newUNode();
+				nodeClone = netClone.newUNode();
 			} else if (nodeOrig instanceof BNode) {
-				nodeClone = controllerClone.newBNode();
+				nodeClone = netClone.newBNode();
 			} else {
 				throw new AssertionError("Unexpected Node type: " + nodeOrig.getClass());
 			}
@@ -60,8 +52,7 @@ public class NetCopy {
 
 	private void copyMarker() {
 		if (netOrig.isMarkerNodePermitted()) {
-			MarkerNode markerClone = new MarkerNode();
-			netClone.permitMarkerNode(markerClone);
+			MarkerNode markerClone = netClone.permitMarkerNode();
 		}
 	}
 
@@ -73,8 +64,8 @@ public class NetCopy {
 		for (Node nodeOrig : netOrig.getNodes()) {
 			for (Arrow arrowOrig : nodeOrig.getArrows()) {
 				Arrow arrowClone = originalToClone(arrowOrig);
-				Node targetClone = originalToClone(arrowOrig.getTarget(controllerOrig));
-				controllerClone.setTarget(arrowClone, targetClone);
+				Node targetClone = originalToClone(arrowOrig.getTarget(Manner.DIRECT));
+				arrowClone.setTarget(targetClone, Manner.DIRECT);
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 package org.ent.net.io.parser;
 
 import org.ent.net.ArrowDirection;
-import org.ent.net.NetController;
+import org.ent.net.Net;
 import org.ent.net.node.Node;
 
 class IdentifierNodeTemplate implements NodeTemplate {
@@ -16,7 +16,7 @@ class IdentifierNodeTemplate implements NodeTemplate {
 	}
 
 	@Override
-	public Node generateNode(NetController controller) throws ParserException {
+	public Node generateNode(Net net) throws ParserException {
 		throw new UnsupportedOperationException();
 	}
 

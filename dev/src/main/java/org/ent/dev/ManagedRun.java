@@ -1,9 +1,6 @@
 package org.ent.dev;
 
-import org.ent.ExecutionEventListener;
-import org.ent.net.DefaultNetController;
 import org.ent.net.Net;
-import org.ent.net.NetController;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.run.NetRunner;
 import org.ent.run.StepResult;
@@ -22,16 +19,9 @@ public class ManagedRun {
 
 	private Net net;
 
-	private ExecutionEventListener eventListener;
-
 	private NetFormatter formatter = new NetFormatter();
 
 	private enum EvaluationStepResult { CONTINUE, STOP }
-
-	public ManagedRun(RunSetup runSetup, ExecutionEventListener eventListener) {
-		this.runSetup = runSetup;
-		this.eventListener = eventListener;
-	}
 
 	public ManagedRun(RunSetup runSetup) {
 		this.runSetup = runSetup;
@@ -87,8 +77,7 @@ public class ManagedRun {
 			net = netRunner.getNet();
 		}
 		if (netRunner == null) {
-			NetController controller = new DefaultNetController(net, eventListener);
-			netRunner = new NetRunner(net, controller);
+			netRunner = new NetRunner(net);
 		}
 		noSteps = 0;
 		if (log.isTraceEnabled()) {

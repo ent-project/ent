@@ -1,17 +1,29 @@
 package org.ent.net.node;
 
+import org.ent.net.Arrow;
+import org.ent.net.ArrowDirection;
+import org.ent.net.Net;
+
 import java.util.List;
 import java.util.Optional;
 
-import org.ent.net.Arrow;
-import org.ent.net.ArrowDirection;
-
 public abstract class Node {
+
+	protected Net net;
 
 	private Hub hub;
 
-	protected Node() {
+	protected Node(Net net) {
+		this.net = net;
 		this.hub = new Hub(this);
+	}
+
+	public Net getNet() {
+		return net;
+	}
+
+	public void setNet(Net net) {
+		this.net = net;
 	}
 
 	public Hub getHub() {

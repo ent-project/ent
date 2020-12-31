@@ -8,17 +8,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.ent.net.Arrow;
+import org.ent.net.Manner;
 import org.ent.net.Net;
-import org.ent.net.NetController;
-import org.ent.net.ReadOnlyNetController;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 
 import javax.validation.constraints.NotNull;
 
 public class NetFormatter {
-
-	private final NetController controller = new ReadOnlyNetController();
 
     private Map<Node, String> givenNodeNames = new HashMap<>();
 
@@ -98,7 +95,7 @@ public class NetFormatter {
         	}
         }
         for (Arrow arrow : node.getArrows()) {
-        	Node child = arrow.getTarget(controller);
+        	Node child = arrow.getTarget(Manner.DIRECT);
         	collectRecursively(child, collected, markerNodesPermitted);
         }
     }
@@ -108,7 +105,7 @@ public class NetFormatter {
             return;
         missing.remove(node);
         for (Arrow arrow : node.getArrows()) {
-        	Node child = arrow.getTarget(controller);
+        	Node child = arrow.getTarget(Manner.DIRECT);
         	collectRecursivelyInverted(child, missing);
         }
     }

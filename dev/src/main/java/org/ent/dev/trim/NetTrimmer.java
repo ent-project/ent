@@ -2,9 +2,8 @@ package org.ent.dev.trim;
 
 import org.ent.dev.RunSetup;
 import org.ent.net.Arrow;
-import org.ent.net.DefaultNetController;
+import org.ent.net.Manner;
 import org.ent.net.Net;
-import org.ent.net.NetController;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 import org.ent.net.util.NetCopy;
@@ -16,8 +15,6 @@ public class NetTrimmer {
 
 	private final Net net;
 
-	private final NetController controller;
-
 	private final RunSetup runSetup;
 
 	private NetCopy copy;
@@ -28,13 +25,11 @@ public class NetTrimmer {
 
 	public NetTrimmer(Net net, RunSetup runSetup) {
 		this.net = net;
-		this.controller = new DefaultNetController(net);
 		this.runSetup = runSetup;
 		if (net.isMarkerNodePermitted()) {
 			this.marker = net.getMarkerNode();
 		} else {
-			this.marker = new MarkerNode();
-			net.permitMarkerNode(this.marker);
+			this.marker = net.permitMarkerNode();
 		}
 	}
 
@@ -70,6 +65,6 @@ public class NetTrimmer {
 	}
 
 	private void cutArrow(Arrow arrow) {
-		controller.setTarget(arrow, marker);
+		arrow.setTarget(marker, Manner.DIRECT);
 	}
 }

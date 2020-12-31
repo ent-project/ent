@@ -10,10 +10,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.ent.net.Arrow;
-import org.ent.net.DefaultNetController;
+import org.ent.net.Manner;
 import org.ent.net.Net;
-import org.ent.net.NetController;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 
@@ -50,8 +50,6 @@ public class NetParser {
 
 	private boolean markerNodePermitted;
 
-	private MarkerNode markerNode;
-
     public Net parse(String input) throws ParserException {
         return parse(new StringReader(input));
     }
@@ -60,7 +58,7 @@ public class NetParser {
         clear();
         firstPassNetParser = new FirstPassNetParser(reader);
         if (markerNodePermitted) {
-        	firstPassNetParser.setMarkerNodesPermitted(markerNode);
+        	firstPassNetParser.setMarkerNodesPermitted();
         }
         List<NodeTemplate> mainNodeTemplates = firstPassNetParser.parseAll();
         return buildNet(mainNodeTemplates);
@@ -78,23 +76,21 @@ public class NetParser {
 		return mainNodes;
 	}
 
-    public NetParser permitMarkerNodes(MarkerNode markerNode) {
+    public NetParser permitMarkerNodes() {
     	this.markerNodePermitted = true;
-    	this.markerNode = markerNode;
     	return this;
     }
 
     private Net buildNet(List<NodeTemplate> mainNodeTemplates) throws ParserException {
 
-    	Net net = new Net();
+    	Net net = createNet();
     	if (markerNodePermitted) {
-    		net.permitMarkerNode(markerNode);
+    		net.permitMarkerNode();
     	}
-        NetController controller = new DefaultNetController(net);
 
-        instantiateNodesFromTemplates(controller);
+        instantiateNodesFromTemplates(net);
 
-        fillInChildNodes(controller);
+        fillInChildNodes();
 
         resolveMainNodes(mainNodeTemplates);
 
@@ -104,16 +100,21 @@ public class NetParser {
         return net;
     }
 
-	private void instantiateNodesFromTemplates(NetController controller) throws ParserException {
+    @VisibleForTesting
+    Net createNet() {
+    	return new Net();
+	}
+
+	private void instantiateNodesFromTemplates(Net net) throws ParserException {
 		for (NodeTemplate template : firstPassNetParser.getAllEntries()) {
         	if (!(template instanceof IdentifierNodeTemplate)) {
-        		Node node = template.generateNode(controller);
+        		Node node = template.generateNode(net);
         		templateNodeMap.put(template, node);
         	}
         }
 	}
 
-	private void fillInChildNodes(NetController controller) throws ParserException {
+	private void fillInChildNodes() throws ParserException {
 		for (NodeTemplate template : firstPassNetParser.getAllEntries()) {
             if (template instanceof IdentifierNodeTemplate) {
                 continue;
@@ -121,7 +122,7 @@ public class NetParser {
             Node node = templateNodeMap.get(template);
             for (Arrow arrow : node.getArrows()) {
             	Node child = resolveNode(template.getChild(arrow.getDirection()));
-            	arrow.setTarget(controller, child);
+            	arrow.setTarget(child, Manner.DIRECT);
             }
             allNodes.add(node);
         }

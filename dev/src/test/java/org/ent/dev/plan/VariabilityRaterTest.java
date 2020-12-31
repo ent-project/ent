@@ -1,8 +1,11 @@
 package org.ent.dev.plan;
 
+import org.ent.net.Net;
 import org.ent.net.node.CNode;
 import org.ent.net.node.cmd.CommandFactory;
 import org.ent.net.node.cmd.ExecutionResult;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -16,8 +19,15 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class VariabilityRaterTest {
 
-    private static final CNode cNodeNop = new CNode(CommandFactory.NOP_COMMAND);
-    private static final CNode cNodeIx = new CNode(CommandFactory.ANCESTOR_SWAP_COMMAND);
+    private static CNode cNodeNop;
+    private static CNode cNodeIx;
+
+    @BeforeAll
+    static void setUp() {
+        Net net = new Net();
+        cNodeNop = net.newCNode(CommandFactory.NOP_COMMAND);
+        cNodeIx = net.newCNode(CommandFactory.ANCESTOR_SWAP_COMMAND);
+    }
 
     @Nested
     class Integration {

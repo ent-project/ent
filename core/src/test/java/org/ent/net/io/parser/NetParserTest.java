@@ -7,12 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ent.net.Manner;
 import org.ent.net.Net;
-import org.ent.net.NetController;
-import org.ent.net.ReadOnlyNetController;
 import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
-import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.UNode;
 import org.ent.net.node.cmd.CommandFactory;
@@ -21,13 +19,10 @@ import org.junit.jupiter.api.Test;
 
 class NetParserTest {
 
-	NetController controller;
-
 	NetParser parser;
 
 	@BeforeEach
 	void setup() {
-		controller = ReadOnlyNetController.getInstance();
 		parser = new NetParser();
 	}
 
@@ -40,13 +35,13 @@ class NetParserTest {
 		Node root = net.getRoot();
 		assertThat(root).isInstanceOf(BNode.class);
 		BNode bRoot = (BNode) root;
-		assertThat(bRoot.getLeftChild(controller)).isInstanceOfSatisfying(CNode.class, c -> {
+		assertThat(bRoot.getLeftChild(Manner.DIRECT)).isInstanceOfSatisfying(CNode.class, c -> {
 			assertThat(c.getCommand()).isEqualTo(CommandFactory.getByName("nop"));
 		});
-		Node rNode = bRoot.getRightChild(controller);
+		Node rNode = bRoot.getRightChild(Manner.DIRECT);
 		assertThat(rNode).isInstanceOf(UNode.class);
 		UNode urNode = (UNode) rNode;
-		assertThat(urNode.getChild(controller)).isInstanceOfSatisfying(CNode.class, c -> {
+		assertThat(urNode.getChild(Manner.DIRECT)).isInstanceOfSatisfying(CNode.class, c -> {
 			assertThat(c.getCommand()).isEqualTo(CommandFactory.getByName("nop"));
 		});
 	}
@@ -68,7 +63,7 @@ class NetParserTest {
 
 		Node n = nodes.iterator().next();
 		assertThat(n).isInstanceOfSatisfying(UNode.class, uNode -> {
-			assertThat(uNode.getChild(controller)).isSameAs(uNode);
+			assertThat(uNode.getChild(Manner.DIRECT)).isSameAs(uNode);
 		});
 	}
 
@@ -82,7 +77,7 @@ class NetParserTest {
 
 	@Test
 	void parse_okay_marker() throws Exception {
-		parser.permitMarkerNodes(new MarkerNode());
+		parser.permitMarkerNodes();
 		Net net = parser.parse("A=[#]");
 
 		Set<Node> nodes = net.getNodes();
@@ -97,7 +92,7 @@ class NetParserTest {
 
 	@Test
 	void parse_error_markerTopLevel() throws Exception {
-		parser.permitMarkerNodes(new MarkerNode());
+		parser.permitMarkerNodes();
 		assertThatThrownBy(() -> parser.parse("<nop>; #")).isInstanceOf(ParserException.class)
 				.hasMessage("Top level node must not be a marker node");
 	}

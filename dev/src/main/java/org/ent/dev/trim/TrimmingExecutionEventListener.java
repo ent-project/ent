@@ -6,7 +6,7 @@ import java.util.Set;
 import org.ent.ExecutionEventListener;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
-import org.ent.net.ExecutionContext;
+import org.ent.net.Manner;
 import org.ent.net.node.Node;
 
 class TrimmingExecutionEventListener implements ExecutionEventListener {
@@ -25,17 +25,25 @@ class TrimmingExecutionEventListener implements ExecutionEventListener {
 	}
 
 	@Override
-	public void fireGetChild(Node n, ArrowDirection arrowDirection, ExecutionContext context) {
-		Arrow arrow = n.getArrow(arrowDirection);
-		if (!overriddenArrows.contains(arrow)) {
-			requiredArrows.add(arrow);
+	public void fireGetChild(Node n, ArrowDirection arrowDirection, Manner manner) {
+		if (isApplicableManner(manner)) {
+			Arrow arrow = n.getArrow(arrowDirection);
+			if (!overriddenArrows.contains(arrow)) {
+				requiredArrows.add(arrow);
+			}
 		}
 	}
 
+	private boolean isApplicableManner(Manner manner) {
+		return manner == Manner.RUNNER || manner == Manner.COMMAND;
+	}
+
 	@Override
-	public void fireSetChild(Node from, ArrowDirection arrowDirection, Node to, ExecutionContext context) {
-		Arrow arrow = from.getArrow(arrowDirection);
-		overriddenArrows.add(arrow);
+	public void fireSetChild(Node from, ArrowDirection arrowDirection, Node to, Manner manner) {
+		if (isApplicableManner(manner)) {
+			Arrow arrow = from.getArrow(arrowDirection);
+			overriddenArrows.add(arrow);
+		}
 	}
 
 	@Override

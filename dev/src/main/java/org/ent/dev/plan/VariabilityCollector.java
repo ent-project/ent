@@ -3,7 +3,7 @@ package org.ent.dev.plan;
 import org.ent.ExecutionEventListener;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
-import org.ent.net.ExecutionContext;
+import org.ent.net.Manner;
 import org.ent.net.node.CNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
@@ -71,16 +71,16 @@ public class VariabilityCollector implements ExecutionEventListener, NetRunnerLi
     }
 
     @Override
-    public void fireGetChild(Node node, ArrowDirection arrowDirection, ExecutionContext context) {
-        if (context == ExecutionContext.COMMAND) {
+    public void fireGetChild(Node node, ArrowDirection arrowDirection, Manner manner) {
+        if (manner == Manner.COMMAND) {
             ArrowData arrowData = getArrowData(node.getArrow(arrowDirection));
             arrowData.wasRead();
         }
     }
 
     @Override
-    public void fireSetChild(Node from, ArrowDirection arrowDirection, Node to, ExecutionContext context) {
-        if (context == ExecutionContext.COMMAND) {
+    public void fireSetChild(Node from, ArrowDirection arrowDirection, Node to, Manner manner) {
+        if (manner == Manner.COMMAND) {
             ArrowData arrowData = getArrowData(from.getArrow(arrowDirection));
             arrowData.wasWritten();
         }

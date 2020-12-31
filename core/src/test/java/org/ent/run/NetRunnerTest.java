@@ -5,12 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Arrays;
 import java.util.List;
 
-import org.ent.net.DefaultNetController;
 import org.ent.net.Net;
-import org.ent.net.NetController;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.io.parser.NetParser;
-import org.ent.net.node.MarkerNode;
 import org.junit.jupiter.api.Test;
 
 class NetRunnerTest {
@@ -54,8 +51,7 @@ class NetRunnerTest {
 		String netStr = steps.get(0);
 		NetParser parser = new NetParser();
 		if (allowMarker) {
-			MarkerNode marker = new MarkerNode();
-			parser.permitMarkerNodes(marker);
+			parser.permitMarkerNodes();
 		}
 		Net net = parser.parse(netStr);
 
@@ -63,8 +59,7 @@ class NetRunnerTest {
 		String out0 = formatter.format(net);
 		assertThat(out0).isEqualTo(netStr);
 
-		NetController controller = new DefaultNetController(net);
-		NetRunner runner = new NetRunner(net, controller);
+		NetRunner runner = new NetRunner(net);
 
 		for (int i = 1; i < steps.size(); i++) {
 			StepResult result = runner.step();

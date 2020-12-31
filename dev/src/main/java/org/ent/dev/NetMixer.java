@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 
 import org.ent.net.Arrow;
-import org.ent.net.DefaultNetController;
+import org.ent.net.Manner;
 import org.ent.net.Net;
-import org.ent.net.NetController;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 import org.ent.util.ModifiedPoisson;
@@ -25,13 +25,10 @@ public class NetMixer {
 
 	private List<Node> nodesList;
 
-	private NetController controller;
-
 	public NetMixer(Random rand, Net primaryNet, Net joiningNet) {
 		this.rand = rand;
 		this.primaryNet = primaryNet;
 		this.joiningNet = joiningNet;
-		this.controller = new DefaultNetController(primaryNet);
 		validate();
 	}
 
@@ -56,17 +53,18 @@ public class NetMixer {
 	}
 
 	private void doJoinNets() {
-		primaryNet.addNodes(joiningNet.getNodes());
+		Set<Node> joiningNodes = joiningNet.removeAllNodes();
+		primaryNet.addNodes(joiningNodes);
 		nodesList = new ArrayList<>(primaryNet.getNodes());
 	}
 
 	private void randomlyWireArrowsToMarkerNodes() {
 		for (Node node : nodesList) {
 			for (Arrow arrow : node.getArrows()) {
-				Node target = controller.getTarget(arrow);
+				Node target = arrow.getTarget(Manner.DIRECT);
 				if (target instanceof MarkerNode) {
 					Node newTarget = drawRandomNonMarkerNode();
-					controller.setTarget(arrow, newTarget);
+					arrow.setTarget(newTarget, Manner.DIRECT);
 				}
 			}
 		}
@@ -81,7 +79,7 @@ public class NetMixer {
 			Optional<Arrow> randArrow = drawRandomArrow(node);
 			randArrow.ifPresent(arrow -> {
 				Node target = drawRandomNonMarkerNode();
-				controller.setTarget(arrow, target);
+				arrow.setTarget(target, Manner.DIRECT);
 			});
 		}
 	}

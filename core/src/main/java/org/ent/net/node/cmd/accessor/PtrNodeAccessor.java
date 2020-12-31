@@ -3,7 +3,7 @@ package org.ent.net.node.cmd.accessor;
 import java.util.Optional;
 
 import org.ent.net.ArrowDirection;
-import org.ent.net.NetController;
+import org.ent.net.Manner;
 import org.ent.net.node.Node;
 
 public class PtrNodeAccessor implements Accessor<Node> {
@@ -21,8 +21,8 @@ public class PtrNodeAccessor implements Accessor<Node> {
 	}
 
 	@Override
-	public Optional<Node> get(NetController controller, Node node) {
-		return node.getArrowMaybe(direction).map(childArrow -> childArrow.getTarget(controller));
+	public Optional<Node> get(Node node, Manner manner) {
+		return node.getArrowMaybe(direction).map(childArrow -> childArrow.getTarget(manner));
 	}
 
 	@Override

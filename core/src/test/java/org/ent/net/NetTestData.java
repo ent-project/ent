@@ -7,6 +7,7 @@ import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.UNode;
+import org.ent.net.node.cmd.CommandFactory;
 import org.ent.net.node.cmd.NopCommand;
 
 public class NetTestData {
@@ -27,15 +28,14 @@ public class NetTestData {
 
 	public static NetWithStringRepresentation buildNet0() {
     	Net net = new Net();
-    	NetController controller = new DefaultNetController(net);
     	net.runWithMarkerNode(dummy -> {
-            BNode b1 = controller.newBNode(dummy, dummy);
-            UNode u1 = controller.newUNode(dummy);
-            CNode nop = controller.newCNode(new NopCommand());
+            BNode b1 = net.newBNode(dummy, dummy);
+            UNode u1 = net.newUNode(dummy);
+            CNode nop = net.newCNode(CommandFactory.NOP_COMMAND);
 
-            b1.setLeftChild(controller, u1);
-            b1.setRightChild(controller, nop);
-            u1.setChild(controller, u1);
+            b1.setLeftChild(u1, Manner.DIRECT);
+            b1.setRightChild(nop, Manner.DIRECT);
+            u1.setChild(u1, Manner.DIRECT);
 
             net.setRoot(b1);
     	});
@@ -45,11 +45,10 @@ public class NetTestData {
 
 	public static NetWithStringRepresentation buildNet1() {
     	Net net = new Net();
-    	NetController controller = new DefaultNetController(net);
 
-        UNode a = controller.newUNode(controller.newCNode(new NopCommand()));
-        BNode b1 = controller.newBNode(a, controller.newCNode(new NopCommand()));
-        BNode b2 = controller.newBNode(a, b1);
+        UNode a = net.newUNode(net.newCNode(new NopCommand()));
+        BNode b1 = net.newBNode(a, net.newCNode(new NopCommand()));
+        BNode b2 = net.newBNode(a, b1);
 
         net.setRoot(b2);
 
@@ -58,27 +57,26 @@ public class NetTestData {
 
 	public static NetWithStringRepresentation buildNet2() {
     	Net net = new Net();
-    	NetController controller = new DefaultNetController(net);
 
     	net.runWithMarkerNode(dummy -> {
-	        UNode u1 = controller.newUNode(dummy);			// a
-	        UNode u2 = controller.newUNode(dummy);			// b
-	        BNode b1 = controller.newBNode(dummy, dummy);
-	        BNode b2 = controller.newBNode(dummy, dummy);	// A
-	        BNode b3 = controller.newBNode(dummy, dummy);
-	        BNode bb = controller.newBNode(dummy, dummy);
-	        CNode nop = controller.newCNode(new NopCommand());
+	        UNode u1 = net.newUNode(dummy);			// a
+	        UNode u2 = net.newUNode(dummy);			// b
+	        BNode b1 = net.newBNode(dummy, dummy);
+	        BNode b2 = net.newBNode(dummy, dummy);	// A
+	        BNode b3 = net.newBNode(dummy, dummy);
+	        BNode bb = net.newBNode(dummy, dummy);
+	        CNode nop = net.newCNode(CommandFactory.NOP_COMMAND);
 
-	        u1.setChild(controller, u2);
-	        u2.setChild(controller, b1);
-	        b1.setLeftChild(controller, bb);
-	        b1.setRightChild(controller, b2);
-	        b2.setLeftChild(controller, bb);
-	        b2.setRightChild(controller, b3);
-	        b3.setLeftChild(controller, bb);
-	        b3.setRightChild(controller, u2);
-	        bb.setLeftChild(controller, nop);
-	        bb.setRightChild(controller, u1);
+	        u1.setChild(u2, Manner.DIRECT);
+	        u2.setChild(b1, Manner.DIRECT);
+	        b1.setLeftChild(bb, Manner.DIRECT);
+	        b1.setRightChild(b2, Manner.DIRECT);
+	        b2.setLeftChild(bb, Manner.DIRECT);
+	        b2.setRightChild(b3, Manner.DIRECT);
+	        b3.setLeftChild(bb, Manner.DIRECT);
+	        b3.setRightChild(u2, Manner.DIRECT);
+	        bb.setLeftChild(nop, Manner.DIRECT);
+	        bb.setRightChild(u1, Manner.DIRECT);
 
 	        net.setRoot(u1);
     	});
@@ -87,12 +85,11 @@ public class NetTestData {
 
 	public NetWithStringRepresentation buildNetDeep() {
     	Net net = new Net();
-    	NetController controller = new DefaultNetController(net);
 
-        CNode nop = controller.newCNode(new NopCommand());
+        CNode nop = net.newCNode(CommandFactory.NOP_COMMAND);
         Node n = nop;
         for (int i = 0; i < 20; i++) {
-        	n = controller.newUNode(n);
+        	n = net.newUNode(n);
         }
 
         net.setRoot(n);

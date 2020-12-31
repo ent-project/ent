@@ -14,15 +14,8 @@ public interface Arrow {
 
 	Node getOrigin();
 
-	default Node getTarget(NetController controller) {
-		return controller.getTarget(this);
-	}
+	Node getTarget(Manner manner);
 
-	default void setTarget(NetController controller, Node target) {
-		controller.setTarget(this, target);
-	}
+	void setTarget(Node target, Manner manner);
 
-	Node getTargetForNetControllerOnly();
-
-	void setTargetForNetControllerOnly(Node target);
 }

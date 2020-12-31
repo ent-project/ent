@@ -4,8 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ent.net.NetController;
-import org.ent.net.ReadOnlyNetController;
+import org.ent.net.Manner;
 import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
 import org.ent.net.node.MarkerNode;
@@ -15,8 +14,6 @@ import org.ent.net.node.UNode;
 public class FormattingWorker {
 
 	private static final String ELLIPSE = "...";
-
-	private final NetController controller = new ReadOnlyNetController();
 
     private final List<Node> rootNodes;
 
@@ -101,13 +98,13 @@ public class FormattingWorker {
 
         if (node instanceof BNode bnode) {
 			stringBuilder.append("(");
-            doFormatRecursively(bnode.getLeftChild(controller), level + 1);
+            doFormatRecursively(bnode.getLeftChild(Manner.DIRECT), level + 1);
             stringBuilder.append(", ");
-            doFormatRecursively(bnode.getRightChild(controller), level + 1);
+            doFormatRecursively(bnode.getRightChild(Manner.DIRECT), level + 1);
             stringBuilder.append(")");
         } else if (node instanceof UNode unode) {
 			stringBuilder.append("[");
-            doFormatRecursively(unode.getChild(controller), level + 1);
+            doFormatRecursively(unode.getChild(Manner.DIRECT), level + 1);
             stringBuilder.append("]");
         } else if (node instanceof CNode cnode) {
 			stringBuilder.append("<");

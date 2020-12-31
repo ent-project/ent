@@ -4,13 +4,10 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.ent.net.Arrow;
-import org.ent.net.NetController;
-import org.ent.net.ReadOnlyNetController;
+import org.ent.net.Manner;
 import org.ent.net.node.Node;
 
 public final class NetUtils {
-
-    private static NetController readController = new ReadOnlyNetController();
 
     private NetUtils() {
     }
@@ -26,7 +23,7 @@ public final class NetUtils {
             return;
         reachableNodes.add(node);
     	for (Arrow arrow : node.getArrows()) {
-    		Node child = readController.getTarget(arrow);
+    		Node child = arrow.getTarget(Manner.DIRECT);
     		doCollectReachableRec(child, reachableNodes);
     	}
     }

@@ -1,23 +1,19 @@
 package org.ent.net.util;
 
-import java.util.Set;
-
 import org.ent.net.Arrow;
-import org.ent.net.DefaultNetController;
+import org.ent.net.Manner;
 import org.ent.net.Net;
-import org.ent.net.NetController;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
+
+import java.util.Set;
 
 public class ReferentialGarbageCollection {
 
 	private final Net net;
 
-	private final NetController controller;
-
 	public ReferentialGarbageCollection(Net net) {
 		this.net = net;
-		this.controller = new DefaultNetController(net);
 	}
 
 	public void run() {
@@ -35,7 +31,7 @@ public class ReferentialGarbageCollection {
 			return;
 		}
 		for (Arrow arrow : n.getArrows()) {
-			controller.setTarget(arrow, n);
+			arrow.setTarget(n, Manner.DIRECT);
 		}
 	}
 }

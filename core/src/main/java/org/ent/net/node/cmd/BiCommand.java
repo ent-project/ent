@@ -1,6 +1,6 @@
 package org.ent.net.node.cmd;
 
-import org.ent.net.NetController;
+import org.ent.net.Manner;
 import org.ent.net.node.BNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
@@ -30,15 +30,15 @@ public class BiCommand<H1, H2> implements Command {
 	}
 
 	@Override
-	public ExecutionResult execute(NetController controller, Node parameters) {
+	public ExecutionResult execute(Node parameters) {
         if (!(parameters instanceof BNode top)) return ExecutionResult.ERROR;
-		return executeImpl(controller, top.getLeftChild(controller), top.getRightChild(controller));
+		return executeImpl(top.getLeftChild(Manner.COMMAND), top.getRightChild(Manner.COMMAND));
 	}
 
-	private ExecutionResult executeImpl(NetController controller, Node arg1, Node arg2) {
-		return accessor1.get(controller, arg1).flatMap(handle1 ->
-			accessor2.get(controller, arg2).map(handle2 ->
-				operation.apply(controller, handle1, handle2)
+	private ExecutionResult executeImpl(Node arg1, Node arg2) {
+		return accessor1.get(arg1, Manner.COMMAND).flatMap(handle1 ->
+			accessor2.get(arg2, Manner.COMMAND).map(handle2 ->
+				operation.apply(handle1, handle2)
 			)
 		).orElse(ExecutionResult.ERROR);
 	}

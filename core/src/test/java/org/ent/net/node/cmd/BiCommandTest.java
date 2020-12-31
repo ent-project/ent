@@ -11,9 +11,8 @@ import java.util.Optional;
 
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
-import org.ent.net.DefaultNetController;
+import org.ent.net.Manner;
 import org.ent.net.Net;
-import org.ent.net.NetController;
 import org.ent.net.io.parser.NetParser;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
@@ -46,9 +45,8 @@ class BiCommandTest {
 	@Test
 	void execute_error_noBNode() throws Exception {
 		Net net = new NetParser().parse("A=[A]");
-		NetController controller = new DefaultNetController(net);
 
-		assertThat(command.execute(controller, net.getRoot())).isEqualTo(ExecutionResult.ERROR);
+		assertThat(command.execute(net.getRoot())).isEqualTo(ExecutionResult.ERROR);
 
 		verifyNoMoreInteractions(accessor1, accessor2, operation);
 	}
@@ -56,46 +54,43 @@ class BiCommandTest {
 	@Test
 	void execute_error_accessor1Empty() throws Exception {
 		Net net = new NetParser().parse("A=(A,A)");
-		NetController controller = new DefaultNetController(net);
 		Node node = net.getRoot();
 
-		assertThat(command.execute(controller, node)).isEqualTo(ExecutionResult.ERROR);
+		assertThat(command.execute(node)).isEqualTo(ExecutionResult.ERROR);
 
-		verify(accessor1).get(controller, node);
+		verify(accessor1).get(node, Manner.COMMAND);
 		verifyNoMoreInteractions(accessor1, accessor2, operation);
 	}
 
 	@Test
 	void execute_error_accessor2Empty() throws Exception {
 		Net net = new NetParser().parse("A=(A,A)");
-		NetController controller = new DefaultNetController(net);
 		Node node = net.getRoot();
 
-		when(accessor1.get(controller, node)).thenReturn(Optional.of(node.getArrow(ArrowDirection.LEFT)));
+		when(accessor1.get(node, Manner.COMMAND)).thenReturn(Optional.of(node.getArrow(ArrowDirection.LEFT)));
 
-		assertThat(command.execute(controller, node)).isEqualTo(ExecutionResult.ERROR);
+		assertThat(command.execute(node)).isEqualTo(ExecutionResult.ERROR);
 
-		verify(accessor1).get(controller, node);
-		verify(accessor2).get(controller, node);
+		verify(accessor1).get(node, Manner.COMMAND);
+		verify(accessor2).get(node, Manner.COMMAND);
 		verifyNoMoreInteractions(accessor1, accessor2, operation);
 	}
 
 	@Test
 	void execute_okay() throws Exception {
 		Net net = new NetParser().parse("A=(A,A)");
-		NetController controller = new DefaultNetController(net);
 		Node node = net.getRoot();
 		Arrow arrow = node.getArrow(ArrowDirection.LEFT);
 
-		when(accessor1.get(controller, node)).thenReturn(Optional.of(arrow));
-		when(accessor2.get(controller, node)).thenReturn(Optional.of(node));
-		when(operation.apply(eq(controller), any(), any())).thenReturn(ExecutionResult.NORMAL);
+		when(accessor1.get(node, Manner.COMMAND)).thenReturn(Optional.of(arrow));
+		when(accessor2.get(node, Manner.COMMAND)).thenReturn(Optional.of(node));
+		when(operation.apply(any(), any())).thenReturn(ExecutionResult.NORMAL);
 
-		assertThat(command.execute(controller, node)).isEqualTo(ExecutionResult.NORMAL);
+		assertThat(command.execute(node)).isEqualTo(ExecutionResult.NORMAL);
 
-		verify(accessor1).get(controller, node);
-		verify(accessor2).get(controller, node);
-		verify(operation).apply(controller, arrow, node);
+		verify(accessor1).get(node, Manner.COMMAND);
+		verify(accessor2).get(node, Manner.COMMAND);
+		verify(operation).apply(arrow, node);
 		verifyNoMoreInteractions(accessor1, accessor2, operation);
 	}
 

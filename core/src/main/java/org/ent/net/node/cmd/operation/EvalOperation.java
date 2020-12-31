@@ -1,6 +1,5 @@
 package org.ent.net.node.cmd.operation;
 
-import org.ent.net.NetController;
 import org.ent.net.node.CNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
@@ -23,7 +22,7 @@ public class EvalOperation implements BiOperation<Node, Node> {
 	}
 
 	@Override
-	public ExecutionResult apply(NetController controller, Node node1, Node node2) {
+	public ExecutionResult apply(Node node1, Node node2) {
 		if (!(node1 instanceof CNode cNode)) {
 			return ExecutionResult.ERROR;
 		}
@@ -32,7 +31,7 @@ public class EvalOperation implements BiOperation<Node, Node> {
 			return ExecutionResult.ERROR;
 		}
 
-		command.execute(controller, node2);
+		command.execute(node2);
 		return ExecutionResult.NORMAL;
 	}
 

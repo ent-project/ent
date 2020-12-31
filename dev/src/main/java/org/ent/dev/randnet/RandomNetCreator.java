@@ -6,9 +6,8 @@ import java.util.Optional;
 import java.util.Random;
 
 import org.ent.net.Arrow;
-import org.ent.net.DefaultNetController;
+import org.ent.net.Manner;
 import org.ent.net.Net;
-import org.ent.net.NetController;
 import org.ent.net.node.Node;
 import org.ent.util.ModifiedPoisson;
 
@@ -27,8 +26,6 @@ public class RandomNetCreator {
 	private final CommandDrawing commandDrawing;
 
 	private Net net;
-
-	private NetController controller;
 
 	private DrawResult result;
 
@@ -90,7 +87,6 @@ public class RandomNetCreator {
 
 	private void initialize() {
     	net = new Net();
-    	controller = new DefaultNetController(net);
     	result = null;
 	}
 
@@ -102,7 +98,7 @@ public class RandomNetCreator {
 		}
 		int rootIdx = rand.nextInt(noBNodes);
 		for (int i = 0; i < noBNodes; i++) {
-			Node n = controller.newBNode();
+			Node n = net.newBNode();
 			if (i == rootIdx) {
 				net.setRoot(n);
 			}
@@ -110,12 +106,12 @@ public class RandomNetCreator {
 
 		int noUNodes = ModifiedPoisson.getModifiedPoisson(numberOfNodes * fractionUNodes).drawModifiedPoisson(rand);
 		for (int i = 0; i < noUNodes; i++) {
-			controller.newUNode();
+			net.newUNode();
 		}
 
 		int noCNodes = ModifiedPoisson.getModifiedPoisson(numberOfNodes * fractionCNodes).drawModifiedPoisson(rand);
 		for (int i = 0; i < noCNodes; i++) {
-			controller.newCNode(commandDrawing.drawCommand());
+			net.newCNode(commandDrawing.drawCommand());
 		}
 	}
 
@@ -125,7 +121,7 @@ public class RandomNetCreator {
 		for (Node node : net.getNodes()) {
 			for (Arrow arrow : node.getArrows()) {
 				Node target = getRandomTarget(nodes);
-				controller.setTarget(arrow, target);
+				arrow.setTarget(target, Manner.DIRECT);
 			}
 		}
 	}

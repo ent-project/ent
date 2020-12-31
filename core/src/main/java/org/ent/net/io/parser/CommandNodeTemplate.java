@@ -1,7 +1,7 @@
 package org.ent.net.io.parser;
 
 import org.ent.net.ArrowDirection;
-import org.ent.net.NetController;
+import org.ent.net.Net;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.CommandFactory;
@@ -18,12 +18,12 @@ class CommandNodeTemplate implements NodeTemplate {
     }
 
 	@Override
-	public Node generateNode(NetController controller) throws ParserException {
+	public Node generateNode(Net net) throws ParserException {
         Command command = CommandFactory.getByName(commandName);
         if (command == null) {
             throw new ParserException("Unknown command: '" + commandName + "'");
         }
-		return controller.newCNode(command);
+		return net.newCNode(command);
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 package org.ent.net.io.parser;
 
 import org.ent.net.ArrowDirection;
-import org.ent.net.NetController;
+import org.ent.net.Net;
 import org.ent.net.node.Node;
 
 class UNodeTemplate implements NodeTemplate {
@@ -12,8 +12,8 @@ class UNodeTemplate implements NodeTemplate {
     }
 
 	@Override
-	public Node generateNode(NetController controller) {
-		return controller.newUNode();
+	public Node generateNode(Net net) {
+		return net.newUNode();
 	}
 
 	@Override

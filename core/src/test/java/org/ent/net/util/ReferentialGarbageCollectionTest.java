@@ -20,7 +20,7 @@ class ReferentialGarbageCollectionTest {
 	@MethodSource("run_testData")
 	void run(Net net, Net netExtraNodes) throws Exception {
 		Set<Node> originalNodes = new HashSet<>(net.getNodes());
-		for (Node n : netExtraNodes.getNodes()) {
+		for (Node n : netExtraNodes.removeAllNodes()) {
 			net.addNode(n);
 		}
 

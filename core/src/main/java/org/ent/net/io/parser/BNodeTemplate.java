@@ -1,7 +1,7 @@
 package org.ent.net.io.parser;
 
 import org.ent.net.ArrowDirection;
-import org.ent.net.NetController;
+import org.ent.net.Net;
 import org.ent.net.node.BNode;
 
 class BNodeTemplate implements NodeTemplate {
@@ -23,7 +23,7 @@ class BNodeTemplate implements NodeTemplate {
     }
 
 	@Override
-	public BNode generateNode(NetController controller) {
-		return controller.newBNode();
+	public BNode generateNode(Net net) {
+		return net.newBNode();
 	}
 }

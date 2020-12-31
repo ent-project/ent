@@ -5,7 +5,6 @@ import org.ent.dev.unit.data.DataImpl;
 import org.ent.net.Net;
 import org.ent.net.io.parser.NetParser;
 import org.ent.net.io.parser.ParserException;
-import org.ent.net.node.MarkerNode;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,7 +16,7 @@ class VariabilityExamTest {
         VariabilityExam exam = new VariabilityExam(DefaultTestRunSetup.RUN_SETUP);
 
         NetParser parser = new NetParser();
-        parser.permitMarkerNodes(new MarkerNode());
+        parser.permitMarkerNodes();
         Net net = parser.parse("((<nop>, (#,#)), #)");
 
         VariabilityExamData data = new VariabilityExamData(new DataImpl());

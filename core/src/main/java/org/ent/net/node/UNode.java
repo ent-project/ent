@@ -6,7 +6,8 @@ import java.util.Optional;
 
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
-import org.ent.net.NetController;
+import org.ent.net.Manner;
+import org.ent.net.Net;
 
 /**
  * Unary node.
@@ -17,9 +18,9 @@ public class UNode extends Node {
 
 	private Hub childHub;
 
-	private final Arrow arrow;
+	private final Arrow arrow = new UNodeArrow();
 
-	private final List<Arrow> arrows;
+	private final List<Arrow> arrows = Collections.singletonList(arrow);
 
 	private class UNodeArrow implements Arrow {
 		@Override
@@ -33,32 +34,49 @@ public class UNode extends Node {
 		}
 
 		@Override
-		public Node getTargetForNetControllerOnly() {
-			return childHub.getNode();
+		public Node getTarget(Manner manner) {
+			net.fireGetTargetCall(getOrigin(), getDirection(), manner);
+			return doGetTarget();
 		}
 
 		@Override
-		public void setTargetForNetControllerOnly(Node target) {
+		public void setTarget(Node target, Manner manner) {
+			net.fireSetTargetCall(getOrigin(), getDirection(), target, manner);
+			doSetTarget(target);
+		}
+
+		private Node doGetTarget() {
+			return childHub.getNode();
+		}
+
+		private void doSetTarget(Node target) {
 			childHub.removeInverseReference(arrow);
 			childHub = target.getHub();
 			childHub.addInverseReference(arrow);
 		}
 	}
 
-	public UNode(Node child) {
-		super();
-		this.arrow = new UNodeArrow();
+	public UNode(Net net, Node child) {
+		super(net);
+		initialize(child);
+	}
+
+	public UNode(Net net) {
+		super(net);
+		initialize(this);
+	}
+
+	private void initialize(Node child) {
 		this.childHub = child.getHub();
 		this.childHub.addInverseReference(arrow);
-		this.arrows = Collections.singletonList(arrow);
 	}
 
-	public Node getChild(NetController controller) {
-		return controller.getTarget(arrow);
+	public Node getChild(Manner manner) {
+		return arrow.getTarget(manner);
 	}
 
-	public void setChild(NetController controller, Node child) {
-		controller.setTarget(arrow, child);
+	public void setChild(Node child, Manner manner) {
+		arrow.setTarget(child, manner);
 	}
 
 	public Arrow getArrow() {

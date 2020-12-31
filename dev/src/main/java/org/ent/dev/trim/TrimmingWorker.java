@@ -20,8 +20,10 @@ class TrimmingWorker {
 	}
 
 	public void runTrimmer() {
-		ManagedRun run = new ManagedRun(runSetup, evaluator).withNet(net);
-		run.perform();
+		net.withExecutionEventListener(evaluator, () -> {
+			ManagedRun run = new ManagedRun(runSetup).withNet(net);
+			run.perform();
+		});
 	}
 
 	public boolean isDead(Arrow arrow) {

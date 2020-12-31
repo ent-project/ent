@@ -35,15 +35,12 @@ public class FirstPassNetParser {
 
 	private boolean markerNodePermitted;
 
-	private MarkerNode markerNode;
-
     public FirstPassNetParser(Reader reader) {
     	this.tokenizer = new NetTokenizer(reader);
 	}
 
-    public void setMarkerNodesPermitted(MarkerNode markerNode) {
+    public void setMarkerNodesPermitted() {
     	this.markerNodePermitted = true;
-    	this.markerNode = markerNode;
     }
 
 	public Set<NodeTemplate> getAllEntries() {
@@ -134,7 +131,7 @@ public class FirstPassNetParser {
             return new IdentifierNodeTemplate(((IdentifierToken) token).getName());
         } else if (token == TokenManager.TOKEN_MARKER) {
         	if (markerNodePermitted) {
-            	return new MarkerNodeTemplate(markerNode);
+            	return new MarkerNodeTemplate();
         	} else {
         		throw new ParserException(MessageFormat.format(
         				"Found marker node in line {0}, column {1}, but is not permitted",
