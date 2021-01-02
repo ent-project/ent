@@ -23,7 +23,7 @@ class NetMixerTest {
 
 		assertThat(netJoined.getNodes().size()).isEqualTo(net1Size + net2Size);
 		netJoined.forbidMarkerNode();
-		netJoined.consistencyTest();
+		netJoined.consistencyCheck();
 	}
 
 }

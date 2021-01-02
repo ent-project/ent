@@ -103,7 +103,7 @@ public class Net {
 
 	public void forbidMarkerNode() {
 		if (VALIDATE) {
-			consistencyTest(); // check marker is not referenced
+			consistencyCheck(); // check marker is not referenced
 		}
 		this.markerNodePermitted = false;
 		this.markerNode = null;
@@ -117,7 +117,7 @@ public class Net {
 		return markerNode;
 	}
 
-	public void consistencyTest() {
+	public void consistencyCheck() {
 		if (root == null) {
 			throw new AssertionError("Root is null");
 		}
@@ -125,11 +125,11 @@ public class Net {
 			throw new AssertionError("Root must be one of the net nodes");
 		}
 		for (Node node : nodes) {
-			consistencyTest(node);
+			consistencyCheck(node);
 		}
 	}
 
-	private void consistencyTest(Node node) {
+	private void consistencyCheck(Node node) {
 
 		if (node instanceof MarkerNode) {
 			throw new AssertionError("Net node must not be a marker node");
@@ -138,7 +138,7 @@ public class Net {
 			throw new AssertionError("Node belongs to another net");
 		}
 		for (Arrow arrow : node.getArrows()) {
-			consistencyTest(arrow);
+			consistencyCheck(arrow);
 		}
 
 		Hub hub = node.getHub();
@@ -152,7 +152,7 @@ public class Net {
 		}
 	}
 
-	private void consistencyTest(Arrow arrow) {
+	private void consistencyCheck(Arrow arrow) {
 		Node child = arrow.getTarget(Manner.DIRECT);
 		if (child instanceof MarkerNode) {
 			if (!markerNodePermitted) {

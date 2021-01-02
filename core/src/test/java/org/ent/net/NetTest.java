@@ -39,7 +39,7 @@ class NetTest {
 		@Test
 		void okay() throws Exception {
 			Net net = parser.parse("A=[A]");
-			assertThatCode(() -> net.consistencyTest()).doesNotThrowAnyException();
+			assertThatCode(() -> net.consistencyCheck()).doesNotThrowAnyException();
 		}
 
 		@Nested
@@ -48,7 +48,7 @@ class NetTest {
 			void rootNull() throws Exception {
 				Net net = parser.parse("A=[A]");
 				net.setRoot(null);
-				assertThatThrownBy(() -> net.consistencyTest()).isInstanceOf(AssertionError.class)
+				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
 						.hasMessage("Root is null");
 			}
 
@@ -57,7 +57,7 @@ class NetTest {
 				Net net = parser.parse("A=[A]");
 				Net net2 = parser.parse("x=(x,x)");
 				net.setRoot(net2.getNodes().iterator().next());
-				assertThatThrownBy(() -> net.consistencyTest()).isInstanceOf(AssertionError.class)
+				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
 						.hasMessage("Root must be one of the net nodes");
 			}
 
@@ -68,7 +68,7 @@ class NetTest {
 				UNode root = (UNode) net.getRoot();
 				MethodUtils.invokeMethod(root.getArrow(), true, "doSetTarget", net2.getRoot());
 
-				assertThatThrownBy(() -> net.consistencyTest()).isInstanceOf(AssertionError.class)
+				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
 						.hasMessage("Child of node must be part of the net");
 			}
 
@@ -79,7 +79,7 @@ class NetTest {
 				BNode root2 = (BNode) net2.getRoot();
 				MethodUtils.invokeMethod(root2.getLeftArrow(), true, "doSetTarget", net.getRoot());
 
-				assertThatThrownBy(() -> net.consistencyTest()).isInstanceOf(AssertionError.class)
+				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
 						.hasMessage("Nodes referencing a net node must be part of the net");
 			}
 
@@ -88,7 +88,7 @@ class NetTest {
 				Net net = new NetParser().parse("A=[A]");
 				net.addNode(new MarkerNode(null));
 
-				assertThatThrownBy(() -> net.consistencyTest()).isInstanceOf(AssertionError.class)
+				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
 						.hasMessage("Net node must not be a marker node");
 			}
 
@@ -98,7 +98,7 @@ class NetTest {
 				MarkerNode otherMarkerNode = new MarkerNode(net);
 				FieldUtils.writeField(net, "markerNode", otherMarkerNode, true);
 
-				assertThatThrownBy(() -> net.consistencyTest()).isInstanceOf(AssertionError.class)
+				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
 						.hasMessage("Child of node is marker node, but not the designated one");
 			}
 
@@ -107,7 +107,7 @@ class NetTest {
 				Net net = new NetParser().permitMarkerNodes().parse("A=[#]");
 				net.forbidMarkerNode();
 
-				assertThatThrownBy(() -> net.consistencyTest()).isInstanceOf(AssertionError.class)
+				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
 						.hasMessage("Child of node is marker node, but they are not permitted");
 			}
 
@@ -117,7 +117,7 @@ class NetTest {
 				Node root = net.getRoot();
 				root.setNet(new Net());
 
-				assertThatThrownBy(() -> net.consistencyTest()).isInstanceOf(AssertionError.class)
+				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
 						.hasMessage("Node belongs to another net");
 			}
 
@@ -129,7 +129,7 @@ class NetTest {
 				Node cNode = parser.getNodeNames().get("c");
 				cNode.getHub().removeInverseReference(uNode.getArrow(ArrowDirection.DOWN));
 
-				assertThatThrownBy(() -> net.consistencyTest()).isInstanceOf(AssertionError.class)
+				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
 						.hasMessage("Child nodes must be aware of their parents");
 			}
 

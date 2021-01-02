@@ -1,11 +1,13 @@
 package org.ent.dev.randnet;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Random;
 
+import org.assertj.core.api.Assertions;
 import org.ent.net.Net;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.CommandFactory;
@@ -28,16 +30,17 @@ class RandomNetCreatorTest {
 	}
 
 	@Test
-	void drawNet() throws Exception {
+	void drawNet() {
 		for (int i = 0; i < NO_DRAWS; i++) {
 			Optional<Net> drawnNet = netCreator.drawNet();
 
-			drawnNet.ifPresent(Net::consistencyTest);
+			assertThatCode(() -> drawnNet.ifPresent(Net::consistencyCheck))
+					.doesNotThrowAnyException();
 		}
 	}
 
 	@Test
-	void drawNet_noBNodes() throws Exception {
+	void drawNet_noBNodes() {
 		netCreator.setFractionBNodes(0.0);
 		netCreator.setFractionCNodes(0.5);
 		netCreator.setFractionUNodes(0.5);

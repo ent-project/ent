@@ -25,13 +25,13 @@ class NetCopyTest {
 
 	@ParameterizedTest(name = "{index} => runCopy(...) on {1}")
 	@MethodSource("netData")
-	void createCopy(Net net, String str) throws Exception {
+	void createCopy(Net net, String str) {
 		NetCopy copy = new NetCopy(net);
 
 		copy.createCopy();
 
 		Net clone = copy.getClonedNet();
-		clone.consistencyTest();
+		clone.consistencyCheck();
 		assertThat(new NetFormatter().format(clone)).isEqualTo(new NetFormatter().format(net));
 	}
 
@@ -47,7 +47,7 @@ class NetCopyTest {
 		copy.createCopy();
 
 		Net clone = copy.getClonedNet();
-		clone.consistencyTest();
+		clone.consistencyCheck();
 		assertThat(new NetFormatter().withAscii(true).format(clone)).isEqualTo("[#]");
 		assertThat(clone.isMarkerNodePermitted()).isTrue();
 		assertThat(clone.getMarkerNode()).isNotSameAs(net.getMarkerNode());

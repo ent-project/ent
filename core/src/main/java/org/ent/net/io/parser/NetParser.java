@@ -91,7 +91,7 @@ public class NetParser {
 
         net.setRoot(mainNodes.get(0));
 
-        net.consistencyTest();
+        net.consistencyCheck();
         return net;
     }
 
