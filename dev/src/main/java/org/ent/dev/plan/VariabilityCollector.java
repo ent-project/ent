@@ -66,11 +66,6 @@ public class VariabilityCollector implements ExecutionEventListener, NetRunnerLi
     }
 
     @Override
-    public void fireExecutionStart() {
-
-    }
-
-    @Override
     public void fireGetChild(Node node, ArrowDirection arrowDirection, Manner manner) {
         if (manner == Manner.COMMAND) {
             ArrowData arrowData = getArrowData(node.getArrow(arrowDirection));

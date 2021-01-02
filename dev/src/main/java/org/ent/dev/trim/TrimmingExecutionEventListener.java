@@ -21,10 +21,6 @@ class TrimmingExecutionEventListener implements ExecutionEventListener {
 	}
 
 	@Override
-	public void fireExecutionStart() {
-	}
-
-	@Override
 	public void fireGetChild(Node n, ArrowDirection arrowDirection, Manner manner) {
 		if (isApplicableManner(manner)) {
 			Arrow arrow = n.getArrow(arrowDirection);
