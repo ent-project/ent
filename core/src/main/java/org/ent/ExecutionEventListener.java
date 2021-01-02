@@ -6,10 +6,10 @@ import org.ent.net.node.Node;
 
 public interface ExecutionEventListener {
 
-	void fireGetChild(Node n, ArrowDirection arrowDirection, Manner manner);
+	void calledGetChild(Node n, ArrowDirection arrowDirection, Manner manner);
 
-	void fireSetChild(Node from, ArrowDirection arrowDirection, Node to, Manner manner);
+	void calledSetChild(Node from, ArrowDirection arrowDirection, Node to, Manner manner);
 
-	void fireNewNode(Node n);
+	void calledNewNode(Node n);
 
 }

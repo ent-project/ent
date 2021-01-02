@@ -21,7 +21,7 @@ class TrimmingExecutionEventListener implements ExecutionEventListener {
 	}
 
 	@Override
-	public void fireGetChild(Node n, ArrowDirection arrowDirection, Manner manner) {
+	public void calledGetChild(Node n, ArrowDirection arrowDirection, Manner manner) {
 		if (isApplicableManner(manner)) {
 			Arrow arrow = n.getArrow(arrowDirection);
 			if (!overriddenArrows.contains(arrow)) {
@@ -35,7 +35,7 @@ class TrimmingExecutionEventListener implements ExecutionEventListener {
 	}
 
 	@Override
-	public void fireSetChild(Node from, ArrowDirection arrowDirection, Node to, Manner manner) {
+	public void calledSetChild(Node from, ArrowDirection arrowDirection, Node to, Manner manner) {
 		if (isApplicableManner(manner)) {
 			Arrow arrow = from.getArrow(arrowDirection);
 			overriddenArrows.add(arrow);
@@ -43,7 +43,7 @@ class TrimmingExecutionEventListener implements ExecutionEventListener {
 	}
 
 	@Override
-	public void fireNewNode(Node n) {
+	public void calledNewNode(Node n) {
 	}
 
 	public boolean isDead(Arrow arrow) {

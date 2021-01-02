@@ -253,16 +253,16 @@ public class Net {
 	}
 
 	public void fireGetTargetCall(Node n, ArrowDirection arrowDirection, Manner manner) {
-		eventListeners.forEach(listener -> listener.fireGetChild(n, arrowDirection, manner));
+		eventListeners.forEach(listener -> listener.calledGetChild(n, arrowDirection, manner));
 	}
 
 	public void fireSetTargetCall(Node from, ArrowDirection arrowDirection, Node to, Manner manner) {
 		validateBelongsToNet(to);
-		eventListeners.forEach(listener -> listener.fireSetChild(from, arrowDirection, to, manner));
+		eventListeners.forEach(listener -> listener.calledSetChild(from, arrowDirection, to, manner));
 	}
 
 	public void fireNewNodeCall(Node n) {
-		eventListeners.forEach(listener -> listener.fireNewNode(n));
+		eventListeners.forEach(listener -> listener.calledNewNode(n));
 	}
 
 }

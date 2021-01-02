@@ -250,7 +250,7 @@ class NetTest {
 			Node uTarget = u.getChild(Manner.DIRECT);
 
 			assertThat(uTarget).isSameAs(nop);
-			verify(eventListener).fireGetChild(u, ArrowDirection.DOWN, Manner.DIRECT);
+			verify(eventListener).calledGetChild(u, ArrowDirection.DOWN, Manner.DIRECT);
 			verifyNoMoreInteractions(eventListener);
 		}
 
@@ -263,7 +263,7 @@ class NetTest {
 
 			u.setChild(ix, Manner.DIRECT);
 
-			verify(eventListener).fireSetChild(u, ArrowDirection.DOWN, ix, Manner.DIRECT);
+			verify(eventListener).calledSetChild(u, ArrowDirection.DOWN, ix, Manner.DIRECT);
 			verifyNoMoreInteractions(eventListener);
 			assertThat(u.getChild(Manner.DIRECT)).isSameAs(ix);
 		}
@@ -297,7 +297,7 @@ class NetTest {
 			UNode uNode = net.newUNode();
 
 			net.validateBelongsToNet(uNode);
-			verify(eventListener).fireNewNode(uNode);
+			verify(eventListener).calledNewNode(uNode);
 			verifyNoMoreInteractions(eventListener);
 			assertThat(uNode.getChild(Manner.DIRECT)).isEqualTo(uNode);
 		}
@@ -311,7 +311,7 @@ class NetTest {
 			UNode uNode = net.newUNode(nop);
 
 			net.validateBelongsToNet(uNode);
-			verify(eventListener).fireNewNode(uNode);
+			verify(eventListener).calledNewNode(uNode);
 			verifyNoMoreInteractions(eventListener);
 			assertThat(uNode.getChild(Manner.DIRECT)).isEqualTo(nop);
 		}
@@ -324,7 +324,7 @@ class NetTest {
 			BNode bNode = net.newBNode();
 
 			net.validateBelongsToNet(bNode);
-			verify(eventListener).fireNewNode(bNode);
+			verify(eventListener).calledNewNode(bNode);
 			verifyNoMoreInteractions(eventListener);
 			assertThat(bNode.getLeftChild(Manner.DIRECT)).isEqualTo(bNode);
 			assertThat(bNode.getRightChild(Manner.DIRECT)).isEqualTo(bNode);
@@ -340,7 +340,7 @@ class NetTest {
 			BNode bNode = net.newBNode(nop, ix);
 
 			net.validateBelongsToNet(bNode);
-			verify(eventListener).fireNewNode(bNode);
+			verify(eventListener).calledNewNode(bNode);
 			verifyNoMoreInteractions(eventListener);
 			assertThat(bNode.getLeftChild(Manner.DIRECT)).isEqualTo(nop);
 			assertThat(bNode.getRightChild(Manner.DIRECT)).isEqualTo(ix);
@@ -374,7 +374,7 @@ class NetTest {
 			CNode cNode = net.newCNode(new NopCommand());
 
 			net.validateBelongsToNet(cNode);
-			verify(eventListener).fireNewNode(cNode);
+			verify(eventListener).calledNewNode(cNode);
 			verifyNoMoreInteractions(eventListener);
 		}
 

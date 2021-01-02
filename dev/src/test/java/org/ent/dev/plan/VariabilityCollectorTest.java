@@ -59,8 +59,8 @@ class VariabilityCollectorTest {
         void fireSetChild() {
             VariabilityCollector collector = new VariabilityCollector();
 
-            collector.fireSetChild(uNode, ArrowDirection.DOWN, cNodeNop, Manner.COMMAND);
-            collector.fireSetChild(uNode, ArrowDirection.DOWN, cNodeNop, Manner.COMMAND);
+            collector.calledSetChild(uNode, ArrowDirection.DOWN, cNodeNop, Manner.COMMAND);
+            collector.calledSetChild(uNode, ArrowDirection.DOWN, cNodeNop, Manner.COMMAND);
 
             Map<Arrow, ArrowData> arrowDataMap = collector.arrowDataMap;
             assertThat(arrowDataMap).containsOnlyKeys(uNode.getArrow());
@@ -72,7 +72,7 @@ class VariabilityCollectorTest {
         void fireGetChild() {
             VariabilityCollector collector = new VariabilityCollector();
 
-            collector.fireGetChild(uNode, ArrowDirection.DOWN, Manner.COMMAND);
+            collector.calledGetChild(uNode, ArrowDirection.DOWN, Manner.COMMAND);
 
             Map<Arrow, ArrowData> arrowDataMap = collector.arrowDataMap;
             assertThat(arrowDataMap).containsOnlyKeys(uNode.getArrow());

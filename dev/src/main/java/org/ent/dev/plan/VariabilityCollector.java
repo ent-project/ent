@@ -66,7 +66,7 @@ public class VariabilityCollector implements ExecutionEventListener, NetRunnerLi
     }
 
     @Override
-    public void fireGetChild(Node node, ArrowDirection arrowDirection, Manner manner) {
+    public void calledGetChild(Node node, ArrowDirection arrowDirection, Manner manner) {
         if (manner == Manner.COMMAND) {
             ArrowData arrowData = getArrowData(node.getArrow(arrowDirection));
             arrowData.wasRead();
@@ -74,7 +74,7 @@ public class VariabilityCollector implements ExecutionEventListener, NetRunnerLi
     }
 
     @Override
-    public void fireSetChild(Node from, ArrowDirection arrowDirection, Node to, Manner manner) {
+    public void calledSetChild(Node from, ArrowDirection arrowDirection, Node to, Manner manner) {
         if (manner == Manner.COMMAND) {
             ArrowData arrowData = getArrowData(from.getArrow(arrowDirection));
             arrowData.wasWritten();
@@ -82,7 +82,7 @@ public class VariabilityCollector implements ExecutionEventListener, NetRunnerLi
     }
 
     @Override
-    public void fireNewNode(Node n) {
+    public void calledNewNode(Node n) {
 
     }
 
