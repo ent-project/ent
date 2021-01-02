@@ -43,9 +43,4 @@ public class CNode extends Node {
 		return Optional.empty();
 	}
 
-	@Override
-	public boolean isInternal() {
-		return false;
-	}
-
 }

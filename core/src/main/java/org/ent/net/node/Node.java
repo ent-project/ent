@@ -40,9 +40,4 @@ public abstract class Node {
 
 	public abstract Optional<Arrow> getArrowMaybe(ArrowDirection arrowDirection);
 
-	/**
-	 * An internal node has child nodes (as opposed to a leaf node).
-	 */
-	public abstract boolean isInternal();
-
 }

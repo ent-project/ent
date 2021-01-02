@@ -148,9 +148,4 @@ public class BNode extends Node {
 		};
 	}
 
-	@Override
-	public boolean isInternal() {
-		return true;
-	}
-
 }

@@ -104,9 +104,4 @@ public class UNode extends Node {
 		};
 	}
 
-	@Override
-	public boolean isInternal() {
-		return true;
-	}
-
 }

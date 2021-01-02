@@ -33,11 +33,6 @@ public class MarkerNode extends Node {
         throw new UnsupportedOperationException();
 	}
 
-	@Override
-	public boolean isInternal() {
-        throw new UnsupportedOperationException();
-	}
-
     @Override
     public String toString() {
         return MARKER_NODE_SYMBOL;
