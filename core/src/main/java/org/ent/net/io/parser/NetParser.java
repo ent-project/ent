@@ -1,15 +1,5 @@
 package org.ent.net.io.parser;
 
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import com.google.common.annotations.VisibleForTesting;
 import org.ent.net.Arrow;
 import org.ent.net.Manner;
@@ -18,6 +8,13 @@ import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 
 import javax.validation.constraints.NotNull;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * A parser that creates a collection of nodes from a text-description in a domain-specific language.
@@ -39,8 +36,6 @@ import javax.validation.constraints.NotNull;
 public class NetParser {
 
     private Map<String, Node> nodeNames;
-
-    private final Set<Node> allNodes = new HashSet<>();
 
     private final List<Node> mainNodes = new ArrayList<>(); // top-level nodes, one for each semicolon-separated expression
 
@@ -124,7 +119,6 @@ public class NetParser {
             	Node child = resolveNode(template.getChild(arrow.getDirection()));
             	arrow.setTarget(child, Manner.DIRECT);
             }
-            allNodes.add(node);
         }
 	}
 
@@ -166,7 +160,6 @@ public class NetParser {
 
 	private void clear() {
         nodeNames = null;
-        allNodes.clear();
         mainNodes.clear();
         templateNodeMap.clear();
     }
