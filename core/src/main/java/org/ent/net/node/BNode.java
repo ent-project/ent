@@ -1,12 +1,13 @@
 package org.ent.net.node;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Manner;
 import org.ent.net.Net;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Binary node.
@@ -146,6 +147,11 @@ public class BNode extends Node {
 			case RIGHT -> Optional.of(rightArrow);
 			case DOWN -> Optional.empty();
 		};
+	}
+
+	@Override
+	public <T> T instanceOf(Function<CNode, T> cNodeCase, Function<UNode, T> uNodeCase, Function<BNode, T> bNodeCase) {
+		return bNodeCase.apply(this);
 	}
 
 }

@@ -15,8 +15,9 @@ import java.util.Map;
 
 public class VariabilityCollector implements ExecutionEventListener, NetRunnerListener {
 
-    Map<Command, CommandData> commandDataMap = new HashMap<>();
-    Map<Arrow, ArrowData> arrowDataMap = new HashMap<>();
+    final Map<Command, CommandData> commandDataMap = new HashMap<>();
+    final Map<Arrow, ArrowData> arrowDataMap = new HashMap<>();
+    final NewNodeData newNodeData = new NewNodeData();
 
     static class CommandData {
         private final Command command;
@@ -65,6 +66,36 @@ public class VariabilityCollector implements ExecutionEventListener, NetRunnerLi
         }
     }
 
+    static class NewNodeData {
+        private int numCNode;
+        private int numUNode;
+        private int numBNode;
+
+        public void newCNode() {
+            numCNode++;
+        }
+
+        public void newUNode() {
+            numUNode++;
+        }
+
+        public void newBNode() {
+            numBNode++;
+        }
+
+        public int getNumCNode() {
+            return numCNode;
+        }
+
+        public int getNumUNode() {
+            return numUNode;
+        }
+
+        public int getNumBNode() {
+            return numBNode;
+        }
+    }
+
     @Override
     public void calledGetChild(Node node, ArrowDirection arrowDirection, Manner manner) {
         if (manner == Manner.COMMAND) {
@@ -83,7 +114,10 @@ public class VariabilityCollector implements ExecutionEventListener, NetRunnerLi
 
     @Override
     public void calledNewNode(Node n) {
-
+        n.doInstanceOf(
+                cNode -> newNodeData.newCNode(),
+                uNode -> newNodeData.newUNode(),
+                bNode -> newNodeData.newBNode());
     }
 
     @Override

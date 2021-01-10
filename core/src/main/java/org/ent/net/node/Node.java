@@ -6,6 +6,8 @@ import org.ent.net.Net;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public abstract class Node {
 
@@ -39,5 +41,23 @@ public abstract class Node {
 	public abstract Arrow getArrow(ArrowDirection arrowDirection);
 
 	public abstract Optional<Arrow> getArrowMaybe(ArrowDirection arrowDirection);
+
+	public abstract <T> T instanceOf(Function<CNode, T> cNodeCase, Function<UNode, T> uNodeCase, Function<BNode, T> bNodeCase);
+
+	public void doInstanceOf(Consumer<CNode> cNodeCase, Consumer<UNode> uNodeCase, Consumer<BNode> bNodeCase) {
+		this.instanceOf(
+				cNode -> {
+					cNodeCase.accept(cNode);
+					return null;
+					},
+				uNode -> {
+					uNodeCase.accept(uNode);
+					return null;
+					},
+				bNode -> {
+					bNodeCase.accept(bNode);
+					return null;
+				});
+	}
 
 }

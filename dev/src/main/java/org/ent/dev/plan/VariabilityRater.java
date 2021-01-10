@@ -22,7 +22,7 @@ public class VariabilityRater {
     }
 
     public long getPoints() {
-        return getPointsForCommandExecution() + getPointsForArrowAccess();
+        return getPointsForCommandExecution() + getPointsForArrowAccess() + getPointsForNewNodes();
     }
 
     private long getPointsForCommandExecution() {
@@ -45,6 +45,14 @@ public class VariabilityRater {
                 .mapToLong(Long::longValue)
                 .sum();
         return Math.round(0.4 * writeBase) + Math.round(0.2 * readBase);
+    }
+
+    private long getPointsForNewNodes() {
+        VariabilityCollector.NewNodeData newNodeData = variabilityCollector.newNodeData;
+        long sum = getCumulativePointsDecaying(newNodeData.getNumCNode())
+                + getCumulativePointsDecaying(newNodeData.getNumUNode())
+                + getCumulativePointsDecaying(newNodeData.getNumBNode());
+        return Math.round(1.7 * sum);
     }
 
     static long getDecayingPoints(int level) {

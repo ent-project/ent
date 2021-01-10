@@ -1,13 +1,14 @@
 package org.ent.net.node;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
 import org.ent.net.node.cmd.Command;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * A command node.
@@ -41,6 +42,11 @@ public class CNode extends Node {
 	@Override
 	public Optional<Arrow> getArrowMaybe(ArrowDirection arrowDirection) {
 		return Optional.empty();
+	}
+
+	@Override
+	public <T> T instanceOf(Function<CNode, T> cNodeCase, Function<UNode, T> uNodeCase, Function<BNode, T> bNodeCase) {
+		return cNodeCase.apply(this);
 	}
 
 }
