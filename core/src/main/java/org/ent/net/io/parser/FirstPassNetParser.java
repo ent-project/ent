@@ -115,8 +115,8 @@ public class FirstPassNetParser {
 
     private NodeTemplate parsePlainNodeExpression() throws ParserException {
         Token token = tokenizer.next();
-        if (token instanceof CommandToken) {
-            return new CommandNodeTemplate(((CommandToken) token).getCommandName());
+        if (token instanceof CommandToken commandToken) {
+            return new CommandNodeTemplate(commandToken.getCommandName());
         } else if (token == TOKEN_LEFT_SQUARE_BRACKET) {
             NodeTemplate child = parseNodeExpression();
             demandToken(TOKEN_RIGHT_SQUARE_BRACKET);
@@ -127,8 +127,8 @@ public class FirstPassNetParser {
             NodeTemplate rightChild = parseNodeExpression();
             demandToken(TOKEN_RIGHT_PARENTHESIS);
             return new BNodeTemplate(leftChild, rightChild);
-        } else if (token instanceof IdentifierToken) {
-            return new IdentifierNodeTemplate(((IdentifierToken) token).getName());
+        } else if (token instanceof IdentifierToken identifierToken) {
+            return new IdentifierNodeTemplate(identifierToken.getName());
         } else if (token == TokenManager.TOKEN_MARKER) {
         	if (markerNodePermitted) {
             	return new MarkerNodeTemplate();

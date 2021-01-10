@@ -146,8 +146,8 @@ public class NetParser {
 
 	private @NotNull Node resolveNode(NodeTemplate template) throws ParserException {
 		NodeTemplate resolvedTemplate;
-		if (template instanceof IdentifierNodeTemplate) {
-			resolvedTemplate = firstPassNetParser.resolveIdentifier((IdentifierNodeTemplate) template);
+		if (template instanceof IdentifierNodeTemplate identifierNodeTemplate) {
+			resolvedTemplate = firstPassNetParser.resolveIdentifier(identifierNodeTemplate);
 		} else {
 			resolvedTemplate = template;
 		}
