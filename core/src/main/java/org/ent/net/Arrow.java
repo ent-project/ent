@@ -14,8 +14,8 @@ public interface Arrow {
 
 	Node getOrigin();
 
-	Node getTarget(Manner manner);
+	Node getTarget(Purview purview);
 
-	void setTarget(Node target, Manner manner);
+	void setTarget(Node target, Purview purview);
 
 }

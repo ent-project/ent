@@ -33,9 +33,9 @@ public class NetTestData {
             UNode u1 = net.newUNode(dummy);
             CNode nop = net.newCNode(CommandFactory.NOP_COMMAND);
 
-            b1.setLeftChild(u1, Manner.DIRECT);
-            b1.setRightChild(nop, Manner.DIRECT);
-            u1.setChild(u1, Manner.DIRECT);
+            b1.setLeftChild(u1, Purview.DIRECT);
+            b1.setRightChild(nop, Purview.DIRECT);
+            u1.setChild(u1, Purview.DIRECT);
 
             net.setRoot(b1);
     	});
@@ -67,16 +67,16 @@ public class NetTestData {
 	        BNode bb = net.newBNode(dummy, dummy);
 	        CNode nop = net.newCNode(CommandFactory.NOP_COMMAND);
 
-	        u1.setChild(u2, Manner.DIRECT);
-	        u2.setChild(b1, Manner.DIRECT);
-	        b1.setLeftChild(bb, Manner.DIRECT);
-	        b1.setRightChild(b2, Manner.DIRECT);
-	        b2.setLeftChild(bb, Manner.DIRECT);
-	        b2.setRightChild(b3, Manner.DIRECT);
-	        b3.setLeftChild(bb, Manner.DIRECT);
-	        b3.setRightChild(u2, Manner.DIRECT);
-	        bb.setLeftChild(nop, Manner.DIRECT);
-	        bb.setRightChild(u1, Manner.DIRECT);
+	        u1.setChild(u2, Purview.DIRECT);
+	        u2.setChild(b1, Purview.DIRECT);
+	        b1.setLeftChild(bb, Purview.DIRECT);
+	        b1.setRightChild(b2, Purview.DIRECT);
+	        b2.setLeftChild(bb, Purview.DIRECT);
+	        b2.setRightChild(b3, Purview.DIRECT);
+	        b3.setLeftChild(bb, Purview.DIRECT);
+	        b3.setRightChild(u2, Purview.DIRECT);
+	        bb.setLeftChild(nop, Purview.DIRECT);
+	        bb.setRightChild(u1, Purview.DIRECT);
 
 	        net.setRoot(u1);
     	});

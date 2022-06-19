@@ -3,7 +3,7 @@ package org.ent.net.node.cmd.accessor;
 import java.util.Optional;
 
 import org.ent.net.ArrowDirection;
-import org.ent.net.Manner;
+import org.ent.net.Purview;
 import org.ent.net.node.Node;
 
 public class PtrPtrNodeAccessor implements Accessor<Node> {
@@ -25,11 +25,11 @@ public class PtrPtrNodeAccessor implements Accessor<Node> {
 	}
 
 	@Override
-	public Optional<Node> get(Node node, Manner manner) {
+	public Optional<Node> get(Node node, Purview purview) {
 		return node.getArrowMaybe(direction1).flatMap(arrow -> {
-			Node child = arrow.getTarget(manner);
+			Node child = arrow.getTarget(purview);
 			return child.getArrowMaybe(this.direction2);
-		}).map(childArrow -> childArrow.getTarget(manner));
+		}).map(childArrow -> childArrow.getTarget(purview));
 	}
 
 	@Override

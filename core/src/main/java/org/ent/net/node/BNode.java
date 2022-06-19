@@ -2,7 +2,7 @@ package org.ent.net.node;
 
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
-import org.ent.net.Manner;
+import org.ent.net.Purview;
 import org.ent.net.Net;
 
 import java.util.List;
@@ -32,13 +32,13 @@ public class BNode extends Node {
 			return BNode.this;
 		}
 
-		public Node getTarget(Manner manner) {
-			net.fireGetTargetCall(getOrigin(), getDirection(), manner);
+		public Node getTarget(Purview purview) {
+			net.fireGetTargetCall(getOrigin(), getDirection(), purview);
 			return doGetTarget();
 		}
 
-		public void setTarget(Node target, Manner manner) {
-			net.fireSetTargetCall(getOrigin(), getDirection(), target, manner);
+		public void setTarget(Node target, Purview purview) {
+			net.fireSetTargetCall(getOrigin(), getDirection(), target, purview);
 			doSetTarget(target);
 		}
 
@@ -64,13 +64,13 @@ public class BNode extends Node {
 			return BNode.this;
 		}
 
-		public Node getTarget(Manner manner) {
-			net.fireGetTargetCall(getOrigin(), getDirection(), manner);
+		public Node getTarget(Purview purview) {
+			net.fireGetTargetCall(getOrigin(), getDirection(), purview);
 			return doGetTarget();
 		}
 
-		public void setTarget(Node target, Manner manner) {
-			net.fireSetTargetCall(getOrigin(), getDirection(), target, manner);
+		public void setTarget(Node target, Purview purview) {
+			net.fireSetTargetCall(getOrigin(), getDirection(), target, purview);
 			doSetTarget(target);
 		}
 
@@ -102,20 +102,20 @@ public class BNode extends Node {
 		this.rightChildHub.addInverseReference(rightArrow);
 	}
 
-	public Node getLeftChild(Manner manner) {
-		return leftArrow.getTarget(manner);
+	public Node getLeftChild(Purview purview) {
+		return leftArrow.getTarget(purview);
 	}
 
-	public void setLeftChild(Node child, Manner manner) {
-		leftArrow.setTarget(child, manner);
+	public void setLeftChild(Node child, Purview purview) {
+		leftArrow.setTarget(child, purview);
 	}
 
-	public Node getRightChild(Manner manner) {
-		return rightArrow.getTarget(manner);
+	public Node getRightChild(Purview purview) {
+		return rightArrow.getTarget(purview);
 	}
 
-	public void setRightChild(Node child, Manner manner) {
-		rightArrow.setTarget(child, manner);
+	public void setRightChild(Node child, Purview purview) {
+		rightArrow.setTarget(child, purview);
 	}
 
 	public Arrow getLeftArrow() {

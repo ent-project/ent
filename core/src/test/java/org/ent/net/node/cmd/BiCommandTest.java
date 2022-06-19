@@ -11,7 +11,7 @@ import java.util.Optional;
 
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
-import org.ent.net.Manner;
+import org.ent.net.Purview;
 import org.ent.net.Net;
 import org.ent.net.io.parser.NetParser;
 import org.ent.net.node.Node;
@@ -58,7 +58,7 @@ class BiCommandTest {
 
 		assertThat(command.execute(node)).isEqualTo(ExecutionResult.ERROR);
 
-		verify(accessor1).get(node, Manner.COMMAND);
+		verify(accessor1).get(node, Purview.COMMAND);
 		verifyNoMoreInteractions(accessor1, accessor2, operation);
 	}
 
@@ -67,12 +67,12 @@ class BiCommandTest {
 		Net net = new NetParser().parse("A=(A,A)");
 		Node node = net.getRoot();
 
-		when(accessor1.get(node, Manner.COMMAND)).thenReturn(Optional.of(node.getArrow(ArrowDirection.LEFT)));
+		when(accessor1.get(node, Purview.COMMAND)).thenReturn(Optional.of(node.getArrow(ArrowDirection.LEFT)));
 
 		assertThat(command.execute(node)).isEqualTo(ExecutionResult.ERROR);
 
-		verify(accessor1).get(node, Manner.COMMAND);
-		verify(accessor2).get(node, Manner.COMMAND);
+		verify(accessor1).get(node, Purview.COMMAND);
+		verify(accessor2).get(node, Purview.COMMAND);
 		verifyNoMoreInteractions(accessor1, accessor2, operation);
 	}
 
@@ -82,14 +82,14 @@ class BiCommandTest {
 		Node node = net.getRoot();
 		Arrow arrow = node.getArrow(ArrowDirection.LEFT);
 
-		when(accessor1.get(node, Manner.COMMAND)).thenReturn(Optional.of(arrow));
-		when(accessor2.get(node, Manner.COMMAND)).thenReturn(Optional.of(node));
+		when(accessor1.get(node, Purview.COMMAND)).thenReturn(Optional.of(arrow));
+		when(accessor2.get(node, Purview.COMMAND)).thenReturn(Optional.of(node));
 		when(operation.apply(any(), any())).thenReturn(ExecutionResult.NORMAL);
 
 		assertThat(command.execute(node)).isEqualTo(ExecutionResult.NORMAL);
 
-		verify(accessor1).get(node, Manner.COMMAND);
-		verify(accessor2).get(node, Manner.COMMAND);
+		verify(accessor1).get(node, Purview.COMMAND);
+		verify(accessor2).get(node, Purview.COMMAND);
 		verify(operation).apply(arrow, node);
 		verifyNoMoreInteractions(accessor1, accessor2, operation);
 	}

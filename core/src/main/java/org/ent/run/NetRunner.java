@@ -1,7 +1,7 @@
 package org.ent.run;
 
 import org.ent.net.Net;
-import org.ent.net.Manner;
+import org.ent.net.Purview;
 import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
 import org.ent.net.node.Node;
@@ -45,14 +45,14 @@ public class NetRunner {
 	}
 
 	private StepResult doStep(BNode executionPointer) {
-		if (!(executionPointer.getLeftChild(Manner.RUNNER) instanceof BNode commandBranch)) {
+		if (!(executionPointer.getLeftChild(Purview.RUNNER) instanceof BNode commandBranch)) {
 			return StepResult.INVALID_COMMAND_BRANCH;
 		}
-		if (!(commandBranch.getLeftChild(Manner.RUNNER) instanceof CNode commandNode)) {
+		if (!(commandBranch.getLeftChild(Purview.RUNNER) instanceof CNode commandNode)) {
 			return StepResult.INVALID_COMMAND_NODE;
 		}
 		Command command = commandNode.getCommand();
-		Node parameters = commandBranch.getRightChild(Manner.RUNNER);
+		Node parameters = commandBranch.getRightChild(Purview.RUNNER);
 
 		ExecutionResult executeResult = command.execute(parameters);
 		StepResult stepResult = convertToStepResult(executeResult);
@@ -71,7 +71,7 @@ public class NetRunner {
 	}
 
 	private void advanceExecutionPointer(BNode executionPointer) {
-		Node newExecutionPointer = executionPointer.getRightChild(Manner.RUNNER);
+		Node newExecutionPointer = executionPointer.getRightChild(Purview.RUNNER);
 		net.setRoot(newExecutionPointer);
 	}
 }

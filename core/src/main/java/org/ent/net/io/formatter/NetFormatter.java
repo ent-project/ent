@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.ent.net.Arrow;
-import org.ent.net.Manner;
+import org.ent.net.Purview;
 import org.ent.net.Net;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
@@ -95,7 +95,7 @@ public class NetFormatter {
         	}
         }
         for (Arrow arrow : node.getArrows()) {
-        	Node child = arrow.getTarget(Manner.DIRECT);
+        	Node child = arrow.getTarget(Purview.DIRECT);
         	collectRecursively(child, collected, markerNodesPermitted);
         }
     }
@@ -105,7 +105,7 @@ public class NetFormatter {
             return;
         missing.remove(node);
         for (Arrow arrow : node.getArrows()) {
-        	Node child = arrow.getTarget(Manner.DIRECT);
+        	Node child = arrow.getTarget(Purview.DIRECT);
         	collectRecursivelyInverted(child, missing);
         }
     }

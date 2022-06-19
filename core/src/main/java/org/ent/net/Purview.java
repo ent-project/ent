@@ -1,5 +1,5 @@
 package org.ent.net;
 
-public enum Manner {
+public enum Purview {
     COMMAND, RUNNER, DIRECT
 }

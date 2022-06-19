@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
-import org.ent.net.Manner;
+import org.ent.net.Purview;
 import org.ent.net.node.Node;
 
 public class PtrArrowAccessor implements Accessor<Arrow> {
@@ -26,9 +26,9 @@ public class PtrArrowAccessor implements Accessor<Arrow> {
 	}
 
 	@Override
-	public Optional<Arrow> get(Node node, Manner manner) {
+	public Optional<Arrow> get(Node node, Purview purview) {
         return node.getArrowMaybe(this.direction1).flatMap(arrow -> {
-        	Node child = arrow.getTarget(manner);
+        	Node child = arrow.getTarget(purview);
         	return child.getArrowMaybe(this.direction2);
         });
 	}

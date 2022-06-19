@@ -1,12 +1,5 @@
 package org.ent.net;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.ent.ExecutionEventListener;
@@ -20,6 +13,12 @@ import org.ent.net.node.cmd.Command;
 import org.ent.net.util.ReferentialGarbageCollection;
 
 import javax.validation.constraints.NotNull;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class Net {
 
@@ -145,7 +144,7 @@ public class Net {
 		for (Arrow arrow : hub.getInverseReferences()) {
 			if (!nodes.contains(arrow.getOrigin()))
 				throw new AssertionError("Nodes referencing a net node must be part of the net");
-			Node childOfParent = arrow.getTarget(Manner.DIRECT);
+			Node childOfParent = arrow.getTarget(Purview.DIRECT);
 			if (childOfParent != node) {
 				throw new AssertionError("Node must be child of its parent");
 			}
@@ -153,7 +152,7 @@ public class Net {
 	}
 
 	private void consistencyCheck(Arrow arrow) {
-		Node child = arrow.getTarget(Manner.DIRECT);
+		Node child = arrow.getTarget(Purview.DIRECT);
 		if (child instanceof MarkerNode) {
 			if (!markerNodePermitted) {
 				throw new AssertionError("Child of node is marker node, but they are not permitted");
@@ -252,13 +251,13 @@ public class Net {
 		}
 	}
 
-	public void fireGetTargetCall(Node n, ArrowDirection arrowDirection, Manner manner) {
-		eventListeners.forEach(listener -> listener.calledGetChild(n, arrowDirection, manner));
+	public void fireGetTargetCall(Node n, ArrowDirection arrowDirection, Purview purview) {
+		eventListeners.forEach(listener -> listener.calledGetChild(n, arrowDirection, purview));
 	}
 
-	public void fireSetTargetCall(Node from, ArrowDirection arrowDirection, Node to, Manner manner) {
+	public void fireSetTargetCall(Node from, ArrowDirection arrowDirection, Node to, Purview purview) {
 		validateBelongsToNet(to);
-		eventListeners.forEach(listener -> listener.calledSetChild(from, arrowDirection, to, manner));
+		eventListeners.forEach(listener -> listener.calledSetChild(from, arrowDirection, to, purview));
 	}
 
 	public void fireNewNodeCall(Node n) {

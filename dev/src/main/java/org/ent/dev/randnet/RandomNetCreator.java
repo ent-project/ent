@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.Random;
 
 import org.ent.net.Arrow;
-import org.ent.net.Manner;
+import org.ent.net.Purview;
 import org.ent.net.Net;
 import org.ent.net.node.Node;
 import org.ent.util.ModifiedPoisson;
@@ -121,7 +121,7 @@ public class RandomNetCreator {
 		for (Node node : net.getNodes()) {
 			for (Arrow arrow : node.getArrows()) {
 				Node target = getRandomTarget(nodes);
-				arrow.setTarget(target, Manner.DIRECT);
+				arrow.setTarget(target, Purview.DIRECT);
 			}
 		}
 	}

@@ -2,7 +2,7 @@ package org.ent.net.node;
 
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
-import org.ent.net.Manner;
+import org.ent.net.Purview;
 import org.ent.net.Net;
 
 import java.util.Collections;
@@ -35,14 +35,14 @@ public class UNode extends Node {
 		}
 
 		@Override
-		public Node getTarget(Manner manner) {
-			net.fireGetTargetCall(getOrigin(), getDirection(), manner);
+		public Node getTarget(Purview purview) {
+			net.fireGetTargetCall(getOrigin(), getDirection(), purview);
 			return doGetTarget();
 		}
 
 		@Override
-		public void setTarget(Node target, Manner manner) {
-			net.fireSetTargetCall(getOrigin(), getDirection(), target, manner);
+		public void setTarget(Node target, Purview purview) {
+			net.fireSetTargetCall(getOrigin(), getDirection(), target, purview);
 			doSetTarget(target);
 		}
 
@@ -72,12 +72,12 @@ public class UNode extends Node {
 		this.childHub.addInverseReference(arrow);
 	}
 
-	public Node getChild(Manner manner) {
-		return arrow.getTarget(manner);
+	public Node getChild(Purview purview) {
+		return arrow.getTarget(purview);
 	}
 
-	public void setChild(Node child, Manner manner) {
-		arrow.setTarget(child, manner);
+	public void setChild(Node child, Purview purview) {
+		arrow.setTarget(child, purview);
 	}
 
 	public Arrow getArrow() {

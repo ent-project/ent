@@ -1,15 +1,15 @@
 package org.ent.net.io.formatter;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.ent.net.Manner;
+import org.ent.net.Purview;
 import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.UNode;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class FormattingWorker {
 
@@ -98,13 +98,13 @@ public class FormattingWorker {
 
         if (node instanceof BNode bnode) {
 			stringBuilder.append("(");
-            doFormatRecursively(bnode.getLeftChild(Manner.DIRECT), level + 1);
+            doFormatRecursively(bnode.getLeftChild(Purview.DIRECT), level + 1);
             stringBuilder.append(", ");
-            doFormatRecursively(bnode.getRightChild(Manner.DIRECT), level + 1);
+            doFormatRecursively(bnode.getRightChild(Purview.DIRECT), level + 1);
             stringBuilder.append(")");
         } else if (node instanceof UNode unode) {
 			stringBuilder.append("[");
-            doFormatRecursively(unode.getChild(Manner.DIRECT), level + 1);
+            doFormatRecursively(unode.getChild(Purview.DIRECT), level + 1);
             stringBuilder.append("]");
         } else if (node instanceof CNode cnode) {
 			stringBuilder.append("<");

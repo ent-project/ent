@@ -2,7 +2,7 @@ package org.ent.dev.trim;
 
 import org.ent.dev.RunSetup;
 import org.ent.net.Arrow;
-import org.ent.net.Manner;
+import org.ent.net.Purview;
 import org.ent.net.Net;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
@@ -65,6 +65,6 @@ public class NetTrimmer {
 	}
 
 	private void cutArrow(Arrow arrow) {
-		arrow.setTarget(marker, Manner.DIRECT);
+		arrow.setTarget(marker, Purview.DIRECT);
 	}
 }

@@ -7,7 +7,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.ent.net.Arrow;
-import org.ent.net.Manner;
+import org.ent.net.Purview;
 import org.ent.net.Net;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
@@ -61,10 +61,10 @@ public class NetMixer {
 	private void randomlyWireArrowsToMarkerNodes() {
 		for (Node node : nodesList) {
 			for (Arrow arrow : node.getArrows()) {
-				Node target = arrow.getTarget(Manner.DIRECT);
+				Node target = arrow.getTarget(Purview.DIRECT);
 				if (target instanceof MarkerNode) {
 					Node newTarget = drawRandomNonMarkerNode();
-					arrow.setTarget(newTarget, Manner.DIRECT);
+					arrow.setTarget(newTarget, Purview.DIRECT);
 				}
 			}
 		}
@@ -79,7 +79,7 @@ public class NetMixer {
 			Optional<Arrow> randArrow = drawRandomArrow(node);
 			randArrow.ifPresent(arrow -> {
 				Node target = drawRandomNonMarkerNode();
-				arrow.setTarget(target, Manner.DIRECT);
+				arrow.setTarget(target, Purview.DIRECT);
 			});
 		}
 	}

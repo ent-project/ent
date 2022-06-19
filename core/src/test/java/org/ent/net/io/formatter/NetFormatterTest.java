@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.ent.net.Manner;
+import org.ent.net.Purview;
 import org.ent.net.Net;
 import org.ent.net.NetTestData;
 import org.ent.net.node.BNode;
@@ -60,16 +60,16 @@ class NetFormatterTest {
 			UNode u1 = net.newUNode(dummy);
 			UNode u2 = net.newUNode(dummy);
 
-			b1.setLeftChild(u1, Manner.DIRECT);
-			b1.setRightChild(u2, Manner.DIRECT);
-			u1.setChild(u1, Manner.DIRECT);
-			u2.setChild(u2, Manner.DIRECT);
+			b1.setLeftChild(u1, Purview.DIRECT);
+			b1.setRightChild(u2, Purview.DIRECT);
+			u1.setChild(u1, Purview.DIRECT);
+			u2.setChild(u2, Purview.DIRECT);
 
 			net.setRoot(b1);
 
 			assertThat(formatter.format(net)).isEqualTo("(a=[a], b=[b])");
 
-			b1.setLeftChild(net.newCNode(CommandFactory.NOP_COMMAND), Manner.DIRECT);
+			b1.setLeftChild(net.newCNode(CommandFactory.NOP_COMMAND), Purview.DIRECT);
 			net.getNodes().remove(u1);
 
 			assertThat(formatter.format(net)).isEqualTo("(<nop>, b=[b])");
@@ -95,9 +95,9 @@ class NetFormatterTest {
 			UNode u1 = net.newUNode(dummy);
 			CNode nop = net.newCNode(new NopCommand());
 
-			b1.setLeftChild(u1, Manner.DIRECT);
-			b1.setRightChild(nop, Manner.DIRECT);
-			u1.setChild(u1, Manner.DIRECT);
+			b1.setLeftChild(u1, Purview.DIRECT);
+			b1.setRightChild(nop, Purview.DIRECT);
+			u1.setChild(u1, Purview.DIRECT);
 
 			net.newUNode(b1);
 			net.setRoot(b1);

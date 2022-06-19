@@ -1,13 +1,13 @@
 package org.ent.dev.trim;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.ent.ExecutionEventListener;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
-import org.ent.net.Manner;
+import org.ent.net.Purview;
 import org.ent.net.node.Node;
+
+import java.util.HashSet;
+import java.util.Set;
 
 class TrimmingExecutionEventListener implements ExecutionEventListener {
 
@@ -21,8 +21,8 @@ class TrimmingExecutionEventListener implements ExecutionEventListener {
 	}
 
 	@Override
-	public void calledGetChild(Node n, ArrowDirection arrowDirection, Manner manner) {
-		if (isApplicableManner(manner)) {
+	public void calledGetChild(Node n, ArrowDirection arrowDirection, Purview purview) {
+		if (isApplicablePurview(purview)) {
 			Arrow arrow = n.getArrow(arrowDirection);
 			if (!overriddenArrows.contains(arrow)) {
 				requiredArrows.add(arrow);
@@ -30,13 +30,13 @@ class TrimmingExecutionEventListener implements ExecutionEventListener {
 		}
 	}
 
-	private boolean isApplicableManner(Manner manner) {
-		return manner == Manner.RUNNER || manner == Manner.COMMAND;
+	private boolean isApplicablePurview(Purview purview) {
+		return purview == Purview.RUNNER || purview == Purview.COMMAND;
 	}
 
 	@Override
-	public void calledSetChild(Node from, ArrowDirection arrowDirection, Node to, Manner manner) {
-		if (isApplicableManner(manner)) {
+	public void calledSetChild(Node from, ArrowDirection arrowDirection, Node to, Purview purview) {
+		if (isApplicablePurview(purview)) {
 			Arrow arrow = from.getArrow(arrowDirection);
 			overriddenArrows.add(arrow);
 		}

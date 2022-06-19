@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.ent.net.Arrow;
-import org.ent.net.Manner;
+import org.ent.net.Purview;
 import org.ent.net.Net;
 import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
@@ -64,8 +64,8 @@ public class NetCopy {
 		for (Node nodeOrig : netOrig.getNodes()) {
 			for (Arrow arrowOrig : nodeOrig.getArrows()) {
 				Arrow arrowClone = originalToClone(arrowOrig);
-				Node targetClone = originalToClone(arrowOrig.getTarget(Manner.DIRECT));
-				arrowClone.setTarget(targetClone, Manner.DIRECT);
+				Node targetClone = originalToClone(arrowOrig.getTarget(Purview.DIRECT));
+				arrowClone.setTarget(targetClone, Purview.DIRECT);
 			}
 		}
 	}

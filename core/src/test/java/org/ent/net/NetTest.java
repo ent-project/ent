@@ -247,10 +247,10 @@ class NetTest {
 			CNode nop = (CNode) parser.getNodeNames().get("_a");
 			net.addExecutionEventListener(eventListener);
 
-			Node uTarget = u.getChild(Manner.DIRECT);
+			Node uTarget = u.getChild(Purview.DIRECT);
 
 			assertThat(uTarget).isSameAs(nop);
-			verify(eventListener).calledGetChild(u, ArrowDirection.DOWN, Manner.DIRECT);
+			verify(eventListener).calledGetChild(u, ArrowDirection.DOWN, Purview.DIRECT);
 			verifyNoMoreInteractions(eventListener);
 		}
 
@@ -261,11 +261,11 @@ class NetTest {
 			CNode ix = (CNode) parser.getNodeNames().get("_b");
 			net.addExecutionEventListener(eventListener);
 
-			u.setChild(ix, Manner.DIRECT);
+			u.setChild(ix, Purview.DIRECT);
 
-			verify(eventListener).calledSetChild(u, ArrowDirection.DOWN, ix, Manner.DIRECT);
+			verify(eventListener).calledSetChild(u, ArrowDirection.DOWN, ix, Purview.DIRECT);
 			verifyNoMoreInteractions(eventListener);
-			assertThat(u.getChild(Manner.DIRECT)).isSameAs(ix);
+			assertThat(u.getChild(Purview.DIRECT)).isSameAs(ix);
 		}
 
 		@Test
@@ -273,7 +273,7 @@ class NetTest {
 			parser.parse("_a=<nop>");
 			CNode a = (CNode) parser.getNodeNames().get("_a");
 
-			assertThatThrownBy(() -> externalArrow.setTarget(a, Manner.DIRECT))
+			assertThatThrownBy(() -> externalArrow.setTarget(a, Purview.DIRECT))
 					.isInstanceOf(IllegalStateException.class)
 					.hasMessage("node belongs to another net");
 		}
@@ -284,7 +284,7 @@ class NetTest {
 			UNode u = (UNode) parser.getNodeNames().get("u");
 			Arrow uArrow = u.getArrow();
 
-			assertThatThrownBy(() -> uArrow.setTarget(externalNode, Manner.DIRECT))
+			assertThatThrownBy(() -> uArrow.setTarget(externalNode, Purview.DIRECT))
 					.isInstanceOf(IllegalStateException.class)
 					.hasMessage("node belongs to another net");
 		}
@@ -299,7 +299,7 @@ class NetTest {
 			net.validateBelongsToNet(uNode);
 			verify(eventListener).calledNewNode(uNode);
 			verifyNoMoreInteractions(eventListener);
-			assertThat(uNode.getChild(Manner.DIRECT)).isEqualTo(uNode);
+			assertThat(uNode.getChild(Purview.DIRECT)).isEqualTo(uNode);
 		}
 
 		@Test
@@ -313,7 +313,7 @@ class NetTest {
 			net.validateBelongsToNet(uNode);
 			verify(eventListener).calledNewNode(uNode);
 			verifyNoMoreInteractions(eventListener);
-			assertThat(uNode.getChild(Manner.DIRECT)).isEqualTo(nop);
+			assertThat(uNode.getChild(Purview.DIRECT)).isEqualTo(nop);
 		}
 
 		@Test
@@ -326,8 +326,8 @@ class NetTest {
 			net.validateBelongsToNet(bNode);
 			verify(eventListener).calledNewNode(bNode);
 			verifyNoMoreInteractions(eventListener);
-			assertThat(bNode.getLeftChild(Manner.DIRECT)).isEqualTo(bNode);
-			assertThat(bNode.getRightChild(Manner.DIRECT)).isEqualTo(bNode);
+			assertThat(bNode.getLeftChild(Purview.DIRECT)).isEqualTo(bNode);
+			assertThat(bNode.getRightChild(Purview.DIRECT)).isEqualTo(bNode);
 		}
 
 		@Test
@@ -342,8 +342,8 @@ class NetTest {
 			net.validateBelongsToNet(bNode);
 			verify(eventListener).calledNewNode(bNode);
 			verifyNoMoreInteractions(eventListener);
-			assertThat(bNode.getLeftChild(Manner.DIRECT)).isEqualTo(nop);
-			assertThat(bNode.getRightChild(Manner.DIRECT)).isEqualTo(ix);
+			assertThat(bNode.getLeftChild(Purview.DIRECT)).isEqualTo(nop);
+			assertThat(bNode.getRightChild(Purview.DIRECT)).isEqualTo(ix);
 		}
 
 		@Test

@@ -1,14 +1,7 @@
 package org.ent.net.io.parser;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.ent.net.Manner;
 import org.ent.net.Net;
+import org.ent.net.Purview;
 import org.ent.net.node.BNode;
 import org.ent.net.node.CNode;
 import org.ent.net.node.Node;
@@ -16,6 +9,13 @@ import org.ent.net.node.UNode;
 import org.ent.net.node.cmd.CommandFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class NetParserTest {
 
@@ -35,13 +35,13 @@ class NetParserTest {
 		Node root = net.getRoot();
 		assertThat(root).isInstanceOf(BNode.class);
 		BNode bRoot = (BNode) root;
-		assertThat(bRoot.getLeftChild(Manner.DIRECT)).isInstanceOfSatisfying(CNode.class, c -> {
+		assertThat(bRoot.getLeftChild(Purview.DIRECT)).isInstanceOfSatisfying(CNode.class, c -> {
 			assertThat(c.getCommand()).isEqualTo(CommandFactory.getByName("nop"));
 		});
-		Node rNode = bRoot.getRightChild(Manner.DIRECT);
+		Node rNode = bRoot.getRightChild(Purview.DIRECT);
 		assertThat(rNode).isInstanceOf(UNode.class);
 		UNode urNode = (UNode) rNode;
-		assertThat(urNode.getChild(Manner.DIRECT)).isInstanceOfSatisfying(CNode.class, c -> {
+		assertThat(urNode.getChild(Purview.DIRECT)).isInstanceOfSatisfying(CNode.class, c -> {
 			assertThat(c.getCommand()).isEqualTo(CommandFactory.getByName("nop"));
 		});
 	}
@@ -63,7 +63,7 @@ class NetParserTest {
 
 		Node n = nodes.iterator().next();
 		assertThat(n).isInstanceOfSatisfying(UNode.class, uNode -> {
-			assertThat(uNode.getChild(Manner.DIRECT)).isSameAs(uNode);
+			assertThat(uNode.getChild(Purview.DIRECT)).isSameAs(uNode);
 		});
 	}
 

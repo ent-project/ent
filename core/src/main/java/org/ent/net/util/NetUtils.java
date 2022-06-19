@@ -4,7 +4,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.ent.net.Arrow;
-import org.ent.net.Manner;
+import org.ent.net.Purview;
 import org.ent.net.node.Node;
 
 public final class NetUtils {
@@ -23,7 +23,7 @@ public final class NetUtils {
             return;
         reachableNodes.add(node);
     	for (Arrow arrow : node.getArrows()) {
-    		Node child = arrow.getTarget(Manner.DIRECT);
+    		Node child = arrow.getTarget(Purview.DIRECT);
     		doCollectReachableRec(child, reachableNodes);
     	}
     }

@@ -2,7 +2,7 @@ package org.ent.net.io.parser;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.ent.net.Arrow;
-import org.ent.net.Manner;
+import org.ent.net.Purview;
 import org.ent.net.Net;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
@@ -117,7 +117,7 @@ public class NetParser {
             Node node = templateNodeMap.get(template);
             for (Arrow arrow : node.getArrows()) {
             	Node child = resolveNode(template.getChild(arrow.getDirection()));
-            	arrow.setTarget(child, Manner.DIRECT);
+            	arrow.setTarget(child, Purview.DIRECT);
             }
         }
 	}
