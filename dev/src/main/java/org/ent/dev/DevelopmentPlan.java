@@ -17,6 +17,7 @@ import org.ent.dev.plan.StepsFilter;
 import org.ent.dev.plan.Trimmer;
 import org.ent.dev.stat.BinaryStat;
 import org.ent.dev.stat.FilterPassRecord;
+import org.ent.dev.stat.HtmlColor;
 import org.ent.dev.stat.LongStat;
 import org.ent.dev.stat.MovingAverage;
 import org.ent.dev.stat.PlotInfo;
@@ -68,6 +69,8 @@ public class DevelopmentPlan {
 	private final EnumMap<StepResult, BinaryStat> level1FailReasonStat;
 	private final BinaryStat level2DirectPassesStat;
 	private final StopwatchStat stopwatchStat;
+
+	private final NewRandomDrawStat newRandomDrawStat;
 
 	private RoundListener roundListener;
 
@@ -195,6 +198,24 @@ public class DevelopmentPlan {
 		}
 	}
 
+	private static class NewRandomDrawStat extends LongStat {
+
+		private long newRandomDraws;
+
+		public NewRandomDrawStat(int binSize) {
+			super(binSize);
+		}
+
+		public void newRound() {
+			putValue(newRandomDraws);
+			newRandomDraws = 0;
+		}
+
+		public void recordNewRandomDraw() {
+			newRandomDraws++;
+		}
+	}
+
 	public DevelopmentPlan(PlotRegistry plotRegistry, HyperRegistry hyperRegistry) {
 		this.hyperRegistry = hyperRegistry;
 		this.randMaster = new Random(RANDOM_MASTER_SEED);
@@ -205,6 +226,7 @@ public class DevelopmentPlan {
 		}
 		this.level2DirectPassesStat = new BinaryStat(100);
 		this.stopwatchStat = new StopwatchStat(10);
+		this.newRandomDrawStat = new NewRandomDrawStat(10);
 		this.output = new Output("Result: ");
 		this.poller = buildPoller();
 		if (plotRegistry != null) {
@@ -238,6 +260,11 @@ public class DevelopmentPlan {
 					.withSubplotOf("stopwatch")
 					.addRow(row -> row.withStat(new MovingAverage(stopwatchStat, 30)).withColor(Color.BLACK))
 			);
+			plotRegistry.addPlot(new PlotInfo("new-random-draws")
+					.addRow(row -> row.withStat(newRandomDrawStat).withColor(HtmlColor.Brown))
+					.withTitle("New random draw per top level event")
+					.withRangeAxisLabel("count")
+					.withRangeMax(15000.));
 		}
 	}
 
@@ -356,6 +383,7 @@ public class DevelopmentPlan {
 		Pool pool;
 
 		Poller result = randomNetSource.toSup()
+		.combineProc(data -> newRandomDrawStat.recordNewRandomDraw())
 		.combineProc(new StepsExam(getRunSetup()))
 		.combineFilter(new StepsFilter(1)
 				.with(new FailuresLimit(100000))
@@ -391,6 +419,7 @@ public class DevelopmentPlan {
 		.combineProc(data -> {
 				level2total++;
 				stopwatchStat.newRound();
+				newRandomDrawStat.newRound();
 			}
 		)
 		.connectReq(new Poller());

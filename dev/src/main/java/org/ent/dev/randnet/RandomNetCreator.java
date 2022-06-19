@@ -1,15 +1,15 @@
 package org.ent.dev.randnet;
 
+import org.ent.net.Arrow;
+import org.ent.net.Net;
+import org.ent.net.Purview;
+import org.ent.net.node.Node;
+import org.ent.util.ModifiedPoisson;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-
-import org.ent.net.Arrow;
-import org.ent.net.Purview;
-import org.ent.net.Net;
-import org.ent.net.node.Node;
-import org.ent.util.ModifiedPoisson;
 
 public class RandomNetCreator {
 
@@ -38,17 +38,18 @@ public class RandomNetCreator {
 
 	public Optional<Net> drawNet() {
 		doDrawNet();
-		switch (result) {
-			case SUCCESS: return Optional.of(net);
-			case REJECT: return Optional.empty();
-			default: throw new AssertionError("Expected result value, but was null");
-		}
+		return switch (result) {
+			case SUCCESS -> Optional.of(net);
+			case REJECT -> Optional.empty();
+		};
 	}
 
 	private void doDrawNet() {
 		initialize();
 		createNodes();
-		if (result == DrawResult.REJECT) return;
+		if (result == DrawResult.REJECT) {
+			return;
+		}
 		rewireToRandomTargets();
 		result = DrawResult.SUCCESS;
 	}
