@@ -1,29 +1,46 @@
 package org.ent.gui;
 
-import org.ent.dev.stat.BinnedStats;
+import org.ent.dev.stat.BinnedStat;
 import org.jfree.data.DomainOrder;
 import org.jfree.data.xy.AbstractIntervalXYDataset;
+import org.jfree.data.xy.TableXYDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BinnedStatsDataSet extends AbstractIntervalXYDataset {
+import java.io.Serial;
+import java.util.ArrayList;
+import java.util.List;
 
-	private static final Logger log = LoggerFactory.getLogger(BinnedStatsDataSet.class);
+public class BinnedStatDataSet extends AbstractIntervalXYDataset implements TableXYDataset {
 
+	private static final Logger log = LoggerFactory.getLogger(BinnedStatDataSet.class);
+
+	@Serial
 	private static final long serialVersionUID = 1L;
 
-	private BinnedStats stats;
+	private final List<BinnedStat> stats;
+
+	private List<String> seriesKeys;
 
 	private int numBinsDisplayed = 80;
 
-	public BinnedStatsDataSet(BinnedStats stats) {
+	public BinnedStatDataSet(BinnedStat stat) {
+		this.stats = new ArrayList<>();
+		this.stats.add(stat);
+	}
+
+	public BinnedStatDataSet(List<BinnedStat> stats) {
 		this.stats = stats;
+	}
+
+	public void setSeriesKeys(List<String> seriesKeys) {
+		this.seriesKeys = seriesKeys;
 	}
 
 	@Override
 	public Double getStartX(int series, int item) {
-		int bin = getBin(item);
-		return (double) bin * stats.getBinSize();
+		int bin = getBin(series, item);
+		return (double) bin * stats.get(series).getBinSize();
 	}
 
 	@Override
@@ -47,7 +64,12 @@ public class BinnedStatsDataSet extends AbstractIntervalXYDataset {
 
 	@Override
 	public int getItemCount(int series) {
-		return Math.min(stats.getNoBins(), numBinsDisplayed + 1);
+		return Math.min(stats.get(series).getNoBins(), numBinsDisplayed + 1);
+	}
+
+	@Override
+	public int getItemCount() {
+		return getItemCount(0);
 	}
 
 	@Override
@@ -55,8 +77,8 @@ public class BinnedStatsDataSet extends AbstractIntervalXYDataset {
 		return (getStartX(series, item) + getEndX(series, item)) / 2;
 	}
 
-	private int getBin(int item) {
-		int size = stats.getNoBins();
+	private int getBin(int series, int item) {
+		int size = stats.get(series).getNoBins();
 		if (size <= numBinsDisplayed) {
 			return item;
 		} else {
@@ -65,7 +87,7 @@ public class BinnedStatsDataSet extends AbstractIntervalXYDataset {
 	}
 
 	public int getFirstItemDisplayed() {
-		int size = stats.getNoBins();
+		int size = stats.get(0).getNoBins();
 		if (size <= numBinsDisplayed) {
 			return 0;
 		} else {
@@ -75,24 +97,24 @@ public class BinnedStatsDataSet extends AbstractIntervalXYDataset {
 
 	@Override
 	public Number getY(int series, int item) {
-		int bin = getBin(item);
-		if (bin >= stats.getNoBins()) {
+		int bin = getBin(series, item);
+		if (bin >= stats.get(series).getNoBins()) {
 			log.trace("getY(item={}) -> bin={}, out of bounds", item, bin);
 			return null;
 		}
-		double result = stats.getValue(bin);
+		double result = stats.get(series).getValue(bin);
 		log.trace("getY(item={}) -> bin={}, value={}", item, bin, result);
 		return result;
 	}
 
 	@Override
 	public int getSeriesCount() {
-		return 1;
+		return stats.size();
 	}
 
 	@Override
-	public Comparable<Integer> getSeriesKey(int series) {
-		return 0;
+	public Comparable getSeriesKey(int series) {
+		return seriesKeys != null ? seriesKeys.get(series) : series;
 	}
 
 	@Override

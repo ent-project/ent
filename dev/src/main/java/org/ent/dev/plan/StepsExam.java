@@ -29,8 +29,7 @@ public class StepsExam extends TypedProc<StepsExamData> {
 	public StepsExamResult examine(Net net) {
 		ManagedRun run = new ManagedRun(runSetup).withNet(net);
 		run.perform();
-		int steps = run.getNoSteps();
-		return new StepsExamResult(runSetup, steps);
+		return new StepsExamResult(runSetup, run.getNoSteps(), run.getLastStepResult());
 	}
 
 }

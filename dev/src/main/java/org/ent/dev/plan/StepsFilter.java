@@ -14,8 +14,8 @@ public class StepsFilter extends TypedFilter<StepsFilterData> {
 	@Override
 	public boolean doTest(StepsFilterData data) {
 		StepsExamResult stepsExamResult = data.getStepsExamResult();
-		int steps = stepsExamResult.getSteps();
-		Integer maxSteps = stepsExamResult.getRunSetup().maxSteps();
+		int steps = stepsExamResult.steps();
+		Integer maxSteps = stepsExamResult.runSetup().maxSteps();
 		return steps >= minSteps && (maxSteps == null || steps < maxSteps);
 	}
 

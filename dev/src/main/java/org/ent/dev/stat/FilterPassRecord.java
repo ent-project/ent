@@ -1,13 +1,13 @@
 package org.ent.dev.stat;
 
 import org.ent.dev.unit.data.Data;
-import org.ent.dev.unit.local.FilterWrapper.FilterListener;
+import org.ent.dev.unit.local.FilterListener;
 
 public class FilterPassRecord implements FilterListener {
 
-	private final BinaryStats stats;
+	private final BinaryStat stats;
 
-	public FilterPassRecord(BinaryStats stats) {
+	public FilterPassRecord(BinaryStat stats) {
 		this.stats = stats;
 	}
 

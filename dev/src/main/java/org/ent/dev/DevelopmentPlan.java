@@ -1,11 +1,5 @@
 package org.ent.dev;
 
-import java.awt.Color;
-import java.beans.PropertyChangeListener;
-import java.util.ArrayDeque;
-import java.util.Queue;
-import java.util.Random;
-
 import org.ent.dev.hyper.FloatHyperparameter;
 import org.ent.dev.hyper.HyperRegistry;
 import org.ent.dev.hyper.IntegerHyperparameter;
@@ -14,30 +8,39 @@ import org.ent.dev.plan.DataProperties.PropNet;
 import org.ent.dev.plan.DataProperties.PropReplicator;
 import org.ent.dev.plan.DataProperties.PropSerialNumber;
 import org.ent.dev.plan.DataProperties.PropStepsExamResult;
+import org.ent.dev.plan.FailReasonRecorder;
 import org.ent.dev.plan.Pool;
 import org.ent.dev.plan.RandomNetSource;
 import org.ent.dev.plan.StepsExam;
 import org.ent.dev.plan.StepsExamResult;
 import org.ent.dev.plan.StepsFilter;
 import org.ent.dev.plan.Trimmer;
-import org.ent.dev.stat.BinaryStats;
+import org.ent.dev.stat.BinaryStat;
 import org.ent.dev.stat.FilterPassRecord;
-import org.ent.dev.stat.LongStats;
+import org.ent.dev.stat.LongStat;
 import org.ent.dev.stat.MovingAverage;
 import org.ent.dev.stat.PlotInfo;
 import org.ent.dev.stat.PlotRegistry;
 import org.ent.dev.unit.DeliveryStash;
-import org.ent.dev.unit.local.TypedProc;
-import org.ent.dev.unit.local.FilterWrapper.FilterListener;
 import org.ent.dev.unit.Req;
 import org.ent.dev.unit.SkewSplitter;
 import org.ent.dev.unit.Sup;
 import org.ent.dev.unit.data.Data;
 import org.ent.dev.unit.data.DataProxy;
+import org.ent.dev.unit.local.FilterListener;
+import org.ent.dev.unit.local.TypedProc;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
+import org.ent.run.StepResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.Color;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayDeque;
+import java.util.EnumMap;
+import java.util.Queue;
+import java.util.Random;
 
 public class DevelopmentPlan {
 
@@ -61,9 +64,10 @@ public class DevelopmentPlan {
 	private int level2heavyLaneTotal;
 	private int level2heavyLanePasses;
 
-	private final BinaryStats level1PassingStats;
-	private final BinaryStats level2DirectPassesStats;
-	private final StopwatchStats stopwatchStats;
+	private final BinaryStat level1PassingStat;
+	private final EnumMap<StepResult, BinaryStat> level1FailReasonStat;
+	private final BinaryStat level2DirectPassesStat;
+	private final StopwatchStat stopwatchStat;
 
 	private RoundListener roundListener;
 
@@ -113,7 +117,9 @@ public class DevelopmentPlan {
 		public void doAccept(OutputData input) {
 			Net net = input.getNet();
 			StepsExamResult stepsExamResult = input.getStepsExamResult();
-			log.trace("{}#{} [{}] {}", prefix, input.getSerialNumber(), stepsExamResult.getSteps(), new NetFormatter().format(net));
+			if (log.isTraceEnabled()) {
+				log.trace("{}#{} [{}] {}", prefix, input.getSerialNumber(), stepsExamResult.steps(), new NetFormatter().format(net));
+			}
 		}
 
 	}
@@ -161,11 +167,11 @@ public class DevelopmentPlan {
 		}
 	}
 
-	private static class StopwatchStats extends LongStats {
+	private static class StopwatchStat extends LongStat {
 
 		private Long lastTime;
 
-		public StopwatchStats(int binSize) {
+		public StopwatchStat(int binSize) {
 			super(binSize);
 		}
 
@@ -192,35 +198,46 @@ public class DevelopmentPlan {
 	public DevelopmentPlan(PlotRegistry plotRegistry, HyperRegistry hyperRegistry) {
 		this.hyperRegistry = hyperRegistry;
 		this.randMaster = new Random(RANDOM_MASTER_SEED);
-		this.level1PassingStats = new BinaryStats(10_000);
-		this.level2DirectPassesStats = new BinaryStats(100);
-		this.stopwatchStats = new StopwatchStats(10);
+		this.level1PassingStat = new BinaryStat(10_000);
+		this.level1FailReasonStat = new EnumMap<>(StepResult.class);
+		for (StepResult sr : StepResult.values()) {
+			level1FailReasonStat.put(sr, new BinaryStat(10_000));
+		}
+		this.level2DirectPassesStat = new BinaryStat(100);
+		this.stopwatchStat = new StopwatchStat(10);
 		this.output = new Output("Result: ");
 		this.poller = buildPoller();
 		if (plotRegistry != null) {
 			plotRegistry.addPlot(new PlotInfo("level1-passing")
-					.withStats(level1PassingStats)
+					.addRow(level1PassingStat)
 					.withTitle("Level 1 passes")
 					.withRangeAxisLabel("%")
 					.withRangeMax(0.1));
+			plotRegistry.addPlot(new PlotInfo("level1-failure-types")
+					.addRow(row -> row.withStat(level1FailReasonStat.get(StepResult.FATAL)).withLabel("fatal").withColor(Color.RED))
+					.addRow(row -> row.withStat(level1FailReasonStat.get(StepResult.INVALID_COMMAND_BRANCH)).withLabel("invalid command branch").withColor(Color.BLUE))
+					.addRow(row -> row.withStat(level1FailReasonStat.get(StepResult.INVALID_COMMAND_NODE)).withLabel("invalid command node").withColor(Color.YELLOW))
+					.addRow(row -> row.withStat(level1FailReasonStat.get(StepResult.COMMAND_EXECUTION_FAILED)).withLabel("execution failed").withColor(Color.DARK_GRAY))
+					.withTitle("Level 1 failure types")
+					.withRangeAxisLabel("%")
+					.withRangeMax(1.0));
 			plotRegistry.addPlot(new PlotInfo("level2-direct-passes")
-					.withStats(level2DirectPassesStats)
+					.addRow(level2DirectPassesStat)
 					.withTitle("Direct passes for level 2")
 					.withRangeAxisLabel("%")
 					.withRangeMax(0.1));
 			plotRegistry.addPlot(new PlotInfo("level2-direc-passes-moving-average")
-					.withStats(new MovingAverage(level2DirectPassesStats, 20))
+					.addRow(new MovingAverage(level2DirectPassesStat, 20))
 					.withSubplotOf("level2-direct-passes"));
 			plotRegistry.addPlot(new PlotInfo("stopwatch")
-					.withStats(stopwatchStats)
+					.addRow(row -> row.withStat(stopwatchStat).withColor(Color.BLUE))
 					.withTitle("Execution time for top level events")
 					.withRangeAxisLabel("ms")
-					.withRangeMax(1000.)
-					.withColor(Color.BLUE));
+					.withRangeMax(1000.));
 			plotRegistry.addPlot(new PlotInfo("stopwatch-moving-average")
 					.withSubplotOf("stopwatch")
-					.withStats(new MovingAverage(stopwatchStats, 30))
-					.withColor(Color.BLACK));
+					.addRow(row -> row.withStat(new MovingAverage(stopwatchStat, 30)).withColor(Color.BLACK))
+			);
 		}
 	}
 
@@ -237,12 +254,12 @@ public class DevelopmentPlan {
 		long start = System.currentTimeMillis();
 		plan.executeBatch(100);
 		long diff = System.currentTimeMillis() - start;
-		System.err.printf("execution time: %.3f s%n", ((double) diff) / 1000);
+		log.info("execution time: %.3f s%n".formatted(((double) diff) / 1000));
 	}
 
 	public void executeBatch(int batchSize) {
 		stopped = false;
-		stopwatchStats.start();
+		stopwatchStat.start();
 		if (batchSize == BATCH_EXECUTION_SIZE_INFINITY) {
 			while (!stopped) {
 				executeOne();
@@ -253,7 +270,7 @@ public class DevelopmentPlan {
 				executeOne();
 			}
 		}
-		stopwatchStats.stop();
+		stopwatchStat.stop();
 		dumpStats();
 	}
 
@@ -272,9 +289,9 @@ public class DevelopmentPlan {
 	}
 
 	public void dumpStats() {
-		long level0total = level1PassingStats.getNoEvents();
-		long level1total = level1PassingStats.getTotalHits();
-		long level2directPasses = level2DirectPassesStats.getTotalHits();
+		long level0total = level1PassingStat.getNoEvents();
+		long level1total = level1PassingStat.getTotalHits();
+		long level2directPasses = level2DirectPassesStat.getTotalHits();
 
 		log.info("Summary:\n---");
 		log.info("level1: passed        {}/{} ({} %)", level1total, level0total, String.format("%.2f", ((double) level1total) / level0total * 100));
@@ -338,11 +355,12 @@ public class DevelopmentPlan {
 
 		Pool pool;
 
-		Poller poller = randomNetSource.toSup()
+		Poller result = randomNetSource.toSup()
 		.combineProc(new StepsExam(getRunSetup()))
 		.combineFilter(new StepsFilter(1)
 				.with(new FailuresLimit(100000))
-				.with(new FilterPassRecord(level1PassingStats))
+				.with(new FilterPassRecord(level1PassingStat))
+						.with(new FailReasonRecorder(level1FailReasonStat))
 				)
 		.combineProc(new Trimmer(getRunSetup()))
 		.combineProc(new Counter())
@@ -350,7 +368,7 @@ public class DevelopmentPlan {
 		.combineDan(new SkewSplitter()
 			.withSorter(new StepsFilter(2)
 					.with(new FailuresLimit(100000))
-					.with(new FilterPassRecord(level2DirectPassesStats))
+					.with(new FilterPassRecord(level2DirectPassesStat))
 					)
 			.withLightLane(
 				new Output("in light lane: ")
@@ -359,11 +377,11 @@ public class DevelopmentPlan {
 				(pool = new Pool(newRandom())).withFeedback(
 					new AddCopyReplicator()
 					.combineProc(new Counter())
-					.combineProc(data -> {level2heavyLaneTotal++;})
+					.combineProc(data -> level2heavyLaneTotal++)
 					.combineProc(new StepsExam(getRunSetup()))
 					.combineProc(new Output("in heavy lane: "))
 					.combineFilter(new StepsFilter(2))
-					.combineProc(data -> {level2heavyLanePasses++;})
+					.combineProc(data -> level2heavyLanePasses++)
 				)
 				.combinePipe(new Output("Passed the heavy lane: "))
 				.combinePipe(new Trimmer(getRunSetup()))
@@ -372,7 +390,7 @@ public class DevelopmentPlan {
 		)
 		.combineProc(data -> {
 				level2total++;
-				stopwatchStats.newRound();
+				stopwatchStat.newRound();
 			}
 		)
 		.connectReq(new Poller());
@@ -414,7 +432,7 @@ public class DevelopmentPlan {
 			hyperRegistry.addHyperparameter(excludeRateJoiningFail);
 			hyperRegistry.addHyperparameter(rewireFraction);
 		}
-		return poller;
+		return result;
 	}
 
 	private RunSetup getRunSetup() {

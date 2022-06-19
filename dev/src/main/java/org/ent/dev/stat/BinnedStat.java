@@ -1,6 +1,6 @@
 package org.ent.dev.stat;
 
-public interface BinnedStats {
+public interface BinnedStat {
 
 	int getBinSize();
 

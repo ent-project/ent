@@ -1,12 +1,14 @@
 package org.ent.dev.stat;
 
-import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class PlotInfo {
 
 	private final String id;
 
-	private BinnedStats stats;
+	private List<PlotRow> rows;
 
 	private String title;
 
@@ -18,22 +20,28 @@ public class PlotInfo {
 
 	private String subplotOf;
 
-	private Color color;
-
 	public PlotInfo(String id) {
 		this.id = id;
+		this.rows = new ArrayList<>();
 	}
 
-	public BinnedStats getStats() {
-		return stats;
+	public List<PlotRow> getRows() {
+		return rows;
 	}
 
-	public void setStats(BinnedStats stats) {
-		this.stats = stats;
+	public void setRows(List<PlotRow> rows) {
+		this.rows = rows;
 	}
 
-	public PlotInfo withStats(BinnedStats stats) {
-		setStats(stats);
+	public PlotInfo addRow(BinnedStat data) {
+		this.rows.add(new PlotRow().withStat(data));
+		return this;
+	}
+
+	public PlotInfo addRow(Consumer<PlotRow> plotRowConsumer) {
+		PlotRow row = new PlotRow();
+		plotRowConsumer.accept(row);
+		this.rows.add(row);
 		return this;
 	}
 
@@ -105,18 +113,4 @@ public class PlotInfo {
 		setSubplotOf(subplotOf);
 		return this;
 	}
-
-	public Color getColor() {
-		return color;
-	}
-
-	public void setColor(Color color) {
-		this.color = color;
-	}
-
-	public PlotInfo withColor(Color color) {
-		setColor(color);
-		return this;
-	}
-
 }

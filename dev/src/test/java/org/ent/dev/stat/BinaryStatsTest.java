@@ -1,14 +1,14 @@
 package org.ent.dev.stat;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class BinaryStatsTest {
 
 	@Test
 	void noBinsAndHits_onlyHits() {
-		BinaryStats bs = new BinaryStats(4);
+		BinaryStat bs = new BinaryStat(4);
 
 		bs.addHit();
 		assertThat(bs.getNoBins()).isZero();
@@ -37,7 +37,7 @@ class BinaryStatsTest {
 
 	@Test
 	void noBinsAndHits_onlyMisses() {
-		BinaryStats bs = new BinaryStats(4);
+		BinaryStat bs = new BinaryStat(4);
 
 		bs.addMiss();
 		assertThat(bs.getNoBins()).isZero();
@@ -66,7 +66,7 @@ class BinaryStatsTest {
 
 	@Test
 	void noBinsAndHits_mixed() {
-		BinaryStats bs = new BinaryStats(4);
+		BinaryStat bs = new BinaryStat(4);
 
 		bs.addMiss();
 		assertThat(bs.getNoBins()).isZero();
@@ -95,7 +95,7 @@ class BinaryStatsTest {
 
 	@Test
 	void noEventsAndTotalHits() {
-		BinaryStats bs = new BinaryStats(4);
+		BinaryStat bs = new BinaryStat(4);
 
 		bs.addHit();
 		bs.addMiss();

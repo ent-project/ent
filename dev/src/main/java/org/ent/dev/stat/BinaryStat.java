@@ -3,9 +3,14 @@ package org.ent.dev.stat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BinaryStats implements BinnedStats {
+/**
+ * Statistics on a stream of binary outcomes (hit or miss).
+ *
+ * Collects data into bins of a given size.
+ */
+public class BinaryStat implements BinnedStat {
 
-	private List<Integer> data;
+	private final List<Integer> data;
 
 	private int idx;
 
@@ -13,7 +18,7 @@ public class BinaryStats implements BinnedStats {
 
 	private final int binSize;
 
-	public BinaryStats(int binSize) {
+	public BinaryStat(int binSize) {
 		if (binSize <= 0) {
 			throw new IllegalArgumentException();
 		}
@@ -59,8 +64,8 @@ public class BinaryStats implements BinnedStats {
 
 	public long getTotalHits() {
 		long hits = 0;
-		for (int i = 0; i < data.size(); i++) {
-			hits += data.get(i);
+		for (Integer value : data) {
+			hits += value;
 		}
 		hits += currentBinHits;
 		return hits;

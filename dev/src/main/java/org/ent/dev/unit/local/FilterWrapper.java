@@ -4,14 +4,9 @@ import org.ent.dev.unit.data.Data;
 
 public class FilterWrapper implements Filter {
 
-	private Filter delegate;
+	private final Filter delegate;
 
-	private FilterListener listener;
-
-	public interface FilterListener {
-		void success(Data data);
-		void failure(Data data);
-	}
+	private final FilterListener listener;
 
 	public FilterWrapper(Filter delegate, FilterListener listener) {
 		this.delegate = delegate;

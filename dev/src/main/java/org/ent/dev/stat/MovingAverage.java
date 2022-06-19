@@ -1,12 +1,12 @@
 package org.ent.dev.stat;
 
-public class MovingAverage implements BinnedStats {
+public class MovingAverage implements BinnedStat {
 
-	private BinnedStats delegate;
+	private final BinnedStat delegate;
 
-	private int width;
+	private final int width;
 
-	public MovingAverage(BinnedStats delegate, int width) {
+	public MovingAverage(BinnedStat delegate, int width) {
 		this.delegate = delegate;
 		this.width = width;
 	}

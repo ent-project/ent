@@ -3,17 +3,17 @@ package org.ent.dev.stat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LongStats implements BinnedStats {
+public class LongStat implements BinnedStat {
 
 	private final int binSize;
 
-	private List<Long> data;
+	private final List<Long> data;
 
 	private int idx;
 
 	private long nextBinAccumulation;
 
-	public LongStats(int binSize) {
+	public LongStat(int binSize) {
 		if (binSize <= 0) {
 			throw new IllegalArgumentException();
 		}

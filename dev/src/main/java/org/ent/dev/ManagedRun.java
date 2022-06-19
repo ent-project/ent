@@ -13,13 +13,15 @@ public class ManagedRun {
 
 	private int noSteps;
 
-	private RunSetup runSetup;
+	private final RunSetup runSetup;
 
 	private NetRunner netRunner;
 
 	private Net net;
 
 	private NetFormatter formatter = new NetFormatter();
+
+	private StepResult lastStepResult;
 
 	private enum EvaluationStepResult { CONTINUE, STOP }
 
@@ -57,6 +59,10 @@ public class ManagedRun {
 		return noSteps;
 	}
 
+	public StepResult getLastStepResult() {
+		return lastStepResult;
+	}
+
 	public void perform() {
 		initializeEvaluation();
 		EvaluationStepResult evaluationStepResult;
@@ -89,6 +95,7 @@ public class ManagedRun {
 		StepResult result = netRunner.step();
 		boolean isFatal = isStepResultFatal(result);
 		if (isFatal) {
+			this.lastStepResult = result;
 			return EvaluationStepResult.STOP;
 		}
 		noSteps++;

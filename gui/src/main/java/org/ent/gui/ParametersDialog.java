@@ -1,18 +1,11 @@
 package org.ent.gui;
 
-import static javax.swing.GroupLayout.DEFAULT_SIZE;
-import static javax.swing.GroupLayout.PREFERRED_SIZE;
-import static javax.swing.GroupLayout.Alignment.BASELINE;
-import static javax.swing.GroupLayout.Alignment.LEADING;
-import static javax.swing.GroupLayout.Alignment.TRAILING;
-import static javax.swing.LayoutStyle.ComponentPlacement.RELATED;
-import static javax.swing.LayoutStyle.ComponentPlacement.UNRELATED;
-
-import java.awt.Frame;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.util.ArrayList;
-import java.util.List;
+import org.ent.dev.hyper.FloatHyperparameter;
+import org.ent.dev.hyper.Hyperparameter;
+import org.ent.dev.hyper.IntegerHyperparameter;
+import org.ent.dev.hyper.RangedHyperparameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -24,29 +17,37 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
+import java.awt.Frame;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.io.Serial;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.ent.dev.hyper.FloatHyperparameter;
-import org.ent.dev.hyper.Hyperparameter;
-import org.ent.dev.hyper.IntegerHyperparameter;
-import org.ent.dev.hyper.RangedHyperparameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static javax.swing.GroupLayout.Alignment.BASELINE;
+import static javax.swing.GroupLayout.Alignment.LEADING;
+import static javax.swing.GroupLayout.Alignment.TRAILING;
+import static javax.swing.GroupLayout.DEFAULT_SIZE;
+import static javax.swing.GroupLayout.PREFERRED_SIZE;
+import static javax.swing.LayoutStyle.ComponentPlacement.RELATED;
+import static javax.swing.LayoutStyle.ComponentPlacement.UNRELATED;
 
 public class ParametersDialog extends JDialog {
 
 	private static final Logger log = LoggerFactory.getLogger(ParametersDialog.class);
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
-	private class ParameterControl<T> {
+	private static class ParameterControl<T> {
 
 		private final RangedHyperparameter<T> hyper;
 
-		private JLabel label;
+		private final JLabel label;
 
-		private JTextField textfield;
+		private final JTextField textfield;
 
-		private JSlider slider;
+		private final JSlider slider;
 
 		public ParameterControl(RangedHyperparameter<T> hyper) {
 			this.hyper = hyper;
@@ -173,8 +174,8 @@ public class ParametersDialog extends JDialog {
 		List<Hyperparameter<?>> parameters = Main.getHyperRegistry().getParameters();
 		List<ParameterControl<?>> elements = new ArrayList<>();
 		for (Hyperparameter<?> hyper : parameters) {
-			if (hyper instanceof RangedHyperparameter) {
-				elements.add(new ParameterControl((RangedHyperparameter) hyper));
+			if (hyper instanceof RangedHyperparameter rangedHyperparameter) {
+				elements.add(new ParameterControl(rangedHyperparameter));
 			} else {
 				throw new AssertionError();
 			}
@@ -184,14 +185,14 @@ public class ParametersDialog extends JDialog {
 		pnlGroup.setLayout(pnlGroupLayout);
 
 		ParallelGroup labelGroupHorizontal = pnlGroupLayout.createParallelGroup(TRAILING);
-		elements.stream().forEach(element -> labelGroupHorizontal.addComponent(element.getLabel()));
+		elements.forEach(element -> labelGroupHorizontal.addComponent(element.getLabel()));
 
 		ParallelGroup textfieldGroupHorizontal = pnlGroupLayout.createParallelGroup();
-		elements.stream().forEach(element ->
+		elements.forEach(element ->
 				textfieldGroupHorizontal.addComponent(element.getTextfield(), PREFERRED_SIZE, DEFAULT_SIZE, PREFERRED_SIZE));
 
 		ParallelGroup sliderGroupHorizontal = pnlGroupLayout.createParallelGroup();
-		elements.stream().forEach(element ->
+		elements.forEach(element ->
 				sliderGroupHorizontal.addComponent(element.getSlider(), DEFAULT_SIZE, 400, Short.MAX_VALUE));
 
 		pnlGroupLayout.setHorizontalGroup(pnlGroupLayout.createSequentialGroup()
