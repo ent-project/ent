@@ -10,7 +10,7 @@ public class Trimmer extends TypedProc<TrimmerData> {
 	private final RunSetup runSetup;
 
 	public Trimmer(RunSetup runSetup) {
-		super(new TrimmerData());
+		super(TrimmerData.class);
 		this.runSetup = runSetup;
 	}
 

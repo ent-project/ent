@@ -1,7 +1,7 @@
 package org.ent.dev.stat;
 
 import org.ent.dev.unit.data.Data;
-import org.ent.dev.unit.local.FilterListener;
+import org.ent.dev.unit.local.util.FilterListener;
 
 public class FilterPassRecord implements FilterListener {
 

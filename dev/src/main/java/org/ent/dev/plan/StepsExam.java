@@ -10,7 +10,7 @@ public class StepsExam extends TypedProc<StepsExamData> {
 	private final RunSetup runSetup;
 
 	public StepsExam(RunSetup runSetup) {
-		super(new StepsExamData());
+		super(StepsExamData.class);
 		this.runSetup = runSetup;
 	}
 

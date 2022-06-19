@@ -1,11 +1,5 @@
 package org.ent.dev.plan;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
 import org.ent.dev.NetMixer;
 import org.ent.dev.plan.DataProperties.PropNet;
 import org.ent.dev.plan.DataProperties.PropReplicator;
@@ -19,6 +13,12 @@ import org.ent.dev.unit.local.Filter;
 import org.ent.net.Net;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public class Pool {
 
@@ -34,7 +34,7 @@ public class Pool {
 
 	private double excludeRateJoiningFail = 1. / 50;
 
-	private double rewireFraction = 0.2;
+	private double rewireFraction = 0.4;
 
 	private final Map<Boolean, Double> excludeRatePrimary = new HashMap<>();
 

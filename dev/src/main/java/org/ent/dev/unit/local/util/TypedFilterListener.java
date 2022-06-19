@@ -1,4 +1,4 @@
-package org.ent.dev.unit.local;
+package org.ent.dev.unit.local.util;
 
 import org.ent.dev.unit.data.Data;
 import org.ent.dev.unit.data.DataProxy;

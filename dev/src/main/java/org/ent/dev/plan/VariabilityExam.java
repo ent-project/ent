@@ -13,7 +13,7 @@ public class VariabilityExam extends TypedProc<VariabilityExamData> {
     private VariabilityCollector collector;
 
     public VariabilityExam(RunSetup runSetup) {
-        super(new VariabilityExamData());
+        super(VariabilityExamData.class);
         this.runSetup = runSetup;
     }
 

@@ -12,6 +12,7 @@ import org.ent.dev.plan.FailReasonRecorder;
 import org.ent.dev.plan.Pool;
 import org.ent.dev.plan.RandomNetSource;
 import org.ent.dev.plan.StepsExam;
+import org.ent.dev.plan.StepsExamData;
 import org.ent.dev.plan.StepsExamResult;
 import org.ent.dev.plan.StepsFilter;
 import org.ent.dev.plan.Trimmer;
@@ -28,7 +29,7 @@ import org.ent.dev.unit.SkewSplitter;
 import org.ent.dev.unit.Sup;
 import org.ent.dev.unit.data.Data;
 import org.ent.dev.unit.data.DataProxy;
-import org.ent.dev.unit.local.FilterListener;
+import org.ent.dev.unit.local.util.FilterListener;
 import org.ent.dev.unit.local.TypedProc;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
@@ -67,12 +68,15 @@ public class DevelopmentPlan {
 
 	private final BinaryStat level1PassingStat;
 	private final EnumMap<StepResult, BinaryStat> level1FailReasonStat;
+	private final EnumMap<MixerOutcome, BinaryStat> mixerOutcomeStat;
 	private final BinaryStat level2DirectPassesStat;
 	private final StopwatchStat stopwatchStat;
 
 	private final NewRandomDrawStat newRandomDrawStat;
 
 	private RoundListener roundListener;
+
+	enum MixerOutcome { WORSE, SAME, BETTER }
 
 	public interface RoundListener {
 		void roundCompleted(Data data);
@@ -112,7 +116,7 @@ public class DevelopmentPlan {
 		String prefix;
 
 		public Output(String prefix) {
-			super(new OutputData());
+			super(OutputData.class);
 			this.prefix = prefix;
 		}
 
@@ -127,12 +131,12 @@ public class DevelopmentPlan {
 
 	}
 
-	private static class OutputData extends DataProxy implements PropNet, PropStepsExamResult, PropSerialNumber{}
+	public static class OutputData extends DataProxy implements PropNet, PropStepsExamResult, PropSerialNumber{}
 
 	public static class AddCopyReplicator extends TypedProc<AddCopyReplicatorData> {
 
 		public AddCopyReplicator() {
-			super(new AddCopyReplicatorData());
+			super(AddCopyReplicatorData.class);
 		}
 
 		@Override
@@ -144,7 +148,7 @@ public class DevelopmentPlan {
 
 	}
 
-	private static class AddCopyReplicatorData extends DataProxy implements PropNet, PropReplicator{}
+	public static class AddCopyReplicatorData extends DataProxy implements PropNet, PropReplicator{}
 
 	static class FailuresLimit implements FilterListener {
 
@@ -224,6 +228,10 @@ public class DevelopmentPlan {
 		for (StepResult sr : StepResult.values()) {
 			level1FailReasonStat.put(sr, new BinaryStat(10_000));
 		}
+		this.mixerOutcomeStat = new EnumMap<>(MixerOutcome.class);
+		for (MixerOutcome oc : MixerOutcome.values()) {
+			mixerOutcomeStat.put(oc, new BinaryStat(1000));
+		}
 		this.level2DirectPassesStat = new BinaryStat(100);
 		this.stopwatchStat = new StopwatchStat(10);
 		this.newRandomDrawStat = new NewRandomDrawStat(10);
@@ -243,6 +251,12 @@ public class DevelopmentPlan {
 					.withTitle("Level 1 failure types")
 					.withRangeAxisLabel("%")
 					.withRangeMax(1.0));
+			plotRegistry.addPlot(new PlotInfo("mixer-outcome")
+					.addRow(row -> row.withStat(mixerOutcomeStat.get(MixerOutcome.BETTER)).withLabel("better").withColor(HtmlColor.ForestGreen))
+					.addRow(row -> row.withStat(mixerOutcomeStat.get(MixerOutcome.WORSE)).withLabel("worse").withColor(HtmlColor.LightCoral))
+					.withTitle("Pool mixer outcome")
+					.withRangeAxisLabel("%")
+					.withRangeMax(0.3));
 			plotRegistry.addPlot(new PlotInfo("level2-direct-passes")
 					.addRow(level2DirectPassesStat)
 					.withTitle("Direct passes for level 2")
@@ -408,6 +422,7 @@ public class DevelopmentPlan {
 					.combineProc(data -> level2heavyLaneTotal++)
 					.combineProc(new StepsExam(getRunSetup()))
 					.combineProc(new Output("in heavy lane: "))
+					.combineProc(StepsExamData.class, this::recordMixerOutcome)
 					.combineFilter(new StepsFilter(2))
 					.combineProc(data -> level2heavyLanePasses++)
 				)
@@ -448,7 +463,7 @@ public class DevelopmentPlan {
 		excludeRateJoiningFail.addPropertyChangeListener(prop ->
 				pool.setExcludeRateJoiningFail(excludeRateJoiningFail.getValue()));
 
-		FloatHyperparameter rewireFraction = new FloatHyperparameter(0.2f, "Pool rewire fraction");
+		FloatHyperparameter rewireFraction = new FloatHyperparameter(0.4f, "Pool rewire fraction");
 		rewireFraction.setMinimumValue(0f);
 		rewireFraction.setMaximumValue(1f);
 		rewireFraction.addPropertyChangeListener(prop ->
@@ -462,6 +477,21 @@ public class DevelopmentPlan {
 			hyperRegistry.addHyperparameter(rewireFraction);
 		}
 		return result;
+	}
+
+	private void recordMixerOutcome(StepsExamData data) {
+		MixerOutcome outcome = switch (data.getStepsExamResult().steps()) {
+			case 0 -> MixerOutcome.WORSE;
+			case 1 -> MixerOutcome.SAME;
+			default -> MixerOutcome.BETTER;
+		};
+		for (MixerOutcome oc : MixerOutcome.values()) {
+			if (oc == outcome) {
+				mixerOutcomeStat.get(oc).addHit();
+			} else {
+				mixerOutcomeStat.get(oc).addMiss();
+			}
+		}
 	}
 
 	private RunSetup getRunSetup() {

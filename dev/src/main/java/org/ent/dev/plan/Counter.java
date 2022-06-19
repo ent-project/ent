@@ -7,7 +7,7 @@ public class Counter extends TypedProc<CounterData> {
 	private long currentNumber;
 
 	public Counter() {
-		super(new CounterData());
+		super(CounterData.class);
 	}
 
 	@Override
