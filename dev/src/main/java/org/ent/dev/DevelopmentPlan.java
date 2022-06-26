@@ -63,13 +63,18 @@ public class DevelopmentPlan {
 	private volatile boolean stopped;
 
 	private int level2total;
+	private int level3total;
 	private int level2heavyLaneTotal;
+	private int level3heavyLaneTotal;
 	private int level2heavyLanePasses;
+	private int level3heavyLanePasses;
 
 	private final BinaryStat level1PassingStat;
 	private final EnumMap<StepResult, BinaryStat> level1FailReasonStat;
-	private final EnumMap<MixerOutcome, BinaryStat> mixerOutcomeStat;
+	private final EnumMap<MixerOutcome, BinaryStat> level2MixerOutcomeStat;
+	private final EnumMap<MixerOutcome, BinaryStat> level3MixerOutcomeStat;
 	private final BinaryStat level2DirectPassesStat;
+	private final BinaryStat level3DirectPassesStat;
 	private final StopwatchStat stopwatchStat;
 
 	private final NewRandomDrawStat newRandomDrawStat;
@@ -228,13 +233,18 @@ public class DevelopmentPlan {
 		for (StepResult sr : StepResult.values()) {
 			level1FailReasonStat.put(sr, new BinaryStat(10_000));
 		}
-		this.mixerOutcomeStat = new EnumMap<>(MixerOutcome.class);
+		this.level2MixerOutcomeStat = new EnumMap<>(MixerOutcome.class);
 		for (MixerOutcome oc : MixerOutcome.values()) {
-			mixerOutcomeStat.put(oc, new BinaryStat(1000));
+			level2MixerOutcomeStat.put(oc, new BinaryStat(1000));
+		}
+		this.level3MixerOutcomeStat = new EnumMap<>(MixerOutcome.class);
+		for (MixerOutcome oc : MixerOutcome.values()) {
+			level3MixerOutcomeStat.put(oc, new BinaryStat(100));
 		}
 		this.level2DirectPassesStat = new BinaryStat(100);
-		this.stopwatchStat = new StopwatchStat(10);
-		this.newRandomDrawStat = new NewRandomDrawStat(10);
+		this.level3DirectPassesStat = new BinaryStat(100);
+		this.stopwatchStat = new StopwatchStat(5);
+		this.newRandomDrawStat = new NewRandomDrawStat(5);
 		this.output = new Output("Result: ");
 		this.poller = buildPoller();
 		if (plotRegistry != null) {
@@ -251,10 +261,10 @@ public class DevelopmentPlan {
 					.withTitle("Level 1 failure types")
 					.withRangeAxisLabel("%")
 					.withRangeMax(1.0));
-			plotRegistry.addPlot(new PlotInfo("mixer-outcome")
-					.addRow(row -> row.withStat(mixerOutcomeStat.get(MixerOutcome.BETTER)).withLabel("better").withColor(HtmlColor.ForestGreen))
-					.addRow(row -> row.withStat(mixerOutcomeStat.get(MixerOutcome.WORSE)).withLabel("worse").withColor(HtmlColor.LightCoral))
-					.withTitle("Pool mixer outcome")
+			plotRegistry.addPlot(new PlotInfo("level2-mixer-outcome")
+					.addRow(row -> row.withStat(level2MixerOutcomeStat.get(MixerOutcome.BETTER)).withLabel("better").withColor(HtmlColor.ForestGreen))
+					.addRow(row -> row.withStat(level2MixerOutcomeStat.get(MixerOutcome.WORSE)).withLabel("worse").withColor(HtmlColor.LightCoral))
+					.withTitle("Pool mixer outcome - level 3")
 					.withRangeAxisLabel("%")
 					.withRangeMax(0.3));
 			plotRegistry.addPlot(new PlotInfo("level2-direct-passes")
@@ -265,6 +275,20 @@ public class DevelopmentPlan {
 			plotRegistry.addPlot(new PlotInfo("level2-direc-passes-moving-average")
 					.addRow(new MovingAverage(level2DirectPassesStat, 20))
 					.withSubplotOf("level2-direct-passes"));
+			plotRegistry.addPlot(new PlotInfo("level3-mixer-outcome")
+					.addRow(row -> row.withStat(level3MixerOutcomeStat.get(MixerOutcome.BETTER)).withLabel("better").withColor(HtmlColor.ForestGreen))
+					.addRow(row -> row.withStat(level3MixerOutcomeStat.get(MixerOutcome.WORSE)).withLabel("worse").withColor(HtmlColor.LightCoral))
+					.withTitle("Pool mixer outcome - level 3")
+					.withRangeAxisLabel("%")
+					.withRangeMax(0.3));
+			plotRegistry.addPlot(new PlotInfo("level3-direct-passes")
+					.addRow(level3DirectPassesStat)
+					.withTitle("Direct passes for level 3")
+					.withRangeAxisLabel("%")
+					.withRangeMax(0.1));
+			plotRegistry.addPlot(new PlotInfo("level3-direc-passes-moving-average")
+					.addRow(new MovingAverage(level3DirectPassesStat, 20))
+					.withSubplotOf("level3-direct-passes"));
 			plotRegistry.addPlot(new PlotInfo("stopwatch")
 					.addRow(row -> row.withStat(stopwatchStat).withColor(Color.BLUE))
 					.withTitle("Execution time for top level events")
@@ -322,7 +346,7 @@ public class DevelopmentPlan {
 		}
 		Data data = poller.getFromQueue();
 		output.accept(data);
-		System.out.println();
+		log.info("---\n");
 
 		if (roundListener != null) {
 			roundListener.roundCompleted(data);
@@ -333,14 +357,20 @@ public class DevelopmentPlan {
 		long level0total = level1PassingStat.getNoEvents();
 		long level1total = level1PassingStat.getTotalHits();
 		long level2directPasses = level2DirectPassesStat.getTotalHits();
+		long level3directPasses = level3DirectPassesStat.getTotalHits();
 
-		log.info("Summary:\n---");
-		log.info("level1: passed        {}/{} ({} %)", level1total, level0total, String.format("%.2f", ((double) level1total) / level0total * 100));
-		log.info("level2 direct passes: {}/{} ({} %)", level2directPasses, level1total,
-				String.format("%.2f", ((double) level2directPasses) / level1total * 100));
-		log.info("level2 pool lane:     {}/{} ({} %)",
-				level2heavyLanePasses, level2heavyLaneTotal,
-				String.format("%.2f", ((double) level2heavyLanePasses) / level2heavyLaneTotal * 100));
+		if (log.isInfoEnabled()) {
+            log.info("Summary:\n---");
+            log.info("level1: passed        {}", formatFraction(level1total, level0total));
+            log.info("level2 direct passes: {}", formatFraction(level2directPasses, level1total));
+            log.info("level2 pool lane:     {}", formatFraction(level2heavyLanePasses, level2heavyLaneTotal));
+			log.info("level3 direct passes: {}", formatFraction(level3directPasses, level2total));
+			log.info("level3 pool lane:     {}", formatFraction(level3heavyLanePasses, level3heavyLaneTotal));
+		}
+	}
+
+	private static String formatFraction(long count, long total) {
+		return "%d/%d (%.2f %%)".formatted(count, total, ((double) count) / total * 100);
 	}
 
 	private Poller buildPoller() {
@@ -355,11 +385,11 @@ public class DevelopmentPlan {
 		fractionCNodes.setMinimumValue(0f);
 		fractionCNodes.setMaximumValue(1f);
 
-		FloatHyperparameter fractionUNodes = new FloatHyperparameter(0.5f, "Fraction of U-nodes");
+		FloatHyperparameter fractionUNodes = new FloatHyperparameter(0.05f, "Fraction of U-nodes");
 		fractionUNodes.setMinimumValue(0f);
 		fractionUNodes.setMaximumValue(1f);
 
-		FloatHyperparameter fractionBNodes = new FloatHyperparameter(0.3f, "Fraction of B-nodes");
+		FloatHyperparameter fractionBNodes = new FloatHyperparameter(0.75f, "Fraction of B-nodes");
 		fractionBNodes.setMinimumValue(0f);
 		fractionBNodes.setMaximumValue(1f);
 
@@ -394,7 +424,8 @@ public class DevelopmentPlan {
 			hyperRegistry.addHyperparameter(fractionBNodes);
 		}
 
-		Pool pool;
+		Pool level2Pool;
+		Pool level3Pool;
 
 		Poller result = randomNetSource.toSup()
 		.combineProc(data -> newRandomDrawStat.recordNewRandomDraw())
@@ -416,13 +447,13 @@ public class DevelopmentPlan {
 				new Output("in light lane: ")
 			)
 			.withHeavyLane(
-				(pool = new Pool(newRandom())).withFeedback(
+				(level2Pool = new Pool(newRandom())).withFeedback(
 					new AddCopyReplicator()
 					.combineProc(new Counter())
 					.combineProc(data -> level2heavyLaneTotal++)
 					.combineProc(new StepsExam(getRunSetup()))
 					.combineProc(new Output("in heavy lane: "))
-					.combineProc(StepsExamData.class, this::recordMixerOutcome)
+					.combineProc(StepsExamData.class, data -> recordMixerOutcome(data, level2MixerOutcomeStat, 1))
 					.combineFilter(new StepsFilter(2))
 					.combineProc(data -> level2heavyLanePasses++)
 				)
@@ -431,39 +462,70 @@ public class DevelopmentPlan {
 				.combinePipe(new Output("trimmed: "))
 			)
 		)
+		.combineProc(data -> level2total++)
+		.combineDan(new SkewSplitter()
+			.withSorter(new StepsFilter(3)
+				.with(new FailuresLimit(100000))
+				.with(new FilterPassRecord(level3DirectPassesStat))
+			)
+			.withLightLane(
+				new Output("in light lane (3): ")
+			)
+			.withHeavyLane(
+				(level3Pool = new Pool(newRandom())).withFeedback(
+					new AddCopyReplicator()
+					.combineProc(new Counter())
+					.combineProc(data -> level3heavyLaneTotal++)
+					.combineProc(new StepsExam(getRunSetup()))
+					.combineProc(new Output("in heavy lane (3): "))
+					.combineProc(StepsExamData.class, data -> recordMixerOutcome(data, level3MixerOutcomeStat, 2))
+					.combineFilter(new StepsFilter(3))
+					.combineProc(data -> level3heavyLanePasses++)
+				)
+				.combinePipe(new Output("Passed the heavy lane (3): "))
+				.combinePipe(new Trimmer(getRunSetup()))
+				.combinePipe(new Output("trimmed (3): "))
+			)
+		)
 		.combineProc(data -> {
-				level2total++;
+				level3total++;
 				stopwatchStat.newRound();
 				newRandomDrawStat.newRound();
 			}
 		)
 		.connectReq(new Poller());
 
-		FloatHyperparameter excludeRatePrimarySuccess = new FloatHyperparameter(1f, "Pool exclude rate: primary success");
+		configurePoolHyperparameter(level2Pool, 2);
+		configurePoolHyperparameter(level3Pool, 3);
+		return result;
+	}
+
+	private void configurePoolHyperparameter(Pool pool, int level) {
+		FloatHyperparameter excludeRatePrimarySuccess = new FloatHyperparameter(1f, "Pool level %s exclude rate: primary success".formatted(level));
 		excludeRatePrimarySuccess.setMinimumValue(0f);
 		excludeRatePrimarySuccess.setMaximumValue(1f);
 		excludeRatePrimarySuccess.addPropertyChangeListener(prop ->
 				pool.setExcludeRatePrimarySuccess(excludeRatePrimarySuccess.getValue()));
 
-		FloatHyperparameter excludeRatePrimaryFail = new FloatHyperparameter(1f / 10, "Pool exclude rate: primary failure");
+		FloatHyperparameter excludeRatePrimaryFail = new FloatHyperparameter(1f / 10, "Pool level %s exclude rate: primary failure".formatted(level));
 		excludeRatePrimaryFail.setMinimumValue(0f);
 		excludeRatePrimaryFail.setMaximumValue(1f);
 		excludeRatePrimaryFail.addPropertyChangeListener(prop ->
 				pool.setExcludeRatePrimaryFail(excludeRatePrimaryFail.getValue()));
 
-		FloatHyperparameter excludeRateJoiningSuccess = new FloatHyperparameter(1f / 2, "Pool exclude rate: joining success");
+		FloatHyperparameter excludeRateJoiningSuccess = new FloatHyperparameter(1f / 2, "Pool level %s exclude rate: joining success".formatted(level));
 		excludeRateJoiningSuccess.setMinimumValue(0f);
 		excludeRateJoiningSuccess.setMaximumValue(1f);
 		excludeRateJoiningSuccess.addPropertyChangeListener(prop ->
 				pool.setExcludeRateJoiningSuccess(excludeRateJoiningSuccess.getValue()));
 
-		FloatHyperparameter excludeRateJoiningFail = new FloatHyperparameter(1f / 50, "Pool exclude rate: joining failure");
+		FloatHyperparameter excludeRateJoiningFail = new FloatHyperparameter(1f / 50, "Pool level %s exclude rate: joining failure".formatted(level));
 		excludeRateJoiningFail.setMinimumValue(0f);
 		excludeRateJoiningFail.setMaximumValue(1f);
 		excludeRateJoiningFail.addPropertyChangeListener(prop ->
 				pool.setExcludeRateJoiningFail(excludeRateJoiningFail.getValue()));
 
-		FloatHyperparameter rewireFraction = new FloatHyperparameter(0.4f, "Pool rewire fraction");
+		FloatHyperparameter rewireFraction = new FloatHyperparameter(0.4f, "Pool level %s rewire fraction".formatted(level));
 		rewireFraction.setMinimumValue(0f);
 		rewireFraction.setMaximumValue(1f);
 		rewireFraction.addPropertyChangeListener(prop ->
@@ -476,15 +538,18 @@ public class DevelopmentPlan {
 			hyperRegistry.addHyperparameter(excludeRateJoiningFail);
 			hyperRegistry.addHyperparameter(rewireFraction);
 		}
-		return result;
 	}
 
-	private void recordMixerOutcome(StepsExamData data) {
-		MixerOutcome outcome = switch (data.getStepsExamResult().steps()) {
-			case 0 -> MixerOutcome.WORSE;
-			case 1 -> MixerOutcome.SAME;
-			default -> MixerOutcome.BETTER;
-		};
+	private void recordMixerOutcome(StepsExamData data, EnumMap<MixerOutcome, BinaryStat> mixerOutcomeStat, int currentLevel) {
+		int steps = data.getStepsExamResult().steps();
+		MixerOutcome outcome;
+		if (steps == currentLevel) {
+			outcome = MixerOutcome.SAME;
+		} else if (steps < currentLevel) {
+			outcome = MixerOutcome.WORSE;
+		} else {
+			outcome = MixerOutcome.BETTER;
+		}
 		for (MixerOutcome oc : MixerOutcome.values()) {
 			if (oc == outcome) {
 				mixerOutcomeStat.get(oc).addHit();
