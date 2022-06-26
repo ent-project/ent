@@ -23,14 +23,15 @@ import org.ent.dev.stat.LongStat;
 import org.ent.dev.stat.MovingAverage;
 import org.ent.dev.stat.PlotInfo;
 import org.ent.dev.stat.PlotRegistry;
+import org.ent.dev.stat.RowType;
 import org.ent.dev.unit.DeliveryStash;
 import org.ent.dev.unit.Req;
 import org.ent.dev.unit.SkewSplitter;
 import org.ent.dev.unit.Sup;
 import org.ent.dev.unit.data.Data;
 import org.ent.dev.unit.data.DataProxy;
-import org.ent.dev.unit.local.util.FilterListener;
 import org.ent.dev.unit.local.TypedProc;
+import org.ent.dev.unit.local.util.FilterListener;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.run.StepResult;
@@ -43,6 +44,8 @@ import java.util.ArrayDeque;
 import java.util.EnumMap;
 import java.util.Queue;
 import java.util.Random;
+
+import static org.ent.dev.stat.PlotRow.GROUP_DEFAULT;
 
 public class DevelopmentPlan {
 
@@ -249,60 +252,53 @@ public class DevelopmentPlan {
 		this.poller = buildPoller();
 		if (plotRegistry != null) {
 			plotRegistry.addPlot(new PlotInfo("level1-passing")
-					.addRow(level1PassingStat)
-					.withTitle("Level 1 passes")
-					.withRangeAxisLabel("%")
-					.withRangeMax(0.1));
+				.addRow(level1PassingStat)
+				.withTitle("Level 1 passes")
+				.withRangeAxisLabel("%")
+				.withRangeMax(0.1));
 			plotRegistry.addPlot(new PlotInfo("level1-failure-types")
-					.addRow(row -> row.withStat(level1FailReasonStat.get(StepResult.FATAL)).withLabel("fatal").withColor(Color.RED))
-					.addRow(row -> row.withStat(level1FailReasonStat.get(StepResult.INVALID_COMMAND_BRANCH)).withLabel("invalid command branch").withColor(Color.BLUE))
-					.addRow(row -> row.withStat(level1FailReasonStat.get(StepResult.INVALID_COMMAND_NODE)).withLabel("invalid command node").withColor(Color.YELLOW))
-					.addRow(row -> row.withStat(level1FailReasonStat.get(StepResult.COMMAND_EXECUTION_FAILED)).withLabel("execution failed").withColor(Color.DARK_GRAY))
-					.withTitle("Level 1 failure types")
-					.withRangeAxisLabel("%")
-					.withRangeMax(1.0));
+				.addRow(row -> row.withGroup(GROUP_DEFAULT).withStat(level1FailReasonStat.get(StepResult.FATAL)).withLabel("fatal").withColor(Color.RED))
+				.addRow(row -> row.withGroup(GROUP_DEFAULT).withStat(level1FailReasonStat.get(StepResult.INVALID_COMMAND_BRANCH)).withLabel("invalid command branch").withColor(Color.BLUE))
+				.addRow(row -> row.withGroup(GROUP_DEFAULT).withStat(level1FailReasonStat.get(StepResult.INVALID_COMMAND_NODE)).withLabel("invalid command node").withColor(Color.YELLOW))
+				.addRow(row -> row.withGroup(GROUP_DEFAULT).withStat(level1FailReasonStat.get(StepResult.COMMAND_EXECUTION_FAILED)).withLabel("execution failed").withColor(Color.DARK_GRAY))
+				.withTitle("Level 1 failure types")
+				.withRangeAxisLabel("%")
+				.withRangeMax(1.0));
 			plotRegistry.addPlot(new PlotInfo("level2-mixer-outcome")
-					.addRow(row -> row.withStat(level2MixerOutcomeStat.get(MixerOutcome.BETTER)).withLabel("better").withColor(HtmlColor.ForestGreen))
-					.addRow(row -> row.withStat(level2MixerOutcomeStat.get(MixerOutcome.WORSE)).withLabel("worse").withColor(HtmlColor.LightCoral))
-					.withTitle("Pool mixer outcome - level 3")
-					.withRangeAxisLabel("%")
-					.withRangeMax(0.3));
+				.addRow(row -> row.withGroup(GROUP_DEFAULT).withStat(level2MixerOutcomeStat.get(MixerOutcome.BETTER)).withLabel("better").withColor(HtmlColor.ForestGreen))
+				.addRow(row -> row.withGroup(GROUP_DEFAULT).withStat(level2MixerOutcomeStat.get(MixerOutcome.WORSE)).withLabel("worse").withColor(HtmlColor.LightCoral))
+				.withTitle("Pool mixer outcome - level 3")
+				.withRangeAxisLabel("%")
+				.withRangeMax(0.3));
 			plotRegistry.addPlot(new PlotInfo("level2-direct-passes")
-					.addRow(level2DirectPassesStat)
-					.withTitle("Direct passes for level 2")
-					.withRangeAxisLabel("%")
-					.withRangeMax(0.1));
-			plotRegistry.addPlot(new PlotInfo("level2-direc-passes-moving-average")
-					.addRow(new MovingAverage(level2DirectPassesStat, 20))
-					.withSubplotOf("level2-direct-passes"));
+				.addRow(level2DirectPassesStat)
+				.addRow(row -> row.withStat(new MovingAverage(level2DirectPassesStat, 20)).withType(RowType.LINE))
+				.withTitle("Direct passes for level 2")
+				.withRangeAxisLabel("%")
+				.withRangeMax(0.1));
 			plotRegistry.addPlot(new PlotInfo("level3-mixer-outcome")
-					.addRow(row -> row.withStat(level3MixerOutcomeStat.get(MixerOutcome.BETTER)).withLabel("better").withColor(HtmlColor.ForestGreen))
-					.addRow(row -> row.withStat(level3MixerOutcomeStat.get(MixerOutcome.WORSE)).withLabel("worse").withColor(HtmlColor.LightCoral))
-					.withTitle("Pool mixer outcome - level 3")
-					.withRangeAxisLabel("%")
-					.withRangeMax(0.3));
+				.addRow(row -> row.withGroup(GROUP_DEFAULT).withStat(level3MixerOutcomeStat.get(MixerOutcome.BETTER)).withLabel("better").withColor(HtmlColor.ForestGreen))
+				.addRow(row -> row.withGroup(GROUP_DEFAULT).withStat(level3MixerOutcomeStat.get(MixerOutcome.WORSE)).withLabel("worse").withColor(HtmlColor.LightCoral))
+				.withTitle("Pool mixer outcome - level 3")
+				.withRangeAxisLabel("%")
+				.withRangeMax(0.3));
 			plotRegistry.addPlot(new PlotInfo("level3-direct-passes")
-					.addRow(level3DirectPassesStat)
-					.withTitle("Direct passes for level 3")
-					.withRangeAxisLabel("%")
-					.withRangeMax(0.1));
-			plotRegistry.addPlot(new PlotInfo("level3-direc-passes-moving-average")
-					.addRow(new MovingAverage(level3DirectPassesStat, 20))
-					.withSubplotOf("level3-direct-passes"));
+				.addRow(level3DirectPassesStat)
+				.addRow(row -> row.withStat(new MovingAverage(level3DirectPassesStat, 20)).withType(RowType.LINE))
+				.withTitle("Direct passes for level 3")
+				.withRangeAxisLabel("%")
+				.withRangeMax(0.1));
 			plotRegistry.addPlot(new PlotInfo("stopwatch")
-					.addRow(row -> row.withStat(stopwatchStat).withColor(Color.BLUE))
-					.withTitle("Execution time for top level events")
-					.withRangeAxisLabel("ms")
-					.withRangeMax(1000.));
-			plotRegistry.addPlot(new PlotInfo("stopwatch-moving-average")
-					.withSubplotOf("stopwatch")
-					.addRow(row -> row.withStat(new MovingAverage(stopwatchStat, 30)).withColor(Color.BLACK))
-			);
+				.addRow(row -> row.withStat(stopwatchStat).withColor(Color.BLUE))
+				.addRow(row -> row.withStat(new MovingAverage(stopwatchStat, 30)).withType(RowType.LINE).withColor(Color.BLACK))
+				.withTitle("Execution time for top level events")
+				.withRangeAxisLabel("ms")
+				.withRangeMax(1000.));
 			plotRegistry.addPlot(new PlotInfo("new-random-draws")
-					.addRow(row -> row.withStat(newRandomDrawStat).withColor(HtmlColor.Brown))
-					.withTitle("New random draw per top level event")
-					.withRangeAxisLabel("count")
-					.withRangeMax(15000.));
+				.addRow(row -> row.withStat(newRandomDrawStat).withColor(HtmlColor.Brown))
+				.withTitle("New random draw per top level event")
+				.withRangeAxisLabel("count")
+				.withRangeMax(15000.));
 		}
 	}
 

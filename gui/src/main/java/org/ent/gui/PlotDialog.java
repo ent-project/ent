@@ -2,7 +2,6 @@ package org.ent.gui;
 
 import org.ent.dev.DevelopmentPlan;
 import org.ent.dev.DevelopmentPlan.RoundListener;
-import org.ent.dev.stat.BinnedStat;
 import org.ent.dev.stat.PlotInfo;
 import org.ent.dev.stat.PlotRow;
 import org.ent.dev.unit.data.Data;
@@ -11,12 +10,11 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.plot.DatasetRenderingOrder;
-import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StackedXYBarRenderer;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.Range;
 
@@ -32,8 +30,10 @@ import java.awt.Frame;
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 public class PlotDialog extends JDialog implements RoundListener {
 
@@ -48,100 +48,92 @@ public class PlotDialog extends JDialog implements RoundListener {
 
 	private static class Plot {
 
-		private final PlotInfo plotInfo;
-
-		private PlotInfo plotInfoSecondary;
-
-	    private final BinnedStatDataSet dataset;
-
-	    private BinnedStatDataSet datasetSecondary;
-
 	    private JFreeChart chart;
 
 	    private final JPanel chartPanel;
 
 	    public Plot(PlotInfo plotInfo) {
-	    	this.plotInfo = plotInfo;
-			this.dataset = new BinnedStatDataSet(plotInfo.getRows().stream().map(PlotRow::getStat).toList());
-			initializeChart();
-			chartPanel = new ChartPanel(chart);
-	    }
-
-		public void initializeChart() {
-			if (dataset.getSeriesCount() == 1) {
-				initializeChartSingleData();
-			} else {
-				initializeChartMultiData();
-			}
-		}
-
-		private void initializeChartMultiData() {
-			dataset.setSeriesKeys(plotInfo.getRows().stream().map(row -> row.getLabel() != null ? row.getLabel() : "").toList());
-
 			NumberAxis domainAxis = new NumberAxis(plotInfo.getDomainAxisLabel());
 			domainAxis.setAutoRangeIncludesZero(false);
 			ValueAxis rangeAxis = new NumberAxis(plotInfo.getRangeAxisLabel());
 			if (plotInfo.getRangeMax() != null) {
 				rangeAxis.setRange(new Range(0, plotInfo.getRangeMax()), true, false);
 			}
-			StackedXYBarRenderer renderer = new StackedXYBarRenderer(0.05);
-
-			XYPlot xyPlot = new XYPlot(dataset, domainAxis, rangeAxis, renderer);
-			chart = new JFreeChart(plotInfo.getTitle(), xyPlot);
+			XYPlot xyPlot = new XYPlot(null, domainAxis, rangeAxis, null);
+			boolean createLegend = plotInfo.getRows().stream().anyMatch(row -> row.getLabel() != null);
+			this.chart = new JFreeChart(plotInfo.getTitle(), JFreeChart.DEFAULT_TITLE_FONT, xyPlot, createLegend);
 			ChartFactory.getChartTheme().apply(chart);
-
 			xyPlot.setBackgroundPaint(new Color(233, 233, 233));
-			renderer.setDrawBarOutline(false);
-			renderer.setShadowVisible(false);
-			StandardXYBarPainter painter = new StandardXYBarPainter();
-			renderer.setBarPainter(painter);
-			for (int i = 0; i < plotInfo.getRows().size(); i++) {
-				PlotRow row = plotInfo.getRows().get(i);
-				if (row.getColor() != null) {
-					renderer.setSeriesPaint(i, row.getColor());
+
+			int i = 0;
+			for (List<PlotRow> rows : collectGroupedRows(plotInfo).values()) {
+				xyPlot.setDataset(i, buildDataSet(rows));
+				xyPlot.setRenderer(i, buildRenderer(rows));
+				i++;
+			}
+			this.chartPanel = new ChartPanel(chart);
+	    }
+
+		private Map<String, List<PlotRow>> collectGroupedRows(PlotInfo plotInfo) {
+			int i = 0;
+			for (PlotRow row : plotInfo.getRows()) {
+				if (row.getGroup() == null) {
+					row.setGroup("internal-" + i);
+					i++;
 				}
 			}
+			return plotInfo.getRows().stream().collect(Collectors.groupingBy(PlotRow::getGroup));
 		}
 
-		private void initializeChartSingleData() {
-			chart = ChartFactory.createXYBarChart(
-					plotInfo.getTitle(),
-					plotInfo.getDomainAxisLabel(),
-					false,
-					plotInfo.getRangeAxisLabel(),
-					dataset, PlotOrientation.VERTICAL, false, true, false);
-			XYPlot xyPlot = chart.getXYPlot();
-			if (plotInfo.getRangeMax() != null) {
-				xyPlot.getRangeAxis().setRange(new Range(0, plotInfo.getRangeMax()), true, false);
+		private BinnedStatDataSet buildDataSet(List<PlotRow> rows) {
+			BinnedStatDataSet dataset = new BinnedStatDataSet(rows.stream().map(PlotRow::getStat).toList());
+			if (rows.stream().anyMatch(row -> row.getLabel() != null)) {
+				dataset.setSeriesKeys(rows.stream().map(row -> row.getLabel() != null ? row.getLabel() : "").toList());
 			}
-			xyPlot.setBackgroundPaint(new Color(233, 233, 233));
-			XYBarRenderer renderer = (XYBarRenderer) xyPlot.getRenderer();
-			if (plotInfo.getRows().get(0).getColor() != null) {
-				renderer.setSeriesPaint(0, plotInfo.getRows().get(0).getColor());
-			}
-			StandardXYBarPainter painter = new StandardXYBarPainter();
-			renderer.setBarPainter(painter);
+			return dataset;
 		}
 
-		public void addSecondaryPlot(PlotInfo plotInfoSecondary) {
-			this.plotInfoSecondary = plotInfoSecondary;
-	    	BinnedStat statsSecondary = plotInfoSecondary.getRows().get(0).getStat();
-			this.datasetSecondary = new BinnedStatDataSet(statsSecondary);
-
-			XYPlot xyPlot = chart.getXYPlot();
-			xyPlot.setDataset(1, datasetSecondary);
-			XYLineAndShapeRenderer renderer2 = new XYLineAndShapeRenderer(true, false);
-			if (plotInfoSecondary.getRows().get(0).getColor() != null) {
-				renderer2.setSeriesPaint(0, plotInfoSecondary.getRows().get(0).getColor());
+		private XYItemRenderer buildRenderer(List<PlotRow> rows) {
+			if (rows.size() == 1) {
+				PlotRow row = rows.get(0);
+				return switch (row.getType()) {
+					case BAR -> {
+						XYBarRenderer renderer = new XYBarRenderer();
+						if (row.getColor() != null) {
+							renderer.setSeriesPaint(0, row.getColor());
+						}
+						renderer.setShadowVisible(false);
+						renderer.setBarPainter(new StandardXYBarPainter());
+						yield renderer;
+					}
+					case LINE -> {
+						XYLineAndShapeRenderer lineRenderer = new XYLineAndShapeRenderer(true, false);
+						if (row.getColor() != null) {
+							lineRenderer.setSeriesPaint(0, row.getColor());
+						}
+						lineRenderer.setSeriesStroke(0, new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
+						yield  lineRenderer;
+					}
+				};
+			} else {
+				StackedXYBarRenderer stackedRenderer = new StackedXYBarRenderer(0.05);
+				stackedRenderer.setDrawBarOutline(false);
+				stackedRenderer.setShadowVisible(false);
+				stackedRenderer.setBarPainter(new StandardXYBarPainter());
+				for (int i = 0; i < rows.size(); i++) {
+					PlotRow row = rows.get(i);
+					if (row.getColor() != null) {
+						stackedRenderer.setSeriesPaint(i, row.getColor());
+					}
+				}
+				return stackedRenderer;
 			}
-			renderer2.setSeriesStroke(0, new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
-			xyPlot.setRenderer(1, renderer2);
-			xyPlot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
 		}
 
 		public void update() {
 	    	XYPlot xyPlot = chart.getXYPlot();
-	    	xyPlot.getDomainAxis().setRange(new Range(dataset.getStartX(0, dataset.getFirstItemDisplayed()),
+			BinnedStatDataSet dataset = (BinnedStatDataSet) xyPlot.getDataset();
+			xyPlot.getDomainAxis().setRange(new Range(dataset.getStartX(0, dataset.getFirstItemDisplayed()),
 	    			dataset.getEndX(0, dataset.getFirstItemDisplayed() + dataset.getNumBinsDisplayed() - 1)),
 	    			true, false);
 	    	chart.fireChartChanged();
@@ -175,17 +167,7 @@ public class PlotDialog extends JDialog implements RoundListener {
 
 	private void build() {
 		for (PlotInfo plotInfo : Main.getPlotRegistry().getPlots()) {
-			if (plotInfo.getSubplotOf() == null) {
-				plots.add(new Plot(plotInfo));
-			}
-		}
-		for (PlotInfo plotInfo : Main.getPlotRegistry().getPlots()) {
-			String subplotOf = plotInfo.getSubplotOf();
-			if (subplotOf != null) {
-				Plot parentPlot = plots.stream().filter(p -> p.plotInfo.getId().equals(subplotOf)).findAny()
-						.orElseThrow(() -> new AssertionError("Parent plot %s not found".formatted(subplotOf)));
-				parentPlot.addSecondaryPlot(plotInfo);
-			}
+			plots.add(new Plot(plotInfo));
 		}
 
 		GroupLayout layout = new GroupLayout(getContentPane());

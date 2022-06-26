@@ -3,9 +3,40 @@ package org.ent.dev.stat;
 import java.awt.Color;
 
 public class PlotRow {
+
+    public static final String GROUP_DEFAULT = "group-default";
+
     private BinnedStat stat;
+    private RowType type = RowType.BAR;
+    private String group;
     private Color color;
     private String label;
+
+    public RowType getType() {
+        return type;
+    }
+
+    public void setType(RowType type) {
+        this.type = type;
+    }
+
+    public PlotRow withType(RowType type) {
+        setType(type);
+        return this;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
+    public PlotRow withGroup(String group) {
+        setGroup(group);
+        return this;
+    }
 
     public BinnedStat getStat() {
         return stat;

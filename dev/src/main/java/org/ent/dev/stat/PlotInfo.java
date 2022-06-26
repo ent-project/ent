@@ -18,8 +18,6 @@ public class PlotInfo {
 
 	private String rangeAxisLabel;
 
-	private String subplotOf;
-
 	public PlotInfo(String id) {
 		this.id = id;
 		this.rows = new ArrayList<>();
@@ -98,19 +96,6 @@ public class PlotInfo {
 
 	public PlotInfo withRangeAxisLabel(String rangeAxisLabel) {
 		setRangeAxisLabel(rangeAxisLabel);
-		return this;
-	}
-
-	public String getSubplotOf() {
-		return subplotOf;
-	}
-
-	public void setSubplotOf(String subplotOf) {
-		this.subplotOf = subplotOf;
-	}
-
-	public PlotInfo withSubplotOf(String subplotOf) {
-		setSubplotOf(subplotOf);
 		return this;
 	}
 }
