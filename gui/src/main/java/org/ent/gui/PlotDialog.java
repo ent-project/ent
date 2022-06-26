@@ -22,7 +22,6 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.JDialog;
-import javax.swing.JPanel;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.EventQueue;
@@ -50,7 +49,7 @@ public class PlotDialog extends JDialog implements RoundListener {
 
 	    private JFreeChart chart;
 
-	    private final JPanel chartPanel;
+	    private final ChartPanel chartPanel;
 
 	    public Plot(PlotInfo plotInfo) {
 			NumberAxis domainAxis = new NumberAxis(plotInfo.getDomainAxisLabel());
@@ -64,6 +63,7 @@ public class PlotDialog extends JDialog implements RoundListener {
 			this.chart = new JFreeChart(plotInfo.getTitle(), JFreeChart.DEFAULT_TITLE_FONT, xyPlot, createLegend);
 			ChartFactory.getChartTheme().apply(chart);
 			xyPlot.setBackgroundPaint(new Color(233, 233, 233));
+			xyPlot.setRangePannable(true);
 
 			int i = 0;
 			for (List<PlotRow> rows : collectGroupedRows(plotInfo).values()) {
@@ -72,6 +72,9 @@ public class PlotDialog extends JDialog implements RoundListener {
 				i++;
 			}
 			this.chartPanel = new ChartPanel(chart);
+			chartPanel.setMouseWheelEnabled(true);
+			chartPanel.setRangeZoomable(true);
+			chartPanel.setDomainZoomable(false);
 	    }
 
 		private Map<String, List<PlotRow>> collectGroupedRows(PlotInfo plotInfo) {
