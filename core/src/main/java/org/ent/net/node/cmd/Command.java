@@ -1,10 +1,10 @@
 package org.ent.net.node.cmd;
 
-import org.ent.net.node.Node;
+import org.ent.net.Arrow;
 
 public interface Command {
 
-    ExecutionResult execute(Node parameters);
+    ExecutionResult execute(Arrow parameters);
 
     int getValue();
 

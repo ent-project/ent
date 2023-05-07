@@ -19,7 +19,7 @@ public class Commands {
     }
 
     public static Command get(BiOperation operation) {
-        BiCommand command = new BiCommand(Accessors.DIRECT, Accessors.DIRECT, operation);
+        BiCommand command = new BiCommand(Accessors.LEFT, Accessors.RIGHT, operation);
         return CommandFactory.getByValue(command.getValue());
     }
 

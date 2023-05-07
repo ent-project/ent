@@ -140,8 +140,9 @@ class VariabilityCollectorTest {
 
         @Test
         void arrows(SoftAssertions softly) throws ParserException {
-            Net net = parser.parse("</=>(arguments:(toSet:[@], <o>), toSet)");
+            Net net = parser.parse("root:<//=>(arguments:(toSet:[@], <o>), toSet)");
             data.setReplicator(() -> net);
+            Node nodeRoot = parser.getNodeByName("root");
             Node nodeArguments = parser.getNodeByName("arguments");
             Node nodeToSet = parser.getNodeNames().get("toSet");
 
@@ -153,10 +154,14 @@ class VariabilityCollectorTest {
 
             VariabilityCollector collector = exam.getCollector();
             softly.assertThat(collector.arrowDataMap).containsOnlyKeys(
+                    nodeRoot.getLeftArrow(),
                     nodeToSet.getLeftArrow(),
                     nodeArguments.getLeftArrow(),
                     nodeArguments.getRightArrow()
             );
+            ArrowData arrowRoot = collector.arrowDataMap.get(nodeRoot.getLeftArrow());
+            softly.assertThat(arrowRoot.getTimesRead()).isEqualTo(2);
+            softly.assertThat(arrowRoot.getTimesWritten()).isZero();
             ArrowData arrowToSet = collector.arrowDataMap.get(nodeToSet.getLeftArrow());
             softly.assertThat(arrowToSet.getTimesRead()).isZero();
             softly.assertThat(arrowToSet.getTimesWritten()).isEqualTo(1);
@@ -170,7 +175,7 @@ class VariabilityCollectorTest {
 
         @Test
         void newNode(SoftAssertions softly) throws ParserException {
-            Net net = parser.parse("</dupn>(arguments:(toSet:[@], <o>), toSet)");
+            Net net = parser.parse("<//dupn>(arguments:(toSet:[@], <o>), toSet)");
             data.setReplicator(() -> net);
 
             exam.accept(data);

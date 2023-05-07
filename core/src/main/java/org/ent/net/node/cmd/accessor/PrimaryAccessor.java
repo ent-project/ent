@@ -26,6 +26,10 @@ public class PrimaryAccessor implements Accessor {
 		return arrow.getTarget(purview).getArrow(this.direction);
 	}
 
+	public ArrowDirection getDirection() {
+		return direction;
+	}
+
 	@Override
 	public int getCode() {
 		return code;

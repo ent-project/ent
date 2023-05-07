@@ -35,7 +35,6 @@ public class EvalOperation implements BiOperation {
 	@Override
 	public ExecutionResult apply(Arrow arrowToNode1, Arrow arrowToNode2) {
 		Node node1 = arrowToNode1.getTarget(Purview.COMMAND);
-		Node node2 = arrowToNode2.getTarget(Purview.COMMAND);
 		Command command = CommandFactory.getByValue(node1.getValue());
 		if (command == null) {
 			return ExecutionResult.ERROR;
@@ -44,7 +43,7 @@ public class EvalOperation implements BiOperation {
 //			return ExecutionResult.ERROR;
 //		}
 
-		command.execute(node2);
+		command.execute(arrowToNode2);
 		return ExecutionResult.NORMAL;
 	}
 

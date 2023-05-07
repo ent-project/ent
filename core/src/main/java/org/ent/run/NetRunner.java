@@ -51,9 +51,8 @@ public class NetRunner {
 				return StepResult.INVALID_COMMAND_NODE;
 			}
 		}
-		Node parameters = executionPointer.getLeftChild(Purview.RUNNER);
 
-		ExecutionResult executeResult = command.execute(parameters);
+		ExecutionResult executeResult = command.execute(executionPointer.getLeftArrow());
 		StepResult stepResult = convertToStepResult(executeResult);
 		log.trace("command {} executed: {}", command, executeResult);
 		if (netRunnerListener != null) {

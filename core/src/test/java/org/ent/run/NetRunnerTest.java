@@ -22,11 +22,11 @@ class NetRunnerTest {
 	@Test
 	void testNetRunner2() throws Exception {
 		doTestNetRunner(false, StepResult.SUCCESS, Arrays.asList(
-				"A:</dup>(B:([B], C:[A]), <xn>((A, _b:</=\\>), _b))",
-				"D:<xn>((A:</dup>(B:([(A, C:[A])], C), D), _b:</=\\>), _b)",
-				"A:</dup>(B:([(_b:</=\\>, C:[_b])], C), D:<xn>((_b, A), A))",
-				"D:<xn>((_b:</=\\>, A:</dup>(B:([(_b, C:[_b])], C), D)), A)",
-				"_b:</=\\>"));
+				"A:<//dup>(B:([B], C:[A]), <xn>((A, _b:<//=\\\\>), _b))",
+				"D:<xn>((A:<//dup>(B:([(A, C:[A])], C), D), _b:<//=\\\\>), _b)",
+				"A:<//dup>(B:([(_b:<//=\\\\>, C:[_b])], C), D:<xn>((_b, A), A))",
+				"D:<xn>((_b:<//=\\\\>, A:<//dup>(B:([(_b, C:[_b])], C), D)), A)",
+				"_b:<//=\\\\>"));
 	}
 
 	@Test

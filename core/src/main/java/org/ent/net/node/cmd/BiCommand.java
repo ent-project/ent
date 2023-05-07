@@ -1,9 +1,10 @@
 package org.ent.net.node.cmd;
 
 import org.ent.net.Arrow;
+import org.ent.net.ArrowDirection;
 import org.ent.net.Purview;
-import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
+import org.ent.net.node.cmd.accessor.PrimaryAccessor;
 import org.ent.net.node.cmd.operation.BiOperation;
 
 public class BiCommand implements Command {
@@ -16,15 +17,17 @@ public class BiCommand implements Command {
 
 	private final int value;
 
-	private String shortName;
+	private final String shortName;
 
-	private String shortNameAscii;
+	private final String shortNameAscii;
 
 	public BiCommand(Accessor accessor1, Accessor accessor2, BiOperation operation) {
 		this.accessor1 = accessor1;
 		this.accessor2 = accessor2;
 		this.operation = operation;
-		this.value = (accessor1.getCode() << 8) | (accessor2.getCode() << 12) | operation.getCode();
+		this.value = operation.getCode() | (accessor1.getCode() << 8) | (accessor2.getCode() << 12);
+		this.shortNameAscii = buildShortNameAscii();
+		this.shortName = buildShortName();
 	}
 
 	public BiOperation getOperation() {
@@ -32,12 +35,8 @@ public class BiCommand implements Command {
 	}
 
 	@Override
-	public ExecutionResult execute(Node parameters) {
-		return executeImpl(parameters.getLeftArrow(), parameters.getRightArrow());
-	}
-
-	private ExecutionResult executeImpl(Arrow arg1, Arrow arg2) {
-		return operation.apply(accessor1.get(arg1, Purview.COMMAND), accessor2.get(arg2, Purview.COMMAND));
+	public ExecutionResult execute(Arrow parameters) {
+		return operation.apply(accessor1.get(parameters, Purview.COMMAND), accessor2.get(parameters, Purview.COMMAND));
 	}
 
 	@Override
@@ -47,18 +46,43 @@ public class BiCommand implements Command {
 
 	@Override
 	public String getShortName() {
-		if (shortName == null) {
-			shortName = accessor1.getShortName() + operation.getShortName() + accessor2.getShortName();
-		}
 		return shortName;
 	}
 
 	@Override
 	public String getShortNameAscii() {
-		if (shortNameAscii == null) {
-			shortNameAscii = accessor1.getShortNameAscii() + operation.getShortNameAscii()
-					+ accessor2.getShortNameAscii();
-		}
 		return shortNameAscii;
+	}
+
+	private String buildShortNameAscii() {
+		String accessor1Name;
+		if (this.accessor1 instanceof PrimaryAccessor primaryLeft && primaryLeft.getDirection() == ArrowDirection.LEFT) {
+			accessor1Name = "";
+		} else {
+			accessor1Name = this.accessor1.getShortNameAscii();
+		}
+		String accessor2Name;
+		if (this.accessor2 instanceof PrimaryAccessor primaryRight && primaryRight.getDirection() == ArrowDirection.RIGHT) {
+			accessor2Name = "";
+		} else {
+			accessor2Name = this.accessor2.getShortNameAscii();
+		}
+		return accessor1Name + this.operation.getShortNameAscii() + accessor2Name;
+	}
+
+	private String buildShortName() {
+		String accessor1Name;
+		if (this.accessor1 instanceof PrimaryAccessor primaryLeft && primaryLeft.getDirection() == ArrowDirection.LEFT) {
+			accessor1Name = "";
+		} else {
+			accessor1Name = this.accessor1.getShortName();
+		}
+		String accessor2Name;
+		if (this.accessor2 instanceof PrimaryAccessor primaryRight && primaryRight.getDirection() == ArrowDirection.RIGHT) {
+			accessor2Name = "";
+		} else {
+			accessor2Name = this.accessor2.getShortName();
+		}
+		return accessor1Name + this.operation.getShortName() + accessor2Name;
 	}
 }

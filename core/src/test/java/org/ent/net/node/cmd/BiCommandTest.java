@@ -2,12 +2,11 @@ package org.ent.net.node.cmd;
 
 import org.ent.net.ArrowDirection;
 import org.ent.net.node.cmd.accessor.Accessor;
-import org.ent.net.node.cmd.accessor.TertiaryAccessor;
 import org.ent.net.node.cmd.accessor.DirectAccessor;
+import org.ent.net.node.cmd.accessor.TertiaryAccessor;
 import org.ent.net.node.cmd.operation.BiOperation;
 import org.ent.net.node.cmd.operation.SetOperation;
 import org.ent.util.TestUtil;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -20,8 +19,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class BiCommandTest {
 
-	private BiCommand command;
-
 	@Mock
 	private Accessor accessor1;
 
@@ -31,16 +28,12 @@ class BiCommandTest {
 	@Mock
 	private BiOperation operation;
 
-	@BeforeEach
-	void setUp() {
-		command = new BiCommand(accessor1, accessor2, operation);
-	}
-
 	@Test
 	void getShortName() {
 		when(accessor1.getShortName()).thenReturn("a");
 		when(operation.getShortName()).thenReturn("x");
 		when(accessor2.getShortName()).thenReturn("b");
+		BiCommand command = new BiCommand(accessor1, accessor2, operation);
 
 		assertThat(command.getShortName()).isEqualTo("axb");
 

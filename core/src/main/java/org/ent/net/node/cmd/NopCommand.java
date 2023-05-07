@@ -1,11 +1,11 @@
 package org.ent.net.node.cmd;
 
-import org.ent.net.node.Node;
+import org.ent.net.Arrow;
 
 public class NopCommand implements Command {
 
 	@Override
-	public ExecutionResult execute(Node parameters) {
+	public ExecutionResult execute(Arrow parameters) {
 		return ExecutionResult.NORMAL;
 	}
 

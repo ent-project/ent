@@ -16,12 +16,7 @@ public class DirectAccessor implements Accessor {
 	}
 
 	@Override
-	public String getShortName() {
-		return "";
-	}
-
-	@Override
 	public String getShortNameAscii() {
-		return "";
+		return "*";
 	}
 }
