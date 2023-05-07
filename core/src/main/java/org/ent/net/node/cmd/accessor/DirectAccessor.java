@@ -3,7 +3,7 @@ package org.ent.net.node.cmd.accessor;
 import org.ent.net.Arrow;
 import org.ent.net.Purview;
 
-public class NodeAccessor implements Accessor {
+public class DirectAccessor implements Accessor {
 
 	@Override
 	public int getCode() {

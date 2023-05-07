@@ -2,8 +2,8 @@ package org.ent.net.node.cmd;
 
 import org.ent.net.ArrowDirection;
 import org.ent.net.node.cmd.accessor.Accessor;
-import org.ent.net.node.cmd.accessor.Level3Accessor;
-import org.ent.net.node.cmd.accessor.NodeAccessor;
+import org.ent.net.node.cmd.accessor.TertiaryAccessor;
+import org.ent.net.node.cmd.accessor.DirectAccessor;
 import org.ent.net.node.cmd.operation.BiOperation;
 import org.ent.net.node.cmd.operation.SetOperation;
 import org.ent.util.TestUtil;
@@ -37,7 +37,7 @@ class BiCommandTest {
 	}
 
 	@Test
-	void getShortName() throws Exception {
+	void getShortName() {
 		when(accessor1.getShortName()).thenReturn("a");
 		when(operation.getShortName()).thenReturn("x");
 		when(accessor2.getShortName()).thenReturn("b");
@@ -51,8 +51,8 @@ class BiCommandTest {
 
 	@Test
 	void getValue() {
-		Accessor a1 = new Level3Accessor(ArrowDirection.RIGHT, ArrowDirection.RIGHT, ArrowDirection.RIGHT);
-		Accessor a2 = new NodeAccessor();
+		Accessor a1 = new TertiaryAccessor(ArrowDirection.RIGHT, ArrowDirection.RIGHT, ArrowDirection.RIGHT);
+		Accessor a2 = new DirectAccessor();
 		BiCommand c = new BiCommand(a1, a2, new SetOperation());
 		assertThat(TestUtil.toBinary16bit(c.getValue())).isEqualTo("0001111100000001");
 	}

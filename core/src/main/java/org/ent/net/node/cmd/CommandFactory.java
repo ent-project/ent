@@ -2,10 +2,10 @@ package org.ent.net.node.cmd;
 
 import org.ent.net.ArrowDirection;
 import org.ent.net.node.cmd.accessor.Accessor;
-import org.ent.net.node.cmd.accessor.ArrowAccessor;
-import org.ent.net.node.cmd.accessor.Level3Accessor;
-import org.ent.net.node.cmd.accessor.NodeAccessor;
-import org.ent.net.node.cmd.accessor.PtrArrowAccessor;
+import org.ent.net.node.cmd.accessor.PrimaryAccessor;
+import org.ent.net.node.cmd.accessor.TertiaryAccessor;
+import org.ent.net.node.cmd.accessor.DirectAccessor;
+import org.ent.net.node.cmd.accessor.SecondaryAccessor;
 import org.ent.net.node.cmd.operation.AncestorExchangeOperation;
 import org.ent.net.node.cmd.operation.AncestorExchangeNormalOperation;
 import org.ent.net.node.cmd.operation.BiOperation;
@@ -35,19 +35,19 @@ public final class CommandFactory {
 
 	private static void initializeCommands() {
 		List<Accessor> accessors = new ArrayList<>();
-		accessors.add(new NodeAccessor());
+		accessors.add(new DirectAccessor());
 		for (ArrowDirection direction : ArrowDirection.values()) {
-			accessors.add(new ArrowAccessor(direction));
+			accessors.add(new PrimaryAccessor(direction));
 		}
 		for (ArrowDirection direction1 : ArrowDirection.values()) {
 			for (ArrowDirection direction2 : ArrowDirection.values()) {
-				accessors.add(new PtrArrowAccessor(direction1, direction2));
+				accessors.add(new SecondaryAccessor(direction1, direction2));
 			}
 		}
 		for (ArrowDirection direction1 : ArrowDirection.values()) {
 			for (ArrowDirection direction2 : ArrowDirection.values()) {
 				for (ArrowDirection direction3 : ArrowDirection.values()) {
-					accessors.add(new Level3Accessor(direction1, direction2, direction3));
+					accessors.add(new TertiaryAccessor(direction1, direction2, direction3));
 				}
 			}
 		}
@@ -104,22 +104,22 @@ public final class CommandFactory {
 	}
 
 	public static Command createSetCommandL(ArrowDirection left) {
-		return new BiCommand(new ArrowAccessor(left), new NodeAccessor(), new SetOperation());
+		return new BiCommand(new PrimaryAccessor(left), new DirectAccessor(), new SetOperation());
 	}
 
 	public static Command createSetCommandLR(ArrowDirection left, ArrowDirection right) {
-		return new BiCommand(new ArrowAccessor(left), new ArrowAccessor(right), new SetOperation());
+		return new BiCommand(new PrimaryAccessor(left), new PrimaryAccessor(right), new SetOperation());
 	}
 
 	public static Command createDupCommand(ArrowDirection left) {
-		return new BiCommand(new ArrowAccessor(left), new NodeAccessor(), new DupOperation());
+		return new BiCommand(new PrimaryAccessor(left), new DirectAccessor(), new DupOperation());
 	}
 
 	public static Command createAncestorSwapCommand() {
-		return new BiCommand(new NodeAccessor(), new NodeAccessor(), new AncestorExchangeOperation());
+		return new BiCommand(new DirectAccessor(), new DirectAccessor(), new AncestorExchangeOperation());
 	}
 
 	public static Command createIsIdenticalCommand(ArrowDirection left, ArrowDirection right) {
-		return new BiCommand(new ArrowAccessor(left), new ArrowAccessor(right), new IsIdenticalOperation());
+		return new BiCommand(new PrimaryAccessor(left), new PrimaryAccessor(right), new IsIdenticalOperation());
 	}
 }

@@ -4,7 +4,7 @@ import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Purview;
 
-public class PtrArrowAccessor implements Accessor {
+public class SecondaryAccessor implements Accessor {
 
     private final ArrowDirection direction1;
 
@@ -16,7 +16,7 @@ public class PtrArrowAccessor implements Accessor {
 
     private final String shortNameAscii;
 
-    public PtrArrowAccessor(ArrowDirection direction1, ArrowDirection direction2) {
+    public SecondaryAccessor(ArrowDirection direction1, ArrowDirection direction2) {
 		this.direction1 = direction1;
 		this.direction2 = direction2;
 		this.code = 0b100 | (direction1 == ArrowDirection.RIGHT ? 0b001 : 0) | (direction2 == ArrowDirection.RIGHT ? 0b010 : 0);

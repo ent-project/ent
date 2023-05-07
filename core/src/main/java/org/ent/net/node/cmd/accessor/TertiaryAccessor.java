@@ -4,7 +4,7 @@ import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Purview;
 
-public class Level3Accessor implements Accessor {
+public class TertiaryAccessor implements Accessor {
 
     private final ArrowDirection direction1;
 
@@ -18,7 +18,7 @@ public class Level3Accessor implements Accessor {
 
     private final String shortNameAscii;
 
-    public Level3Accessor(ArrowDirection direction1, ArrowDirection direction2, ArrowDirection direction3) {
+    public TertiaryAccessor(ArrowDirection direction1, ArrowDirection direction2, ArrowDirection direction3) {
         this.direction1 = direction1;
         this.direction2 = direction2;
         this.direction3 = direction3;

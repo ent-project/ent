@@ -4,7 +4,7 @@ import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Purview;
 
-public class ArrowAccessor implements Accessor {
+public class PrimaryAccessor implements Accessor {
 
     private final ArrowDirection direction;
 
@@ -14,7 +14,7 @@ public class ArrowAccessor implements Accessor {
 
     private final String shortNameAscii;
 
-    public ArrowAccessor(ArrowDirection direction) {
+    public PrimaryAccessor(ArrowDirection direction) {
 		this.direction = direction;
 		this.code = 0b10 | (direction == ArrowDirection.RIGHT ? 0b01 : 0);
 		this.shortName = ArrowDirection.ARROW_SYMBOLS.get(direction);

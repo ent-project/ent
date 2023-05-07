@@ -10,13 +10,13 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-class PtrArrowAccessorTest {
+class SecondaryAccessorTest {
 
     @ParameterizedTest
     @MethodSource("codeData")
     void code(ArrowDirection direction1, ArrowDirection direction2, int expectedCode) {
-        PtrArrowAccessor ptrArrowAccessor = new PtrArrowAccessor(direction1, direction2);
-        Assertions.assertThat(ptrArrowAccessor.getCode()).isEqualTo(expectedCode);
+        SecondaryAccessor secondaryAccessor = new SecondaryAccessor(direction1, direction2);
+        Assertions.assertThat(secondaryAccessor.getCode()).isEqualTo(expectedCode);
     }
 
     public static Stream<Arguments> codeData() {
