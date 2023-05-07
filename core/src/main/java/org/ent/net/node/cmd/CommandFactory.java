@@ -13,12 +13,16 @@ import org.ent.net.node.cmd.operation.DupNormalOperation;
 import org.ent.net.node.cmd.operation.DupOperation;
 import org.ent.net.node.cmd.operation.IsIdenticalOperation;
 import org.ent.net.node.cmd.operation.SetOperation;
+import org.ent.net.node.cmd.operation.SetValueOperation;
 import org.ent.net.node.cmd.operation.TriOperation;
 import org.ent.net.node.cmd.operation.math.BitwiseAndOperation;
 import org.ent.net.node.cmd.operation.math.BitwiseOrOperation;
+import org.ent.net.node.cmd.operation.math.DecOperation;
+import org.ent.net.node.cmd.operation.math.IncOperation;
 import org.ent.net.node.cmd.operation.math.MinusOperation;
 import org.ent.net.node.cmd.operation.math.ModuloOperation;
 import org.ent.net.node.cmd.operation.math.MultiplyOperation;
+import org.ent.net.node.cmd.operation.math.NegOperation;
 import org.ent.net.node.cmd.operation.math.PlusOperation;
 import org.ent.net.node.cmd.operation.math.RotateRightOperation;
 import org.ent.net.node.cmd.operation.math.ShiftLeftOperation;
@@ -69,7 +73,11 @@ public final class CommandFactory {
 				new AncestorExchangeNormalOperation(),
 				new DupOperation(),
 				new DupNormalOperation(),
-				new IsIdenticalOperation()
+				new IsIdenticalOperation(),
+				new SetValueOperation(),
+				new NegOperation(),
+				new IncOperation(),
+				new DecOperation()
 		);
 		for (Accessor accessor1 : accessors) {
 			for (Accessor accessor2 : accessors) {

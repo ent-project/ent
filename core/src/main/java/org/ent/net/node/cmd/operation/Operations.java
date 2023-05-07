@@ -21,6 +21,11 @@ public class Operations {
     public static final int CODE_SHIFT_LEFT_OPERATION = 0b11000;
     public static final int CODE_SHIFT_RIGHT_OPERATION = 0b11001;
 
+    public static final int CODE_SET_VALUE_OPERATION = 0b100000;
+    public static final int CODE_NEG_OPERATION = 0b100001;
+    public static final int CODE_INC_OPERATION = 0b100010;
+    public static final int CODE_DEC_OPERATION = 0b100011;
+
     public static final SetOperation SET = new SetOperation();
     public static final AncestorExchangeOperation ANCESTOR_EXCHANGE = new AncestorExchangeOperation();
     public static final PlusOperation PLUS = new PlusOperation();

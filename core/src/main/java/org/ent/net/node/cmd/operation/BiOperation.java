@@ -9,7 +9,9 @@ public interface BiOperation {
 
 	ExecutionResult apply(Arrow handle1, Arrow handle2);
 
-	String getShortName();
+	default String getShortName() {
+		return getShortNameAscii();
+	}
 
 	String getShortNameAscii();
 }
