@@ -22,7 +22,7 @@ public class Net {
 
 	private static final boolean VALIDATE = true;
 
-	private Set<Node> nodes;
+	private final Set<Node> nodes;
 
 	private Node root;
 
@@ -190,54 +190,10 @@ public class Net {
 		hub1.setNode(node2);
 	}
 
-	public Node newUNode(Node child) {
-		validateBelongsToNet(child);
-		Node uNode = new BNode(this, child);
-		addNodeInternal(uNode);
-		fireNewNodeCall(uNode);
-		return uNode;
-	}
-
-	public Node newNode() {
-		BNode bNode = new BNode(this);
-		addNodeInternal(bNode);
-		fireNewNodeCall(bNode);
-		return bNode;
-	}
-
-	public Node newBNode() {
-		return newNode();
-	}
-
 	public Node newRoot() {
 		Node newRoot = newNode();
 		setRoot(newRoot);
 		return newRoot;
-	}
-
-	public BNode newNodee(Node leftChild, Node rightChild) {
-		validateBelongsToNet(leftChild);
-		validateBelongsToNet(rightChild);
-		BNode bNode = new BNode(this, leftChild, rightChild);
-		addNodeInternal(bNode);
-		fireNewNodeCall(bNode);
-		return bNode;
-	}
-
-	public BNode newBNode(Node leftChild, Node rightChild) {
-		return newNodee(leftChild, rightChild);
-	}
-
-	public Node newCNode(Command command) {
-		return newNode(command);
-	}
-
-	public Node newNode(Command command) {
-		return newCNode(command.getValue());
-	}
-
-	public Node newCNode(int value) {
-		return newNode(value);
 	}
 
 	public Node newNode(int value, Node leftChild, Node rightChild) {
@@ -249,12 +205,48 @@ public class Net {
 		return node;
 	}
 
+	public Node newNode() {
+		BNode bNode = new BNode(this);
+		addNodeInternal(bNode);
+		fireNewNodeCall(bNode);
+		return bNode;
+	}
+
+	public Node newNode(Node leftChild, Node rightChild) {
+		validateBelongsToNet(leftChild);
+		validateBelongsToNet(rightChild);
+		BNode bNode = new BNode(this, leftChild, rightChild);
+		addNodeInternal(bNode);
+		fireNewNodeCall(bNode);
+		return bNode;
+	}
+
+	public Node newNode(Command command) {
+		return newNode(command.getValue());
+	}
+
 	public Node newNode(int value) {
 		Node cNode = new BNode(this);
 		cNode.setValue(value);
 		addNodeInternal(cNode);
 		fireNewNodeCall(cNode);
 		return cNode;
+	}
+
+	public Node newUNode(Node child) {
+		validateBelongsToNet(child);
+		Node uNode = new BNode(this, child);
+		addNodeInternal(uNode);
+		fireNewNodeCall(uNode);
+		return uNode;
+	}
+
+	public Node newCNode(Command command) {
+		return newNode(command);
+	}
+
+	public Node newCNode(int value) {
+		return newNode(value);
 	}
 
 	public void addNodeInternal(Node node) {

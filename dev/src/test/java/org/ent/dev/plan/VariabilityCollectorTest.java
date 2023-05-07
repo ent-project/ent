@@ -66,9 +66,9 @@ class VariabilityCollectorTest {
             collector.calledSetChild(uNode, ArrowDirection.LEFT, cNodeNop, Purview.COMMAND);
 
             Map<Arrow, ArrowData> arrowDataMap = collector.arrowDataMap;
-            assertThat(arrowDataMap).containsOnlyKeys(uNode.getArrow());
-            assertThat(arrowDataMap.get(uNode.getArrow()).getTimesRead()).isZero();
-            assertThat(arrowDataMap.get(uNode.getArrow()).getTimesWritten()).isEqualTo(2);
+            assertThat(arrowDataMap).containsOnlyKeys(uNode.getLeftArrow());
+            assertThat(arrowDataMap.get(uNode.getLeftArrow()).getTimesRead()).isZero();
+            assertThat(arrowDataMap.get(uNode.getLeftArrow()).getTimesWritten()).isEqualTo(2);
         }
 
         @Test
@@ -78,9 +78,9 @@ class VariabilityCollectorTest {
             collector.calledGetChild(uNode, ArrowDirection.LEFT, Purview.COMMAND);
 
             Map<Arrow, ArrowData> arrowDataMap = collector.arrowDataMap;
-            assertThat(arrowDataMap).containsOnlyKeys(uNode.getArrow());
-            assertThat(arrowDataMap.get(uNode.getArrow()).getTimesRead()).isEqualTo(1);
-            assertThat(arrowDataMap.get(uNode.getArrow()).getTimesWritten()).isZero();
+            assertThat(arrowDataMap).containsOnlyKeys(uNode.getLeftArrow());
+            assertThat(arrowDataMap.get(uNode.getLeftArrow()).getTimesRead()).isEqualTo(1);
+            assertThat(arrowDataMap.get(uNode.getLeftArrow()).getTimesWritten()).isZero();
         }
     }
 
@@ -114,7 +114,7 @@ class VariabilityCollectorTest {
         void newBNode(SoftAssertions softly) {
             VariabilityCollector collector = new VariabilityCollector();
             Node nop = net.newCNode(Commands.NOP);
-            Node bNode = net.newBNode(nop, nop);
+            Node bNode = net.newNode(nop, nop);
 
             collector.calledNewNode(bNode);
 
@@ -153,11 +153,11 @@ class VariabilityCollectorTest {
 
             VariabilityCollector collector = exam.getCollector();
             softly.assertThat(collector.arrowDataMap).containsOnlyKeys(
-                    nodeToSet.getArrow(),
+                    nodeToSet.getLeftArrow(),
                     nodeArguments.getLeftArrow(),
                     nodeArguments.getRightArrow()
             );
-            ArrowData arrowToSet = collector.arrowDataMap.get(nodeToSet.getArrow());
+            ArrowData arrowToSet = collector.arrowDataMap.get(nodeToSet.getLeftArrow());
             softly.assertThat(arrowToSet.getTimesRead()).isZero();
             softly.assertThat(arrowToSet.getTimesWritten()).isEqualTo(1);
             ArrowData arrowArgumentsLeft = collector.arrowDataMap.get(nodeArguments.getLeftArrow());

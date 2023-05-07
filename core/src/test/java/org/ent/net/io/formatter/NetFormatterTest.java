@@ -162,7 +162,7 @@ class NetFormatterTest {
 
 			@Test
 			void doubleChildBinary() {
-				Node b = net.newBNode(net.newCNode(Commands.get(SET)), net.newCNode(Commands.get(ANCESTOR_EXCHANGE)));
+				Node b = net.newNode(net.newCNode(Commands.get(SET)), net.newCNode(Commands.get(ANCESTOR_EXCHANGE)));
 				root.setLeftChild(b, Purview.DIRECT);
 				root.setRightChild(b, Purview.DIRECT);
 
@@ -245,7 +245,7 @@ class NetFormatterTest {
 
 	@ParameterizedTest(name = "{index} => format(...) should return {1}")
 	@MethodSource("format_testData")
-	void format(Net net, String stringRepresentation) throws Exception {
+	void format(Net net, String stringRepresentation) {
 		String str = formatter.format(net);
 
 		assertThat(str).isEqualTo(stringRepresentation);

@@ -39,9 +39,9 @@ public class NetTestData {
     	Net net = new Net();
 
         Node a = net.newUNode(net.newCNode(Commands.NOP));
-        Node b1 = net.newBNode(a, net.newCNode(Commands.ANCESTOR_EXCHANGE));
+		Node b1 = net.newNode(a, net.newCNode(Commands.ANCESTOR_EXCHANGE));
 		b1.setValue(0x1f);
-        Node root = net.newBNode(a, b1);
+		Node root = net.newNode(a, b1);
 
         net.setRoot(root);
 
@@ -53,8 +53,8 @@ public class NetTestData {
 
 		Node b3 = net.newNode();
 		Node b4 = net.newNode();
-		Node b2 = net.newBNode(b4, b3);				// A
-		Node b1 = net.newBNode(b4, b2);
+		Node b2 = net.newNode(b4, b3);				// A
+		Node b1 = net.newNode(b4, b2);
 		Node unary_b = net.newUNode(b1);			// b
 		Node unary_root_a = net.newUNode(unary_b);	// a
 		Node nop = net.newCNode(Commands.NOP);
@@ -71,8 +71,7 @@ public class NetTestData {
 	public NetWithStringRepresentation buildNetDeep() {
     	Net net = new Net();
 
-        Node nop = net.newCNode(Commands.NOP);
-        Node n = nop;
+		Node n = net.newCNode(Commands.NOP);
         for (int i = 0; i < 20; i++) {
         	n = net.newUNode(n);
         }

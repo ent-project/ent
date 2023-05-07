@@ -26,10 +26,6 @@ public interface Node {
 
 	Arrow getLeftArrow();
 
-	default Arrow getArrow() {
-		return getLeftArrow();
-	}
-
 	Arrow getRightArrow();
 
 	Node getLeftChild(Purview purview);

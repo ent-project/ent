@@ -75,7 +75,7 @@ class NetTest {
 				Net net = new NetParser().parse("[#1]");
 				Net net2 = new NetParser().parse("(<o>,<x>)");
 				Node root = net.getRoot();
-				MethodUtils.invokeMethod(root.getArrow(), true, "doSetTarget", net2.getRoot());
+				MethodUtils.invokeMethod(root.getLeftArrow(), true, "doSetTarget", net2.getRoot());
 
 				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
 						.hasMessage("Child of node must be part of the net");
@@ -136,7 +136,7 @@ class NetTest {
 				Net net = parser.parse("u:[c:<o>]");
 				Node uNode = parser.getNodeNames().get("u");
 				Node cNode = parser.getNodeNames().get("c");
-				cNode.getHub().removeInverseReference(uNode.getArrow());
+				cNode.getHub().removeInverseReference(uNode.getLeftArrow());
 
 				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
 						.hasMessage("Child nodes must be aware of their parents");
@@ -246,7 +246,7 @@ class NetTest {
 		void setUp() throws Exception {
 			parser.parse("a:<o>");
 			externalNode = parser.getNodeNames().get("a");
-			externalArrow = externalNode.getArrow();
+			externalArrow = externalNode.getLeftArrow();
 		}
 
 		@Test
@@ -291,7 +291,7 @@ class NetTest {
 		void setTarget_error_rogueTarget() throws Exception {
 			parser.parse("u:[<o>]");
 			Node u = parser.getNodeNames().get("u");
-			Arrow uArrow = u.getArrow();
+			Arrow uArrow = u.getLeftArrow();
 
 			assertThatThrownBy(() -> uArrow.setTarget(externalNode, Purview.DIRECT))
 					.isInstanceOf(IllegalStateException.class)
@@ -313,17 +313,17 @@ class NetTest {
 		}
 
 		@Test
-		void newBNode() {
+		void newNode() {
 			Net net = new Net();
 			net.addExecutionEventListener(eventListener);
 
-			Node bNode = net.newBNode();
+			Node node = net.newNode();
 
-			net.validateBelongsToNet(bNode);
-			verify(eventListener).calledNewNode(bNode);
+			net.validateBelongsToNet(node);
+			verify(eventListener).calledNewNode(node);
 			verifyNoMoreInteractions(eventListener);
-			assertThat(bNode.getLeftChild(Purview.DIRECT)).isEqualTo(bNode);
-			assertThat(bNode.getRightChild(Purview.DIRECT)).isEqualTo(bNode);
+			assertThat(node.getLeftChild(Purview.DIRECT)).isEqualTo(node);
+			assertThat(node.getRightChild(Purview.DIRECT)).isEqualTo(node);
 		}
 
 		@Test
@@ -333,7 +333,7 @@ class NetTest {
 			Node ix = parser.getNodeNames().get("_b");
 			net.addExecutionEventListener(eventListener);
 
-			Node bNode = net.newBNode(nop, ix);
+			Node bNode = net.newNode(nop, ix);
 
 			net.validateBelongsToNet(bNode);
 			verify(eventListener).calledNewNode(bNode);
@@ -347,7 +347,7 @@ class NetTest {
 			Net net = parser.parse("_a:<o>");
 			Node nop = parser.getNodeNames().get("_a");
 
-			assertThatThrownBy(() -> net.newBNode(externalNode, nop))
+			assertThatThrownBy(() -> net.newNode(externalNode, nop))
 					.isInstanceOf(IllegalStateException.class)
 					.hasMessage("node belongs to another net");
 		}
@@ -357,7 +357,7 @@ class NetTest {
 			Net net = parser.parse("_a:<o>");
 			Node nop = parser.getNodeNames().get("_a");
 
-			assertThatThrownBy(() -> net.newBNode(nop, externalNode))
+			assertThatThrownBy(() -> net.newNode(nop, externalNode))
 					.isInstanceOf(IllegalStateException.class)
 					.hasMessage("node belongs to another net");
 		}
