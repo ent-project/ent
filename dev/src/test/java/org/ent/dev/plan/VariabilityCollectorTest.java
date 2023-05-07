@@ -140,7 +140,7 @@ class VariabilityCollectorTest {
 
         @Test
         void arrows(SoftAssertions softly) throws ParserException {
-            Net net = parser.parse("((</=>, arguments:(toSet:[@], <o>)), toSet)");
+            Net net = parser.parse("</=>(arguments:(toSet:[@], <o>), toSet)");
             data.setReplicator(() -> net);
             Node nodeArguments = parser.getNodeByName("arguments");
             Node nodeToSet = parser.getNodeNames().get("toSet");
@@ -170,7 +170,7 @@ class VariabilityCollectorTest {
 
         @Test
         void newNode(SoftAssertions softly) throws ParserException {
-            Net net = parser.parse("((</dupn>, arguments:(toSet:[@], <o>)), toSet)");
+            Net net = parser.parse("</dupn>(arguments:(toSet:[@], <o>), toSet)");
             data.setReplicator(() -> net);
 
             exam.accept(data);

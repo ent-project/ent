@@ -42,11 +42,8 @@ public class NetRunner {
 	}
 
 	private StepResult doStep(Node executionPointer) {
-		Node commandBranch = executionPointer.getLeftChild(Purview.RUNNER);
-		Node commandNode = commandBranch.getLeftChild(Purview.RUNNER);
 		boolean executionPointerDoesNotAdvance = executionPointer.getRightChild(Purview.RUNNER) == executionPointer;
-
-		Command command = CommandFactory.getByValue(commandNode.getValue());
+		Command command = CommandFactory.getByValue(executionPointer.getValue());
 		if (command == null) {
 			if (executionPointerDoesNotAdvance) {
 				return StepResult.ENDLESS_LOOP;
@@ -54,13 +51,13 @@ public class NetRunner {
 				return StepResult.INVALID_COMMAND_NODE;
 			}
 		}
-		Node parameters = commandBranch.getRightChild(Purview.RUNNER);
+		Node parameters = executionPointer.getLeftChild(Purview.RUNNER);
 
 		ExecutionResult executeResult = command.execute(parameters);
 		StepResult stepResult = convertToStepResult(executeResult);
 		log.trace("command {} executed: {}", command, executeResult);
 		if (netRunnerListener != null) {
-			netRunnerListener.fireCommandExecuted(commandNode, executeResult);
+			netRunnerListener.fireCommandExecuted(executionPointer, executeResult);
 		}
 
 		if (command.getValue() == Commands.NOP.getValue() && executionPointerDoesNotAdvance) {

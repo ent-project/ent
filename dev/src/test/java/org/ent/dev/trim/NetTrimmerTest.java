@@ -35,14 +35,14 @@ class NetTrimmerTest {
 
 	private static Stream<Arguments> runTrimmer_testData() {
 	    return Stream.of(
-			of(	"(A:(<o>, [B:(A, [A])]), B)",
-				"(A:(<o>, <o>), B:(A, [A]))"),
+			of(	"A:([B:(A, [A])], B)",
+				"A:(<o>, B:(A, [A]))"),
 
-	    	of( "A:((<xn>, A), a:[[[[a]]]])",
-		    		"A:((<xn>, A), a:[<o>])"),
+	    	of( "A:<xn>(A, a:[[[[a]]]])",
+		    		"A:<xn>(A, a:<o>)"),
 
-	    	of( "A:(B:(_a:</dupn>, C:(M:(D:(B, a:[([(((</dupn>, a), [_b:</=\\>]), _a)], _b)]), C), _a)), D); (A, _a); (_a, _a); [D]; [a]",
-				"A:(B:(_a:</dupn>, C:(M:<o>, _a)), D:(B, a:[(<o>, _b:</=\\>)]))")
+	    	of( "A:</dupn>(C:(M:(D:(B:<o>, a:[([(((</dupn>, a), [_b:</=\\>]), A)], _b)]), C), A), D); [a]",
+				"A:</dupn>(C:(M:<o>, A), D:(B:<o>, a:[<o>]))")
 	    );
 	}
 }
