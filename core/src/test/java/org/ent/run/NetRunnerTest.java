@@ -37,6 +37,13 @@ class NetRunnerTest {
 				"A:<xn>"));
 	}
 
+	@Test
+	void testNetRunner4() throws Exception {
+		doTestNetRunner(false, StepResult.ENDLESS_LOOP, Arrays.asList(
+				"</=\\sl*>(#1(result:<o>, #3), result)",
+				"result:#6"));
+	}
+
 	private void doTestNetRunner(boolean allowMarker, StepResult expectedFinalResult,
 			List<String> steps) throws Exception {
 		String netStr = steps.get(0);
