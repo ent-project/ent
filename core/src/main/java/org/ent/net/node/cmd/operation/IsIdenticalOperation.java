@@ -4,7 +4,12 @@ import org.ent.net.Arrow;
 import org.ent.net.Purview;
 import org.ent.net.node.cmd.ExecutionResult;
 
-public class IsIdenticalOperation implements BiOperation<Arrow, Arrow> {
+public class IsIdenticalOperation implements BiOperation {
+
+	@Override
+	public int getCode() {
+		return Operations.CODE_IS_IDENTICAL_OPERATION;
+	}
 
 	@Override
 	public ExecutionResult apply(Arrow arrow1, Arrow arrow2) {

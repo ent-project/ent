@@ -1,14 +1,8 @@
 package org.ent.net.io.parser.tokenizer;
 
-import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_COMMA;
-import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_EOF;
-import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_EQUALS;
-import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_LEFT_PARENTHESIS;
-import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_LEFT_SQUARE_BRACKET;
-import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_MARKER;
-import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_RIGHT_PARENTHESIS;
-import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_RIGHT_SQUARE_BRACKET;
-import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_SEMICOLON;
+import org.ent.net.io.parser.ParserException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -16,9 +10,15 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 
-import org.ent.net.io.parser.ParserException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_COMMA;
+import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_EOF;
+import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_COLON;
+import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_LEFT_PARENTHESIS;
+import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_LEFT_SQUARE_BRACKET;
+import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_MARKER;
+import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_RIGHT_PARENTHESIS;
+import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_RIGHT_SQUARE_BRACKET;
+import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_SEMICOLON;
 
 public class NetTokenizer {
 
@@ -67,7 +67,7 @@ public class NetTokenizer {
                 nextChar();
                 advanced = true;
             }
-            if (this.ch == '@') {
+            if (this.ch == '~') {
                 // comment - advance to the next newline or end of file
                 nextChar();
                 while (this.ch != '\n' && this.ch != -1) {
@@ -100,11 +100,11 @@ public class NetTokenizer {
                 nextChar();
                 return TOKEN_RIGHT_SQUARE_BRACKET;
             }
-            case '=' -> {
+            case ':' -> {
                 nextChar();
-                return TOKEN_EQUALS;
+                return TOKEN_COLON;
             }
-            case '#', '●' -> {
+            case '@', '●' -> {
             	nextChar();
             	return TOKEN_MARKER;
             }
@@ -115,6 +115,10 @@ public class NetTokenizer {
             case ';' -> {
                 nextChar();
                 return TOKEN_SEMICOLON;
+            }
+            case '#' -> {
+                nextChar();
+                return parseValue();
             }
             case '<' -> {
                 nextChar();
@@ -139,7 +143,7 @@ public class NetTokenizer {
         while (queue.size() < n) {
             Token tkn = fetchNextToken();
             log.trace("TOKEN: {}", tkn);
-            this.queue.add(tkn);
+            queue.add(tkn);
         }
         return (new ArrayList<>(queue)).get(n - 1);
     }
@@ -158,6 +162,28 @@ public class NetTokenizer {
 
     private static boolean isIdentifierChar(int ch) {
         return isIdentifierStartChar(ch) || isNumber(ch);
+    }
+
+    private static boolean isHexChar(int ch) {
+        if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F')) {
+            return true;
+        }
+        return false;
+    }
+
+    private Token parseValue() throws ParserException {
+        StringBuilder sb = new StringBuilder();
+        while (isHexChar(ch)) {
+            sb.append((char) this.ch);
+            nextChar();
+        }
+        if (sb.length() > 8) {
+            throw new ParserException("Hex values are limited to 8 digits, but found " + sb.length());
+        }
+        if (sb.isEmpty()) {
+            throw new ParserException("Expected hex characters after '#' sign, but found none.");
+        }
+        return new ValueToken(sb.toString());
     }
 
     private Token parseCommand() {

@@ -22,7 +22,10 @@ public class VariabilityRater {
     }
 
     public long getPoints() {
-        return getPointsForCommandExecution() + getPointsForArrowAccess() + getPointsForNewNodes();
+        long pointsCommandExecution = getPointsForCommandExecution();
+        long pointsArrowAccess = getPointsForArrowAccess();
+        long pointsNewNodes = getPointsForNewNodes();
+        return pointsCommandExecution + pointsArrowAccess + pointsNewNodes;
     }
 
     private long getPointsForCommandExecution() {

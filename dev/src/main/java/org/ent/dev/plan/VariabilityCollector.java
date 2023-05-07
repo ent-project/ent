@@ -4,7 +4,6 @@ import org.ent.ExecutionEventListener;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Purview;
-import org.ent.net.node.CNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.ExecutionResult;
@@ -114,14 +113,16 @@ public class VariabilityCollector implements ExecutionEventListener, NetRunnerLi
 
     @Override
     public void calledNewNode(Node n) {
-        n.doInstanceOf(
-                cNode -> newNodeData.newCNode(),
-                uNode -> newNodeData.newUNode(),
-                bNode -> newNodeData.newBNode());
+        switch (n.getNodeType()) {
+            case COMMAND_NODE -> newNodeData.newCNode();
+            case UNARY_NODE -> newNodeData.newUNode();
+            case BINARY_NODE -> newNodeData.newBNode();
+            case MARKER_NODE -> {}
+        }
     }
 
     @Override
-    public void fireCommandExecuted(CNode commandNode, ExecutionResult executeResult) {
+    public void fireCommandExecuted(Node commandNode, ExecutionResult executeResult) {
         CommandData commandData = getCommandData(commandNode.getCommand());
         commandData.executed();
     }

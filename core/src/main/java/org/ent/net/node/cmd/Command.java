@@ -6,7 +6,7 @@ public interface Command {
 
     ExecutionResult execute(Node parameters);
 
-    int getEvalLevel();
+    int getValue();
 
 	String getShortName();
 

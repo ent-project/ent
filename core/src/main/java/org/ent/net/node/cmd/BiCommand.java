@@ -1,61 +1,54 @@
 package org.ent.net.node.cmd;
 
+import org.ent.net.Arrow;
 import org.ent.net.Purview;
-import org.ent.net.node.BNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
-import org.ent.net.node.cmd.accessor.NodeAccessor;
 import org.ent.net.node.cmd.operation.BiOperation;
 
-public class BiCommand<H1, H2> implements Command {
+public class BiCommand implements Command {
 
-	private final Accessor<H1> accessor1;
+	private final Accessor accessor1;
 
-	private final Accessor<H2> accessor2;
+	private final Accessor accessor2;
 
-	private final BiOperation<H1, H2> operation;
+	private final BiOperation operation;
+
+	private final int value;
 
 	private String shortName;
 
 	private String shortNameAscii;
 
-	public BiCommand(Accessor<H1> accessor1, Accessor<H2> accessor2, BiOperation<H1, H2> operation) {
+	public BiCommand(Accessor accessor1, Accessor accessor2, BiOperation operation) {
 		this.accessor1 = accessor1;
 		this.accessor2 = accessor2;
 		this.operation = operation;
+		this.value = (accessor1.getCode() << 8) | (accessor2.getCode() << 12) | operation.getCode();
 	}
 
-	public BiOperation<H1, H2> getOperation() {
+	public BiOperation getOperation() {
 		return operation;
 	}
 
 	@Override
 	public ExecutionResult execute(Node parameters) {
-        if (!(parameters instanceof BNode top)) return ExecutionResult.ERROR;
-		return executeImpl(top.getLeftChild(Purview.COMMAND), top.getRightChild(Purview.COMMAND));
+		return executeImpl(parameters.getLeftArrow(), parameters.getRightArrow());
 	}
 
-	private ExecutionResult executeImpl(Node arg1, Node arg2) {
-		return accessor1.get(arg1, Purview.COMMAND).flatMap(handle1 ->
-			accessor2.get(arg2, Purview.COMMAND).map(handle2 ->
-				operation.apply(handle1, handle2)
-			)
-		).orElse(ExecutionResult.ERROR);
+	private ExecutionResult executeImpl(Arrow arg1, Arrow arg2) {
+		return operation.apply(accessor1.get(arg1, Purview.COMMAND), accessor2.get(arg2, Purview.COMMAND));
 	}
 
 	@Override
-	public int getEvalLevel() {
-		return operation.getEvalLevel();
+	public int getValue() {
+		return value;
 	}
 
 	@Override
 	public String getShortName() {
 		if (shortName == null) {
-			if (isTwoNodeAccessorShortcut()) {
-				shortName = operation.getShortName();
-			} else {
-				shortName = accessor1.getShortName() + operation.getShortName() + accessor2.getShortName();
-			}
+			shortName = accessor1.getShortName() + operation.getShortName() + accessor2.getShortName();
 		}
 		return shortName;
 	}
@@ -63,18 +56,9 @@ public class BiCommand<H1, H2> implements Command {
 	@Override
 	public String getShortNameAscii() {
 		if (shortNameAscii == null) {
-			if (isTwoNodeAccessorShortcut()) {
-				shortNameAscii = operation.getShortNameAscii();
-			} else {
-				shortNameAscii = accessor1.getShortNameAscii() + operation.getShortNameAscii()
-						+ accessor2.getShortNameAscii();
-			}
+			shortNameAscii = accessor1.getShortNameAscii() + operation.getShortNameAscii()
+					+ accessor2.getShortNameAscii();
 		}
 		return shortNameAscii;
 	}
-
-	private boolean isTwoNodeAccessorShortcut() {
-		return accessor1 instanceof NodeAccessor && accessor2 instanceof NodeAccessor;
-	}
-
 }

@@ -1,11 +1,10 @@
 package org.ent.net.io.formatter;
 
 import org.ent.net.Purview;
-import org.ent.net.node.BNode;
-import org.ent.net.node.CNode;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
-import org.ent.net.node.UNode;
+import org.ent.net.node.cmd.Command;
+import org.ent.net.node.cmd.CommandFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +17,8 @@ public class FormattingWorker {
     private final List<Node> rootNodes;
 
     private final Map<Node, String> givenNodeNames;
+
+	private final boolean forceGivenNodeNames;
 
     private final Map<Node, String> variableBindings;
 
@@ -33,13 +34,14 @@ public class FormattingWorker {
 
 	private int cNodeVariableNameIndex;
 
-	public FormattingWorker(List<Node> rootNodes, Map<Node, String> givenNodeNames, Integer maxDepth) {
+	public FormattingWorker(List<Node> rootNodes, Map<Node, String> givenNodeNames, boolean forceGivenNodeNames, Integer maxDepth) {
 		this.rootNodes = rootNodes;
 		if (givenNodeNames != null) {
 			this.givenNodeNames = givenNodeNames;
 		} else {
 			this.givenNodeNames = new HashMap<>();
 		}
+		this.forceGivenNodeNames = forceGivenNodeNames;
 		this.variableBindings = new HashMap<>();
 		this.maxDepth = maxDepth;
 		this.stringBuilder = new StringBuilder();
@@ -92,38 +94,56 @@ public class FormattingWorker {
         if (requiresVariable(node)) {
         	variableName = determineVariableName(node);
         	stringBuilder.append(variableName);
-        	stringBuilder.append("=");
+        	stringBuilder.append(":");
     		variableBindings.put(node, variableName);
         }
-
-        if (node instanceof BNode bnode) {
-			stringBuilder.append("(");
-            doFormatRecursively(bnode.getLeftChild(Purview.DIRECT), level + 1);
-            stringBuilder.append(", ");
-            doFormatRecursively(bnode.getRightChild(Purview.DIRECT), level + 1);
-            stringBuilder.append(")");
-        } else if (node instanceof UNode unode) {
-			stringBuilder.append("[");
-            doFormatRecursively(unode.getChild(Purview.DIRECT), level + 1);
-            stringBuilder.append("]");
-        } else if (node instanceof CNode cnode) {
-			stringBuilder.append("<");
-			stringBuilder.append(ascii ? cnode.getCommand().getShortNameAscii() : cnode.getCommand().getShortName());
-            stringBuilder.append(">");
-        } else if (node instanceof MarkerNode) {
-        	stringBuilder.append(ascii ? MarkerNode.MARKER_NODE_SYMBOL_ASCII : MarkerNode.MARKER_NODE_SYMBOL);
-        }
+		if (node.isMarkerNode()) {
+			stringBuilder.append(ascii ? MarkerNode.MARKER_NODE_SYMBOL_ASCII : MarkerNode.MARKER_NODE_SYMBOL);
+		} else {
+			if (node.getValue() != 0 || node.isCommandNode()) {
+				Command command = CommandFactory.getByValue(node.getValue());
+				if (command != null) {
+					stringBuilder.append("<");
+					stringBuilder.append(ascii ? command.getShortNameAscii() : command.getShortName());
+					stringBuilder.append(">");
+				} else {
+					stringBuilder.append(String.format("#%x", node.getValue()));
+				}
+			}
+			if (node.isUnaryNode()) {
+				stringBuilder.append("[");
+				doFormatRecursively(node.getLeftChild(Purview.DIRECT), level + 1);
+				stringBuilder.append("]");
+			} else if (!node.isCommandNode()) {
+				stringBuilder.append("(");
+				Node leftChild = node.getLeftChild(Purview.DIRECT);
+				doFormatRecursively(leftChild, level + 1);
+				stringBuilder.append(", ");
+				Node rightChild = node.getRightChild(Purview.DIRECT);
+				doFormatRecursively(rightChild, level + 1);
+				stringBuilder.append(")");
+			}
+		}
 	}
 
 	private boolean requiresVariable(Node n) {
-		if (n instanceof MarkerNode) {
+		if (n.isMarkerNode()) {
 			return false;
 		}
-		int inverseReferences = n.getHub().getInverseReferences().size();
+		if (forceGivenNodeNames && givenNodeNames.containsKey(n)) {
+			return true;
+		}
+		int references = n.getHub().getInverseReferences().size();
+		if (n.getRightChild(Purview.DIRECT) == n) {
+			references--;
+			if (n.getLeftChild(Purview.DIRECT) == n) {
+				references--;
+			}
+		}
 		if (rootNodes.contains(n)) {
-			return inverseReferences >= 1;
+			return references >= 1;
 		} else {
-			return inverseReferences >= 2;
+			return references >= 2;
 		}
 	}
 
@@ -145,29 +165,19 @@ public class FormattingWorker {
 	}
 
 	private String getNewVariableName(Node n) {
-		int index;
-		if (n instanceof UNode) {
-			index = uNodeVariableNameIndex;
-			uNodeVariableNameIndex++;
-		} else if (n instanceof BNode) {
-			index = bNodeVariableNameIndex;
-			bNodeVariableNameIndex++;
-		} else if (n instanceof CNode) {
-			index = cNodeVariableNameIndex;
-			cNodeVariableNameIndex++;
-		} else {
-			throw new AssertionError();
-		}
+		int index =
+		switch (n.getNodeType()) {
+			case UNARY_NODE -> uNodeVariableNameIndex++;
+			case BINARY_NODE -> bNodeVariableNameIndex++;
+			case COMMAND_NODE -> cNodeVariableNameIndex++;
+			case MARKER_NODE -> throw new AssertionError();
+		};
 		String name = VariableNameHelper.getLetterBasedVariableNameForIndex(index);
-		if (n instanceof UNode) {
-			return name;
-		} else if (n instanceof BNode) {
-			return name.toUpperCase();
-		} else if (n instanceof CNode) {
-			return "_" + name;
-		} else {
-			throw new AssertionError();
-		}
+		return switch (n.getNodeType()) {
+			case UNARY_NODE -> name;
+			case BINARY_NODE -> name.toUpperCase();
+			case COMMAND_NODE -> "_" + name;
+			case MARKER_NODE -> throw new AssertionError();
+		};
 	}
-
 }

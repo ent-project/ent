@@ -15,12 +15,6 @@ public class RandomNetCreator {
 
 	private int numberOfNodes = 15;
 
-	private double fractionBNodes = 0.3;
-
-	private double fractionUNodes = 0.5;
-
-	private double fractionCNodes = 0.2;
-
 	private final Random rand;
 
 	private final CommandDrawing commandDrawing;
@@ -62,57 +56,22 @@ public class RandomNetCreator {
 		this.numberOfNodes = numberOfNodes;
 	}
 
-	public double getFractionBNodes() {
-		return fractionBNodes;
-	}
-
-	public void setFractionBNodes(double fractionBNodes) {
-		this.fractionBNodes = fractionBNodes;
-	}
-
-	public double getFractionUNodes() {
-		return fractionUNodes;
-	}
-
-	public void setFractionUNodes(double fractionUNodes) {
-		this.fractionUNodes = fractionUNodes;
-	}
-
-	public double getFractionCNodes() {
-		return fractionCNodes;
-	}
-
-	public void setFractionCNodes(double fractionCNodes) {
-		this.fractionCNodes = fractionCNodes;
-	}
-
 	private void initialize() {
     	net = new Net();
     	result = null;
 	}
 
 	private void createNodes() {
-		int noBNodes = ModifiedPoisson.getModifiedPoisson(numberOfNodes * fractionBNodes).drawModifiedPoisson(rand);
-		if (noBNodes == 0) {
+		int noNodes = ModifiedPoisson.getModifiedPoisson(numberOfNodes).drawModifiedPoisson(rand);
+		if (noNodes == 0) {
 			result = DrawResult.REJECT;
 			return;
 		}
-		int rootIdx = rand.nextInt(noBNodes);
-		for (int i = 0; i < noBNodes; i++) {
-			Node n = net.newBNode();
-			if (i == rootIdx) {
+		for (int i = 0; i < noNodes; i++) {
+			Node n = net.newNode(commandDrawing.drawCommand());
+			if (i == 0) {
 				net.setRoot(n);
 			}
-		}
-
-		int noUNodes = ModifiedPoisson.getModifiedPoisson(numberOfNodes * fractionUNodes).drawModifiedPoisson(rand);
-		for (int i = 0; i < noUNodes; i++) {
-			net.newUNode();
-		}
-
-		int noCNodes = ModifiedPoisson.getModifiedPoisson(numberOfNodes * fractionCNodes).drawModifiedPoisson(rand);
-		for (int i = 0; i < noCNodes; i++) {
-			net.newCNode(commandDrawing.drawCommand());
 		}
 	}
 

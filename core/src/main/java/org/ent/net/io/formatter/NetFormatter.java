@@ -1,5 +1,12 @@
 package org.ent.net.io.formatter;
 
+import org.ent.net.Arrow;
+import org.ent.net.Net;
+import org.ent.net.Purview;
+import org.ent.net.node.MarkerNode;
+import org.ent.net.node.Node;
+
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -7,17 +14,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.ent.net.Arrow;
-import org.ent.net.Purview;
-import org.ent.net.Net;
-import org.ent.net.node.MarkerNode;
-import org.ent.net.node.Node;
-
-import javax.validation.constraints.NotNull;
-
 public class NetFormatter {
 
     private Map<Node, String> givenNodeNames = new HashMap<>();
+
+	private boolean forceGivenNodeNames;
 
 	private Integer maxDepth;
 
@@ -41,6 +42,15 @@ public class NetFormatter {
 
 	public NetFormatter withNodeNamesInverse(Map<String, Node> nodeNames) {
 		setNodeNamesInverse(nodeNames);
+		return this;
+	}
+
+	public void setForceGivenNodeNames(boolean forceGivenNodeNames) {
+		this.forceGivenNodeNames = forceGivenNodeNames;
+	}
+
+	public NetFormatter withForceGivenNodeNames(boolean forceGivenNodeNames) {
+		setForceGivenNodeNames(forceGivenNodeNames);
 		return this;
 	}
 
@@ -73,7 +83,7 @@ public class NetFormatter {
             rootNodes.add(nextRoot);
         }
 
-        FormattingWorker worker = new FormattingWorker(rootNodes, givenNodeNames, maxDepth)
+        FormattingWorker worker = new FormattingWorker(rootNodes, givenNodeNames, forceGivenNodeNames, maxDepth)
 				.withAscii(ascii);
 
         String result = worker.formatRecursively();

@@ -1,14 +1,13 @@
 package org.ent.net.node.cmd.operation;
 
+import org.ent.net.Arrow;
 import org.ent.net.node.cmd.ExecutionResult;
 
-public interface BiOperation<H1, H2> {
+public interface BiOperation {
 
-	ExecutionResult apply(H1 handle1, H2 handle2);
+	int getCode();
 
-	default int getEvalLevel() {
-		return 0;
-	}
+	ExecutionResult apply(Arrow handle1, Arrow handle2);
 
 	String getShortName();
 

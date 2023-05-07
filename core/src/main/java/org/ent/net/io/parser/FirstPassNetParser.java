@@ -1,29 +1,31 @@
 package org.ent.net.io.parser;
 
-import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_COMMA;
-import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_EOF;
-import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_EQUALS;
-import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_LEFT_PARENTHESIS;
-import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_LEFT_SQUARE_BRACKET;
-import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_RIGHT_PARENTHESIS;
-import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_RIGHT_SQUARE_BRACKET;
-import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_SEMICOLON;
-
-import java.io.Reader;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.ent.net.io.parser.tokenizer.CommandToken;
 import org.ent.net.io.parser.tokenizer.IdentifierToken;
 import org.ent.net.io.parser.tokenizer.NetTokenizer;
 import org.ent.net.io.parser.tokenizer.Token;
 import org.ent.net.io.parser.tokenizer.TokenManager;
-import org.ent.net.node.MarkerNode;
+import org.ent.net.io.parser.tokenizer.ValueToken;
+import org.ent.net.node.cmd.Command;
+import org.ent.net.node.cmd.CommandFactory;
+
+import java.io.Reader;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_COLON;
+import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_COMMA;
+import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_EOF;
+import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_LEFT_PARENTHESIS;
+import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_LEFT_SQUARE_BRACKET;
+import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_RIGHT_PARENTHESIS;
+import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_RIGHT_SQUARE_BRACKET;
+import static org.ent.net.io.parser.tokenizer.TokenManager.TOKEN_SEMICOLON;
 
 public class FirstPassNetParser {
 
@@ -31,7 +33,7 @@ public class FirstPassNetParser {
 
     private final Map<String, NodeTemplate> identifierMapping = new HashMap<>();
 
-	private final Set<NodeTemplate> allEntries = new HashSet<>();
+	private final Set<NodeTemplate> allEntries = new LinkedHashSet<>();
 
 	private boolean markerNodePermitted;
 
@@ -96,37 +98,59 @@ public class FirstPassNetParser {
         Token token = tokenizer.peek();
         if (token instanceof IdentifierToken identifierToken) {
             Token tokenNext = tokenizer.peek(2);
-            if (tokenNext == TOKEN_EQUALS) {
+            if (tokenNext == TOKEN_COLON) {
                 tokenizer.next();
                 tokenizer.next();
-                NodeTemplate value = parsePlainNodeExpression();
+                NodeTemplate nodeTemplate = parseNodeWithPossibleValueExpression();
                 String name = identifierToken.getName();
                 if (identifierMapping.containsKey(name))
                     throw new ParserException("Identifier '" + name + "' bound more than once.");
-                identifierMapping.put(name, value);
-                allEntries.add(value);
-                return value;
+                identifierMapping.put(name, nodeTemplate);
+                allEntries.add(nodeTemplate);
+                return nodeTemplate;
             }
         }
-        NodeTemplate value = parsePlainNodeExpression();
-        allEntries.add(value);
-        return value;
+        NodeTemplate nodeTemplate = parseNodeWithPossibleValueExpression();
+        allEntries.add(nodeTemplate);
+        return nodeTemplate;
     }
 
-    private NodeTemplate parsePlainNodeExpression() throws ParserException {
+    private NodeTemplate parseNodeWithPossibleValueExpression() throws ParserException {
+        Token token = tokenizer.peek();
+        int value = 0;
+        if (token instanceof ValueToken valueToken) {
+            tokenizer.next();
+            value = valueToken.getValue();
+        } else if (token instanceof CommandToken commandToken) {
+            tokenizer.next();
+            Command command = CommandFactory.getByName(commandToken.getCommandName());
+            if (command == null) {
+                throw new ParserException("Unknown command: '" + commandToken.getCommandName() + "'");
+            }
+            value = command.getValue();
+        } else {
+            return parsePlainNodeExpression(0);
+        }
+        Token next = tokenizer.peek();
+        if (next == TOKEN_LEFT_SQUARE_BRACKET || next == TOKEN_LEFT_PARENTHESIS) {
+            return parsePlainNodeExpression(value);
+        } else {
+            return new ValueNodeTemplate(value);
+        }
+    }
+
+        private NodeTemplate parsePlainNodeExpression(int value) throws ParserException {
         Token token = tokenizer.next();
-        if (token instanceof CommandToken commandToken) {
-            return new CommandNodeTemplate(commandToken.getCommandName());
-        } else if (token == TOKEN_LEFT_SQUARE_BRACKET) {
+        if (token == TOKEN_LEFT_SQUARE_BRACKET) {
             NodeTemplate child = parseNodeExpression();
             demandToken(TOKEN_RIGHT_SQUARE_BRACKET);
-            return new UNodeTemplate(child);
+            return new UnaryNodeTemplate(value, child);
         } else if (token == TOKEN_LEFT_PARENTHESIS) {
             NodeTemplate leftChild = parseNodeExpression();
             demandToken(TOKEN_COMMA);
             NodeTemplate rightChild = parseNodeExpression();
             demandToken(TOKEN_RIGHT_PARENTHESIS);
-            return new BNodeTemplate(leftChild, rightChild);
+            return new BNodeTemplate(value, leftChild, rightChild);
         } else if (token instanceof IdentifierToken identifierToken) {
             return new IdentifierNodeTemplate(identifierToken.getName());
         } else if (token == TokenManager.TOKEN_MARKER) {

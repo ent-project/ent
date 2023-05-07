@@ -2,17 +2,17 @@ package org.ent.net.node;
 
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
-import org.ent.net.Purview;
 import org.ent.net.Net;
+import org.ent.net.Purview;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * Binary node.
  */
-public class BNode extends Node {
+public class BNode extends AbstractNode {
+
+	private int value;
 
 	private Hub leftChildHub;
 	private Hub rightChildHub;
@@ -85,9 +85,19 @@ public class BNode extends Node {
 		}
 	}
 
-	public BNode(Net net, Node leftChild, Node rightChild) {
+	public BNode(Net net, int value, Node leftChild, Node rightChild) {
 		super(net);
+		this.value = value;
 		initialize(leftChild, rightChild);
+	}
+
+	public BNode(Net net, Node leftChild, Node rightChild) {
+		this(net, 0, leftChild, rightChild);
+	}
+
+	public BNode(Net net, Node leftChild) {
+		super(net);
+		initialize(leftChild, this);
 	}
 
 	public BNode(Net net) {
@@ -102,26 +112,32 @@ public class BNode extends Node {
 		this.rightChildHub.addInverseReference(rightArrow);
 	}
 
+	@Override
 	public Node getLeftChild(Purview purview) {
 		return leftArrow.getTarget(purview);
 	}
 
+	@Override
 	public void setLeftChild(Node child, Purview purview) {
 		leftArrow.setTarget(child, purview);
 	}
 
+	@Override
 	public Node getRightChild(Purview purview) {
 		return rightArrow.getTarget(purview);
 	}
 
+	@Override
 	public void setRightChild(Node child, Purview purview) {
 		rightArrow.setTarget(child, purview);
 	}
 
+	@Override
 	public Arrow getLeftArrow() {
 		return leftArrow;
 	}
 
+	@Override
 	public Arrow getRightArrow() {
 		return rightArrow;
 	}
@@ -136,22 +152,44 @@ public class BNode extends Node {
 		return switch (arrowDirection) {
 			case LEFT -> leftArrow;
 			case RIGHT -> rightArrow;
-			case DOWN -> throw new IllegalArgumentException();
 		};
 	}
 
 	@Override
-	public Optional<Arrow> getArrowMaybe(ArrowDirection arrowDirection) {
-		return switch (arrowDirection) {
-			case LEFT -> Optional.of(leftArrow);
-			case RIGHT -> Optional.of(rightArrow);
-			case DOWN -> Optional.empty();
-		};
+	public int getValue() {
+		return value;
 	}
 
 	@Override
-	public <T> T instanceOf(Function<CNode, T> cNodeCase, Function<UNode, T> uNodeCase, Function<BNode, T> bNodeCase) {
-		return bNodeCase.apply(this);
+	public void setValue(int value) {
+		this.value = value;
 	}
 
+	@Override
+	public boolean isUnaryNode() {
+		return rightChildHub.getNode() == this && leftChildHub.getNode() != this;
+	}
+
+	@Override
+	public boolean isCommandNode() {
+		return leftChildHub.getNode() == this && rightChildHub.getNode() == this;
+	}
+
+	@Override
+	public boolean isMarkerNode() {
+		return false;
+	}
+
+	@Override
+	public NodeType getNodeType() {
+		if (rightChildHub.getNode() == this) {
+			if (leftChildHub.getNode() == this) {
+				return NodeType.COMMAND_NODE;
+			} else {
+				return NodeType.UNARY_NODE;
+			}
+		} else {
+			return NodeType.BINARY_NODE;
+		}
+	}
 }

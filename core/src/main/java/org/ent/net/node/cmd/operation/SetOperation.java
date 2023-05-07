@@ -5,10 +5,16 @@ import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.ExecutionResult;
 
-public class SetOperation implements BiOperation<Arrow, Node> {
+public class SetOperation implements BiOperation {
 
 	@Override
-	public ExecutionResult apply(Arrow setter, Node target) {
+	public int getCode() {
+		return Operations.CODE_SET_OPERATION;
+	}
+
+	@Override
+	public ExecutionResult apply(Arrow setter, Arrow arrowToTarget) {
+		Node target = arrowToTarget.getTarget(Purview.COMMAND);
 		setter.setTarget(target, Purview.COMMAND);
 		return ExecutionResult.NORMAL;
 	}
@@ -20,7 +26,7 @@ public class SetOperation implements BiOperation<Arrow, Node> {
 
 	@Override
 	public String getShortNameAscii() {
-		return ":";
+		return "=";
 	}
 
 }

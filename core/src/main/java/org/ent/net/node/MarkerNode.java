@@ -3,17 +3,16 @@ package org.ent.net.node;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
+import org.ent.net.Purview;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
 
-public class MarkerNode extends Node {
+public class MarkerNode extends BNode {
 
 	public static final String MARKER_NODE_SYMBOL = "●";
 
-	public static final String MARKER_NODE_SYMBOL_ASCII = "#";
+	public static final String MARKER_NODE_SYMBOL_ASCII = "@";
 
 	public MarkerNode(Net net) {
 		super(net);
@@ -30,17 +29,47 @@ public class MarkerNode extends Node {
 	}
 
 	@Override
-	public Optional<Arrow> getArrowMaybe(ArrowDirection arrowDirection) {
-        throw new UnsupportedOperationException();
+	public Node getLeftChild(Purview purview) {
+		throw new UnsupportedOperationException();
 	}
 
-    @Override
+	@Override
+	public void setLeftChild(Node child, Purview purview) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Node getRightChild(Purview purview) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setRightChild(Node child, Purview purview) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
     public String toString() {
         return MARKER_NODE_SYMBOL;
     }
 
 	@Override
-	public <T> T instanceOf(Function<CNode, T> cNodeCase, Function<UNode, T> uNodeCase, Function<BNode, T> bNodeCase) {
-		throw new AssertionError("No MarkerNode expected");
+	public boolean isMarkerNode() {
+		return true;
+	}
+
+	@Override
+	public boolean isUnaryNode() {
+		return false;
+	}
+
+	@Override
+	public boolean isCommandNode() {
+		return false;
+	}
+
+	@Override
+	public NodeType getNodeType() {
+		return NodeType.MARKER_NODE;
 	}
 }

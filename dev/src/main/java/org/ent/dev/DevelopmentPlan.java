@@ -39,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.Color;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayDeque;
 import java.util.EnumMap;
 import java.util.Queue;
@@ -258,7 +257,7 @@ public class DevelopmentPlan {
 				.withRangeMax(0.1));
 			plotRegistry.addPlot(new PlotInfo("level1-failure-types")
 				.addRow(row -> row.withGroup(GROUP_DEFAULT).withStat(level1FailReasonStat.get(StepResult.FATAL)).withLabel("fatal").withColor(Color.RED))
-				.addRow(row -> row.withGroup(GROUP_DEFAULT).withStat(level1FailReasonStat.get(StepResult.INVALID_COMMAND_BRANCH)).withLabel("invalid command branch").withColor(Color.BLUE))
+				.addRow(row -> row.withGroup(GROUP_DEFAULT).withStat(level1FailReasonStat.get(StepResult.ENDLESS_LOOP)).withLabel("invalid command branch").withColor(Color.BLUE))
 				.addRow(row -> row.withGroup(GROUP_DEFAULT).withStat(level1FailReasonStat.get(StepResult.INVALID_COMMAND_NODE)).withLabel("invalid command node").withColor(Color.YELLOW))
 				.addRow(row -> row.withGroup(GROUP_DEFAULT).withStat(level1FailReasonStat.get(StepResult.COMMAND_EXECUTION_FAILED)).withLabel("execution failed").withColor(Color.DARK_GRAY))
 				.withTitle("Level 1 failure types")
@@ -377,47 +376,13 @@ public class DevelopmentPlan {
 		noNodesHyper.setMinimumValue(0);
 		noNodesHyper.setMaximumValue(40);
 
-		FloatHyperparameter fractionCNodes = new FloatHyperparameter(0.2f, "Fraction of C-nodes");
-		fractionCNodes.setMinimumValue(0f);
-		fractionCNodes.setMaximumValue(1f);
-
-		FloatHyperparameter fractionUNodes = new FloatHyperparameter(0.05f, "Fraction of U-nodes");
-		fractionUNodes.setMinimumValue(0f);
-		fractionUNodes.setMaximumValue(1f);
-
-		FloatHyperparameter fractionBNodes = new FloatHyperparameter(0.75f, "Fraction of B-nodes");
-		fractionBNodes.setMinimumValue(0f);
-		fractionBNodes.setMaximumValue(1f);
-
 		noNodesHyper.addPropertyChangeListener(e -> {
 			int noNodes = (int) e.getNewValue();
 			randomNetSource.setNoNodes(noNodes);
 		});
-		PropertyChangeListener updateFractions = e -> {
-			float valC = fractionCNodes.getValue();
-			float valU = fractionUNodes.getValue();
-			float valB = fractionBNodes.getValue();
-			float sum = valC + valU + valB;
-			if (sum == 0) {
-				valC = valU = valB = 1f;
-				sum = 3f;
-			}
-			valC /= sum;
-			valU /= sum;
-			valB /= sum;
-			randomNetSource.setFractionCNodes(valC);
-			randomNetSource.setFractionUNodes(valU);
-			randomNetSource.setFractionBNodes(valB);
-		};
-		fractionCNodes.addPropertyChangeListener(updateFractions);
-		fractionUNodes.addPropertyChangeListener(updateFractions);
-		fractionBNodes.addPropertyChangeListener(updateFractions);
 
 		if (hyperRegistry != null) {
 			hyperRegistry.addHyperparameter(noNodesHyper);
-			hyperRegistry.addHyperparameter(fractionCNodes);
-			hyperRegistry.addHyperparameter(fractionUNodes);
-			hyperRegistry.addHyperparameter(fractionBNodes);
 		}
 
 		Pool level2Pool;

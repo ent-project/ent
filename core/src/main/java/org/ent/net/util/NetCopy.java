@@ -1,16 +1,12 @@
 package org.ent.net.util;
 
+import org.ent.net.Arrow;
+import org.ent.net.Net;
+import org.ent.net.Purview;
+import org.ent.net.node.Node;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.ent.net.Arrow;
-import org.ent.net.Purview;
-import org.ent.net.Net;
-import org.ent.net.node.BNode;
-import org.ent.net.node.CNode;
-import org.ent.net.node.MarkerNode;
-import org.ent.net.node.Node;
-import org.ent.net.node.UNode;
 
 public class NetCopy {
 
@@ -36,23 +32,16 @@ public class NetCopy {
 
 	private void copyNodes() throws AssertionError {
 		for (Node nodeOrig : netOrig.getNodes()) {
-			Node nodeClone;
-			if (nodeOrig instanceof CNode cNodeOrig) {
-				nodeClone = netClone.newCNode(cNodeOrig.getCommand());
-			} else if (nodeOrig instanceof UNode) {
-				nodeClone = netClone.newUNode();
-			} else if (nodeOrig instanceof BNode) {
-				nodeClone = netClone.newBNode();
-			} else {
-				throw new AssertionError("Unexpected Node type: " + nodeOrig.getClass());
+			if (nodeOrig.isMarkerNode()) {
+				throw new AssertionError("Marker node not expected");
 			}
-			originalToCloneMap.put(nodeOrig, nodeClone);
+			originalToCloneMap.put(nodeOrig, netClone.newNode(nodeOrig.getValue()));
 		}
 	}
 
 	private void copyMarker() {
 		if (netOrig.isMarkerNodePermitted()) {
-			MarkerNode markerClone = netClone.permitMarkerNode();
+			netClone.permitMarkerNode();
 		}
 	}
 

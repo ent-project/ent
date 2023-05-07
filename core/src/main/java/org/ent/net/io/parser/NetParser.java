@@ -2,8 +2,9 @@ package org.ent.net.io.parser;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.ent.net.Arrow;
-import org.ent.net.Purview;
+import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
+import org.ent.net.Purview;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 
@@ -11,6 +12,7 @@ import javax.validation.constraints.NotNull;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +69,10 @@ public class NetParser {
         return nodeNames;
     }
 
+	public Node getNodeByName(String name) throws ParserException {
+		return getNodeNames().get(name);
+	}
+
     public List<Node> getMainNodes() {
 		return mainNodes;
 	}
@@ -77,43 +83,62 @@ public class NetParser {
     }
 
     private Net buildNet(List<NodeTemplate> mainNodeTemplates) throws ParserException {
-
     	Net net = createNet();
     	if (markerNodePermitted) {
     		net.permitMarkerNode();
     	}
-
-        instantiateNodesFromTemplates(net);
-
-        fillInChildNodes();
-
+		List<NodeTemplate> allTemplates = collectFromLeftToRight(mainNodeTemplates);
+		instantiateNodesFromTemplates(net, allTemplates);
+        fillInChildNodes(allTemplates);
         resolveMainNodes(mainNodeTemplates);
-
         net.setRoot(mainNodes.get(0));
-
         net.consistencyCheck();
         return net;
     }
 
-    @VisibleForTesting
+	private List<NodeTemplate> collectFromLeftToRight(List<NodeTemplate> mainNodeTemplates) {
+		List<NodeTemplate> results = new ArrayList<>();
+		for (NodeTemplate template : mainNodeTemplates) {
+			collectFromLeftToRightRecursively(template, results);
+		}
+		return results;
+	}
+
+	private void collectFromLeftToRightRecursively(NodeTemplate template, List<NodeTemplate> results) {
+		if (results.contains(template)) {
+			return;
+		}
+		results.add(template);
+		if (template instanceof IdentifierNodeTemplate) {
+			return;
+		}
+		if (template instanceof MarkerNodeTemplate) {
+			return;
+		}
+		for (ArrowDirection direction : ArrowDirection.values()) {
+			collectFromLeftToRightRecursively(template.getChild(direction), results);
+		}
+	}
+
+	@VisibleForTesting
     Net createNet() {
     	return new Net();
 	}
 
-	private void instantiateNodesFromTemplates(Net net) throws ParserException {
-		for (NodeTemplate template : firstPassNetParser.getAllEntries()) {
-        	if (!(template instanceof IdentifierNodeTemplate)) {
-        		Node node = template.generateNode(net);
-        		templateNodeMap.put(template, node);
-        	}
+	private void instantiateNodesFromTemplates(Net net, Collection<NodeTemplate> templates) throws ParserException {
+		for (NodeTemplate template : templates) {
+			if (!(template instanceof IdentifierNodeTemplate)) {
+				Node node = template.generateNode(net);
+				templateNodeMap.put(template, node);
+			}
         }
 	}
 
-	private void fillInChildNodes() throws ParserException {
-		for (NodeTemplate template : firstPassNetParser.getAllEntries()) {
-            if (template instanceof IdentifierNodeTemplate) {
-                continue;
-            }
+	private void fillInChildNodes(Collection<NodeTemplate> templates) throws ParserException {
+		for (NodeTemplate template : templates) {
+			if (template instanceof IdentifierNodeTemplate) {
+				continue;
+			}
             Node node = templateNodeMap.get(template);
             for (Arrow arrow : node.getArrows()) {
             	Node child = resolveNode(template.getChild(arrow.getDirection()));

@@ -7,16 +7,14 @@ import org.ent.dev.plan.VariabilityCollector.ArrowData;
 import org.ent.dev.unit.data.DataImpl;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
-import org.ent.net.Purview;
 import org.ent.net.Net;
+import org.ent.net.Purview;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.io.parser.NetParser;
 import org.ent.net.io.parser.ParserException;
-import org.ent.net.node.BNode;
-import org.ent.net.node.CNode;
-import org.ent.net.node.UNode;
+import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
-import org.ent.net.node.cmd.CommandFactory;
+import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.ExecutionResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -32,29 +30,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 class VariabilityCollectorTest {
 
     private Net net;
-    private CNode cNodeNop;
-    private CNode cNodeIx;
-    private UNode uNode;
+    private Node cNodeNop;
+    private Node cNodeX;
+    private Node uNode;
 
     @BeforeEach
     void setUp() {
         net = new Net();
-        cNodeNop = net.newCNode(CommandFactory.NOP_COMMAND);
-        cNodeIx = net.newCNode(CommandFactory.ANCESTOR_SWAP_COMMAND);
-        uNode = net.newUNode();
+        cNodeNop = net.newCNode(Commands.NOP);
+        cNodeX = net.newCNode(Commands.ANCESTOR_EXCHANGE);
+        uNode = net.newUNode(cNodeNop);
     }
 
     @Test
     void fireCommandExecuted() {
         VariabilityCollector collector = new VariabilityCollector();
 
-        for (CNode cNode : List.of(cNodeNop, cNodeIx, cNodeNop)) {
+        for (Node cNode : List.of(cNodeNop, cNodeX, cNodeNop)) {
             collector.fireCommandExecuted(cNode, ExecutionResult.NORMAL);
         }
 
         Map<Command, VariabilityCollector.CommandData> commandDataMap = collector.commandDataMap;
         assertThat(commandDataMap.get(cNodeNop.getCommand()).getTimesExecuted()).isEqualTo(2);
-        assertThat(commandDataMap.get(cNodeIx.getCommand()).getTimesExecuted()).isEqualTo(1);
+        assertThat(commandDataMap.get(cNodeX.getCommand()).getTimesExecuted()).isEqualTo(1);
     }
 
     @Nested
@@ -64,8 +62,8 @@ class VariabilityCollectorTest {
         void fireSetChild() {
             VariabilityCollector collector = new VariabilityCollector();
 
-            collector.calledSetChild(uNode, ArrowDirection.DOWN, cNodeNop, Purview.COMMAND);
-            collector.calledSetChild(uNode, ArrowDirection.DOWN, cNodeNop, Purview.COMMAND);
+            collector.calledSetChild(uNode, ArrowDirection.LEFT, cNodeNop, Purview.COMMAND);
+            collector.calledSetChild(uNode, ArrowDirection.LEFT, cNodeNop, Purview.COMMAND);
 
             Map<Arrow, ArrowData> arrowDataMap = collector.arrowDataMap;
             assertThat(arrowDataMap).containsOnlyKeys(uNode.getArrow());
@@ -77,7 +75,7 @@ class VariabilityCollectorTest {
         void fireGetChild() {
             VariabilityCollector collector = new VariabilityCollector();
 
-            collector.calledGetChild(uNode, ArrowDirection.DOWN, Purview.COMMAND);
+            collector.calledGetChild(uNode, ArrowDirection.LEFT, Purview.COMMAND);
 
             Map<Arrow, ArrowData> arrowDataMap = collector.arrowDataMap;
             assertThat(arrowDataMap).containsOnlyKeys(uNode.getArrow());
@@ -93,7 +91,7 @@ class VariabilityCollectorTest {
         void newCNode(SoftAssertions softly) {
             VariabilityCollector collector = new VariabilityCollector();
 
-            collector.calledNewNode(cNodeIx);
+            collector.calledNewNode(cNodeX);
 
             softly.assertThat(collector.newNodeData.getNumCNode()).isEqualTo(1);
             softly.assertThat(collector.newNodeData.getNumUNode()).isZero();
@@ -103,6 +101,7 @@ class VariabilityCollectorTest {
         @Test
         void newUNode(SoftAssertions softly) {
             VariabilityCollector collector = new VariabilityCollector();
+            Node nop = net.newCNode(Commands.NOP);
 
             collector.calledNewNode(uNode);
 
@@ -114,7 +113,8 @@ class VariabilityCollectorTest {
         @Test
         void newBNode(SoftAssertions softly) {
             VariabilityCollector collector = new VariabilityCollector();
-            BNode bNode = net.newBNode();
+            Node nop = net.newCNode(Commands.NOP);
+            Node bNode = net.newBNode(nop, nop);
 
             collector.calledNewNode(bNode);
 
@@ -140,16 +140,16 @@ class VariabilityCollectorTest {
 
         @Test
         void arrows(SoftAssertions softly) throws ParserException {
-            Net net = parser.parse("((<|:*>, arguments=(toSet=[#], <nop>)), toSet)");
+            Net net = parser.parse("((</=>, arguments:(toSet:[@], <o>)), toSet)");
             data.setReplicator(() -> net);
-            BNode nodeArguments = (BNode) parser.getNodeNames().get("arguments");
-            UNode nodeToSet = (UNode) parser.getNodeNames().get("toSet");
+            Node nodeArguments = parser.getNodeByName("arguments");
+            Node nodeToSet = parser.getNodeNames().get("toSet");
 
             exam.accept(data);
 
             net.referentialGarbageCollection();
             String netFmt = new NetFormatter().withAscii(true).format(net);
-            softly.assertThat(netFmt).isEqualTo("[<nop>]");
+            softly.assertThat(netFmt).isEqualTo("[<o>]");
 
             VariabilityCollector collector = exam.getCollector();
             softly.assertThat(collector.arrowDataMap).containsOnlyKeys(
@@ -170,14 +170,14 @@ class VariabilityCollectorTest {
 
         @Test
         void newNode(SoftAssertions softly) throws ParserException {
-            Net net = parser.parse("((<|dup*>, arguments=(toSet=[#], <nop>)), toSet)");
+            Net net = parser.parse("((</dupn>, arguments:(toSet:[@], <o>)), toSet)");
             data.setReplicator(() -> net);
 
             exam.accept(data);
 
             net.referentialGarbageCollection();
             String netFmt = new NetFormatter().withAscii(true).format(net);
-            softly.assertThat(netFmt).isEqualTo("[<nop>]");
+            softly.assertThat(netFmt).isEqualTo("[<o>]");
             VariabilityCollector collector = exam.getCollector();
             softly.assertThat(collector.newNodeData.getNumCNode()).isEqualTo(1);
             softly.assertThat(collector.newNodeData.getNumUNode()).isEqualTo(0);

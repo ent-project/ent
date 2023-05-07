@@ -24,4 +24,9 @@ class IdentifierNodeTemplate implements NodeTemplate {
 	public NodeTemplate getChild(ArrowDirection arrowDirection) {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public void setChild(ArrowDirection arrowDirection, NodeTemplate child) {
+		throw new UnsupportedOperationException();
+	}
 }

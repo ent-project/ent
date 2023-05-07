@@ -1,13 +1,13 @@
 package org.ent.net.node.cmd.accessor;
 
-import java.util.Optional;
-
+import org.ent.net.Arrow;
 import org.ent.net.Purview;
-import org.ent.net.node.Node;
 
-public interface Accessor<T> {
+public interface Accessor {
 
-	Optional<T> get(Node node, Purview purview);
+	Arrow get(Arrow arrow, Purview purview);
+
+	int getCode();
 
 	String getShortName();
 

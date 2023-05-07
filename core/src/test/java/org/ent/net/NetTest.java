@@ -2,29 +2,33 @@ package org.ent.net;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
+import org.ent.Environment;
 import org.ent.ExecutionEventListener;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.io.parser.NetParser;
-import org.ent.net.node.BNode;
-import org.ent.net.node.CNode;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
-import org.ent.net.node.UNode;
-import org.ent.net.node.cmd.CommandFactory;
+import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.NopCommand;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -33,12 +37,17 @@ class NetTest {
 
 	NetParser parser = new NetParser();
 
+	@BeforeAll
+	static void setTestEnvironment() {
+		Environment.setTest(true);
+	}
+
 	@Nested
 	class Consistency {
 
 		@Test
 		void okay() throws Exception {
-			Net net = parser.parse("A=[A]");
+			Net net = parser.parse("[#1]");
 			assertThatCode(() -> net.consistencyCheck()).doesNotThrowAnyException();
 		}
 
@@ -46,7 +55,7 @@ class NetTest {
 		class Errors {
 			@Test
 			void rootNull() throws Exception {
-				Net net = parser.parse("A=[A]");
+				Net net = parser.parse("[#1]");
 				net.setRoot(null);
 				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
 						.hasMessage("Root is null");
@@ -54,8 +63,8 @@ class NetTest {
 
 			@Test
 			void rootNotInNet() throws Exception {
-				Net net = parser.parse("A=[A]");
-				Net net2 = parser.parse("x=(x,x)");
+				Net net = parser.parse("[#1]");
+				Net net2 = parser.parse("(<o>,<x>)");
 				net.setRoot(net2.getNodes().iterator().next());
 				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
 						.hasMessage("Root must be one of the net nodes");
@@ -63,9 +72,9 @@ class NetTest {
 
 			@Test
 			void rogueChild() throws Exception {
-				Net net = new NetParser().parse("A=[A]");
-				Net net2 = new NetParser().parse("x=(x,x)");
-				UNode root = (UNode) net.getRoot();
+				Net net = new NetParser().parse("[#1]");
+				Net net2 = new NetParser().parse("(<o>,<x>)");
+				Node root = net.getRoot();
 				MethodUtils.invokeMethod(root.getArrow(), true, "doSetTarget", net2.getRoot());
 
 				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
@@ -74,9 +83,9 @@ class NetTest {
 
 			@Test
 			void rogueParent() throws Exception {
-				Net net = new NetParser().parse("A=[A]");
-				Net net2 = new NetParser().parse("x=(x,x)");
-				BNode root2 = (BNode) net2.getRoot();
+				Net net = new NetParser().parse("[#1]");
+				Net net2 = new NetParser().parse("(<o>,<x>)");
+				Node root2 = net2.getRoot();
 				MethodUtils.invokeMethod(root2.getLeftArrow(), true, "doSetTarget", net.getRoot());
 
 				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
@@ -85,7 +94,7 @@ class NetTest {
 
 			@Test
 			void markerInNet() throws Exception {
-				Net net = new NetParser().parse("A=[A]");
+				Net net = new NetParser().parse("[#1]");
 				net.addNode(new MarkerNode(null));
 
 				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
@@ -94,7 +103,7 @@ class NetTest {
 
 			@Test
 			void wrongMarker() throws Exception {
-				Net net = new NetParser().permitMarkerNodes().parse("[#]");
+				Net net = new NetParser().permitMarkerNodes().parse("[@]");
 				MarkerNode otherMarkerNode = new MarkerNode(net);
 				FieldUtils.writeField(net, "markerNode", otherMarkerNode, true);
 
@@ -104,7 +113,7 @@ class NetTest {
 
 			@Test
 			void markerNotPermitted() throws Exception {
-				Net net = new NetParser().permitMarkerNodes().parse("A=[#]");
+				Net net = new NetParser().permitMarkerNodes().parse("[@]");
 				net.forbidMarkerNode();
 
 				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
@@ -113,7 +122,7 @@ class NetTest {
 
 			@Test
 			void notOfNet() throws Exception {
-				Net net = new NetParser().permitMarkerNodes().parse("A=[A]");
+				Net net = new NetParser().permitMarkerNodes().parse("[#1]");
 				Node root = net.getRoot();
 				root.setNet(new Net());
 
@@ -124,10 +133,10 @@ class NetTest {
 			@Test
 			void noInverseReference() throws Exception {
 				NetParser parser = new NetParser().permitMarkerNodes();
-				Net net = parser.parse("u=[c=<nop>]");
+				Net net = parser.parse("u:[c:<o>]");
 				Node uNode = parser.getNodeNames().get("u");
 				Node cNode = parser.getNodeNames().get("c");
-				cNode.getHub().removeInverseReference(uNode.getArrow(ArrowDirection.DOWN));
+				cNode.getHub().removeInverseReference(uNode.getArrow());
 
 				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
 						.hasMessage("Child nodes must be aware of their parents");
@@ -138,21 +147,21 @@ class NetTest {
 
 	@Test
 	void addNodes_okay() throws Exception {
-		Net net = new NetParser().parse("A=[A]");
-		assertThat(net.getNodes().size()).isEqualTo(1);
-		Net net2 = new NetParser().parse("x=(x,x)");
+		Net net = new NetParser().parse("<o>");
+		assertThat(net.getNodes()).hasSize(1);
+		Net net2 = new NetParser().parse("<x>");
 
 		net.addNodes(net2.removeAllNodes());
 
-		assertThat(net.getNodes().size()).isEqualTo(2);
+		assertThat(net.getNodes()).hasSize(2);
 		assertThat(net.getNodes()).containsAll(net2.getNodes());
 	}
 
 	@Test
 	void addNodes_error() throws Exception {
-		Net net = parser.parse("A=[A]");
-		assertThat(net.getNodes().size()).isEqualTo(1);
-		Net net2 = parser.parse("x=(x,x)");
+		Net net = parser.parse("<o>");
+		assertThat(net.getNodes()).hasSize(1);
+		Net net2 = parser.parse("<x>");
 
 		Set<Node> net2Nodes = net2.getNodes();
 
@@ -163,8 +172,8 @@ class NetTest {
 
 	@Test
 	void validateBelongsToNet_okay() throws Exception {
-		Net net = parser.parse("A=[A]");
-		Node a = parser.getNodeNames().get("A");
+		Net net = parser.parse("a:<o>");
+		Node a = parser.getNodeNames().get("a");
 
 		assertThatCode(() -> net.validateBelongsToNet(a)).doesNotThrowAnyException();
 	}
@@ -172,7 +181,7 @@ class NetTest {
 	@Test
 	void validateBelongsToNet_netDoesNotKnowTheNode_error() {
 		Net net = new Net();
-		Node node = net.newCNode(CommandFactory.NOP_COMMAND);
+		Node node = net.newCNode(Commands.NOP);
 		net.removeNode(node);
 
 		assertThatExceptionOfType(IllegalStateException.class)
@@ -183,7 +192,7 @@ class NetTest {
 	@Test
 	void validateBelongsToNet_nodeHasDifferentParentNet_error() {
 		Net net = new Net();
-		Node node = net.newCNode(CommandFactory.NOP_COMMAND);
+		Node node = net.newCNode(Commands.NOP);
 		Net otherNet = new Net();
 		node.setNet(otherNet);
 
@@ -213,7 +222,7 @@ class NetTest {
 	@Test
 	void runWithMarkerNode() {
 		final Net net = new Net();
-		net.setRoot(net.newUNode());
+		net.setRoot(net.newNode());
 
 		assertThat(net.isMarkerNodePermitted()).isFalse();
 		net.runWithMarkerNode(marker -> {
@@ -229,49 +238,49 @@ class NetTest {
 		@Mock
 		private ExecutionEventListener eventListener;
 
-		private UNode externalNode;
+		private Node externalNode;
 
 		private Arrow externalArrow;
 
 		@BeforeEach
 		void setUp() throws Exception {
-			parser.parse("a=[a]");
-			externalNode = (UNode) parser.getNodeNames().get("a");
+			parser.parse("a:<o>");
+			externalNode = parser.getNodeNames().get("a");
 			externalArrow = externalNode.getArrow();
 		}
 
 		@Test
 		void getTarget() throws Exception {
-			Net net = parser.parse("u=[_a=<nop>]");
-			UNode u = (UNode) parser.getNodeNames().get("u");
-			CNode nop = (CNode) parser.getNodeNames().get("_a");
+			Net net = parser.parse("u:[_a:<o>]");
+			Node u = parser.getNodeNames().get("u");
+			Node nop = parser.getNodeNames().get("_a");
 			net.addExecutionEventListener(eventListener);
 
-			Node uTarget = u.getChild(Purview.DIRECT);
+			Node uTarget = u.getLeftChild();
 
 			assertThat(uTarget).isSameAs(nop);
-			verify(eventListener).calledGetChild(u, ArrowDirection.DOWN, Purview.DIRECT);
+			verify(eventListener).calledGetChild(u, ArrowDirection.LEFT, Purview.DIRECT);
 			verifyNoMoreInteractions(eventListener);
 		}
 
 		@Test
 		void setTarget() throws Exception {
-			Net net = parser.parse("u=[<nop>]; _b=<ix>");
-			UNode u = (UNode) parser.getNodeNames().get("u");
-			CNode ix = (CNode) parser.getNodeNames().get("_b");
+			Net net = parser.parse("u:[<o>]; _b:<x>");
+			Node u = parser.getNodeNames().get("u");
+			Node ix = parser.getNodeNames().get("_b");
 			net.addExecutionEventListener(eventListener);
 
-			u.setChild(ix, Purview.DIRECT);
+			u.setLeftChild(ix, Purview.DIRECT);
 
-			verify(eventListener).calledSetChild(u, ArrowDirection.DOWN, ix, Purview.DIRECT);
+			verify(eventListener).calledSetChild(u, ArrowDirection.LEFT, ix, Purview.DIRECT);
 			verifyNoMoreInteractions(eventListener);
-			assertThat(u.getChild(Purview.DIRECT)).isSameAs(ix);
+			assertThat(u.getLeftChild(Purview.DIRECT)).isSameAs(ix);
 		}
 
 		@Test
 		void setTarget_error_rogueOrigin() throws Exception {
-			parser.parse("_a=<nop>");
-			CNode a = (CNode) parser.getNodeNames().get("_a");
+			parser.parse("_a:<o>");
+			Node a = parser.getNodeNames().get("_a");
 
 			assertThatThrownBy(() -> externalArrow.setTarget(a, Purview.DIRECT))
 					.isInstanceOf(IllegalStateException.class)
@@ -280,8 +289,8 @@ class NetTest {
 
 		@Test
 		void setTarget_error_rogueTarget() throws Exception {
-			parser.parse("u=[<nop>]");
-			UNode u = (UNode) parser.getNodeNames().get("u");
+			parser.parse("u:[<o>]");
+			Node u = parser.getNodeNames().get("u");
 			Arrow uArrow = u.getArrow();
 
 			assertThatThrownBy(() -> uArrow.setTarget(externalNode, Purview.DIRECT))
@@ -290,30 +299,17 @@ class NetTest {
 		}
 
 		@Test
-		void newUNode() {
-			Net net = new Net();
-			net.addExecutionEventListener(eventListener);
-
-			UNode uNode = net.newUNode();
-
-			net.validateBelongsToNet(uNode);
-			verify(eventListener).calledNewNode(uNode);
-			verifyNoMoreInteractions(eventListener);
-			assertThat(uNode.getChild(Purview.DIRECT)).isEqualTo(uNode);
-		}
-
-		@Test
 		void newUNode_childArg() throws Exception {
-			Net net = parser.parse("_a=<nop>");
+			Net net = parser.parse("_a:<o>");
 			Node nop = parser.getNodeNames().get("_a");
 			net.addExecutionEventListener(eventListener);
 
-			UNode uNode = net.newUNode(nop);
+			Node uNode = net.newUNode(nop);
 
 			net.validateBelongsToNet(uNode);
 			verify(eventListener).calledNewNode(uNode);
 			verifyNoMoreInteractions(eventListener);
-			assertThat(uNode.getChild(Purview.DIRECT)).isEqualTo(nop);
+			assertThat(uNode.getLeftChild(Purview.DIRECT)).isEqualTo(nop);
 		}
 
 		@Test
@@ -321,7 +317,7 @@ class NetTest {
 			Net net = new Net();
 			net.addExecutionEventListener(eventListener);
 
-			BNode bNode = net.newBNode();
+			Node bNode = net.newBNode();
 
 			net.validateBelongsToNet(bNode);
 			verify(eventListener).calledNewNode(bNode);
@@ -332,12 +328,12 @@ class NetTest {
 
 		@Test
 		void newBNode_childArgs() throws Exception {
-			Net net = parser.parse("_a=<nop>; _b=<ix>");
+			Net net = parser.parse("_a:<o>; _b:<x>");
 			Node nop = parser.getNodeNames().get("_a");
 			Node ix = parser.getNodeNames().get("_b");
 			net.addExecutionEventListener(eventListener);
 
-			BNode bNode = net.newBNode(nop, ix);
+			Node bNode = net.newBNode(nop, ix);
 
 			net.validateBelongsToNet(bNode);
 			verify(eventListener).calledNewNode(bNode);
@@ -348,7 +344,7 @@ class NetTest {
 
 		@Test
 		void newBNode_childArgs_error_left() throws Exception {
-			Net net = parser.parse("_a=<nop>");
+			Net net = parser.parse("_a:<o>");
 			Node nop = parser.getNodeNames().get("_a");
 
 			assertThatThrownBy(() -> net.newBNode(externalNode, nop))
@@ -358,7 +354,7 @@ class NetTest {
 
 		@Test
 		void newBNode_childArgs_error_right() throws Exception {
-			Net net = parser.parse("_a=<nop>");
+			Net net = parser.parse("_a:<o>");
 			Node nop = parser.getNodeNames().get("_a");
 
 			assertThatThrownBy(() -> net.newBNode(nop, externalNode))
@@ -371,45 +367,61 @@ class NetTest {
 			Net net = new Net();
 			net.addExecutionEventListener(eventListener);
 
-			CNode cNode = net.newCNode(new NopCommand());
+			Node cNode = net.newCNode(new NopCommand());
 
 			net.validateBelongsToNet(cNode);
 			verify(eventListener).calledNewNode(cNode);
 			verifyNoMoreInteractions(eventListener);
 		}
 
-		@Test
-		void ancestorSwap() throws Exception {
-			Net net = parser.parse("(([_a=<nop>], _b=<ix>), ((_a, _a), [_b]))");
-			Node a = parser.getNodeNames().get("_a");
-			Node b = parser.getNodeNames().get("_b");
-			net.addExecutionEventListener(eventListener);
+		@Nested
+		class AncestorExchange {
 
-			Net.ancestorSwap(a, b);
+			@ParameterizedTest
+			@MethodSource("ancestorSwapData")
+			void ancestorSwap(String input, String expectedOutput) throws Exception {
+				Net net = parser.parse(input);
+				Node a = parser.getNodeNames().get("a");
+				Node b = parser.getNodeNames().get("b");
+				net.addExecutionEventListener(eventListener);
 
-			verifyNoMoreInteractions(eventListener);
-			NetFormatter formatter = new NetFormatter()
-					.withNodeNamesInverse(parser.getNodeNames())
-					.withAscii(true);
-			assertThat(formatter.format(net)).isEqualTo("(([_b=<ix>], _a=<nop>), ((_b, _b), [_a]))");
-		}
+				Net.ancestorExchange(a, b);
 
-		@Test
-		void ancestorSwap_error_first() throws Exception {
-			parser.parse("_a=<nop>");
-			Node nop = parser.getNodeNames().get("_a");
+				verifyNoMoreInteractions(eventListener);
+				NetFormatter formatter = new NetFormatter()
+						.withNodeNamesInverse(parser.getNodeNames())
+						.withForceGivenNodeNames(true)
+						.withAscii(true);
+				assertThat(formatter.format(net)).isEqualTo(expectedOutput);
+			}
 
-			assertThatThrownBy(() -> Net.ancestorSwap(externalNode, nop))
-					.isInstanceOf(IllegalStateException.class)
-					.hasMessage("node belongs to another net");
+			private static Stream<Arguments> ancestorSwapData() {
+				return Stream.of(
+					arguments("(a:(#1, #2), b:(#3, #4))", "(b:(#3, #4), a:(#1, #2))"),
+					arguments("[a:#1(<o>, <o>)]; b:#2(<x>, <x>)", "[b:#2(<x>, <x>)]; a:#1(<o>, <o>)"),
+					arguments("[a:#1(b, b)]; b:#2(<x>, <x>)", "[b:#2(<x>, <x>)]; a:#1"),
+					arguments("(a:[<x>], b:[<o>])", "(b:(<o>, a:(<x>, b)), a)"),
+					arguments("(([a:<o>], b:<x>), ((a, a), [b]))", "(([b:<x>(a:(b, b), a)], a), ((b, b), [a]))")
+				);
+			}
+
+			@Test
+			void ancestorSwap_error_first() throws Exception {
+				parser.parse("_a:<o>");
+				Node nop = parser.getNodeNames().get("_a");
+
+				assertThatThrownBy(() -> Net.ancestorExchange(externalNode, nop))
+						.isInstanceOf(IllegalStateException.class)
+						.hasMessage("node belongs to another net");
+			}
 		}
 
 		@Test
 		void ancestorSwap_error_second() throws Exception {
-			parser.parse("_a=<nop>");
+			parser.parse("_a:<o>");
 			Node nop = parser.getNodeNames().get("_a");
 
-			assertThatThrownBy(() -> Net.ancestorSwap(nop, externalNode))
+			assertThatThrownBy(() -> Net.ancestorExchange(nop, externalNode))
 					.isInstanceOf(IllegalStateException.class)
 					.hasMessage("node belongs to another net");
 		}

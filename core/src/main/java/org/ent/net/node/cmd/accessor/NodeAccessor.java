@@ -1,24 +1,27 @@
 package org.ent.net.node.cmd.accessor;
 
-import java.util.Optional;
-
+import org.ent.net.Arrow;
 import org.ent.net.Purview;
-import org.ent.net.node.Node;
 
-public class NodeAccessor implements Accessor<Node> {
+public class NodeAccessor implements Accessor {
 
 	@Override
-	public Optional<Node> get(Node node, Purview purview) {
-		return Optional.of(node);
+	public int getCode() {
+		return 0b1;
+	}
+
+	@Override
+	public Arrow get(Arrow arrow, Purview purview) {
+		return arrow;
 	}
 
 	@Override
 	public String getShortName() {
-		return "•";
+		return "";
 	}
 
 	@Override
 	public String getShortNameAscii() {
-		return "*";
+		return "";
 	}
 }

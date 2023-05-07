@@ -1,8 +1,8 @@
 package org.ent.dev.plan;
 
 import org.ent.net.Net;
-import org.ent.net.node.CNode;
-import org.ent.net.node.cmd.CommandFactory;
+import org.ent.net.node.Node;
+import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.ExecutionResult;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -18,14 +18,14 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class VariabilityRaterTest {
 
-    private static CNode cNodeNop;
-    private static CNode cNodeIx;
+    private static Node cNodeNop;
+    private static Node cNodeIx;
 
     @BeforeAll
     static void setUp() {
         Net net = new Net();
-        cNodeNop = net.newCNode(CommandFactory.NOP_COMMAND);
-        cNodeIx = net.newCNode(CommandFactory.ANCESTOR_SWAP_COMMAND);
+        cNodeNop = net.newCNode(Commands.NOP);
+        cNodeIx = net.newCNode(Commands.ANCESTOR_EXCHANGE);
     }
 
     @Nested
@@ -33,9 +33,9 @@ class VariabilityRaterTest {
 
         @ParameterizedTest
         @MethodSource("org.ent.dev.plan.VariabilityRaterTest#integration_getPoints")
-        void getPoints_command(List < CNode > commandsExecuted,long pointsExpected){
+        void getPoints_command(List<Node> commandsExecuted, long pointsExpected){
             VariabilityCollector collector = new VariabilityCollector();
-            for (CNode cNode : commandsExecuted) {
+            for (Node cNode : commandsExecuted) {
                 collector.fireCommandExecuted(cNode, ExecutionResult.NORMAL);
             }
             VariabilityRater rater = new VariabilityRater(collector);

@@ -1,21 +1,22 @@
 package org.ent.net.io.parser;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.entry;
+import org.ent.net.node.cmd.Commands;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.entry;
 
 class FirstPassNetParserTest {
 
 	@Test
 	void resolveIdentifier_chain() throws Exception {
-		String input = "A=B; B=C; C=<nop>";
+		String input = "A:B; B:C; C:<o>";
 		FirstPassNetParser parser = new FirstPassNetParser(new StringReader(input));
 		List<NodeTemplate> mainNodeTemplates = parser.parseAll();
 
@@ -38,8 +39,8 @@ class FirstPassNetParserTest {
 		assertThat(template2).isInstanceOfSatisfying(IdentifierNodeTemplate.class, i -> {
 			assertThat(i.getName()).isEqualTo("C");
 		});
-		assertThat(template3).isInstanceOfSatisfying(CommandNodeTemplate.class, c -> {
-			assertThat(c.getCommandName()).isEqualTo("nop");
+		assertThat(template3).isInstanceOfSatisfying(ValueNodeTemplate.class, c -> {
+			assertThat(c.getValue()).isEqualTo(Commands.NOP.getValue());
 		});
 
 		assertThat(parser.resolveIdentifier((IdentifierNodeTemplate) template1)).isSameAs(template3);
@@ -48,15 +49,15 @@ class FirstPassNetParserTest {
 
 	@Test
 	void parseAll_okay_semicolons() throws Exception {
-		String input = "; <nop> ;;; <nop>;";
+		String input = "; <o> ;;; <o>;";
 		FirstPassNetParser parser = new FirstPassNetParser(new StringReader(input));
 		parser.parseAll();
-		assertThat(parser.getAllEntries().size()).isEqualTo(2);
+		assertThat(parser.getAllEntries()).hasSize(2);
 	}
 
 	@Test
 	void resolveIdentifier_error_cycle() throws Exception {
-		String input = "A=B; B=C; C=A";
+		String input = "A:B; B:C; C:A";
 		FirstPassNetParser parser = new FirstPassNetParser(new StringReader(input));
 		parser.parseAll();
 		Map<String, NodeTemplate> identifierMapping = parser.getIdentifierMapping();
@@ -68,7 +69,7 @@ class FirstPassNetParserTest {
 
 	@Test
 	void parseAll_error_duplicateName() throws Exception {
-		String input = "(A=<nop>, A=[<nop>])";
+		String input = "(A:<o>, A:[<o>])";
 		FirstPassNetParser parser = new FirstPassNetParser(new StringReader(input));
 		assertThatThrownBy(() -> parser.parseAll())
 				.isInstanceOf(ParserException.class).hasMessage("Identifier 'A' bound more than once.");

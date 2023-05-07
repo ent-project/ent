@@ -109,18 +109,10 @@ public class ManagedRun {
 	private boolean isStepResultFatal(StepResult result) throws AssertionError {
 		return switch (result) {
 			case SUCCESS -> false;
-			case FATAL -> true;
+			case FATAL, ENDLESS_LOOP -> true;
 			case COMMAND_EXECUTION_FAILED -> {
 				if (runSetup.commandExecutionFailedIsFatal()) {
 					log.debug("Command execution failed in step {} - end evaluation", noSteps);
-					yield true;
-				} else {
-					yield false;
-				}
-			}
-			case INVALID_COMMAND_BRANCH -> {
-				if (runSetup.invalidCommandBranchIsFatal()) {
-					log.debug("Invalid command branch in step {} - end evaluation", noSteps);
 					yield true;
 				} else {
 					yield false;

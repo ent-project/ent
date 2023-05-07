@@ -1,63 +1,100 @@
 package org.ent.net.node;
 
+import com.google.common.annotations.VisibleForTesting;
+import org.ent.Environment;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
+import org.ent.net.Purview;
+import org.ent.net.node.cmd.Command;
+import org.ent.net.node.cmd.CommandFactory;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
-public abstract class Node {
+public interface Node {
 
-	protected Net net;
+	Net getNet();
+	void setNet(Net net);
 
-	private Hub hub;
+	Hub getHub();
 
-	protected Node(Net net) {
-		this.net = net;
-		this.hub = new Hub(this);
+	void setHub(Hub hub);
+
+	List<Arrow> getArrows();
+
+	Arrow getArrow(ArrowDirection arrowDirection);
+
+	Arrow getLeftArrow();
+
+	default Arrow getArrow() {
+		return getLeftArrow();
 	}
 
-	public Net getNet() {
-		return net;
+	Arrow getRightArrow();
+
+	Node getLeftChild(Purview purview);
+
+	@VisibleForTesting
+	default Node getLeftChild() {
+		verifyTestEnvironment();
+		return getLeftChild(Purview.DIRECT);
 	}
 
-	public void setNet(Net net) {
-		this.net = net;
+	default boolean hasProperLeftChild() {
+		return getLeftChild(Purview.DIRECT) != this;
 	}
 
-	public Hub getHub() {
-		return hub;
+	default boolean hasProperRightChild() {
+		return getRightChild(Purview.DIRECT) != this;
 	}
 
-	public void setHub(Hub hub) {
-		this.hub = hub;
+	void setLeftChild(Node child, Purview purview);
+
+	@VisibleForTesting
+	default void setLeftChild(Node child) {
+		verifyTestEnvironment();
+		setLeftChild(child, Purview.DIRECT);
 	}
 
-	public abstract List<Arrow> getArrows();
+	Node getRightChild(Purview purview);
 
-	public abstract Arrow getArrow(ArrowDirection arrowDirection);
-
-	public abstract Optional<Arrow> getArrowMaybe(ArrowDirection arrowDirection);
-
-	public abstract <T> T instanceOf(Function<CNode, T> cNodeCase, Function<UNode, T> uNodeCase, Function<BNode, T> bNodeCase);
-
-	public void doInstanceOf(Consumer<CNode> cNodeCase, Consumer<UNode> uNodeCase, Consumer<BNode> bNodeCase) {
-		this.instanceOf(
-				cNode -> {
-					cNodeCase.accept(cNode);
-					return null;
-					},
-				uNode -> {
-					uNodeCase.accept(uNode);
-					return null;
-					},
-				bNode -> {
-					bNodeCase.accept(bNode);
-					return null;
-				});
+	@VisibleForTesting
+	default Node getRightChild() {
+		verifyTestEnvironment();
+		return getRightChild(Purview.DIRECT);
 	}
 
+	void setRightChild(Node child, Purview purview);
+
+	@VisibleForTesting
+	default void setRightChild(Node child) {
+		verifyTestEnvironment();
+		setRightChild(child, Purview.DIRECT);
+	}
+
+	private void verifyTestEnvironment() {
+		if (!Environment.isTest()) {
+			throw new AssertionError();
+		}
+	}
+
+	int getValue();
+
+	void setValue(int value);
+
+	default void setCommand(Command command) {
+		setValue(command.getValue());
+	}
+
+	boolean isUnaryNode();
+
+	boolean isCommandNode();
+
+	boolean isMarkerNode();
+
+	NodeType getNodeType();
+
+	default Command getCommand() {
+		return CommandFactory.getByValue(getValue());
+	}
 }

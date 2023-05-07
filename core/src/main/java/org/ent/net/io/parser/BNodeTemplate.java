@@ -2,13 +2,15 @@ package org.ent.net.io.parser;
 
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
-import org.ent.net.node.BNode;
+import org.ent.net.node.Node;
 
 class BNodeTemplate implements NodeTemplate {
-    private final NodeTemplate leftChild;
-    private final NodeTemplate rightChild;
+    private final int value;
+    private NodeTemplate leftChild;
+    private NodeTemplate rightChild;
 
-    public BNodeTemplate(NodeTemplate leftChild, NodeTemplate rightChild) {
+    public BNodeTemplate(int value, NodeTemplate leftChild, NodeTemplate rightChild) {
+        this.value = value;
         this.leftChild = leftChild;
         this.rightChild = rightChild;
     }
@@ -18,12 +20,19 @@ class BNodeTemplate implements NodeTemplate {
     	return switch (arrowDirection) {
     		case LEFT -> leftChild;
     		case RIGHT -> rightChild;
-    		case DOWN -> throw new IllegalArgumentException();
     	};
     }
 
-	@Override
-	public BNode generateNode(Net net) {
-		return net.newBNode();
+    @Override
+    public void setChild(ArrowDirection arrowDirection, NodeTemplate child) {
+        switch (arrowDirection) {
+            case LEFT -> this.leftChild  = child;
+            case RIGHT -> this.rightChild = child;
+        }
+    }
+
+    @Override
+	public Node generateNode(Net net) {
+		return net.newNode(value);
 	}
 }

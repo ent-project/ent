@@ -10,7 +10,7 @@ public class NopCommand implements Command {
 	}
 
 	@Override
-	public int getEvalLevel() {
+	public int getValue() {
 		return 0;
 	}
 
@@ -21,6 +21,6 @@ public class NopCommand implements Command {
 
 	@Override
 	public String getShortNameAscii() {
-		return "nop";
+		return "o";
 	}
 }

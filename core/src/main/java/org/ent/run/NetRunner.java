@@ -2,10 +2,10 @@ package org.ent.run;
 
 import org.ent.net.Net;
 import org.ent.net.Purview;
-import org.ent.net.node.BNode;
-import org.ent.net.node.CNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
+import org.ent.net.node.cmd.CommandFactory;
+import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.ExecutionResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,23 +35,25 @@ public class NetRunner {
 	}
 
 	public StepResult step() {
-		Node root = net.getRoot();
-		if (!(root instanceof BNode executionPointer)) {
-			return StepResult.FATAL;
-		}
+		Node executionPointer = net.getRoot();
 		StepResult result = doStep(executionPointer);
 		advanceExecutionPointer(executionPointer);
 		return result;
 	}
 
-	private StepResult doStep(BNode executionPointer) {
-		if (!(executionPointer.getLeftChild(Purview.RUNNER) instanceof BNode commandBranch)) {
-			return StepResult.INVALID_COMMAND_BRANCH;
+	private StepResult doStep(Node executionPointer) {
+		Node commandBranch = executionPointer.getLeftChild(Purview.RUNNER);
+		Node commandNode = commandBranch.getLeftChild(Purview.RUNNER);
+		boolean executionPointerDoesNotAdvance = executionPointer.getRightChild(Purview.RUNNER) == executionPointer;
+
+		Command command = CommandFactory.getByValue(commandNode.getValue());
+		if (command == null) {
+			if (executionPointerDoesNotAdvance) {
+				return StepResult.ENDLESS_LOOP;
+			} else {
+				return StepResult.INVALID_COMMAND_NODE;
+			}
 		}
-		if (!(commandBranch.getLeftChild(Purview.RUNNER) instanceof CNode commandNode)) {
-			return StepResult.INVALID_COMMAND_NODE;
-		}
-		Command command = commandNode.getCommand();
 		Node parameters = commandBranch.getRightChild(Purview.RUNNER);
 
 		ExecutionResult executeResult = command.execute(parameters);
@@ -59,6 +61,10 @@ public class NetRunner {
 		log.trace("command {} executed: {}", command, executeResult);
 		if (netRunnerListener != null) {
 			netRunnerListener.fireCommandExecuted(commandNode, executeResult);
+		}
+
+		if (command.getValue() == Commands.NOP.getValue() && executionPointerDoesNotAdvance) {
+			return StepResult.ENDLESS_LOOP;
 		}
 		return stepResult;
 	}
@@ -70,7 +76,7 @@ public class NetRunner {
 		};
 	}
 
-	private void advanceExecutionPointer(BNode executionPointer) {
+	private void advanceExecutionPointer(Node executionPointer) {
 		Node newExecutionPointer = executionPointer.getRightChild(Purview.RUNNER);
 		net.setRoot(newExecutionPointer);
 	}

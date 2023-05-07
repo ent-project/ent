@@ -17,7 +17,7 @@ class VariabilityExamTest {
 
         NetParser parser = new NetParser();
         parser.permitMarkerNodes();
-        Net net = parser.parse("((<nop>, (#,#)), #)");
+        Net net = parser.parse("r:((<o>, #1), r)");
 
         VariabilityExamData data = new VariabilityExamData(new DataImpl());
         data.setReplicator(() -> net);

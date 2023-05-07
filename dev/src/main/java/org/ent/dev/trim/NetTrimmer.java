@@ -65,6 +65,6 @@ public class NetTrimmer {
 	}
 
 	private void cutArrow(Arrow arrow) {
-		arrow.setTarget(marker, Purview.DIRECT);
+		arrow.setTarget(arrow.getOrigin(), Purview.DIRECT);
 	}
 }

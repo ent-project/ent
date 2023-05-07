@@ -9,4 +9,6 @@ interface NodeTemplate {
 	Node generateNode(Net net) throws ParserException;
 
 	NodeTemplate getChild(ArrowDirection arrowDirection);
+
+	void setChild(ArrowDirection arrowDirection, NodeTemplate child);
 }

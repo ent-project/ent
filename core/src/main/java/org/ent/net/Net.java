@@ -4,11 +4,9 @@ import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.ent.ExecutionEventListener;
 import org.ent.net.node.BNode;
-import org.ent.net.node.CNode;
 import org.ent.net.node.Hub;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
-import org.ent.net.node.UNode;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.util.ReferentialGarbageCollection;
 
@@ -181,7 +179,7 @@ public class Net {
 		forbidMarkerNode();
 	}
 
-	public static void ancestorSwap(Node node1, Node node2) {
+	public static void ancestorExchange(Node node1, Node node2) {
 		Net net = node1.getNet();
 		net.validateBelongsToNet(node2);
 		Hub hub1 = node1.getHub();
@@ -192,29 +190,32 @@ public class Net {
 		hub1.setNode(node2);
 	}
 
-	public UNode newUNode() {
-		UNode uNode = new UNode(this);
-		addNodeInternal(uNode);
-		fireNewNodeCall(uNode);
-		return uNode;
-	}
-
-	public UNode newUNode(Node child) {
+	public Node newUNode(Node child) {
 		validateBelongsToNet(child);
-		UNode uNode = new UNode(this, child);
+		Node uNode = new BNode(this, child);
 		addNodeInternal(uNode);
 		fireNewNodeCall(uNode);
 		return uNode;
 	}
 
-	public BNode newBNode() {
+	public Node newNode() {
 		BNode bNode = new BNode(this);
 		addNodeInternal(bNode);
 		fireNewNodeCall(bNode);
 		return bNode;
 	}
 
-	public BNode newBNode(Node leftChild, Node rightChild) {
+	public Node newBNode() {
+		return newNode();
+	}
+
+	public Node newRoot() {
+		Node newRoot = newNode();
+		setRoot(newRoot);
+		return newRoot;
+	}
+
+	public BNode newNodee(Node leftChild, Node rightChild) {
 		validateBelongsToNet(leftChild);
 		validateBelongsToNet(rightChild);
 		BNode bNode = new BNode(this, leftChild, rightChild);
@@ -223,8 +224,34 @@ public class Net {
 		return bNode;
 	}
 
-	public CNode newCNode(Command command) {
-		CNode cNode = new CNode(this, command);
+	public BNode newBNode(Node leftChild, Node rightChild) {
+		return newNodee(leftChild, rightChild);
+	}
+
+	public Node newCNode(Command command) {
+		return newNode(command);
+	}
+
+	public Node newNode(Command command) {
+		return newCNode(command.getValue());
+	}
+
+	public Node newCNode(int value) {
+		return newNode(value);
+	}
+
+	public Node newNode(int value, Node leftChild, Node rightChild) {
+		validateBelongsToNet(leftChild);
+		validateBelongsToNet(rightChild);
+		BNode node = new BNode(this, value, leftChild, rightChild);
+		addNodeInternal(node);
+		fireNewNodeCall(node);
+		return node;
+	}
+
+	public Node newNode(int value) {
+		Node cNode = new BNode(this);
+		cNode.setValue(value);
 		addNodeInternal(cNode);
 		fireNewNodeCall(cNode);
 		return cNode;

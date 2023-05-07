@@ -1,12 +1,13 @@
 package org.ent.dev.randnet;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Arrays;
-
+import org.ent.net.ArrowDirection;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.CommandFactory;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class CommandDrawingImplTest {
 
@@ -36,17 +37,17 @@ class CommandDrawingImplTest {
 	void drawCommand() throws Exception {
 		Command nopCommand = CommandFactory.createNopCommand();
 		Command ixCommand = CommandFactory.createAncestorSwapCommand();
-		Command evalCommand = CommandFactory.createEvalCommand(0);
+		Command setCommand = CommandFactory.createSetCommandL(ArrowDirection.LEFT);
 		CommandDrawingImpl commandDrawing = new CommandDrawingImpl(RandomTestUtil.newRandom(),
 				Arrays.asList(
 						new CommandCandidate(nopCommand, 1.0),
 						new CommandCandidate(ixCommand, 5.0),
-						new CommandCandidate(evalCommand, 3.0)));
+						new CommandCandidate(setCommand, 3.0)));
 
 		for (int i = 0; i < 100; i++) {
 			Command drawnCommand = commandDrawing.drawCommand();
 
-			assertThat(drawnCommand).isIn(nopCommand, ixCommand, evalCommand);
+			assertThat(drawnCommand).isIn(nopCommand, ixCommand, setCommand);
 		}
 	}
 
