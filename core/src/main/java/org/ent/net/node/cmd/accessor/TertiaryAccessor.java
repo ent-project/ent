@@ -1,5 +1,6 @@
 package org.ent.net.node.cmd.accessor;
 
+import org.ent.Ent;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Purview;
@@ -35,8 +36,10 @@ public class TertiaryAccessor implements Accessor {
     }
 
     @Override
-    public Arrow get(Arrow arrow, Purview purview) {
-        return arrow.getTarget(purview).getArrow(direction1).getTarget(purview).getArrow(direction2).getTarget(purview).getArrow(direction3);
+    public Arrow get(Arrow arrow, Ent ent, Purview purview) {
+        Arrow arrow1 = ent.advanceWithPortals(arrow.getTarget(purview), direction1);
+        Arrow arrow2 = ent.advanceWithPortals(arrow1.getTarget(purview), direction2);
+        return ent.advanceWithPortals(arrow2.getTarget(purview), direction3);
     }
 
     @Override

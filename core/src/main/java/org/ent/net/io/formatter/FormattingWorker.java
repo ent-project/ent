@@ -1,5 +1,6 @@
 package org.ent.net.io.formatter;
 
+import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
@@ -14,9 +15,9 @@ public class FormattingWorker {
 
 	private static final String ELLIPSE = "...";
 
-    private final List<Node> rootNodes;
+	private final Net net;
 
-    private final Map<Node, String> givenNodeNames;
+    private final List<Node> rootNodes;
 
 	private final boolean forceGivenNodeNames;
 
@@ -34,13 +35,9 @@ public class FormattingWorker {
 
 	private int cNodeVariableNameIndex;
 
-	public FormattingWorker(List<Node> rootNodes, Map<Node, String> givenNodeNames, boolean forceGivenNodeNames, Integer maxDepth) {
+	public FormattingWorker(Net net, List<Node> rootNodes, boolean forceGivenNodeNames, Integer maxDepth) {
+		this.net = net;
 		this.rootNodes = rootNodes;
-		if (givenNodeNames != null) {
-			this.givenNodeNames = givenNodeNames;
-		} else {
-			this.givenNodeNames = new HashMap<>();
-		}
 		this.forceGivenNodeNames = forceGivenNodeNames;
 		this.variableBindings = new HashMap<>();
 		this.maxDepth = maxDepth;
@@ -130,7 +127,7 @@ public class FormattingWorker {
 		if (n.isMarkerNode()) {
 			return false;
 		}
-		if (forceGivenNodeNames && givenNodeNames.containsKey(n)) {
+		if (forceGivenNodeNames && net.getName(n) != null) {
 			return true;
 		}
 		int references = n.getHub().getInverseReferences().size();
@@ -149,7 +146,7 @@ public class FormattingWorker {
 
 	private String determineVariableName(Node node) {
 		String name;
-		String givenNodeName = givenNodeNames.get(node);
+		String givenNodeName = net.getName(node);
 		if (givenNodeName != null) {
 			return givenNodeName;
 		} else {
@@ -161,7 +158,7 @@ public class FormattingWorker {
 	}
 
 	private boolean variableNameIsTaken(String name) {
-		return givenNodeNames.containsValue(name) || variableBindings.containsValue(name);
+		return net.getByName(name) != null || variableBindings.containsValue(name);
 	}
 
 	private String getNewVariableName(Node n) {

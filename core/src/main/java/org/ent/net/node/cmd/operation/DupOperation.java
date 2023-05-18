@@ -15,6 +15,9 @@ public class DupOperation implements BiOperation {
 	@Override
 	public ExecutionResult apply(Arrow setter, Arrow arrowToTarget) {
 		Node target = arrowToTarget.getTarget(Purview.COMMAND);
+		if (target.getNet() != setter.getOrigin().getNet()) {
+			return ExecutionResult.ERROR;
+		}
 		Node copy = target.getNet().newNode(target.getValue(),
 				target.getLeftChild(Purview.COMMAND),
 				target.getRightChild(Purview.COMMAND));

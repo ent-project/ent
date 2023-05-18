@@ -1,7 +1,8 @@
 package org.ent.dev.plan;
 
+import org.ent.Ent;
 import org.ent.dev.NetMixer;
-import org.ent.dev.plan.DataProperties.PropNet;
+import org.ent.dev.plan.DataProperties.PropEnt;
 import org.ent.dev.plan.DataProperties.PropReplicator;
 import org.ent.dev.unit.Dan;
 import org.ent.dev.unit.Req;
@@ -90,7 +91,7 @@ public class Pool {
 		}
 	}
 
-	private static class PoolOutputDataImpl extends DataImpl implements PropNet {}
+	private static class PoolOutputDataImpl extends DataImpl implements PropEnt {}
 
 	private class PoolFeedback implements Filter {
 
@@ -238,14 +239,14 @@ public class Pool {
 		PoolData poolDataPrimary = members.get(idxPrimary);
 		PoolData poolDataJoining = members.get(idxJoining);
 
-		Net offspring = produceOffspring(poolDataPrimary, poolDataJoining);
-		PropNet offspringData = new PoolOutputDataImpl();
-		offspringData.setNet(offspring);
+		Ent offspring = produceOffspring(poolDataPrimary, poolDataJoining);
+		PropEnt offspringData = new PoolOutputDataImpl();
+		offspringData.setEnt(offspring);
 		state = State.ACCEPTING_FEEDBACK;
 		downstream.deliver(offspringData);
 	}
 
-	private Net produceOffspring(PoolData infoPrimary, PoolData infoJoining) {
+	private Ent produceOffspring(PoolData infoPrimary, PoolData infoJoining) {
 
 		Net primaryNetReplica = infoPrimary.getReplicator().getNewSpecimen();
 		Net joiningNetReplica = infoJoining.getReplicator().getNewSpecimen();
@@ -255,7 +256,7 @@ public class Pool {
 
 		mixer.join();
 
-		return primaryNetReplica;
+		return new Ent(primaryNetReplica); // FIXME
 	}
 
 	private void reset() {

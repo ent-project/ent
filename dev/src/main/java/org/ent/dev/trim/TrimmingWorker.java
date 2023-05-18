@@ -1,27 +1,27 @@
 package org.ent.dev.trim;
 
+import org.ent.Ent;
 import org.ent.dev.ManagedRun;
 import org.ent.dev.RunSetup;
 import org.ent.net.Arrow;
-import org.ent.net.Net;
 
 class TrimmingWorker {
 
-	private final Net net;
+	private final Ent ent;
 
 	private final RunSetup runSetup;
 
 	private TrimmingExecutionEventListener evaluator;
 
-	public TrimmingWorker(Net net, RunSetup runSetup) {
-		this.net = net;
+	public TrimmingWorker(Ent ent, RunSetup runSetup) {
+		this.ent = ent;
 		this.runSetup = runSetup;
 		this.evaluator = new TrimmingExecutionEventListener();
 	}
 
 	public void runTrimmer() {
-		net.withExecutionEventListener(evaluator, () -> {
-			ManagedRun run = new ManagedRun(runSetup).withNet(net);
+		ent.getNet().withExecutionEventListener(evaluator, () -> {
+			ManagedRun run = new ManagedRun(runSetup).withEnt(ent);
 			run.perform();
 		});
 	}

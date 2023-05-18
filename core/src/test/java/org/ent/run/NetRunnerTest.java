@@ -1,8 +1,11 @@
 package org.ent.run;
 
+import org.ent.Ent;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.io.parser.NetParser;
+import org.ent.net.io.parser.ParserException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -11,6 +14,19 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class NetRunnerTest {
+
+	private NetParser netParser;
+
+	private NetFormatter netFormatter;
+
+	@BeforeEach
+	void setUpParserAndFormatter() throws ParserException {
+		NetParser parser = new NetParser();
+		NetFormatter formatter = new NetFormatter()
+				.withAscii(true)
+				.withForceGivenNodeNames(true);
+
+	}
 
 	@Test
 	void testNetRunner1() throws Exception {
@@ -55,12 +71,12 @@ class NetRunnerTest {
 
 		NetFormatter formatter = new NetFormatter()
                 .withAscii(true)
-                .withNodeNamesInverse(parser.getNodeNames())
                 .withForceGivenNodeNames(true);
 		String out0 = formatter.format(net);
 		assertThat(out0).isEqualTo(netStr);
 
-		NetRunner runner = new NetRunner(net);
+		Ent ent = new Ent(net);
+		NetRunner runner = new NetRunner(ent);
 
 		for (int i = 1; i < steps.size(); i++) {
 			StepResult result = runner.step();
@@ -75,4 +91,9 @@ class NetRunnerTest {
 		StepResult actualFinalResult = runner.step();
 		assertThat(actualFinalResult).isEqualTo(expectedFinalResult);
 	}
+
+//	void testWithObservation() {
+//		"<=>(params:(@, [#1]), [params])"
+//
+//	}
 }

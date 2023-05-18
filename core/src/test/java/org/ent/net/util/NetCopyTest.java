@@ -1,6 +1,6 @@
 package org.ent.net.util;
 
-import org.ent.Environment;
+import org.ent.Profile;
 import org.ent.net.Net;
 import org.ent.net.NetTestData;
 import org.ent.net.io.formatter.NetFormatter;
@@ -26,7 +26,7 @@ class NetCopyTest {
 
 	@BeforeAll
 	static void setTestEnvironment() {
-		Environment.setTest(true);
+		Profile.setTest(true);
 	}
 
 	@ParameterizedTest(name = "{index} => runCopy(...) on {1}")

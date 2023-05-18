@@ -15,6 +15,9 @@ public class SetOperation implements BiOperation {
 	@Override
 	public ExecutionResult apply(Arrow setter, Arrow arrowToTarget) {
 		Node target = arrowToTarget.getTarget(Purview.COMMAND);
+		if (target.getNet() != setter.getOrigin().getNet()) {
+			return ExecutionResult.ERROR;
+		}
 		setter.setTarget(target, Purview.COMMAND);
 		return ExecutionResult.NORMAL;
 	}

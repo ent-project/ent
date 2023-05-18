@@ -1,10 +1,10 @@
 package org.ent;
 
-public class Environment {
+public class Profile {
 
     private static boolean isTest;
 
-    private Environment() {
+    private Profile() {
     }
 
     public static boolean isTest() {
@@ -12,6 +12,6 @@ public class Environment {
     }
 
     public static void setTest(boolean isTest) {
-        Environment.isTest = isTest;
+        Profile.isTest = isTest;
     }
 }

@@ -2,6 +2,7 @@ package org.ent.dev.plan;
 
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
+import org.ent.Ent;
 import org.ent.dev.DefaultTestRunSetup;
 import org.ent.dev.plan.VariabilityCollector.ArrowData;
 import org.ent.dev.unit.data.DataImpl;
@@ -140,11 +141,12 @@ class VariabilityCollectorTest {
 
         @Test
         void arrows(SoftAssertions softly) throws ParserException {
-            Net net = parser.parse("root:<//=>(arguments:(toSet:[@], <o>), toSet)");
+            Ent ent = parser.parseEnt("root:<//=>(arguments:(toSet:[@], <o>), toSet)");
+            Net net = ent.getNet();
             data.setReplicator(() -> net);
-            Node nodeRoot = parser.getNodeByName("root");
-            Node nodeArguments = parser.getNodeByName("arguments");
-            Node nodeToSet = parser.getNodeNames().get("toSet");
+            Node nodeRoot = net.getByName("root");
+            Node nodeArguments = net.getByName("arguments");
+            Node nodeToSet = net.getByName("toSet");
 
             exam.accept(data);
 

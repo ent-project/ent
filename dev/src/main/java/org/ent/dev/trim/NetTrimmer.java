@@ -1,9 +1,10 @@
 package org.ent.dev.trim;
 
+import org.ent.Ent;
 import org.ent.dev.RunSetup;
 import org.ent.net.Arrow;
-import org.ent.net.Purview;
 import org.ent.net.Net;
+import org.ent.net.Purview;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 import org.ent.net.util.NetCopy;
@@ -12,6 +13,8 @@ import org.ent.net.util.NetCopy;
  * NetTrimmer simplifies a net to those nodes and arrows that are relevant to the execution.
  */
 public class NetTrimmer {
+
+	private final Ent ent;
 
 	private final Net net;
 
@@ -23,8 +26,9 @@ public class NetTrimmer {
 
 	private TrimmingWorker trimmingWorker;
 
-	public NetTrimmer(Net net, RunSetup runSetup) {
-		this.net = net;
+	public NetTrimmer(Ent ent, RunSetup runSetup) {
+		this.ent = ent;
+		this.net = ent.getNet();
 		this.runSetup = runSetup;
 		if (net.isMarkerNodePermitted()) {
 			this.marker = net.getMarkerNode();
@@ -36,8 +40,9 @@ public class NetTrimmer {
 	public void runTrimmer() {
 		copy = new NetCopy(net);
 		copy.createCopy();
+		Ent entCopy = new Ent(copy.getClonedNet()); // FIXME
 
-		trimmingWorker = new TrimmingWorker(copy.getClonedNet(), runSetup);
+		trimmingWorker = new TrimmingWorker(entCopy, runSetup);
 		trimmingWorker.runTrimmer();
 
 		cutDeadArrows();

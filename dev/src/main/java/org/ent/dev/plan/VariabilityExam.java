@@ -1,6 +1,7 @@
 package org.ent.dev.plan;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.ent.Ent;
 import org.ent.dev.ManagedRun;
 import org.ent.dev.RunSetup;
 import org.ent.dev.unit.local.TypedProc;
@@ -24,15 +25,16 @@ public class VariabilityExam extends TypedProc<VariabilityExamData> {
     @Override
     protected void doAccept(VariabilityExamData data) {
         Net netExamSpecimen = data.getReplicator().getNewSpecimen();
-        VariabilityExamResult result = examine(netExamSpecimen);
+        Ent ent = new Ent(netExamSpecimen); // FIXME
+        VariabilityExamResult result = examine(ent);
 
         data.setVariabilityExamResult(result);
     }
 
-    private VariabilityExamResult examine(Net net) {
+    private VariabilityExamResult examine(Ent ent) {
         collector = new VariabilityCollector();
-        net.addExecutionEventListener(collector);
-        NetRunner runner = new NetRunner(net);
+        ent.getNet().addExecutionEventListener(collector);
+        NetRunner runner = new NetRunner(ent);
         runner.setNetRunnerListener(collector);
         ManagedRun run = new ManagedRun(runSetup).withNetRunner(runner);
         run.perform();

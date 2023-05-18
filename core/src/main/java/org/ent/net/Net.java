@@ -1,6 +1,8 @@
 package org.ent.net;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import org.apache.commons.lang3.Validate;
 import org.ent.ExecutionEventListener;
 import org.ent.net.node.BNode;
@@ -23,6 +25,8 @@ public class Net {
 	private static final boolean VALIDATE = true;
 
 	private final Set<Node> nodes;
+
+	private BiMap<Node, String> nodeNames;
 
 	private Node root;
 
@@ -196,6 +200,18 @@ public class Net {
 		return newRoot;
 	}
 
+	public Node newRoot(int value, Node leftChild, Node rightChild) {
+		Node newRoot = newNode(value, leftChild, rightChild);
+		setRoot(newRoot);
+		return newRoot;
+	}
+
+	public Node newRoot(Node leftChild, Node rightChild) {
+		Node newRoot = newNode(leftChild, rightChild);
+		setRoot(newRoot);
+		return newRoot;
+	}
+
 	public Node newNode(int value, Node leftChild, Node rightChild) {
 		validateBelongsToNet(leftChild);
 		validateBelongsToNet(rightChild);
@@ -281,6 +297,28 @@ public class Net {
 
 	public void fireNewNodeCall(Node n) {
 		eventListeners.forEach(listener -> listener.calledNewNode(n));
+	}
+
+	public void setName(Node node, String name) {
+		validateBelongsToNet(node);
+		if (nodeNames == null) {
+			nodeNames = HashBiMap.create();
+		}
+		nodeNames.put(node, name);
+	}
+
+	public String getName(Node node) {
+		if (nodeNames == null) {
+			return null;
+		}
+		return nodeNames.get(node);
+	}
+
+	public Node getByName(String name) {
+		if (nodeNames == null) {
+			return null;
+		}
+		return nodeNames.inverse().get(name);
 	}
 
 }

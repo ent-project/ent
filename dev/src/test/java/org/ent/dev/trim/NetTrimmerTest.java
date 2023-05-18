@@ -1,5 +1,6 @@
 package org.ent.dev.trim;
 
+import org.ent.Ent;
 import org.ent.dev.DefaultTestRunSetup;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
@@ -21,11 +22,10 @@ class NetTrimmerTest {
 		NetParser parser = new NetParser();
 		Net net = parser.parse(original);
 
-		NetTrimmer trimmer = new NetTrimmer(net, DefaultTestRunSetup.RUN_SETUP);
+		NetTrimmer trimmer = new NetTrimmer(new Ent(net), DefaultTestRunSetup.RUN_SETUP);
 		trimmer.runTrimmer();
 
 		NetFormatter formatter = new NetFormatter()
-				.withNodeNamesInverse(parser.getNodeNames())
 				.withForceGivenNodeNames(true)
 				.withAscii(true);
 		String actualTrimmed = formatter.format(net);

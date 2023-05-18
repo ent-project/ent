@@ -1,10 +1,11 @@
 package org.ent.dev;
 
+import org.ent.Ent;
 import org.ent.dev.hyper.FloatHyperparameter;
 import org.ent.dev.hyper.HyperRegistry;
 import org.ent.dev.hyper.IntegerHyperparameter;
 import org.ent.dev.plan.Counter;
-import org.ent.dev.plan.DataProperties.PropNet;
+import org.ent.dev.plan.DataProperties.PropEnt;
 import org.ent.dev.plan.DataProperties.PropReplicator;
 import org.ent.dev.plan.DataProperties.PropSerialNumber;
 import org.ent.dev.plan.DataProperties.PropStepsExamResult;
@@ -32,7 +33,6 @@ import org.ent.dev.unit.data.Data;
 import org.ent.dev.unit.data.DataProxy;
 import org.ent.dev.unit.local.TypedProc;
 import org.ent.dev.unit.local.util.FilterListener;
-import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.run.StepResult;
 import org.slf4j.Logger;
@@ -129,16 +129,16 @@ public class DevelopmentPlan {
 
 		@Override
 		public void doAccept(OutputData input) {
-			Net net = input.getNet();
+			Ent ent = input.getEnt();
 			StepsExamResult stepsExamResult = input.getStepsExamResult();
 			if (log.isTraceEnabled()) {
-				log.trace("{}#{} [{}] {}", prefix, input.getSerialNumber(), stepsExamResult.steps(), new NetFormatter().format(net));
+				log.trace("{}#{} [{}] {}", prefix, input.getSerialNumber(), stepsExamResult.steps(), new NetFormatter().format(ent));
 			}
 		}
 
 	}
 
-	public static class OutputData extends DataProxy implements PropNet, PropStepsExamResult, PropSerialNumber{}
+	public static class OutputData extends DataProxy implements PropEnt, PropStepsExamResult, PropSerialNumber{}
 
 	public static class AddCopyReplicator extends TypedProc<AddCopyReplicatorData> {
 
@@ -148,14 +148,14 @@ public class DevelopmentPlan {
 
 		@Override
 		public void doAccept(AddCopyReplicatorData input) {
-			Net net = input.getNet();
-			CopyReplicator replicator = new CopyReplicator(net);
+			Ent ent = input.getEnt();
+			CopyReplicator replicator = new CopyReplicator(ent);
 			input.setReplicator(replicator);
 		}
 
 	}
 
-	public static class AddCopyReplicatorData extends DataProxy implements PropNet, PropReplicator{}
+	public static class AddCopyReplicatorData extends DataProxy implements PropEnt, PropReplicator{}
 
 	static class FailuresLimit implements FilterListener {
 

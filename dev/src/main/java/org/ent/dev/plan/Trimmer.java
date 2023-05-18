@@ -1,9 +1,9 @@
 package org.ent.dev.plan;
 
+import org.ent.Ent;
 import org.ent.dev.RunSetup;
 import org.ent.dev.trim.NetTrimmer;
 import org.ent.dev.unit.local.TypedProc;
-import org.ent.net.Net;
 
 public class Trimmer extends TypedProc<TrimmerData> {
 
@@ -16,8 +16,8 @@ public class Trimmer extends TypedProc<TrimmerData> {
 
 	@Override
 	public void doAccept(TrimmerData data) {
-		Net net = data.getNet();
-		NetTrimmer trimmer = new NetTrimmer(net, getRunSetup());
+		Ent ent = data.getEnt();
+		NetTrimmer trimmer = new NetTrimmer(ent, getRunSetup());
 		trimmer.runTrimmer();
 	}
 

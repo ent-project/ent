@@ -1,7 +1,7 @@
 package org.ent.net.node;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.ent.Environment;
+import org.ent.Profile;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
@@ -69,7 +69,7 @@ public interface Node {
 	}
 
 	private void verifyTestEnvironment() {
-		if (!Environment.isTest()) {
+		if (!Profile.isTest()) {
 			throw new AssertionError();
 		}
 	}

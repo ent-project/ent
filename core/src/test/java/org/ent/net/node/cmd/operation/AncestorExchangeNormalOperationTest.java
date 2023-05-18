@@ -26,7 +26,6 @@ class AncestorExchangeNormalOperationTest {
 
         NetFormatter formatter = new NetFormatter()
                 .withAscii(true)
-                .withNodeNamesInverse(parser.getNodeNames())
                 .withForceGivenNodeNames(true);
         String result = formatter.format(net);
         assertThat(result).isEqualTo(expectedOutput);

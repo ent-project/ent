@@ -1,5 +1,6 @@
 package org.ent.net.node.cmd;
 
+import org.ent.Ent;
 import org.ent.net.Arrow;
 import org.ent.net.Purview;
 import org.ent.net.node.cmd.accessor.Accessor;
@@ -36,8 +37,8 @@ public class TriCommand implements Command {
     }
 
     @Override
-    public ExecutionResult execute(Arrow parameters) {
-        return operation.apply(accessor1.get(parameters, Purview.COMMAND), accessor2.get(parameters, Purview.COMMAND), accessor3.get(parameters, Purview.COMMAND));
+    public ExecutionResult execute(Arrow parameters, Ent ent) {
+        return operation.apply(accessor1.get(parameters, ent, Purview.COMMAND), accessor2.get(parameters, ent, Purview.COMMAND), accessor3.get(parameters, ent, Purview.COMMAND));
     }
 
     @Override

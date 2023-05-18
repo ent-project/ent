@@ -1,7 +1,8 @@
 package org.ent.dev.plan;
 
+import org.ent.Ent;
 import org.ent.dev.CopyReplicator;
-import org.ent.dev.plan.DataProperties.PropNet;
+import org.ent.dev.plan.DataProperties.PropEnt;
 import org.ent.dev.plan.DataProperties.PropReplicator;
 import org.ent.dev.plan.DataProperties.PropSeed;
 import org.ent.dev.randnet.CommandCandidate;
@@ -36,18 +37,18 @@ public class RandomNetSource implements Source {
 
 	private List<CommandCandidate> commandCandidates;
 
-	public class RandomNetSourceData extends DataImpl implements PropNet, PropSeed, PropReplicator {
+	public class RandomNetSourceData extends DataImpl implements PropEnt, PropSeed, PropReplicator {
 
-		public RandomNetSourceData(Net net, long seed) {
-			setNet(net);
+		public RandomNetSourceData(Ent ent, long seed) {
+			setEnt(ent);
 			setSeed(seed);
-			setReplicator(new CopyReplicator(net));
+			setReplicator(new CopyReplicator(ent));
 		}
 
 		public void log() {
 			if (log.isTraceEnabled()) {
 				NetFormatter formatter = new NetFormatter();
-				log.trace("#{} {}", toHex(getSeed()), formatter.format(getNet()));
+				log.trace("#{} {}", toHex(getSeed()), formatter.format(getEnt()));
 			}
 		}
 	}
@@ -63,7 +64,8 @@ public class RandomNetSource implements Source {
 			long netSeed = randNetSeeds.nextLong();
 			Optional<Net> maybeNet = drawNet(netSeed);
 			if (maybeNet.isPresent()) {
-				RandomNetSourceData netInfo = new RandomNetSourceData(maybeNet.get(), netSeed);
+				Ent ent = new Ent(maybeNet.get()); // FIXME
+				RandomNetSourceData netInfo = new RandomNetSourceData(ent, netSeed);
 				netInfo.log();
 				return netInfo;
 			} else {

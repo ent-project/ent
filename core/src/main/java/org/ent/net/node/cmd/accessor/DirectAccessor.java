@@ -1,5 +1,6 @@
 package org.ent.net.node.cmd.accessor;
 
+import org.ent.Ent;
 import org.ent.net.Arrow;
 import org.ent.net.Purview;
 
@@ -11,7 +12,7 @@ public class DirectAccessor implements Accessor {
 	}
 
 	@Override
-	public Arrow get(Arrow arrow, Purview purview) {
+	public Arrow get(Arrow arrow, Ent ent, Purview purview) {
 		return arrow;
 	}
 

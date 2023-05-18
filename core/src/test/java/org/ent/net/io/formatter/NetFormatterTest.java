@@ -1,6 +1,6 @@
 package org.ent.net.io.formatter;
 
-import org.ent.Environment;
+import org.ent.Profile;
 import org.ent.net.Net;
 import org.ent.net.NetTestData;
 import org.ent.net.Purview;
@@ -14,8 +14,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,7 +33,7 @@ class NetFormatterTest {
 
 	@BeforeAll
 	public static void enableTestEnvironment() {
-		Environment.setTest(true);
+		Profile.setTest(true);
 	}
 
 	@BeforeEach
@@ -218,18 +216,18 @@ class NetFormatterTest {
 			assertThat(str).isEqualTo("A:(a:[[a]], <o>); [A]");
 		}
 
-		@Test
-		void setNodeNames() {
-			Map<Node, String> nodeNames = new HashMap<>();
-			nodeNames.put(root, "x1");
-			formatter.setNodeNames(nodeNames);
-			Node u = net.newUNode(root);
-			root.setLeftChild(u);
-
-			String str = formatter.format(net);
-
-			assertThat(str).isEqualTo("x1:[[x1]]");
-		}
+//		@Test
+//		void setNodeNames() {
+//			Map<Node, String> nodeNames = new HashMap<>();
+//			nodeNames.put(root, "x1");
+//			formatter.setNodeNames(nodeNames);
+//			Node u = net.newUNode(root);
+//			root.setLeftChild(u);
+//
+//			String str = formatter.format(net);
+//
+//			assertThat(str).isEqualTo("x1:[[x1]]");
+//		}
 
 		@Test
 		void marker() {
@@ -263,8 +261,8 @@ class NetFormatterTest {
 		String str2 = formatter.format(testData.net2.getNet());
 
 		assertThat(str0).isEqualTo("(a:[[a]], <o>)");
-		assertThat(str1).isEqualTo("(b:[<o>], #1f(b, <x>))");
-		assertThat(str2).isEqualTo("c:[d:[(A:(<o>, c), (A, (A, d)))]]");
+		assertThat(str1).isEqualTo("(a:[<o>], #1f(a, <x>))");
+		assertThat(str2).isEqualTo("a:[b:[(A:(<o>, a), (A, (A, b)))]]");
 	}
 
 

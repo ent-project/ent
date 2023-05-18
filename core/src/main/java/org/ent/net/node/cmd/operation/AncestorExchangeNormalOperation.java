@@ -19,9 +19,12 @@ public class AncestorExchangeNormalOperation implements BiOperation {
 	@Override
 	public ExecutionResult apply(Arrow arrowToNode1, Arrow arrowToNode2) {
 		Node node1 = arrowToNode1.getTarget(Purview.COMMAND);
+		Node node2 = arrowToNode2.getTarget(Purview.COMMAND);
+		if (node1.getNet() != node2.getNet()) {
+			return ExecutionResult.ERROR;
+		}
 		boolean node1HasProperLeftChild = node1.hasProperLeftChild();
 		boolean node1HasProperRightChild = node1.hasProperRightChild();
-		Node node2 = arrowToNode2.getTarget(Purview.COMMAND);
 		boolean node2HasProperLeftChild = node2.hasProperLeftChild();
 		boolean node2HasProperRightChild = node2.hasProperRightChild();
 		Net.ancestorExchange(node1, node2);

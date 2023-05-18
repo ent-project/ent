@@ -1,6 +1,6 @@
 package org.ent.net.io.parser;
 
-import org.ent.Environment;
+import org.ent.Profile;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.node.Node;
@@ -16,7 +16,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -35,7 +34,7 @@ class NetParserTest {
 
 	@BeforeAll
 	static void setTestEnvironment() {
-		Environment.setTest(true);
+		Profile.setTest(true);
 	}
 
 	@Nested
@@ -220,24 +219,20 @@ class NetParserTest {
 	}
 
 	@Test
-	void getNodeNames() throws Exception {
+	void checkNodeNames() throws Exception {
 		Net net = parser.parse("(nop:<o>, [[C]]); C:[nop];");
 
-		Map<String, Node> nodeNames = parser.getNodeNames();
-		assertThat(nodeNames).containsOnlyKeys("nop", "C");
-		assertThat(net.getNodes()).contains(nodeNames.get("nop"), nodeNames.get("C"));
+		assertThat(net.getNodes()).contains(net.getByName("nop"), net.getByName("C"));
 	}
 
 	@Test
 	void getMainNodes() throws Exception {
-		parser.parse("T:(x:[(x,x)],K);K:((<o>,F),F);F:x");
+		Net net = parser.parse("T:(x:[(x,x)],K);K:((<o>,F),F);F:[x]");
 
 		List<Node> mainNodes = parser.getMainNodes();
-		assertThat(mainNodes).hasSize(3);
 
-		Map<String, Node> nodeNames = parser.getNodeNames();
-		assertThat(mainNodes).asList().containsExactly(nodeNames.get("T"), nodeNames.get("K"),
-				nodeNames.get("F"));
+		assertThat(mainNodes).asList().containsExactly(net.getByName("T"), net.getByName("K"),
+				net.getByName("F"));
 	}
 
 }

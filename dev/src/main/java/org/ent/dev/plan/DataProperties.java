@@ -1,20 +1,20 @@
 package org.ent.dev.plan;
 
+import org.ent.Ent;
 import org.ent.dev.NetReplicator;
 import org.ent.dev.unit.data.Data;
-import org.ent.net.Net;
 
 public interface DataProperties {
 
-	interface PropNet extends Data {
-		String KEY = "net";
+	interface PropEnt extends Data {
+		String KEY = "ent";
 
-		default Net getNet() {
-			return (Net) getProperty(KEY);
+		default Ent getEnt() {
+			return (Ent) getProperty(KEY);
 		}
 
-		default void setNet(Net net) {
-			setProperty(KEY, net);
+		default void setEnt(Ent ent) {
+			setProperty(KEY, ent);
 		}
 	}
 

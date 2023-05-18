@@ -1,6 +1,6 @@
 package org.ent.dev;
 
-import org.ent.net.Net;
+import org.ent.Ent;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.run.NetRunner;
 import org.ent.run.StepResult;
@@ -17,7 +17,7 @@ public class ManagedRun {
 
 	private NetRunner netRunner;
 
-	private Net net;
+	private Ent ent;
 
 	private NetFormatter formatter = new NetFormatter();
 
@@ -42,16 +42,12 @@ public class ManagedRun {
 		return this;
 	}
 
-	public Net getNet() {
-		return net;
+	public void setEnt(Ent ent) {
+		this.ent = ent;
 	}
 
-	public void setNet(Net net) {
-		this.net = net;
-	}
-
-	public ManagedRun withNet(Net net) {
-		setNet(net);
+	public ManagedRun withEnt(Ent ent) {
+		setEnt(ent);
 		return this;
 	}
 
@@ -70,24 +66,24 @@ public class ManagedRun {
 		do {
 			evaluationStepResult = doStep();
 			if (log.isTraceEnabled()) {
-				log.trace("step {}/{}: {}", noSteps, evaluationStepResult, formatter.format(net));
+				log.trace("step {}/{}: {}", noSteps, evaluationStepResult, formatter.format(ent));
 			}
 		} while (evaluationStepResult == EvaluationStepResult.CONTINUE);
 	}
 
 	private void initializeEvaluation() {
-		if (net == null && netRunner == null) {
+		if (ent == null && netRunner == null) {
 			throw new IllegalArgumentException("Either net or netRunner must be set.");
 		}
-		if (net == null) {
-			net = netRunner.getNet();
+		if (ent == null) {
+			ent = netRunner.getEnt();
 		}
 		if (netRunner == null) {
-			netRunner = new NetRunner(net);
+			netRunner = new NetRunner(ent);
 		}
 		noSteps = 0;
 		if (log.isTraceEnabled()) {
-			log.trace("before: {}", formatter.format(net));
+			log.trace("before: {}", formatter.format(ent));
 		}
 	}
 

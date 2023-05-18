@@ -1,5 +1,6 @@
 package org.ent.net.io.formatter;
 
+import org.ent.Ent;
 import org.ent.net.Arrow;
 import org.ent.net.Net;
 import org.ent.net.Purview;
@@ -8,15 +9,11 @@ import org.ent.net.node.Node;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class NetFormatter {
-
-    private Map<Node, String> givenNodeNames = new HashMap<>();
 
 	private boolean forceGivenNodeNames;
 
@@ -30,19 +27,6 @@ public class NetFormatter {
 
 	public void setMaxDepth(Integer maxDepth) {
 		this.maxDepth = maxDepth;
-	}
-
-	public void setNodeNames(Map<Node, String> nodeNames) {
-		givenNodeNames.putAll(nodeNames);
-	}
-
-	public void setNodeNamesInverse(Map<String, Node> nodeNames) {
-		nodeNames.entrySet().forEach(entry -> givenNodeNames.put(entry.getValue(), entry.getKey()));
-	}
-
-	public NetFormatter withNodeNamesInverse(Map<String, Node> nodeNames) {
-		setNodeNamesInverse(nodeNames);
-		return this;
 	}
 
 	public void setForceGivenNodeNames(boolean forceGivenNodeNames) {
@@ -67,6 +51,10 @@ public class NetFormatter {
 		return this;
 	}
 
+	public String format(Ent ent) {
+		return format(ent.getNet());
+	}
+
 	public String format(@NotNull Net net) {
         Set<Node> collected = new LinkedHashSet<>();
         List<Node> rootNodes = new ArrayList<>();
@@ -83,12 +71,12 @@ public class NetFormatter {
             rootNodes.add(nextRoot);
         }
 
-        FormattingWorker worker = new FormattingWorker(rootNodes, givenNodeNames, forceGivenNodeNames, maxDepth)
+        FormattingWorker worker = new FormattingWorker(net, rootNodes, forceGivenNodeNames, maxDepth)
 				.withAscii(ascii);
 
         String result = worker.formatRecursively();
 
-        givenNodeNames.putAll(worker.getVariableBindings());
+		worker.getVariableBindings().forEach(net::setName);
 
         return result;
 	}

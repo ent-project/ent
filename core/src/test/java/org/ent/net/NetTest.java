@@ -2,7 +2,7 @@ package org.ent.net;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
-import org.ent.Environment;
+import org.ent.Profile;
 import org.ent.ExecutionEventListener;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.io.parser.NetParser;
@@ -39,7 +39,7 @@ class NetTest {
 
 	@BeforeAll
 	static void setTestEnvironment() {
-		Environment.setTest(true);
+		Profile.setTest(true);
 	}
 
 	@Nested
@@ -134,8 +134,8 @@ class NetTest {
 			void noInverseReference() throws Exception {
 				NetParser parser = new NetParser().permitMarkerNodes();
 				Net net = parser.parse("u:[c:<o>]");
-				Node uNode = parser.getNodeNames().get("u");
-				Node cNode = parser.getNodeNames().get("c");
+				Node uNode = net.getByName("u");
+				Node cNode = net.getByName("c");
 				cNode.getHub().removeInverseReference(uNode.getLeftArrow());
 
 				assertThatThrownBy(() -> net.consistencyCheck()).isInstanceOf(AssertionError.class)
@@ -173,7 +173,7 @@ class NetTest {
 	@Test
 	void validateBelongsToNet_okay() throws Exception {
 		Net net = parser.parse("a:<o>");
-		Node a = parser.getNodeNames().get("a");
+		Node a = net.getByName("a");
 
 		assertThatCode(() -> net.validateBelongsToNet(a)).doesNotThrowAnyException();
 	}
@@ -244,16 +244,16 @@ class NetTest {
 
 		@BeforeEach
 		void setUp() throws Exception {
-			parser.parse("a:<o>");
-			externalNode = parser.getNodeNames().get("a");
+			Net net = parser.parse("a:<o>");
+			externalNode = net.getByName("a");
 			externalArrow = externalNode.getLeftArrow();
 		}
 
 		@Test
 		void getTarget() throws Exception {
 			Net net = parser.parse("u:[_a:<o>]");
-			Node u = parser.getNodeNames().get("u");
-			Node nop = parser.getNodeNames().get("_a");
+			Node u = net.getByName("u");
+			Node nop = net.getByName("_a");
 			net.addExecutionEventListener(eventListener);
 
 			Node uTarget = u.getLeftChild();
@@ -266,8 +266,8 @@ class NetTest {
 		@Test
 		void setTarget() throws Exception {
 			Net net = parser.parse("u:[<o>]; _b:<x>");
-			Node u = parser.getNodeNames().get("u");
-			Node ix = parser.getNodeNames().get("_b");
+			Node u = net.getByName("u");
+			Node ix = net.getByName("_b");
 			net.addExecutionEventListener(eventListener);
 
 			u.setLeftChild(ix, Purview.DIRECT);
@@ -279,8 +279,8 @@ class NetTest {
 
 		@Test
 		void setTarget_error_rogueOrigin() throws Exception {
-			parser.parse("_a:<o>");
-			Node a = parser.getNodeNames().get("_a");
+			Net net = parser.parse("_a:<o>");
+			Node a = net.getByName("_a");
 
 			assertThatThrownBy(() -> externalArrow.setTarget(a, Purview.DIRECT))
 					.isInstanceOf(IllegalStateException.class)
@@ -289,8 +289,8 @@ class NetTest {
 
 		@Test
 		void setTarget_error_rogueTarget() throws Exception {
-			parser.parse("u:[<o>]");
-			Node u = parser.getNodeNames().get("u");
+			Net net = parser.parse("u:[<o>]");
+			Node u = net.getByName("u");
 			Arrow uArrow = u.getLeftArrow();
 
 			assertThatThrownBy(() -> uArrow.setTarget(externalNode, Purview.DIRECT))
@@ -301,7 +301,7 @@ class NetTest {
 		@Test
 		void newUNode_childArg() throws Exception {
 			Net net = parser.parse("_a:<o>");
-			Node nop = parser.getNodeNames().get("_a");
+			Node nop = net.getByName("_a");
 			net.addExecutionEventListener(eventListener);
 
 			Node uNode = net.newUNode(nop);
@@ -329,8 +329,8 @@ class NetTest {
 		@Test
 		void newBNode_childArgs() throws Exception {
 			Net net = parser.parse("_a:<o>; _b:<x>");
-			Node nop = parser.getNodeNames().get("_a");
-			Node ix = parser.getNodeNames().get("_b");
+			Node nop = net.getByName("_a");
+			Node ix = net.getByName("_b");
 			net.addExecutionEventListener(eventListener);
 
 			Node bNode = net.newNode(nop, ix);
@@ -345,7 +345,7 @@ class NetTest {
 		@Test
 		void newBNode_childArgs_error_left() throws Exception {
 			Net net = parser.parse("_a:<o>");
-			Node nop = parser.getNodeNames().get("_a");
+			Node nop = net.getByName("_a");
 
 			assertThatThrownBy(() -> net.newNode(externalNode, nop))
 					.isInstanceOf(IllegalStateException.class)
@@ -355,7 +355,7 @@ class NetTest {
 		@Test
 		void newBNode_childArgs_error_right() throws Exception {
 			Net net = parser.parse("_a:<o>");
-			Node nop = parser.getNodeNames().get("_a");
+			Node nop = net.getByName("_a");
 
 			assertThatThrownBy(() -> net.newNode(nop, externalNode))
 					.isInstanceOf(IllegalStateException.class)
@@ -381,15 +381,14 @@ class NetTest {
 			@MethodSource("ancestorSwapData")
 			void ancestorSwap(String input, String expectedOutput) throws Exception {
 				Net net = parser.parse(input);
-				Node a = parser.getNodeNames().get("a");
-				Node b = parser.getNodeNames().get("b");
+				Node a = net.getByName("a");
+				Node b = net.getByName("b");
 				net.addExecutionEventListener(eventListener);
 
 				Net.ancestorExchange(a, b);
 
 				verifyNoMoreInteractions(eventListener);
 				NetFormatter formatter = new NetFormatter()
-						.withNodeNamesInverse(parser.getNodeNames())
 						.withForceGivenNodeNames(true)
 						.withAscii(true);
 				assertThat(formatter.format(net)).isEqualTo(expectedOutput);
@@ -407,8 +406,8 @@ class NetTest {
 
 			@Test
 			void ancestorSwap_error_first() throws Exception {
-				parser.parse("_a:<o>");
-				Node nop = parser.getNodeNames().get("_a");
+				Net net = parser.parse("_a:<o>");
+				Node nop = net.getByName("_a");
 
 				assertThatThrownBy(() -> Net.ancestorExchange(externalNode, nop))
 						.isInstanceOf(IllegalStateException.class)
@@ -418,8 +417,8 @@ class NetTest {
 
 		@Test
 		void ancestorSwap_error_second() throws Exception {
-			parser.parse("_a:<o>");
-			Node nop = parser.getNodeNames().get("_a");
+			Net net = parser.parse("_a:<o>");
+			Node nop = net.getByName("_a");
 
 			assertThatThrownBy(() -> Net.ancestorExchange(nop, externalNode))
 					.isInstanceOf(IllegalStateException.class)

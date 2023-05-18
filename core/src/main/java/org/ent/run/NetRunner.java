@@ -1,5 +1,6 @@
 package org.ent.run;
 
+import org.ent.Ent;
 import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
@@ -15,15 +16,21 @@ public class NetRunner {
 	private static final Logger log = LoggerFactory.getLogger(NetRunner.class);
 
 	private final Net net;
+	private final Ent ent;
 
 	private NetRunnerListener netRunnerListener;
 
-	public NetRunner(Net net) {
-		this.net = net;
+	public NetRunner(Ent ent) {
+		this.ent = ent;
+		this.net = ent.getNet();
 	}
 
 	public Net getNet() {
 		return net;
+	}
+
+	public Ent getEnt() {
+		return ent;
 	}
 
 	public NetRunnerListener getNetRunnerListener() {
@@ -52,7 +59,7 @@ public class NetRunner {
 			}
 		}
 
-		ExecutionResult executeResult = command.execute(executionPointer.getLeftArrow());
+		ExecutionResult executeResult = command.execute(executionPointer.getLeftArrow(), ent);
 		StepResult stepResult = convertToStepResult(executeResult);
 		log.trace("command {} executed: {}", command, executeResult);
 		if (netRunnerListener != null) {

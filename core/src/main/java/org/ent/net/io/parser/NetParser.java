@@ -1,6 +1,7 @@
 package org.ent.net.io.parser;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.ent.Ent;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
@@ -16,7 +17,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * A parser that creates a collection of nodes from a text-description in a domain-specific language.
@@ -37,8 +37,6 @@ import java.util.Map.Entry;
  */
 public class NetParser {
 
-    private Map<String, Node> nodeNames;
-
     private final List<Node> mainNodes = new ArrayList<>(); // top-level nodes, one for each semicolon-separated expression
 
 	private final Map<NodeTemplate, Node> templateNodeMap = new HashMap<>();
@@ -46,6 +44,10 @@ public class NetParser {
 	private FirstPassNetParser firstPassNetParser;
 
 	private boolean markerNodePermitted;
+
+	public Ent parseEnt(String input) throws ParserException {
+		return new Ent(parse(input));
+	}
 
     public Net parse(String input) throws ParserException {
         return parse(new StringReader(input));
@@ -58,22 +60,12 @@ public class NetParser {
         	firstPassNetParser.setMarkerNodesPermitted();
         }
         List<NodeTemplate> mainNodeTemplates = firstPassNetParser.parseAll();
-        return buildNet(mainNodeTemplates);
+		Net net = buildNet(mainNodeTemplates);
+		assignNodeNames(net);
+		return net;
     }
 
-    // values are not unique, i.e. one node can have several names
-    public Map<String, Node> getNodeNames() throws ParserException {
-        if (nodeNames == null) {
-        	nodeNames = buildNodeNames();
-        }
-        return nodeNames;
-    }
-
-	public Node getNodeByName(String name) throws ParserException {
-		return getNodeNames().get(name);
-	}
-
-    public List<Node> getMainNodes() {
+	public List<Node> getMainNodes() {
 		return mainNodes;
 	}
 
@@ -157,16 +149,13 @@ public class NetParser {
 		}
 	}
 
-	private Map<String, Node> buildNodeNames() throws ParserException {
-		Map<String, Node> result = new HashMap<>();
-		Map<String, NodeTemplate> identifierMapping = firstPassNetParser.getIdentifierMapping();
-		for (Entry<String, NodeTemplate> entry : identifierMapping.entrySet()) {
+	private void assignNodeNames(Net net) throws ParserException {
+		for (var entry : firstPassNetParser.getIdentifierMapping().entrySet()) {
 			String name = entry.getKey();
 			NodeTemplate template = entry.getValue();
 			Node node = resolveNode(template);
-	        result.put(name, node);
+			net.setName(node, name);
 		}
-		return result;
 	}
 
 	private @NotNull Node resolveNode(NodeTemplate template) throws ParserException {
@@ -184,7 +173,6 @@ public class NetParser {
 	}
 
 	private void clear() {
-        nodeNames = null;
         mainNodes.clear();
         templateNodeMap.clear();
     }
