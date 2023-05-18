@@ -4,7 +4,6 @@ import org.ent.Ent;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.io.parser.NetParser;
-import org.ent.net.io.parser.ParserException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,14 +12,14 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class NetRunnerTest {
+class EntRunnerTest {
 
 	private NetParser netParser;
 
 	private NetFormatter netFormatter;
 
 	@BeforeEach
-	void setUpParserAndFormatter() throws ParserException {
+	void setUpParserAndFormatter() {
 		NetParser parser = new NetParser();
 		NetFormatter formatter = new NetFormatter()
 				.withAscii(true)
@@ -76,7 +75,7 @@ class NetRunnerTest {
 		assertThat(out0).isEqualTo(netStr);
 
 		Ent ent = new Ent(net);
-		NetRunner runner = new NetRunner(ent);
+		EntRunner runner = new EntRunner(ent);
 
 		for (int i = 1; i < steps.size(); i++) {
 			StepResult result = runner.step();

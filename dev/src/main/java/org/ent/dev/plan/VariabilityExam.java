@@ -6,7 +6,7 @@ import org.ent.dev.ManagedRun;
 import org.ent.dev.RunSetup;
 import org.ent.dev.unit.local.TypedProc;
 import org.ent.net.Net;
-import org.ent.run.NetRunner;
+import org.ent.run.EntRunner;
 
 public class VariabilityExam extends TypedProc<VariabilityExamData> {
 
@@ -34,7 +34,7 @@ public class VariabilityExam extends TypedProc<VariabilityExamData> {
     private VariabilityExamResult examine(Ent ent) {
         collector = new VariabilityCollector();
         ent.getNet().addExecutionEventListener(collector);
-        NetRunner runner = new NetRunner(ent);
+        EntRunner runner = new EntRunner(ent);
         runner.setNetRunnerListener(collector);
         ManagedRun run = new ManagedRun(runSetup).withNetRunner(runner);
         run.perform();

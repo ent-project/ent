@@ -11,16 +11,16 @@ import org.ent.net.node.cmd.ExecutionResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NetRunner {
+public class EntRunner {
 
-	private static final Logger log = LoggerFactory.getLogger(NetRunner.class);
+	private static final Logger log = LoggerFactory.getLogger(EntRunner.class);
 
 	private final Net net;
 	private final Ent ent;
 
-	private NetRunnerListener netRunnerListener;
+	private EntRunnerListener entRunnerListener;
 
-	public NetRunner(Ent ent) {
+	public EntRunner(Ent ent) {
 		this.ent = ent;
 		this.net = ent.getNet();
 	}
@@ -33,12 +33,12 @@ public class NetRunner {
 		return ent;
 	}
 
-	public NetRunnerListener getNetRunnerListener() {
-		return netRunnerListener;
+	public EntRunnerListener getNetRunnerListener() {
+		return entRunnerListener;
 	}
 
-	public void setNetRunnerListener(NetRunnerListener netRunnerListener) {
-		this.netRunnerListener = netRunnerListener;
+	public void setNetRunnerListener(EntRunnerListener entRunnerListener) {
+		this.entRunnerListener = entRunnerListener;
 	}
 
 	public StepResult step() {
@@ -62,8 +62,8 @@ public class NetRunner {
 		ExecutionResult executeResult = command.execute(executionPointer.getLeftArrow(), ent);
 		StepResult stepResult = convertToStepResult(executeResult);
 		log.trace("command {} executed: {}", command, executeResult);
-		if (netRunnerListener != null) {
-			netRunnerListener.fireCommandExecuted(executionPointer, executeResult);
+		if (entRunnerListener != null) {
+			entRunnerListener.fireCommandExecuted(executionPointer, executeResult);
 		}
 
 		if (command.getValue() == Commands.NOP.getValue() && executionPointerDoesNotAdvance) {

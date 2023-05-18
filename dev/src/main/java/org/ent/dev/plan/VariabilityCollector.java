@@ -7,12 +7,12 @@ import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.ExecutionResult;
-import org.ent.run.NetRunnerListener;
+import org.ent.run.EntRunnerListener;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class VariabilityCollector implements ExecutionEventListener, NetRunnerListener {
+public class VariabilityCollector implements ExecutionEventListener, EntRunnerListener {
 
     final Map<Command, CommandData> commandDataMap = new HashMap<>();
     final Map<Arrow, ArrowData> arrowDataMap = new HashMap<>();

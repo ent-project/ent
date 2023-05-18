@@ -1,7 +1,7 @@
 package org.ent.dev;
 
 import org.ent.net.io.formatter.NetFormatter;
-import org.ent.run.NetRunner;
+import org.ent.run.EntRunner;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -22,63 +22,63 @@ class ManagedRunTest {
 	private static final int MAX_STEPS = 5;
 
 	@Mock
-	NetRunner netRunner;
+	EntRunner entRunner;
 
 	@Mock
 	NetFormatter netFormatter;
 
 	@Test
 	void perform_okay() {
-		Mockito.doReturn(SUCCESS).when(netRunner).step();
+		Mockito.doReturn(SUCCESS).when(entRunner).step();
 		ManagedRun run = new ManagedRun(RunSetup.create(s -> s.withMaxSteps(MAX_STEPS)))
-                .withNetRunner(netRunner).withFormatter(netFormatter);
+                .withNetRunner(entRunner).withFormatter(netFormatter);
 
 		run.perform();
 
-		verify(netRunner, times(MAX_STEPS)).step();
+		verify(entRunner, times(MAX_STEPS)).step();
 		assertThat(run.getNoSteps()).isEqualTo(MAX_STEPS);
 	}
 
 	@Test
 	void perform_stop_fatal() {
-		doReturn(FATAL).when(netRunner).step();
-		ManagedRun run = new ManagedRun(RunSetup.create(s -> s)).withNetRunner(netRunner).withFormatter(netFormatter);
+		doReturn(FATAL).when(entRunner).step();
+		ManagedRun run = new ManagedRun(RunSetup.create(s -> s)).withNetRunner(entRunner).withFormatter(netFormatter);
 
 		run.perform();
 
-		verify(netRunner, times(1)).step();
+		verify(entRunner, times(1)).step();
 		assertThat(run.getNoSteps()).isZero();
 	}
 
 	@Test
 	void perform_okay_commandExecutionFailedIsNotFatal() {
-		doReturn(SUCCESS, SUCCESS, COMMAND_EXECUTION_FAILED).when(netRunner).step();
+		doReturn(SUCCESS, SUCCESS, COMMAND_EXECUTION_FAILED).when(entRunner).step();
 		ManagedRun run = new ManagedRun(
 		            RunSetup.create(s -> s
                         .withCommandExecutionFailedIsFatal(false)
                         .withMaxSteps(MAX_STEPS)))
-                .withNetRunner(netRunner)
+                .withNetRunner(entRunner)
                 .withFormatter(netFormatter);
 
 		run.perform();
 
-		verify(netRunner, times(MAX_STEPS)).step();
+		verify(entRunner, times(MAX_STEPS)).step();
 		assertThat(run.getNoSteps()).isEqualTo(MAX_STEPS);
 	}
 
 	@Test
 	void perform_stop_commandExecutionFailed() {
-		doReturn(SUCCESS, SUCCESS, COMMAND_EXECUTION_FAILED).when(netRunner).step();
+		doReturn(SUCCESS, SUCCESS, COMMAND_EXECUTION_FAILED).when(entRunner).step();
 		ManagedRun run = new ManagedRun(
                     RunSetup.create(s -> s
                         .withCommandExecutionFailedIsFatal(true)
                         .withMaxSteps(MAX_STEPS)))
-                .withNetRunner(netRunner)
+                .withNetRunner(entRunner)
                 .withFormatter(netFormatter);
 
 		run.perform();
 
-		verify(netRunner, times(3)).step();
+		verify(entRunner, times(3)).step();
 		assertThat(run.getNoSteps()).isEqualTo(2);
 	}
 

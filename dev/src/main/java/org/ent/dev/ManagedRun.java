@@ -2,7 +2,7 @@ package org.ent.dev;
 
 import org.ent.Ent;
 import org.ent.net.io.formatter.NetFormatter;
-import org.ent.run.NetRunner;
+import org.ent.run.EntRunner;
 import org.ent.run.StepResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,7 @@ public class ManagedRun {
 
 	private final RunSetup runSetup;
 
-	private NetRunner netRunner;
+	private EntRunner entRunner;
 
 	private Ent ent;
 
@@ -29,16 +29,16 @@ public class ManagedRun {
 		this.runSetup = runSetup;
 	}
 
-	public NetRunner getNetRunner() {
-		return netRunner;
+	public EntRunner getNetRunner() {
+		return entRunner;
 	}
 
-	public void setNetRunner(NetRunner netRunner) {
-		this.netRunner = netRunner;
+	public void setNetRunner(EntRunner entRunner) {
+		this.entRunner = entRunner;
 	}
 
-	public ManagedRun withNetRunner(NetRunner netRunner) {
-		setNetRunner(netRunner);
+	public ManagedRun withNetRunner(EntRunner entRunner) {
+		setNetRunner(entRunner);
 		return this;
 	}
 
@@ -72,14 +72,14 @@ public class ManagedRun {
 	}
 
 	private void initializeEvaluation() {
-		if (ent == null && netRunner == null) {
+		if (ent == null && entRunner == null) {
 			throw new IllegalArgumentException("Either net or netRunner must be set.");
 		}
 		if (ent == null) {
-			ent = netRunner.getEnt();
+			ent = entRunner.getEnt();
 		}
-		if (netRunner == null) {
-			netRunner = new NetRunner(ent);
+		if (entRunner == null) {
+			entRunner = new EntRunner(ent);
 		}
 		noSteps = 0;
 		if (log.isTraceEnabled()) {
@@ -88,7 +88,7 @@ public class ManagedRun {
 	}
 
 	private EvaluationStepResult doStep() {
-		StepResult result = netRunner.step();
+		StepResult result = entRunner.step();
 		boolean isFatal = isStepResultFatal(result);
 		if (isFatal) {
 			this.lastStepResult = result;
