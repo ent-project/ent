@@ -15,6 +15,6 @@ public class XorOperation extends TriValueOperation {
 
     @Override
     public String getSecondSeparator() {
-        return "^";
+        return "xor";
     }
 }

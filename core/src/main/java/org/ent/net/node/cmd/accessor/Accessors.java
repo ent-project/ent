@@ -7,6 +7,7 @@ import java.util.List;
 
 public class Accessors {
 
+    public static final FlowAccessor FLOW = new FlowAccessor();
     public static final DirectAccessor DIRECT = new DirectAccessor();
     public static final PrimaryAccessor LEFT = new PrimaryAccessor(ArrowDirection.LEFT);
     public static final PrimaryAccessor RIGHT = new PrimaryAccessor(ArrowDirection.RIGHT);
@@ -22,6 +23,7 @@ public class Accessors {
 
     static {
         ALL_ACCESSORS = new ArrayList<>();
+        ALL_ACCESSORS.add(FLOW);
         ALL_ACCESSORS.add(DIRECT);
         ALL_ACCESSORS.add(LEFT);
         ALL_ACCESSORS.add(RIGHT);

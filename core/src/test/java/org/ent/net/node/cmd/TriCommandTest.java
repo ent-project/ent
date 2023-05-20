@@ -23,7 +23,7 @@ class TriCommandTest extends TestBase {
         Net net = builder().net(unary(parameters = node(arg1 = value(7), arg2 = value(5))));
         Command command = new TriCommand(Accessors.DIRECT, Accessors.LEFT, Accessors.RIGHT, Operations.PLUS_OPERATION);
 
-        command.execute(net.getRoot().getLeftArrow(), new Ent(net));
+        command.execute(net.getRoot(), new Ent(net));
 
         assertThat(parameters.getValue()).isEqualTo(12);
         assertThat(arg1.getValue()).isEqualTo(7);
@@ -37,7 +37,7 @@ class TriCommandTest extends TestBase {
         Net net = builder().net(unary(node(GREATER_THAN_CONDITION, i = value(7), value(0))));
         Command command = new TriCommand(Accessors.LEFT, Accessors.LEFT, Accessors.LEFT, Operations.PLUS_OPERATION); // i = i + i
 
-        command.execute(net.getRoot().getLeftArrow(), new Ent(net));
+        command.execute(net.getRoot(), new Ent(net));
 
         assertThat(i.getValue()).isEqualTo(14);
     }
@@ -48,7 +48,7 @@ class TriCommandTest extends TestBase {
         Net net = builder().net(unary(node(GREATER_THAN_CONDITION, i = value(7), value(1000))));
         Command command = new TriCommand(Accessors.LEFT, Accessors.LEFT, Accessors.LEFT, Operations.PLUS_OPERATION); // i = i + i
 
-        command.execute(net.getRoot().getLeftArrow(), new Ent(net));
+        command.execute(net.getRoot(), new Ent(net));
 
         assertThat(i.getValue()).isEqualTo(7);
     }

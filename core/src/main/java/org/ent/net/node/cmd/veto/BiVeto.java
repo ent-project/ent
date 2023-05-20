@@ -4,26 +4,11 @@ import org.ent.Ent;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Purview;
+import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
 import org.ent.net.node.cmd.accessor.PrimaryAccessor;
 
 public class BiVeto implements Veto {
-
-/*
-value bit pattern:
-|                 |                 |                 |                 |
-  P V O O O O O O   Z Z Z Z Y Y Y Y   X X X X C C C C   C C C C C C C N
-
-N - 'not' flag (inverts the condition)
-C - condition code
-X - accessor for the first parameter
-Y - accessor for the second parameter
-Z - accessor for the third parameter, all 0 in this case
-O - unused = 0
-V - veto flag = 1
-P - portal flag = 0
-
- */
 
     private final Accessor accessor1;
 
@@ -51,9 +36,9 @@ P - portal flag = 0
     }
 
     @Override
-    public boolean evaluate(Arrow parameters, Ent ent) {
-        Arrow arrow1 = accessor1.get(parameters, ent, Purview.COMMAND);
-        Arrow arrow2 = accessor2.get(parameters, ent, Purview.COMMAND);
+    public boolean evaluate(Node base, Ent ent) {
+        Arrow arrow1 = accessor1.get(base, ent, Purview.COMMAND);
+        Arrow arrow2 = accessor2.get(base, ent, Purview.COMMAND);
         return not ^ condition.evaluate(arrow1, arrow2);
     }
 

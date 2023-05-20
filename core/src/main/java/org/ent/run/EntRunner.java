@@ -63,7 +63,7 @@ public class EntRunner {
 			}
 		}
 
-		ExecutionResult executeResult = command.execute(executionPointer.getLeftArrow(), ent);
+		ExecutionResult executeResult = command.execute(executionPointer, ent);
 		StepResult stepResult = convertToStepResult(executeResult);
 		log.trace("command {} executed: {}", command, executeResult);
 		if (entRunnerListener != null) {

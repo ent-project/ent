@@ -4,6 +4,7 @@ import org.ent.Ent;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Purview;
+import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
 import org.ent.net.node.cmd.accessor.PrimaryAccessor;
 import org.ent.net.node.cmd.operation.BiOperation;
@@ -24,7 +25,10 @@ public class BiCommand extends VetoedCommand {
 		this.accessor1 = accessor1;
 		this.accessor2 = accessor2;
 		this.operation = operation;
-		this.value = operation.getCode() | (accessor1.getCode() << 8) | (accessor2.getCode() << 12);
+		this.value = Command.COMMAND_PATTERN |
+				operation.getCode() |
+				(accessor1.getCode() << 12) |
+				(accessor2.getCode() << 16);
 		this.shortName = buildShortName();
 	}
 
@@ -33,9 +37,9 @@ public class BiCommand extends VetoedCommand {
 	}
 
 	@Override
-	public ExecutionResult doExecute(Arrow parameters, Ent ent) {
-		Arrow handle1 = accessor1.get(parameters, ent, Purview.COMMAND);
-		Arrow handle2 = accessor2.get(parameters, ent, Purview.COMMAND);
+	public ExecutionResult doExecute(Node base, Ent ent) {
+		Arrow handle1 = accessor1.get(base, ent, Purview.COMMAND);
+		Arrow handle2 = accessor2.get(base, ent, Purview.COMMAND);
 		return operation.apply(handle1, handle2, ent);
 	}
 

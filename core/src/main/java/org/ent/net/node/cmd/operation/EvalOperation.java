@@ -39,7 +39,7 @@ public class EvalOperation implements BiOperation {
 //			return ExecutionResult.ERROR;
 //		}
 
-		command.execute(arrowToNode2, null);
+//		command.execute(arrowToNode2, null);
 		return ExecutionResult.NORMAL;
 	}
 

@@ -3,6 +3,7 @@ package org.ent.net.node.cmd;
 import org.ent.Ent;
 import org.ent.net.Arrow;
 import org.ent.net.Purview;
+import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
 import org.ent.net.node.cmd.operation.TriOperation;
 
@@ -23,7 +24,11 @@ public class TriCommand extends VetoedCommand {
         this.accessor2 = accessor2;
         this.accessor3 = accessor3;
         this.operation = operation;
-        this.value = operation.getCode() | (accessor1.getCode() << 8) | (accessor2.getCode() << 12) | (accessor3.getCode() << 16);
+        this.value = Command.COMMAND_PATTERN |
+                operation.getCode() |
+                (accessor1.getCode() << 12) |
+                (accessor2.getCode() << 16) |
+                (accessor3.getCode() << 20);
         this.shortName = accessor1.getShortName() + operation.getFirstSeparator() +
                 accessor2.getShortName() + operation.getSecondSeparator() + accessor3.getShortName();
     }
@@ -33,10 +38,10 @@ public class TriCommand extends VetoedCommand {
     }
 
     @Override
-    public ExecutionResult doExecute(Arrow parameters, Ent ent) {
-        Arrow handle1 = accessor1.get(parameters, ent, Purview.COMMAND);
-        Arrow handle2 = accessor2.get(parameters, ent, Purview.COMMAND);
-        Arrow handle3 = accessor3.get(parameters, ent, Purview.COMMAND);
+    public ExecutionResult doExecute(Node base, Ent ent) {
+        Arrow handle1 = accessor1.get(base, ent, Purview.COMMAND);
+        Arrow handle2 = accessor2.get(base, ent, Purview.COMMAND);
+        Arrow handle3 = accessor3.get(base, ent, Purview.COMMAND);
         return operation.apply(handle1, handle2, handle3);
     }
 

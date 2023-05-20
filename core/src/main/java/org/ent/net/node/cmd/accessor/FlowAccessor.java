@@ -5,20 +5,20 @@ import org.ent.net.Arrow;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
 
-public class DirectAccessor implements Accessor {
+public class FlowAccessor implements Accessor {
 
 	@Override
 	public int getCode() {
-		return 0b1;
+		return 0;
 	}
 
 	@Override
 	public Arrow get(Node base, Ent ent, Purview purview) {
-		return base.getLeftArrow();
+		return base.getRightArrow();
 	}
 
 	@Override
 	public String getShortName() {
-		return "*";
+		return "^";
 	}
 }

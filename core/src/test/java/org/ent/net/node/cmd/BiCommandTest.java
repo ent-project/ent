@@ -57,7 +57,8 @@ class BiCommandTest {
 		Accessor a1 = new TertiaryAccessor(ArrowDirection.RIGHT, ArrowDirection.RIGHT, ArrowDirection.RIGHT);
 		Accessor a2 = new DirectAccessor();
 		BiCommand c = new BiCommand(a1, a2, new SetOperation());
-		assertThat(TestUtil.toBinary16bit(c.getValue())).isEqualTo("0001111100000001");
+		assertThat(TestUtil.toBinary16bit(c.getValue())).isEqualTo(
+				TestUtil.toBinary16bit(0b0011_0011__0000_0001__1111_0000__0000_0001));
 	}
 
 	@Test
@@ -66,7 +67,7 @@ class BiCommandTest {
 		Net net = builder().net(unary(node(GREATER_THAN_CONDITION, i = value(7), value(0))));
 		Command command = new BiCommand(Accessors.LEFT, Accessors.LEFT, INC_OPERATION);
 
-		command.execute(net.getRoot().getLeftArrow(), new Ent(net));
+		command.execute(net.getRoot(), new Ent(net));
 
 		assertThat(i.getValue()).isEqualTo(8);
 	}
@@ -77,7 +78,7 @@ class BiCommandTest {
 		Net net = builder().net(unary(node(GREATER_THAN_CONDITION, i = value(7), value(1000))));
 		Command command = new BiCommand(Accessors.LEFT, Accessors.LEFT, INC_OPERATION);
 
-		command.execute(net.getRoot().getLeftArrow(), new Ent(net));
+		command.execute(net.getRoot(), new Ent(net));
 
 		assertThat(i.getValue()).isEqualTo(7);
 	}
