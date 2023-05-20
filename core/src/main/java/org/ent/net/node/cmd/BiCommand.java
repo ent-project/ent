@@ -8,7 +8,7 @@ import org.ent.net.node.cmd.accessor.Accessor;
 import org.ent.net.node.cmd.accessor.PrimaryAccessor;
 import org.ent.net.node.cmd.operation.BiOperation;
 
-public class BiCommand implements Command {
+public class BiCommand extends VetoedCommand {
 
 	private final Accessor accessor1;
 
@@ -36,8 +36,10 @@ public class BiCommand implements Command {
 	}
 
 	@Override
-	public ExecutionResult execute(Arrow parameters, Ent ent) {
-		return operation.apply(accessor1.get(parameters, ent, Purview.COMMAND), accessor2.get(parameters, ent, Purview.COMMAND));
+	public ExecutionResult doExecute(Arrow parameters, Ent ent) {
+		Arrow handle1 = accessor1.get(parameters, ent, Purview.COMMAND);
+		Arrow handle2 = accessor2.get(parameters, ent, Purview.COMMAND);
+		return operation.apply(handle1, handle2);
 	}
 
 	@Override
@@ -45,7 +47,7 @@ public class BiCommand implements Command {
 		return value;
 	}
 
-	@Override
+	@Deprecated
 	public String getShortName() {
 		return shortName;
 	}
@@ -56,34 +58,32 @@ public class BiCommand implements Command {
 	}
 
 	private String buildShortNameAscii() {
-		String accessor1Name;
+		String accessor1Name = this.accessor1.getShortNameAscii();
 		if (this.accessor1 instanceof PrimaryAccessor primaryLeft && primaryLeft.getDirection() == ArrowDirection.LEFT) {
 			accessor1Name = "";
-		} else {
-			accessor1Name = this.accessor1.getShortNameAscii();
 		}
-		String accessor2Name;
+		String accessor2Name = this.accessor2.getShortNameAscii();
 		if (this.accessor2 instanceof PrimaryAccessor primaryRight && primaryRight.getDirection() == ArrowDirection.RIGHT) {
 			accessor2Name = "";
-		} else {
-			accessor2Name = this.accessor2.getShortNameAscii();
 		}
 		return accessor1Name + this.operation.getShortNameAscii() + accessor2Name;
 	}
 
+	@Deprecated
 	private String buildShortName() {
-		String accessor1Name;
+		String accessor1Name = this.accessor1.getShortName();
 		if (this.accessor1 instanceof PrimaryAccessor primaryLeft && primaryLeft.getDirection() == ArrowDirection.LEFT) {
 			accessor1Name = "";
-		} else {
-			accessor1Name = this.accessor1.getShortName();
 		}
-		String accessor2Name;
+		String accessor2Name = this.accessor2.getShortName();
 		if (this.accessor2 instanceof PrimaryAccessor primaryRight && primaryRight.getDirection() == ArrowDirection.RIGHT) {
 			accessor2Name = "";
-		} else {
-			accessor2Name = this.accessor2.getShortName();
 		}
 		return accessor1Name + this.operation.getShortName() + accessor2Name;
+	}
+
+	@Override
+	public String toString() {
+		return getName();
 	}
 }

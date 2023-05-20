@@ -2,34 +2,18 @@ package org.ent.net.node.cmd;
 
 import org.ent.net.ArrowDirection;
 import org.ent.net.node.cmd.accessor.Accessor;
+import org.ent.net.node.cmd.accessor.Accessors;
 import org.ent.net.node.cmd.accessor.DirectAccessor;
 import org.ent.net.node.cmd.accessor.PrimaryAccessor;
-import org.ent.net.node.cmd.accessor.SecondaryAccessor;
-import org.ent.net.node.cmd.accessor.TertiaryAccessor;
-import org.ent.net.node.cmd.operation.AncestorExchangeNormalOperation;
 import org.ent.net.node.cmd.operation.AncestorExchangeOperation;
 import org.ent.net.node.cmd.operation.BiOperation;
-import org.ent.net.node.cmd.operation.DupNormalOperation;
 import org.ent.net.node.cmd.operation.DupOperation;
 import org.ent.net.node.cmd.operation.IsIdenticalOperation;
+import org.ent.net.node.cmd.operation.Operations;
 import org.ent.net.node.cmd.operation.SetOperation;
-import org.ent.net.node.cmd.operation.SetValueOperation;
 import org.ent.net.node.cmd.operation.TriOperation;
-import org.ent.net.node.cmd.operation.math.BitwiseAndOperation;
-import org.ent.net.node.cmd.operation.math.BitwiseOrOperation;
-import org.ent.net.node.cmd.operation.math.DecOperation;
-import org.ent.net.node.cmd.operation.math.IncOperation;
-import org.ent.net.node.cmd.operation.math.MinusOperation;
-import org.ent.net.node.cmd.operation.math.ModuloOperation;
-import org.ent.net.node.cmd.operation.math.MultiplyOperation;
-import org.ent.net.node.cmd.operation.math.NegOperation;
-import org.ent.net.node.cmd.operation.math.PlusOperation;
-import org.ent.net.node.cmd.operation.math.RotateRightOperation;
-import org.ent.net.node.cmd.operation.math.ShiftLeftOperation;
-import org.ent.net.node.cmd.operation.math.ShiftRightOperation;
-import org.ent.net.node.cmd.operation.math.XorOperation;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,38 +33,21 @@ public final class CommandFactory {
 
 
 	private static void initializeCommands() {
-		List<Accessor> accessors = new ArrayList<>();
-		accessors.add(new DirectAccessor());
-		for (ArrowDirection direction : ArrowDirection.values()) {
-			accessors.add(new PrimaryAccessor(direction));
-		}
-		for (ArrowDirection direction1 : ArrowDirection.values()) {
-			for (ArrowDirection direction2 : ArrowDirection.values()) {
-				accessors.add(new SecondaryAccessor(direction1, direction2));
-			}
-		}
-		for (ArrowDirection direction1 : ArrowDirection.values()) {
-			for (ArrowDirection direction2 : ArrowDirection.values()) {
-				for (ArrowDirection direction3 : ArrowDirection.values()) {
-					accessors.add(new TertiaryAccessor(direction1, direction2, direction3));
-				}
-			}
-		}
 		initializeCommand(new NopCommand());
 		List<BiOperation> biOperations = List.of(
-				new SetOperation(),
-				new AncestorExchangeOperation(),
-				new AncestorExchangeNormalOperation(),
-				new DupOperation(),
-				new DupNormalOperation(),
-				new IsIdenticalOperation(),
-				new SetValueOperation(),
-				new NegOperation(),
-				new IncOperation(),
-				new DecOperation()
+				Operations.SET_OPERATION,
+				Operations.ANCESTOR_EXCHANGE_OPERATION,
+				Operations.ANCESTOR_EXCHANGE_NORMAL_OPERATION,
+				Operations.DUP_OPERATION,
+				Operations.DUP_NORMAL_OPERATION,
+				Operations.IS_IDENTICAL_OPERATION,
+				Operations.SET_VALUE_OPERATION,
+				Operations.NEG_OPERATION,
+				Operations.INC_OPERATION,
+				Operations.DEC_OPERATION
 		);
-		for (Accessor accessor1 : accessors) {
-			for (Accessor accessor2 : accessors) {
+		for (Accessor accessor1 : Accessors.ALL_ACCESSORS) {
+			for (Accessor accessor2 : Accessors.ALL_ACCESSORS) {
 				for (BiOperation operation : biOperations) {
 					Command command = new BiCommand(accessor1, accessor2, operation);
 					initializeCommand(command);
@@ -88,20 +55,20 @@ public final class CommandFactory {
 			}
 		}
 		List<TriOperation> triOperations = List.of(
-				new PlusOperation(),
-				new MinusOperation(),
-				new MultiplyOperation(),
-				new ModuloOperation(),
-				new XorOperation(),
-				new BitwiseAndOperation(),
-				new BitwiseOrOperation(),
-				new RotateRightOperation(),
-				new ShiftLeftOperation(),
-				new ShiftRightOperation()
+				Operations.PLUS_OPERATION,
+				Operations.MINUS_OPERATION,
+				Operations.MULTIPLY_OPERATION,
+				Operations.MODULO_OPERATION,
+				Operations.XOR_OPERATION,
+				Operations.BITWISE_AND_OPERATION,
+				Operations.BITWISE_OR_OPERATION,
+				Operations.ROTATE_RIGHT_OPERATION,
+				Operations.SHIFT_LEFT_OPERATION,
+				Operations.SHIFT_RIGHT_OPERATION
 		);
-		for (Accessor accessor1 : accessors) {
-			for (Accessor accessor2 : accessors) {
-				for (Accessor accessor3 : accessors) {
+		for (Accessor accessor1 : Accessors.ALL_ACCESSORS) {
+			for (Accessor accessor2 : Accessors.ALL_ACCESSORS) {
+				for (Accessor accessor3 : Accessors.ALL_ACCESSORS) {
 					for (TriOperation operation : triOperations) {
 						Command command = new TriCommand(accessor1, accessor2, accessor3, operation);
 						initializeCommand(command);
@@ -122,20 +89,17 @@ public final class CommandFactory {
 	private static Map<String, Command> buildCommandsByName() {
 		Map<String, Command> result = new HashMap<>();
 		for (Command command : commandMap.values()) {
-			String name = command.getShortName();
+			String name = command.getShortNameAscii();
 			if (result.containsKey(name)) {
 				throw new AssertionError("Duplicate command name: " + name);
 			}
 			result.put(name, command);
-			String nameAscii = command.getShortNameAscii();
-			if (!name.equals(nameAscii)) {
-				if (result.containsKey(nameAscii)) {
-					throw new AssertionError("Duplicate command name: " + nameAscii);
-				}
-				result.put(nameAscii, command);
-			}
 		}
 		return result;
+	}
+
+	public static Collection<String> getAllCommandNames() {
+		return commandsByName.keySet();
 	}
 
 	public static Command getByValue(int value) {

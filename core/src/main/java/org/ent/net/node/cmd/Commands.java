@@ -8,7 +8,7 @@ import org.ent.net.node.cmd.operation.Operations;
 public class Commands {
 
     public static final Command NOP = CommandFactory.getByValue(new NopCommand().getValue());
-    public static final Command ANCESTOR_EXCHANGE = get(Operations.ANCESTOR_EXCHANGE);
+    public static final Command ANCESTOR_EXCHANGE = get(Operations.ANCESTOR_EXCHANGE_OPERATION);
 
     private Commands() {
     }

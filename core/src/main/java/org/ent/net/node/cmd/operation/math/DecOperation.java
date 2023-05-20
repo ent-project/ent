@@ -17,6 +17,6 @@ public class DecOperation extends BiValueOperation {
 
 	@Override
 	public String getShortNameAscii() {
-		return "=-1+";
+		return "dec";
 	}
 }

@@ -1,7 +1,11 @@
 package org.ent.net.node.cmd;
 
+import org.ent.Ent;
 import org.ent.net.ArrowDirection;
+import org.ent.net.Net;
+import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
+import org.ent.net.node.cmd.accessor.Accessors;
 import org.ent.net.node.cmd.accessor.DirectAccessor;
 import org.ent.net.node.cmd.accessor.TertiaryAccessor;
 import org.ent.net.node.cmd.operation.BiOperation;
@@ -13,6 +17,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.ent.net.node.cmd.operation.Operations.INC_OPERATION;
+import static org.ent.net.node.cmd.veto.Conditions.GREATER_THAN_CONDITION;
+import static org.ent.util.NetBuilder.builder;
+import static org.ent.util.NetBuilder.node;
+import static org.ent.util.NetBuilder.unary;
+import static org.ent.util.NetBuilder.value;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,6 +58,28 @@ class BiCommandTest {
 		Accessor a2 = new DirectAccessor();
 		BiCommand c = new BiCommand(a1, a2, new SetOperation());
 		assertThat(TestUtil.toBinary16bit(c.getValue())).isEqualTo("0001111100000001");
+	}
+
+	@Test
+	void execute_withVeto_pass() {
+		Node i;
+		Net net = builder().net(unary(node(GREATER_THAN_CONDITION, i = value(7), value(0))));
+		Command command = new BiCommand(Accessors.LEFT, Accessors.LEFT, INC_OPERATION);
+
+		command.execute(net.getRoot().getLeftArrow(), new Ent(net));
+
+		assertThat(i.getValue()).isEqualTo(8);
+	}
+
+	@Test
+	void execute_withVeto_reject() {
+		Node i;
+		Net net = builder().net(unary(node(GREATER_THAN_CONDITION, i = value(7), value(1000))));
+		Command command = new BiCommand(Accessors.LEFT, Accessors.LEFT, INC_OPERATION);
+
+		command.execute(net.getRoot().getLeftArrow(), new Ent(net));
+
+		assertThat(i.getValue()).isEqualTo(7);
 	}
 
 }

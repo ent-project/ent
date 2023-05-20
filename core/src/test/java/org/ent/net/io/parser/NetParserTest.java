@@ -7,6 +7,8 @@ import org.ent.net.node.Node;
 import org.ent.net.node.NodeType;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.operation.Operations;
+import org.ent.net.node.cmd.veto.Conditions;
+import org.ent.net.node.cmd.veto.Vetos;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -61,7 +63,19 @@ class NetParserTest {
 			Node root = net.getRoot();
 
 			assertThat(root.getNodeType()).isEqualTo(NodeType.COMMAND_NODE);
-			assertThat(root.getValue()).isEqualTo(Commands.get(Operations.ANCESTOR_EXCHANGE).getValue());
+			assertThat(root.getValue()).isEqualTo(Commands.get(Operations.ANCESTOR_EXCHANGE_OPERATION).getValue());
+		}
+
+		@Test
+		void condition() throws Exception {
+			Net net = parser.parse("<?===?>");
+
+			Set<Node> nodes = net.getNodes();
+			assertThat(nodes).hasSize(1);
+			Node root = net.getRoot();
+
+			assertThat(root.getNodeType()).isEqualTo(NodeType.COMMAND_NODE);
+			assertThat(root.getValue()).isEqualTo(Vetos.get(Conditions.IDENTICAL_CONDITION).getValue());
 		}
 
 		@Test
@@ -101,7 +115,7 @@ class NetParserTest {
 			assertThat(root.getLeftChild().getNodeType()).isEqualTo(NodeType.COMMAND_NODE);
 			assertThat(root.getLeftChild().getValue()).isEqualTo(Commands.NOP.getValue());
 			assertThat(root.getRightChild().getNodeType()).isEqualTo(NodeType.COMMAND_NODE);
-			assertThat(root.getRightChild().getValue()).isEqualTo(Commands.get(Operations.ANCESTOR_EXCHANGE).getValue());
+			assertThat(root.getRightChild().getValue()).isEqualTo(Commands.get(Operations.ANCESTOR_EXCHANGE_OPERATION).getValue());
 		}
 
 		@Test
@@ -187,32 +201,32 @@ class NetParserTest {
 	@Nested
 	class Error {
 		@Test
-		void markerNotPermitted() throws Exception {
+		void markerNotPermitted() {
 			assertThatThrownBy(() -> parser.parse("A:[@]")).isInstanceOf(ParserException.class)
 					.hasMessage("Found marker node in line 1, column 6, but is not permitted");
 		}
 
 		@Test
-		void markerTopLevel() throws Exception {
+		void markerTopLevel() {
 			parser.permitMarkerNodes();
 			assertThatThrownBy(() -> parser.parse("<o>; @")).isInstanceOf(ParserException.class)
 					.hasMessage("Top level node must not be a marker node");
 		}
 
 		@Test
-		void tokenizer() throws Exception {
+		void tokenizer(){
 			assertThatThrownBy(() -> parser.parse("A:[B];\nC:]")).isInstanceOf(ParserException.class)
 					.hasMessageContaining("Unexpected token ']' in line 2, column 5");
 		}
 
 		@Test
-		void unknownIdentifier() throws Exception {
+		void unknownIdentifier() {
 			assertThatThrownBy(() -> parser.parse("(A,B); B:A")).isInstanceOf(ParserException.class)
 					.hasMessage("Unknown identifier: 'A'");
 		}
 
 		@Test
-		void duplicateIdentifier() throws Exception {
+		void duplicateIdentifier(){
 			assertThatThrownBy(() -> parser.parse("(a:#1, a:#2)")).isInstanceOf(ParserException.class)
 					.hasMessage("Identifier 'a' bound more than once.");
 		}

@@ -15,14 +15,18 @@ public class EntRunner {
 
 	private static final Logger log = LoggerFactory.getLogger(EntRunner.class);
 
-	private final Net net;
 	private final Ent ent;
+	private final Net net;
 
 	private EntRunnerListener entRunnerListener;
 
 	public EntRunner(Ent ent) {
 		this.ent = ent;
 		this.net = ent.getNet();
+	}
+
+	public EntRunner(Net net) {
+		this(new Ent(net));
 	}
 
 	public Net getNet() {

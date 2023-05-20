@@ -6,8 +6,7 @@ import org.ent.net.io.parser.tokenizer.NetTokenizer;
 import org.ent.net.io.parser.tokenizer.Token;
 import org.ent.net.io.parser.tokenizer.TokenManager;
 import org.ent.net.io.parser.tokenizer.ValueToken;
-import org.ent.net.node.cmd.Command;
-import org.ent.net.node.cmd.CommandFactory;
+import org.ent.net.node.cmd.Values;
 
 import java.io.Reader;
 import java.text.MessageFormat;
@@ -117,17 +116,17 @@ public class FirstPassNetParser {
 
     private NodeTemplate parseNodeWithPossibleValueExpression() throws ParserException {
         Token token = tokenizer.peek();
-        int value = 0;
+        int value;
         if (token instanceof ValueToken valueToken) {
             tokenizer.next();
             value = valueToken.getValue();
         } else if (token instanceof CommandToken commandToken) {
             tokenizer.next();
-            Command command = CommandFactory.getByName(commandToken.getCommandName());
-            if (command == null) {
-                throw new ParserException("Unknown command: '" + commandToken.getCommandName() + "'");
+            Integer namedValue = Values.getByName(commandToken.getCommandName());
+            if (namedValue == null) {
+                throw new ParserException("Unknown command/condition: '" + commandToken.getCommandName() + "'");
             }
-            value = command.getValue();
+            value = namedValue;
         } else {
             return parsePlainNodeExpression(0);
         }

@@ -30,9 +30,9 @@ import java.util.Map;
  * <p>
  * Examples:
  * <ul>
- * <li><code>([&lt;nop&gt;], (&lt;nop&gt;, &lt;nop&gt;))</code>
- * <li><code>B=(u=[B],(&lt;nop&gt;, u))</code>
- * <li><code>(K, K); K=[K]</code>
+ * <li><code>([&lt;o&gt;], (&lt;o&gt;, &lt;o&gt;))</code>
+ * <li><code>B:(u:[B],(&lt;o&gt;, u))</code>
+ * <li><code>(K, K); K:[K]</code>
  * </ul>
  */
 public class NetParser {

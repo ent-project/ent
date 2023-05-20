@@ -4,8 +4,7 @@ import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
-import org.ent.net.node.cmd.Command;
-import org.ent.net.node.cmd.CommandFactory;
+import org.ent.net.node.cmd.Values;
 
 import java.util.HashMap;
 import java.util.List;
@@ -98,10 +97,10 @@ public class FormattingWorker {
 			stringBuilder.append(ascii ? MarkerNode.MARKER_NODE_SYMBOL_ASCII : MarkerNode.MARKER_NODE_SYMBOL);
 		} else {
 			if (node.getValue() != 0 || node.isCommandNode()) {
-				Command command = CommandFactory.getByValue(node.getValue());
-				if (command != null) {
+				String name = Values.getName(node.getValue());
+				if (name != null) {
 					stringBuilder.append("<");
-					stringBuilder.append(ascii ? command.getShortNameAscii() : command.getShortName());
+					stringBuilder.append(name);
 					stringBuilder.append(">");
 				} else {
 					stringBuilder.append(String.format("#%x", node.getValue()));

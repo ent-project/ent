@@ -1,37 +1,55 @@
 package org.ent.net.node.cmd;
 
 import org.ent.Ent;
-import org.ent.Profile;
+import org.ent.TestBase;
 import org.ent.net.Net;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessors;
 import org.ent.net.node.cmd.operation.Operations;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.ent.net.node.cmd.veto.Conditions.GREATER_THAN_CONDITION;
+import static org.ent.util.NetBuilder.builder;
+import static org.ent.util.NetBuilder.node;
+import static org.ent.util.NetBuilder.unary;
+import static org.ent.util.NetBuilder.value;
 
-class TriCommandTest {
-    @BeforeAll
-    static void setTestEnvironment() {
-        Profile.setTest(true);
-    }
+class TriCommandTest extends TestBase {
 
     @Test
     void execute() {
-        Net net = new Net();
-        Ent ent = new Ent(net);
-        Node root = net.newRoot();
-        Node arg1 = net.newCNode(7);
-        Node arg2 = net.newCNode(5);
-        Node parameters = net.newNode(arg1, arg2);
-        root.setLeftChild(parameters);
-        Command command = new TriCommand(Accessors.DIRECT, Accessors.LEFT, Accessors.RIGHT, Operations.PLUS);
+        Node parameters, arg1, arg2;
+        Net net = builder().net(unary(parameters = node(arg1 = value(7), arg2 = value(5))));
+        Command command = new TriCommand(Accessors.DIRECT, Accessors.LEFT, Accessors.RIGHT, Operations.PLUS_OPERATION);
 
-        command.execute(root.getLeftArrow(), ent);
+        command.execute(net.getRoot().getLeftArrow(), new Ent(net));
 
         assertThat(parameters.getValue()).isEqualTo(12);
         assertThat(arg1.getValue()).isEqualTo(7);
         assertThat(arg2.getValue()).isEqualTo(5);
+    }
+
+
+    @Test
+    void execute_withVeto_pass() {
+        Node i;
+        Net net = builder().net(unary(node(GREATER_THAN_CONDITION, i = value(7), value(0))));
+        Command command = new TriCommand(Accessors.LEFT, Accessors.LEFT, Accessors.LEFT, Operations.PLUS_OPERATION); // i = i + i
+
+        command.execute(net.getRoot().getLeftArrow(), new Ent(net));
+
+        assertThat(i.getValue()).isEqualTo(14);
+    }
+
+    @Test
+    void execute_withVeto_reject() {
+        Node i;
+        Net net = builder().net(unary(node(GREATER_THAN_CONDITION, i = value(7), value(1000))));
+        Command command = new TriCommand(Accessors.LEFT, Accessors.LEFT, Accessors.LEFT, Operations.PLUS_OPERATION); // i = i + i
+
+        command.execute(net.getRoot().getLeftArrow(), new Ent(net));
+
+        assertThat(i.getValue()).isEqualTo(7);
     }
 }

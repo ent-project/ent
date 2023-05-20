@@ -1,6 +1,5 @@
 package org.ent.run;
 
-import org.ent.Ent;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.io.parser.NetParser;
@@ -14,17 +13,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EntRunnerTest {
 
-	private NetParser netParser;
+	private NetParser parser;
 
-	private NetFormatter netFormatter;
+	private NetFormatter formatter;
 
 	@BeforeEach
 	void setUpParserAndFormatter() {
-		NetParser parser = new NetParser();
-		NetFormatter formatter = new NetFormatter()
+		parser = new NetParser();
+		formatter = new NetFormatter()
 				.withAscii(true)
 				.withForceGivenNodeNames(true);
-
 	}
 
 	@Test
@@ -74,8 +72,7 @@ class EntRunnerTest {
 		String out0 = formatter.format(net);
 		assertThat(out0).isEqualTo(netStr);
 
-		Ent ent = new Ent(net);
-		EntRunner runner = new EntRunner(ent);
+		EntRunner runner = new EntRunner(net);
 
 		for (int i = 1; i < steps.size(); i++) {
 			StepResult result = runner.step();
@@ -91,8 +88,25 @@ class EntRunnerTest {
 		assertThat(actualFinalResult).isEqualTo(expectedFinalResult);
 	}
 
-//	void testWithObservation() {
-//		"<=>(params:(@, [#1]), [params])"
-//
-//	}
+	@Test
+	void loop() throws Exception {
+        Net net = parser.parse("""
+            line01:<\\\\\\=\\/>(if:<?//gt/\\?>((i:#0, #5), (FIN:[i], line02)), line02);  ~ goto FIN if i > 5
+            line02:<o>(line02, line03);													 ~ (indirection for setting the exec pointer)
+            line03:<*inc*>(i, line01);													 ~ i++; goto start
+        """);
+		EntRunner runner = new EntRunner(net);
+
+		StepResult result = null;
+		for (int i = 1; i < 40; i++) {
+			result = runner.step();
+			if (result != StepResult.SUCCESS) {
+				break;
+			}
+		}
+		assertThat(result).isEqualTo(StepResult.ENDLESS_LOOP);
+
+		net.referentialGarbageCollection();
+		assertThat(formatter.format(net)).isEqualTo("FIN:[i:#6]");
+	}
 }

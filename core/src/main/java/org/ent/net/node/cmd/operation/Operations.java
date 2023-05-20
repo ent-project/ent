@@ -1,6 +1,18 @@
 package org.ent.net.node.cmd.operation;
 
+import org.ent.net.node.cmd.operation.math.BitwiseAndOperation;
+import org.ent.net.node.cmd.operation.math.BitwiseOrOperation;
+import org.ent.net.node.cmd.operation.math.DecOperation;
+import org.ent.net.node.cmd.operation.math.IncOperation;
+import org.ent.net.node.cmd.operation.math.MinusOperation;
+import org.ent.net.node.cmd.operation.math.ModuloOperation;
+import org.ent.net.node.cmd.operation.math.MultiplyOperation;
+import org.ent.net.node.cmd.operation.math.NegOperation;
 import org.ent.net.node.cmd.operation.math.PlusOperation;
+import org.ent.net.node.cmd.operation.math.RotateRightOperation;
+import org.ent.net.node.cmd.operation.math.ShiftLeftOperation;
+import org.ent.net.node.cmd.operation.math.ShiftRightOperation;
+import org.ent.net.node.cmd.operation.math.XorOperation;
 
 public class Operations {
 
@@ -26,9 +38,26 @@ public class Operations {
     public static final int CODE_INC_OPERATION = 0b100010;
     public static final int CODE_DEC_OPERATION = 0b100011;
 
-    public static final SetOperation SET = new SetOperation();
-    public static final AncestorExchangeOperation ANCESTOR_EXCHANGE = new AncestorExchangeOperation();
-    public static final PlusOperation PLUS = new PlusOperation();
+    public static final SetOperation SET_OPERATION = new SetOperation();
+    public static final AncestorExchangeOperation ANCESTOR_EXCHANGE_OPERATION = new AncestorExchangeOperation();
+    public static final DupOperation DUP_OPERATION = new DupOperation();
+    public static final AncestorExchangeNormalOperation ANCESTOR_EXCHANGE_NORMAL_OPERATION = new AncestorExchangeNormalOperation();
+    public static final DupNormalOperation DUP_NORMAL_OPERATION = new DupNormalOperation();
+    public static final IsIdenticalOperation IS_IDENTICAL_OPERATION = new IsIdenticalOperation();
+    public static final SetValueOperation SET_VALUE_OPERATION = new SetValueOperation();
+    public static final NegOperation NEG_OPERATION = new NegOperation();
+    public static final IncOperation INC_OPERATION = new IncOperation();
+    public static final DecOperation DEC_OPERATION = new DecOperation();
+    public static final PlusOperation PLUS_OPERATION = new PlusOperation();
+    public static final MinusOperation MINUS_OPERATION = new MinusOperation();
+    public static final MultiplyOperation MULTIPLY_OPERATION = new MultiplyOperation();
+    public static final ModuloOperation MODULO_OPERATION = new ModuloOperation();
+    public static final XorOperation XOR_OPERATION = new XorOperation();
+    public static final BitwiseAndOperation BITWISE_AND_OPERATION = new BitwiseAndOperation();
+    public static final BitwiseOrOperation BITWISE_OR_OPERATION = new BitwiseOrOperation();
+    public static final RotateRightOperation ROTATE_RIGHT_OPERATION = new RotateRightOperation();
+    public static final ShiftLeftOperation SHIFT_LEFT_OPERATION = new ShiftLeftOperation();
+    public static final ShiftRightOperation SHIFT_RIGHT_OPERATION = new ShiftRightOperation();
 
     private Operations() {
     }

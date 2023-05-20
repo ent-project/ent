@@ -15,7 +15,7 @@ public class NopCommand implements Command {
 		return 0;
 	}
 
-	@Override
+	@Deprecated
 	public String getShortName() {
 		return "∅";
 	}

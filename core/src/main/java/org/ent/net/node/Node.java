@@ -8,6 +8,7 @@ import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.CommandFactory;
+import org.ent.net.node.cmd.veto.Veto;
 
 import java.util.List;
 
@@ -32,7 +33,7 @@ public interface Node {
 
 	@VisibleForTesting
 	default Node getLeftChild() {
-		verifyTestEnvironment();
+		Profile.verifyTestProfile();
 		return getLeftChild(Purview.DIRECT);
 	}
 
@@ -48,7 +49,7 @@ public interface Node {
 
 	@VisibleForTesting
 	default void setLeftChild(Node child) {
-		verifyTestEnvironment();
+		Profile.verifyTestProfile();
 		setLeftChild(child, Purview.DIRECT);
 	}
 
@@ -56,7 +57,7 @@ public interface Node {
 
 	@VisibleForTesting
 	default Node getRightChild() {
-		verifyTestEnvironment();
+		Profile.verifyTestProfile();
 		return getRightChild(Purview.DIRECT);
 	}
 
@@ -64,14 +65,8 @@ public interface Node {
 
 	@VisibleForTesting
 	default void setRightChild(Node child) {
-		verifyTestEnvironment();
+		Profile.verifyTestProfile();
 		setRightChild(child, Purview.DIRECT);
-	}
-
-	private void verifyTestEnvironment() {
-		if (!Profile.isTest()) {
-			throw new AssertionError();
-		}
 	}
 
 	int getValue();
@@ -80,6 +75,10 @@ public interface Node {
 
 	default void setCommand(Command command) {
 		setValue(command.getValue());
+	}
+
+	default void setVeto(Veto value) {
+		setValue(value.getValue());
 	}
 
 	boolean isUnaryNode();

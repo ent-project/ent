@@ -6,7 +6,7 @@ import org.ent.net.Purview;
 import org.ent.net.node.cmd.accessor.Accessor;
 import org.ent.net.node.cmd.operation.TriOperation;
 
-public class TriCommand implements Command {
+public class TriCommand extends VetoedCommand {
 
     private final Accessor accessor1;
     private final Accessor accessor2;
@@ -37,8 +37,11 @@ public class TriCommand implements Command {
     }
 
     @Override
-    public ExecutionResult execute(Arrow parameters, Ent ent) {
-        return operation.apply(accessor1.get(parameters, ent, Purview.COMMAND), accessor2.get(parameters, ent, Purview.COMMAND), accessor3.get(parameters, ent, Purview.COMMAND));
+    public ExecutionResult doExecute(Arrow parameters, Ent ent) {
+        Arrow handle1 = accessor1.get(parameters, ent, Purview.COMMAND);
+        Arrow handle2 = accessor2.get(parameters, ent, Purview.COMMAND);
+        Arrow handle3 = accessor3.get(parameters, ent, Purview.COMMAND);
+        return operation.apply(handle1, handle2, handle3);
     }
 
     @Override
@@ -46,7 +49,7 @@ public class TriCommand implements Command {
         return value;
     }
 
-    @Override
+    @Deprecated
     public String getShortName() {
         return shortName;
     }

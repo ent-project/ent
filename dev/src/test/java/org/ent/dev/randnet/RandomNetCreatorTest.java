@@ -4,8 +4,6 @@ import org.ent.net.Net;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.CommandFactory;
 import org.ent.net.node.cmd.Commands;
-import org.ent.net.node.cmd.accessor.Accessors;
-import org.ent.net.node.cmd.operation.Operations;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +12,9 @@ import java.util.Optional;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.ent.net.node.cmd.accessor.Accessors.DIRECT;
+import static org.ent.net.node.cmd.accessor.Accessors.LEFT;
+import static org.ent.net.node.cmd.operation.Operations.SET_OPERATION;
 
 class RandomNetCreatorTest {
 
@@ -43,7 +44,7 @@ class RandomNetCreatorTest {
 	private CommandDrawingImpl buildCommandDrawing(Random rand) {
 		Command nopCommand = CommandFactory.createNopCommand();
 		Command ixCommand = CommandFactory.createAncestorSwapCommand();
-		Command setCommand = Commands.get(Accessors.LEFT, Operations.SET, Accessors.DIRECT);
+		Command setCommand = Commands.get(LEFT, SET_OPERATION, DIRECT);
 		return new CommandDrawingImpl(rand,
 				Arrays.asList(
 						new CommandCandidate(nopCommand, 1.0),

@@ -14,4 +14,10 @@ public class Profile {
     public static void setTest(boolean isTest) {
         Profile.isTest = isTest;
     }
+
+    public static void verifyTestProfile() {
+        if (!isTest()) {
+            throw new AssertionError();
+        }
+    }
 }
