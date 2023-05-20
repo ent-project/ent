@@ -1,5 +1,6 @@
 package org.ent.net.node.cmd.operation;
 
+import org.ent.Ent;
 import org.ent.net.Arrow;
 import org.ent.net.Net;
 import org.ent.net.Purview;
@@ -17,7 +18,7 @@ public class AncestorExchangeNormalOperation implements BiOperation {
 	}
 
 	@Override
-	public ExecutionResult apply(Arrow arrowToNode1, Arrow arrowToNode2) {
+	public ExecutionResult apply(Arrow arrowToNode1, Arrow arrowToNode2, Ent ent) {
 		Node node1 = arrowToNode1.getTarget(Purview.COMMAND);
 		Node node2 = arrowToNode2.getTarget(Purview.COMMAND);
 		if (node1.getNet() != node2.getNet()) {

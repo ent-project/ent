@@ -1,5 +1,6 @@
 package org.ent.net.node.cmd.operation;
 
+import org.ent.Ent;
 import org.ent.net.Arrow;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
@@ -13,7 +14,7 @@ public class IsIdenticalOperation implements BiOperation {
 	}
 
 	@Override
-	public ExecutionResult apply(Arrow arrow1, Arrow arrow2) {
+	public ExecutionResult apply(Arrow arrow1, Arrow arrow2, Ent ent) {
 		Node node1 = arrow1.getTarget(Purview.COMMAND);
 		Node node2 = arrow2.getTarget(Purview.COMMAND);
 		if (node1.getNet() != node2.getNet()) {

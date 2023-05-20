@@ -44,7 +44,7 @@ class RandomNetCreatorTest {
 	private CommandDrawingImpl buildCommandDrawing(Random rand) {
 		Command nopCommand = CommandFactory.createNopCommand();
 		Command ixCommand = CommandFactory.createAncestorSwapCommand();
-		Command setCommand = Commands.get(LEFT, SET_OPERATION, DIRECT);
+		Command setCommand = Commands.get(SET_OPERATION, LEFT, DIRECT);
 		return new CommandDrawingImpl(rand,
 				Arrays.asList(
 						new CommandCandidate(nopCommand, 1.0),

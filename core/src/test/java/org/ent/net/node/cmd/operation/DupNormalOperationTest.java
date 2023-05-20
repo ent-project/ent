@@ -1,9 +1,10 @@
 package org.ent.net.node.cmd.operation;
 
-import org.ent.net.Net;
+import org.ent.Ent;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.io.parser.NetParser;
 import org.ent.net.io.parser.ParserException;
+import org.ent.net.node.Node;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -19,14 +20,15 @@ class DupNormalOperationTest {
     @MethodSource("applyTestCases")
     void apply(String input, String expectedOutput) throws ParserException {
         NetParser parser = new NetParser();
-        Net net = parser.parse(input);
+        Ent ent = parser.parseEnt(input);
         DupNormalOperation dupNormalOperation = new DupNormalOperation();
 
-        dupNormalOperation.apply(net.getRoot().getLeftArrow(), net.getRoot().getRightArrow());
+        Node root = ent.getNet().getRoot();
+        dupNormalOperation.apply(root.getLeftArrow(), root.getRightArrow(), ent);
 
         NetFormatter formatter = new NetFormatter()
                 .withForceGivenNodeNames(true);
-        String result = formatter.format(net);
+        String result = formatter.format(ent);
         assertThat(result).isEqualTo(expectedOutput);
     }
 

@@ -1,5 +1,6 @@
 package org.ent.util;
 
+import org.ent.Ent;
 import org.ent.net.Net;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
@@ -21,11 +22,15 @@ public class NetBuilder {
         return new NetBuilder();
     }
 
-    public Net net(Node s) {
+    public Net net(Node root) {
         Net net = currentNet.get();
-        net.setRoot(s);
+        net.setRoot(root);
         currentNet.remove();
         return net;
+    }
+
+    public Ent ent(Node root) {
+        return new Ent(net(root));
     }
 
     public static Node node() {
@@ -60,7 +65,17 @@ public class NetBuilder {
         return node(Vetos.get(c).getValue(), n1, n2);
     }
 
-    public static Node unary(Node child) {
+    public static Node unary(int value, Node child) {
+        Node node = currentNet.get().newUNode(child);
+        node.setValue(value);
+        return node;
+    }
+
+    public static Node unary(Command command, Node child) {
+        return unary(command.getValue(), child);
+    }
+
+        public static Node unary(Node child) {
         return currentNet.get().newUNode(child);
     }
 

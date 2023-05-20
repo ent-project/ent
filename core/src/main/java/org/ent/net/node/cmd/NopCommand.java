@@ -18,4 +18,9 @@ public class NopCommand implements Command {
 	public String getShortName() {
 		return "o";
 	}
+
+	@Override
+	public String toString() {
+		return "<" + getShortName() + ">";
+	}
 }

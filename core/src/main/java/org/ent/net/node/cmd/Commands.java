@@ -13,7 +13,7 @@ public class Commands {
     private Commands() {
     }
 
-    public static Command get(Accessor left, BiOperation operation, Accessor right) {
+    public static Command get(BiOperation operation, Accessor left, Accessor right) {
         BiCommand command = new BiCommand(left, right, operation);
         return CommandFactory.getByValue(command.getValue());
     }

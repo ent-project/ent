@@ -17,6 +17,8 @@ public class Ent {
 
     private final List<Net> domains;
 
+    EventsListenerWrapper eventsListenerWrapper = new EventsListenerWrapper();
+
     public Ent(Net net) {
         this.net = net;
         domains = new ArrayList<>();
@@ -37,6 +39,7 @@ public class Ent {
         if (isPortal(value)) {
             int index = -value;
             Node domainPointer = getDomainRoot(index);
+            event().advancedThroughPortal(node, domainPointer);
             return domainPointer.getArrow(direction);
         } else {
             return node.getArrow(direction);
@@ -87,6 +90,24 @@ public class Ent {
             throw new AssertionError("trying to clear purview, but none is active");
         }
         this.purview = null;
+        return this;
+    }
+
+    public EntEventListener getEventListener() {
+        return eventsListenerWrapper.getDelegate();
+    }
+
+    public Ent setEventListener(EntEventListener eventListener) {
+        eventsListenerWrapper.setDelegate(eventListener);
+        return this;
+    }
+
+    public EventsListenerWrapper event() {
+        return eventsListenerWrapper;
+    }
+
+    public Ent setDomain(int i, Net domain) {
+        domains.set(i, domain);
         return this;
     }
 }

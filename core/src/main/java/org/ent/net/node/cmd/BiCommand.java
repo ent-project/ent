@@ -36,7 +36,7 @@ public class BiCommand extends VetoedCommand {
 	public ExecutionResult doExecute(Arrow parameters, Ent ent) {
 		Arrow handle1 = accessor1.get(parameters, ent, Purview.COMMAND);
 		Arrow handle2 = accessor2.get(parameters, ent, Purview.COMMAND);
-		return operation.apply(handle1, handle2);
+		return operation.apply(handle1, handle2, ent);
 	}
 
 	@Override

@@ -14,11 +14,19 @@ public abstract class VetoedCommand implements Command {
         if (veto != null) {
             boolean pass = veto.evaluate(parameters, ent);
             if (!pass) {
+                ent.event().blockedByVeto(veto);
                 return ExecutionResult.NORMAL;
+            } else {
+                ent.event().passedThroughVeto(veto);
             }
         }
         return doExecute(parameters, ent);
     }
 
     protected abstract ExecutionResult doExecute(Arrow parameters, Ent ent);
+
+    @Override
+    public String toString() {
+        return "<" + getShortName() + ">";
+    }
 }
