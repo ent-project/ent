@@ -12,13 +12,7 @@ public enum ArrowDirection {
 
 	public static final Map<ArrowDirection, String> ARROW_SYMBOLS = new EnumMap<>(ArrowDirection.class);
 	static {
-		ARROW_SYMBOLS.put(ArrowDirection.LEFT, "↙");
-		ARROW_SYMBOLS.put(ArrowDirection.RIGHT, "↘");
-	}
-
-	public static final Map<ArrowDirection, String> ARROW_SYMBOLS_ASCII = new EnumMap<>(ArrowDirection.class);
-	static {
-		ARROW_SYMBOLS_ASCII.put(ArrowDirection.LEFT, "/");
-		ARROW_SYMBOLS_ASCII.put(ArrowDirection.RIGHT, "\\");
+		ARROW_SYMBOLS.put(ArrowDirection.LEFT, "/");
+		ARROW_SYMBOLS.put(ArrowDirection.RIGHT, "\\");
 	}
 }

@@ -26,8 +26,6 @@ public class FormattingWorker {
 
 	private final StringBuilder stringBuilder;
 
-	private boolean ascii;
-
 	private int uNodeVariableNameIndex;
 
 	private int bNodeVariableNameIndex;
@@ -41,19 +39,6 @@ public class FormattingWorker {
 		this.variableBindings = new HashMap<>();
 		this.maxDepth = maxDepth;
 		this.stringBuilder = new StringBuilder();
-	}
-
-	public boolean isAscii() {
-		return ascii;
-	}
-
-	public void setAscii(boolean ascii) {
-		this.ascii = ascii;
-	}
-
-	public FormattingWorker withAscii(boolean ascii) {
-		setAscii(ascii);
-		return this;
 	}
 
 	public String formatRecursively() {
@@ -94,7 +79,7 @@ public class FormattingWorker {
     		variableBindings.put(node, variableName);
         }
 		if (node.isMarkerNode()) {
-			stringBuilder.append(ascii ? MarkerNode.MARKER_NODE_SYMBOL_ASCII : MarkerNode.MARKER_NODE_SYMBOL);
+			stringBuilder.append(MarkerNode.MARKER_NODE_SYMBOL);
 		} else {
 			if (node.getValue() != 0 || node.isCommandNode()) {
 				String name = Values.getName(node.getValue());

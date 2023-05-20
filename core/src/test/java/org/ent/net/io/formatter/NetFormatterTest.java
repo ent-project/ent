@@ -40,7 +40,7 @@ class NetFormatterTest {
 
 	@BeforeEach
 	void setUp() {
-		formatter = new NetFormatter().withAscii(true);
+		formatter = new NetFormatter();
 	}
 
 	@Nested

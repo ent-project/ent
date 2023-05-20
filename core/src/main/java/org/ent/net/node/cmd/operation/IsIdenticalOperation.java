@@ -33,11 +33,6 @@ public class IsIdenticalOperation implements BiOperation {
 
 	@Override
 	public String getShortName() {
-		return "≡";
-	}
-
-	@Override
-	public String getShortNameAscii() {
 		return "==";
 	}
 

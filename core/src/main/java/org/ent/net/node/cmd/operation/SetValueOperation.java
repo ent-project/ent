@@ -13,7 +13,7 @@ public class SetValueOperation extends BiValueOperation {
 	}
 
 	@Override
-	public String getShortNameAscii() {
+	public String getShortName() {
 		return "=+";
 	}
 }

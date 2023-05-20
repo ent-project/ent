@@ -389,8 +389,7 @@ class NetTest {
 
 				verifyNoMoreInteractions(eventListener);
 				NetFormatter formatter = new NetFormatter()
-						.withForceGivenNodeNames(true)
-						.withAscii(true);
+						.withForceGivenNodeNames(true);
 				assertThat(formatter.format(net)).isEqualTo(expectedOutput);
 			}
 

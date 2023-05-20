@@ -54,7 +54,7 @@ class NetCopyTest {
 
 		Net clone = copy.getClonedNet();
 		clone.consistencyCheck();
-		assertThat(new NetFormatter().withAscii(true).format(clone)).isEqualTo("[@]");
+		assertThat(new NetFormatter().format(clone)).isEqualTo("[@]");
 		assertThat(clone.isMarkerNodePermitted()).isTrue();
 		assertThat(clone.getMarkerNode()).isNotSameAs(net.getMarkerNode());
 	}

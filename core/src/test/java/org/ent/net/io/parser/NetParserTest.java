@@ -177,7 +177,7 @@ class NetParserTest {
 		void other(String input) throws Exception {
 			Net net = parser.parse(input);
 
-			NetFormatter formatter = new NetFormatter().withAscii(true);
+			NetFormatter formatter = new NetFormatter();
 			String output = formatter.format(net);
 			assertThat(output).isEqualTo(input);
 		}

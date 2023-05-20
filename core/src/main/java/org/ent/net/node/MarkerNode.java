@@ -10,9 +10,8 @@ import java.util.List;
 
 public class MarkerNode extends BNode {
 
-	public static final String MARKER_NODE_SYMBOL = "●";
 
-	public static final String MARKER_NODE_SYMBOL_ASCII = "@";
+	public static final String MARKER_NODE_SYMBOL = "@";
 
 	public MarkerNode(Net net) {
 		super(net);

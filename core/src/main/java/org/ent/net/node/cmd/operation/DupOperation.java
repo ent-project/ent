@@ -27,11 +27,6 @@ public class DupOperation implements BiOperation {
 
 	@Override
 	public String getShortName() {
-		return "⏪";
-	}
-
-	@Override
-	public String getShortNameAscii() {
 		return "dup";
 	}
 }

@@ -21,7 +21,6 @@ class EntRunnerTest {
 	void setUpParserAndFormatter() {
 		parser = new NetParser();
 		formatter = new NetFormatter()
-				.withAscii(true)
 				.withForceGivenNodeNames(true);
 	}
 
@@ -67,7 +66,6 @@ class EntRunnerTest {
 		Net net = parser.parse(netStr);
 
 		NetFormatter formatter = new NetFormatter()
-                .withAscii(true)
                 .withForceGivenNodeNames(true);
 		String out0 = formatter.format(net);
 		assertThat(out0).isEqualTo(netStr);

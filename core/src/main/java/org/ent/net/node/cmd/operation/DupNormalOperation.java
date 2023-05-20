@@ -35,11 +35,6 @@ public class DupNormalOperation implements BiOperation {
 
 	@Override
 	public String getShortName() {
-		return "⏪n";
-	}
-
-	@Override
-	public String getShortNameAscii() {
 		return "dupn";
 	}
 }

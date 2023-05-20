@@ -89,7 +89,7 @@ public final class CommandFactory {
 	private static Map<String, Command> buildCommandsByName() {
 		Map<String, Command> result = new HashMap<>();
 		for (Command command : commandMap.values()) {
-			String name = command.getShortNameAscii();
+			String name = command.getShortName();
 			if (result.containsKey(name)) {
 				throw new AssertionError("Duplicate command name: " + name);
 			}

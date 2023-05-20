@@ -10,9 +10,5 @@ public interface Accessor {
 
 	int getCode();
 
-	default String getShortName() {
-		return getShortNameAscii();
-	}
-
-	String getShortNameAscii();
+	String getShortName();
 }

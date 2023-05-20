@@ -15,7 +15,6 @@ public class TestBase {
     void setUpParserAndFormatter() {
         parser = new NetParser();
         formatter = new NetFormatter()
-                .withAscii(true)
                 .withForceGivenNodeNames(true);
     }
 

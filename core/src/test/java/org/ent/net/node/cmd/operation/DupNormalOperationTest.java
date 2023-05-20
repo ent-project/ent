@@ -25,7 +25,6 @@ class DupNormalOperationTest {
         dupNormalOperation.apply(net.getRoot().getLeftArrow(), net.getRoot().getRightArrow());
 
         NetFormatter formatter = new NetFormatter()
-                .withAscii(true)
                 .withForceGivenNodeNames(true);
         String result = formatter.format(net);
         assertThat(result).isEqualTo(expectedOutput);

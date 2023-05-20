@@ -20,14 +20,11 @@ public class BiCommand extends VetoedCommand {
 
 	private final String shortName;
 
-	private final String shortNameAscii;
-
 	public BiCommand(Accessor accessor1, Accessor accessor2, BiOperation operation) {
 		this.accessor1 = accessor1;
 		this.accessor2 = accessor2;
 		this.operation = operation;
 		this.value = operation.getCode() | (accessor1.getCode() << 8) | (accessor2.getCode() << 12);
-		this.shortNameAscii = buildShortNameAscii();
 		this.shortName = buildShortName();
 	}
 
@@ -47,29 +44,10 @@ public class BiCommand extends VetoedCommand {
 		return value;
 	}
 
-	@Deprecated
 	public String getShortName() {
 		return shortName;
 	}
 
-	@Override
-	public String getShortNameAscii() {
-		return shortNameAscii;
-	}
-
-	private String buildShortNameAscii() {
-		String accessor1Name = this.accessor1.getShortNameAscii();
-		if (this.accessor1 instanceof PrimaryAccessor primaryLeft && primaryLeft.getDirection() == ArrowDirection.LEFT) {
-			accessor1Name = "";
-		}
-		String accessor2Name = this.accessor2.getShortNameAscii();
-		if (this.accessor2 instanceof PrimaryAccessor primaryRight && primaryRight.getDirection() == ArrowDirection.RIGHT) {
-			accessor2Name = "";
-		}
-		return accessor1Name + this.operation.getShortNameAscii() + accessor2Name;
-	}
-
-	@Deprecated
 	private String buildShortName() {
 		String accessor1Name = this.accessor1.getShortName();
 		if (this.accessor1 instanceof PrimaryAccessor primaryLeft && primaryLeft.getDirection() == ArrowDirection.LEFT) {
@@ -80,10 +58,5 @@ public class BiCommand extends VetoedCommand {
 			accessor2Name = "";
 		}
 		return accessor1Name + this.operation.getShortName() + accessor2Name;
-	}
-
-	@Override
-	public String toString() {
-		return getName();
 	}
 }

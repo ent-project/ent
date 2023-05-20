@@ -58,11 +58,11 @@ P - portal flag = 0
     }
 
     private String buildShortName() {
-        String accessor1Name = this.accessor1.getShortNameAscii();
+        String accessor1Name = this.accessor1.getShortName();
         if (this.accessor1 instanceof PrimaryAccessor primaryLeft && primaryLeft.getDirection() == ArrowDirection.LEFT) {
             accessor1Name = "";
         }
-        String accessor2Name = this.accessor2.getShortNameAscii();
+        String accessor2Name = this.accessor2.getShortName();
         if (this.accessor2 instanceof PrimaryAccessor primaryRight && primaryRight.getDirection() == ArrowDirection.RIGHT) {
             accessor2Name = "";
         }

@@ -45,11 +45,6 @@ public class AncestorExchangeNormalOperation implements BiOperation {
 
 	@Override
 	public String getShortName() {
-		return "⤩n";
-	}
-
-	@Override
-	public String getShortNameAscii() {
 		return "xn";
 	}
 }

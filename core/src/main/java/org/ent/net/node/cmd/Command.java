@@ -9,9 +9,6 @@ public interface Command {
 
     int getValue();
 
-    String getShortNameAscii();
+    String getShortName();
 
-    default String getName() {
-        return getShortNameAscii();
-    }
 }
