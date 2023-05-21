@@ -7,8 +7,8 @@ import org.ent.net.node.Node;
 import org.ent.net.node.cmd.ExecutionResult;
 
 /**
- * Duplicate node. The copy has the same children as the original. There is one exception: If the original has arrows
- * pointing to itself, then the copy will also have arrows pointing to itself.
+ * Duplicate node. The copy has the same children as the original. There is one exception:
+ * If the original has arrows pointing to itself, then the copy will also have arrows pointing to itself.
  */
 public class DupNormalOperation implements BiOperation {
 

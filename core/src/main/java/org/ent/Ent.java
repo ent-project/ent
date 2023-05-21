@@ -1,7 +1,5 @@
 package org.ent;
 
-import org.ent.net.Arrow;
-import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
@@ -17,7 +15,7 @@ public class Ent {
 
     private final List<Net> domains;
 
-    EventsListenerWrapper eventsListenerWrapper = new EventsListenerWrapper();
+    EntEventListener eventListener = new NopEventListener();
 
     public Ent(Net net) {
         this.net = net;
@@ -34,15 +32,15 @@ public class Ent {
         this.net = net;
     }
 
-    public Arrow advanceWithPortals(Node node, ArrowDirection direction) {
+    public Node relayToOtherDomain(Node node) {
         int value = node.getValue();
         if (isPortal(value)) {
             int index = -value;
             Node domainPointer = getDomainRoot(index);
             event().advancedThroughPortal(node, domainPointer);
-            return domainPointer.getArrow(direction);
+            return domainPointer;
         } else {
-            return node.getArrow(direction);
+            return node;
         }
     }
 
@@ -56,7 +54,7 @@ public class Ent {
     }
 
     private Net initializeDomain(int index) {
-        return switch (index) {
+        Net domain = switch (index) {
             case 0 -> {
                 Net readDomain = new Net();
                 Node readData = readDomain.newNode(0xbeef1234);
@@ -71,6 +69,8 @@ public class Ent {
             }
             default -> throw new IllegalArgumentException();
         };
+        domain.setNetIndex(index + 1);
+        return domain;
     }
 
     private static boolean isPortal(int value) {
@@ -94,16 +94,16 @@ public class Ent {
     }
 
     public EntEventListener getEventListener() {
-        return eventsListenerWrapper.getDelegate();
+        return eventListener;
     }
 
     public Ent setEventListener(EntEventListener eventListener) {
-        eventsListenerWrapper.setDelegate(eventListener);
+        this.eventListener = eventListener;
         return this;
     }
 
-    public EventsListenerWrapper event() {
-        return eventsListenerWrapper;
+    public EntEventListener event() {
+        return eventListener;
     }
 
     public Ent setDomain(int i, Net domain) {

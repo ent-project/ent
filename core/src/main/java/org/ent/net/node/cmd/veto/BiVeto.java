@@ -1,7 +1,6 @@
 package org.ent.net.node.cmd.veto;
 
 import org.ent.Ent;
-import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
@@ -37,9 +36,11 @@ public class BiVeto implements Veto {
 
     @Override
     public boolean evaluate(Node base, Ent ent) {
-        Arrow arrow1 = accessor1.get(base, ent, Purview.COMMAND);
-        Arrow arrow2 = accessor2.get(base, ent, Purview.COMMAND);
-        return not ^ condition.evaluate(arrow1, arrow2);
+        Node node1 = accessor1.getTarget(base, ent, Purview.COMMAND);
+        Node node2 = accessor2.getTarget(base, ent, Purview.COMMAND);
+        boolean result = not ^ condition.evaluate(node1, node2);
+        ent.event().vetoEvaluation(this, node1, node2, result);
+        return result;
     }
 
     private String buildShortName() {

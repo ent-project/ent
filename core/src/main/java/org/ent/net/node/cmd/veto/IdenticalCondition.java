@@ -1,7 +1,5 @@
 package org.ent.net.node.cmd.veto;
 
-import org.ent.net.Arrow;
-import org.ent.net.Purview;
 import org.ent.net.node.Node;
 
 public final class IdenticalCondition implements BiCondition {
@@ -11,9 +9,7 @@ public final class IdenticalCondition implements BiCondition {
     }
 
     @Override
-    public boolean evaluate(Arrow handle1, Arrow handle2) {
-        Node node1 = handle1.getTarget(Purview.COMMAND);
-        Node node2 = handle2.getTarget(Purview.COMMAND);
+    public boolean evaluate(Node node1, Node node2) {
         return node1 == node2;
     }
 

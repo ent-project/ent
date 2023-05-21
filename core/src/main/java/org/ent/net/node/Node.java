@@ -37,6 +37,14 @@ public interface Node {
 		return getLeftChild(Purview.DIRECT);
 	}
 
+	default
+	Node getChild(ArrowDirection direction, Purview purview) {
+		return switch (direction) {
+			case LEFT -> getLeftChild(purview);
+			case RIGHT -> getRightChild(purview);
+		};
+	}
+
 	default boolean hasProperLeftChild() {
 		return getLeftChild(Purview.DIRECT) != this;
 	}
@@ -91,5 +99,17 @@ public interface Node {
 
 	default Command getCommand() {
 		return Commands.getByValue(getValue());
+	}
+
+	default int getIndex() {
+		return getNet().getNodeIndex(this);
+	}
+
+	default long getAddress() {
+		long index = getIndex();
+		long netIndex = getNet().getNetIndex();
+		return index + (netIndex << 32);
+
+		// FIXME unit tests
 	}
 }

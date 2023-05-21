@@ -31,8 +31,11 @@ public class SecondaryAccessor implements Accessor {
 
 	@Override
 	public Arrow get(Node base, Ent ent, Purview purview) {
-		Arrow arrow1 = ent.advanceWithPortals(base.getLeftChild(purview), direction1);
-		return ent.advanceWithPortals(arrow1.getTarget(purview), direction2);
+		Node node1 = base.getLeftChild(purview);
+		Node node1Relayed = ent.relayToOtherDomain(node1);
+		Node node2 = node1Relayed.getChild(direction1, purview);
+		Node node2Relayed = ent.relayToOtherDomain(node2);
+		return node2Relayed.getArrow(direction2);
 	}
 
 	@Override

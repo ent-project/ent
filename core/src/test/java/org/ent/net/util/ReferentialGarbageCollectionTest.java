@@ -1,24 +1,31 @@
 package org.ent.net.util;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.params.provider.Arguments.of;
+import org.ent.Profile;
+import org.ent.net.Net;
+import org.ent.net.NetTestData;
+import org.ent.net.node.Node;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.ent.net.Net;
-import org.ent.net.NetTestData;
-import org.ent.net.node.Node;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.of;
 
 class ReferentialGarbageCollectionTest {
 
+	@BeforeAll
+	static void setTestEnvironment() {
+		Profile.setTest(true);
+	}
+
 	@ParameterizedTest(name = "{index} => run()")
 	@MethodSource("run_testData")
-	void run(Net net, Net netExtraNodes) throws Exception {
+	void run(Net net, Net netExtraNodes) {
 		Set<Node> originalNodes = new HashSet<>(net.getNodes());
 		for (Node n : netExtraNodes.removeAllNodes()) {
 			net.addNode(n);

@@ -9,6 +9,12 @@ public interface Accessor {
 
 	Arrow get(Node base, Ent ent, Purview purview);
 
+	default
+	Node getTarget(Node base, Ent ent, Purview purview) {
+		Arrow arrow = get(base, ent, purview);
+		return arrow.getTarget(Purview.COMMAND);
+	}
+
 	int getCode();
 
 	String getShortName();

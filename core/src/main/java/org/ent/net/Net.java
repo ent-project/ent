@@ -14,8 +14,11 @@ import org.ent.net.util.ReferentialGarbageCollection;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -26,8 +29,12 @@ public class Net {
 
 	private final Set<Node> nodes;
 
-	private BiMap<Node, String> nodeNames;
+	private int netIndex;
 
+	private BiMap<Node, String> nodeNames;
+	private final Map<Node, Integer> nodeIndices = new HashMap<>(); // FIXME: think about performance
+
+	private int currentIndex;
 	private Node root;
 
 	private boolean markerNodePermitted;
@@ -38,6 +45,15 @@ public class Net {
 
 	public Net() {
 		this.nodes = new LinkedHashSet<>();
+	}
+
+	public int getNetIndex() {
+		return netIndex;
+	}
+
+	public Net setNetIndex(int netIndex) {
+		this.netIndex = netIndex;
+		return this;
 	}
 
 	public Set<Node> getNodes() {
@@ -57,22 +73,36 @@ public class Net {
 	}
 
 	public boolean removeNode(Node node) {
+		nodeIndices.remove(node);
+		if (nodeNames != null) {
+			nodeNames.remove(node);
+		}
 		return nodes.remove(node);
 	}
 
-	public boolean removeNodeIf(Predicate<? super Node> filter) {
-		return nodes.removeIf(filter);
+	public void removeNodeIf(Predicate<? super Node> filter) {
+		Iterator<Node> iterator = nodes.iterator();
+		while (iterator.hasNext()) {
+			Node node = iterator.next();
+			if (filter.test(node)) {
+				nodeIndices.remove(node);
+				if (nodeNames != null) {
+					nodeNames.remove(node);
+				}
+				iterator.remove();
+			}
+		}
 	}
 
 	public Set<Node> removeAllNodes() {
 		HashSet<Node> formerNodes = new HashSet<>(this.nodes);
 		formerNodes.forEach(n -> n.setNet(null));
 		nodes.clear();
+		nodeIndices.clear();
+		if (nodeNames != null) {
+			nodeNames.clear();
+		}
 		return formerNodes;
-	}
-
-	public void clearNodes() {
-		nodes.clear();
 	}
 
 	public Node getRoot() {
@@ -80,6 +110,7 @@ public class Net {
 	}
 
 	public void setRoot(Node root) {
+		// FIXME check it is part of net
 		this.root = root;
 	}
 
@@ -265,8 +296,10 @@ public class Net {
 		return newNode(value);
 	}
 
-	public void addNodeInternal(Node node) {
+	private void addNodeInternal(Node node) {
 		nodes.add(node);
+		nodeIndices.put(node, currentIndex);
+		currentIndex++;
 	}
 
 	public void addExecutionEventListener(ExecutionEventListener listener) {
@@ -321,4 +354,7 @@ public class Net {
 		return nodeNames.inverse().get(name);
 	}
 
+	public int getNodeIndex(Node node) {
+		return nodeIndices.get(node);
+	}
 }

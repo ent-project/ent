@@ -1,12 +1,12 @@
 package org.ent.net.node.cmd.veto;
 
-import org.ent.net.Arrow;
+import org.ent.net.node.Node;
 
 public sealed interface BiCondition permits IdenticalCondition, BiValueCondition {
 
     int getCode();
 
-    boolean evaluate(Arrow handle1, Arrow handle2);
+    boolean evaluate(Node node1, Node node2);
 
     String getShortName();
 
