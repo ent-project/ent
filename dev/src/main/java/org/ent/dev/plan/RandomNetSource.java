@@ -14,7 +14,9 @@ import org.ent.dev.unit.local.Source;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
-import org.ent.net.node.cmd.CommandFactory;
+import org.ent.net.node.cmd.Commands;
+import org.ent.net.node.cmd.accessor.Accessors;
+import org.ent.net.node.cmd.operation.Operations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +37,9 @@ public class RandomNetSource implements Source {
 
 	private final Random randNetSeeds;
 
-	private List<CommandCandidate> commandCandidates;
+	private final List<CommandCandidate> commandCandidates;
 
-	public class RandomNetSourceData extends DataImpl implements PropEnt, PropSeed, PropReplicator {
+	public static class RandomNetSourceData extends DataImpl implements PropEnt, PropSeed, PropReplicator {
 
 		public RandomNetSourceData(Ent ent, long seed) {
 			setEnt(ent);
@@ -96,20 +98,20 @@ public class RandomNetSource implements Source {
 		double N3 = N1 / 3;
 		double N9 = N1 / 9;
 
-		candidates.add(new CommandCandidate(CommandFactory.createNopCommand(), N1));
-		for (ArrowDirection left : ArrowDirection.values()) {
-			candidates.add(new CommandCandidate(CommandFactory.createSetCommandL(left), N3));
-			for (ArrowDirection right : ArrowDirection.values()) {
-				candidates.add(new CommandCandidate(CommandFactory.createSetCommandLR(left, right), N9));
+		candidates.add(new CommandCandidate(Commands.NOP, N1));
+		for (ArrowDirection direction1 : ArrowDirection.values()) {
+			candidates.add(new CommandCandidate(Commands.get(Operations.SET_OPERATION, Accessors.get(direction1), Accessors.DIRECT), N3));
+			for (ArrowDirection direction2 : ArrowDirection.values()) {
+				candidates.add(new CommandCandidate(Commands.get(Operations.SET_OPERATION, Accessors.get(direction1), Accessors.get(direction2)), N9));
 			}
 		}
-		for (ArrowDirection left : ArrowDirection.values()) {
-			candidates.add(new CommandCandidate(CommandFactory.createDupCommand(left), N3));
+		for (ArrowDirection direction : ArrowDirection.values()) {
+			candidates.add(new CommandCandidate(Commands.get(Operations.DUP_OPERATION, Accessors.get(direction), Accessors.DIRECT), N3));
 		}
-		candidates.add(new CommandCandidate(CommandFactory.createAncestorSwapCommand(), N1));
-		for (ArrowDirection left : ArrowDirection.values()) {
-			for (ArrowDirection right : ArrowDirection.values()) {
-				candidates.add(new CommandCandidate(CommandFactory.createIsIdenticalCommand(left, right), N9));
+		candidates.add(new CommandCandidate(Commands.ANCESTOR_EXCHANGE, N1));
+		for (ArrowDirection direction1 : ArrowDirection.values()) {
+			for (ArrowDirection direction2 : ArrowDirection.values()) {
+				candidates.add(new CommandCandidate(Commands.get(Operations.IS_IDENTICAL_OPERATION, Accessors.get(direction1), Accessors.get(direction2)), N9));
 			}
 		}
 		return candidates;

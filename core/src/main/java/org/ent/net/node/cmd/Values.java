@@ -13,11 +13,11 @@ public class Values {
 
     private static BiMap<String, Integer> buildValuesByName() {
         BiMap<String, Integer> result = HashBiMap.create();
-        CommandFactory.getAllCommandNames().forEach(name -> {
+        Commands.getAllCommandNames().forEach(name -> {
             if (result.containsKey(name)) {
                 throw new AssertionError("duplicate name: " + name);
             }
-            result.put(name, CommandFactory.getByName(name).getValue());
+            result.put(name, Commands.getByName(name).getValue());
         });
         Vetos.getAllVetoNames().forEach(name -> {
             if (result.containsKey(name)) {

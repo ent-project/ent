@@ -1,8 +1,7 @@
 package org.ent.dev.randnet;
 
-import org.ent.net.ArrowDirection;
 import org.ent.net.node.cmd.Command;
-import org.ent.net.node.cmd.CommandFactory;
+import org.ent.net.node.cmd.Commands;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -13,7 +12,7 @@ class CommandDrawingImplTest {
 
 	@Test
 	void randomValueToIndex() {
-		Command nopCommand = CommandFactory.createNopCommand();
+		Command nopCommand = Commands.NOP;
 		CommandDrawingImpl commandDrawing = new CommandDrawingImpl(RandomTestUtil.newRandom(),
 				Arrays.asList(
 						new CommandCandidate(nopCommand, 2.0),
@@ -34,10 +33,10 @@ class CommandDrawingImplTest {
 	}
 
 	@Test
-	void drawCommand() throws Exception {
-		Command nopCommand = CommandFactory.createNopCommand();
-		Command ixCommand = CommandFactory.createAncestorSwapCommand();
-		Command setCommand = CommandFactory.createSetCommandL(ArrowDirection.LEFT);
+	void drawCommand() {
+		Command nopCommand = Commands.NOP;
+		Command ixCommand = Commands.ANCESTOR_EXCHANGE;
+		Command setCommand = Commands.SET;
 		CommandDrawingImpl commandDrawing = new CommandDrawingImpl(RandomTestUtil.newRandom(),
 				Arrays.asList(
 						new CommandCandidate(nopCommand, 1.0),

@@ -6,6 +6,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Accessors {
+    /*
+    Accessor overview:
+                                 <> (root)
+                                /  \
+                       DIRECT /     \ FLOW
+                            /        \
+            ("parameters") o         <> (next root)
+                         /  \
+                 LEFT  /     \ RIGHT
+                     /        \
+   ("1st argument") o          o ("2nd argument")
+                  /  \       /  \
+              LL/   LR\    /RL   \RR
+              o        o  o       o
+
+         TertiaryAccessor goes one level deeper
+     */
 
     public static final FlowAccessor FLOW = new FlowAccessor();
     public static final DirectAccessor DIRECT = new DirectAccessor();
@@ -38,6 +55,13 @@ public class Accessors {
                 }
             }
         }
+    }
+
+    public static Accessor get(ArrowDirection direction) {
+        return switch (direction) {
+            case LEFT -> LEFT;
+            case RIGHT -> RIGHT;
+        };
     }
 
 }

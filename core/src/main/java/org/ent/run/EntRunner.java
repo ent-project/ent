@@ -5,7 +5,6 @@ import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
-import org.ent.net.node.cmd.CommandFactory;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.ExecutionResult;
 import org.slf4j.Logger;
@@ -54,7 +53,7 @@ public class EntRunner {
 
 	private StepResult doStep(Node executionPointer) {
 		boolean executionPointerDoesNotAdvance = executionPointer.getRightChild(Purview.RUNNER) == executionPointer;
-		Command command = CommandFactory.getByValue(executionPointer.getValue());
+		Command command = Commands.getByValue(executionPointer.getValue());
 		if (command == null) {
 			if (executionPointerDoesNotAdvance) {
 				return StepResult.ENDLESS_LOOP;

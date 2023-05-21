@@ -15,7 +15,7 @@ class CommandFactoryTest {
     @ParameterizedTest
     @MethodSource("valueData")
     void getValue(String commandName, int expectedValue) {
-        Command command = CommandFactory.getByName(commandName);
+        Command command = Commands.getByName(commandName);
         assertThat(command).isNotNull();
         assertThat(TestUtil.toBinary16bit(command.getValue())).isEqualTo(TestUtil.toBinary16bit(expectedValue));
     }

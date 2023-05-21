@@ -7,7 +7,7 @@ import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.cmd.Command;
-import org.ent.net.node.cmd.CommandFactory;
+import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.veto.Veto;
 
 import java.util.List;
@@ -90,6 +90,6 @@ public interface Node {
 	NodeType getNodeType();
 
 	default Command getCommand() {
-		return CommandFactory.getByValue(getValue());
+		return Commands.getByValue(getValue());
 	}
 }

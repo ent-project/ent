@@ -21,7 +21,7 @@ public class BiCommand extends VetoedCommand {
 
 	private final String shortName;
 
-	public BiCommand(Accessor accessor1, Accessor accessor2, BiOperation operation) {
+	public BiCommand(BiOperation operation, Accessor accessor1, Accessor accessor2) {
 		this.accessor1 = accessor1;
 		this.accessor2 = accessor2;
 		this.operation = operation;

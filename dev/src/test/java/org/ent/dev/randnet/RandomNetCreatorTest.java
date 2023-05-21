@@ -2,7 +2,6 @@ package org.ent.dev.randnet;
 
 import org.ent.net.Net;
 import org.ent.net.node.cmd.Command;
-import org.ent.net.node.cmd.CommandFactory;
 import org.ent.net.node.cmd.Commands;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,8 +41,8 @@ class RandomNetCreatorTest {
 	}
 
 	private CommandDrawingImpl buildCommandDrawing(Random rand) {
-		Command nopCommand = CommandFactory.createNopCommand();
-		Command ixCommand = CommandFactory.createAncestorSwapCommand();
+		Command nopCommand = Commands.NOP;
+		Command ixCommand = Commands.ANCESTOR_EXCHANGE;
 		Command setCommand = Commands.get(SET_OPERATION, LEFT, DIRECT);
 		return new CommandDrawingImpl(rand,
 				Arrays.asList(

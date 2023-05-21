@@ -5,7 +5,7 @@ import org.ent.net.Arrow;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
-import org.ent.net.node.cmd.CommandFactory;
+import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.ExecutionResult;
 
 /**
@@ -31,7 +31,7 @@ public class EvalOperation implements BiOperation {
 	@Override
 	public ExecutionResult apply(Arrow arrowToNode1, Arrow arrowToNode2, Ent ent) {
 		Node node1 = arrowToNode1.getTarget(Purview.COMMAND);
-		Command command = CommandFactory.getByValue(node1.getValue());
+		Command command = Commands.getByValue(node1.getValue());
 		if (command == null) {
 			return ExecutionResult.ERROR;
 		}
