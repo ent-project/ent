@@ -14,7 +14,7 @@ public class DupNormalOperation implements BiOperation {
 
 	@Override
 	public int getCode() {
-		return Operations.CODE_DUP_REGULAR_OPERATION;
+		return Operations.CODE_DUP_NORMAL_OPERATION;
 	}
 
 	@Override

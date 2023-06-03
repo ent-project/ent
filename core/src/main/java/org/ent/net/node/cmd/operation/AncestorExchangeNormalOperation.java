@@ -14,7 +14,7 @@ public class AncestorExchangeNormalOperation implements BiOperation {
 
 	@Override
 	public int getCode() {
-		return Operations.CODE_ANCESTOR_SWAP_OPERATION;
+		return Operations.CODE_ANCESTOR_EXCHANGE_NORMAL_OPERATION;
 	}
 
 	@Override

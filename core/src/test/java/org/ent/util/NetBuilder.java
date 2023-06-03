@@ -49,12 +49,12 @@ public class NetBuilder {
         return node(c.getValue(), n1, n2);
     }
 
-    public static Node node(Node n1, Node n2) {
-        return node(0, n1, n2);
+    public static Node node(Node node1, Node node2) {
+        return node(0, node1, node2);
     }
 
-    public static Node node(BiOperation c, Node n1, Node n2) {
-        return node(Commands.get(c), n1, n2);
+    public static Node node(BiOperation operation, Node node1, Node node2) {
+        return node(Commands.get(operation), node1, node2);
     }
 
     public static Node value(BiCondition c) {
@@ -71,6 +71,9 @@ public class NetBuilder {
         return node;
     }
 
+    public static Node unary(BiOperation operation, Node node) {
+        return unary(Commands.get(operation), node);
+    }
     public static Node unary(Command command, Node child) {
         return unary(command.getValue(), child);
     }

@@ -10,6 +10,7 @@ import org.ent.net.node.cmd.accessor.PrimaryAccessor;
 import org.ent.net.node.cmd.accessor.SecondaryAccessor;
 import org.ent.net.node.cmd.accessor.TertiaryAccessor;
 import org.ent.net.node.cmd.operation.BiOperation;
+import org.ent.net.node.cmd.operation.MonoOperation;
 import org.ent.net.node.cmd.operation.Operations;
 import org.ent.net.node.cmd.operation.TriOperation;
 import org.ent.net.node.cmd.veto.BiCondition;
@@ -36,6 +37,7 @@ public class DefaultValueDrawing implements ValueDrawing {
         addValueBase(Operations.SET_OPERATION, WEIGHT1);
         addValueBase(Operations.DUP_OPERATION, WEIGHT1);
         addValueBase(Operations.SET_VALUE_OPERATION, WEIGHT1);
+        addValueBase(Operations.EVAL_OPERATION, WEIGHT2);
 
         addValueBase(Operations.NEG_OPERATION, WEIGHT3);
         addValueBase(Operations.INC_OPERATION, WEIGHT2);
@@ -117,6 +119,10 @@ public class DefaultValueDrawing implements ValueDrawing {
         }
     }
 
+    private void addValueBase(MonoOperation operation, int weight) {
+        addValueBase(getCommandBase(operation), weight);
+    }
+
     private void addValueBase(BiCondition condition, boolean not, int weight) {
         for (int i = 0; i < weight; i++) {
             valueSamples.add(Vetos.get(condition, not, Accessors.FLOW, Accessors.FLOW));
@@ -125,6 +131,10 @@ public class DefaultValueDrawing implements ValueDrawing {
 
     private void addValueBase(TriOperation operation, int weight) {
         addValueBase(getCommandBase(operation), weight);
+    }
+
+    private Command getCommandBase(MonoOperation operation) {
+        return Commands.get(operation, Accessors.FLOW);
     }
 
     private Command getCommandBase(TriOperation operation) {

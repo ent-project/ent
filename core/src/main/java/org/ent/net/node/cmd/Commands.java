@@ -3,6 +3,7 @@ package org.ent.net.node.cmd;
 import org.ent.net.node.cmd.accessor.Accessor;
 import org.ent.net.node.cmd.accessor.Accessors;
 import org.ent.net.node.cmd.operation.BiOperation;
+import org.ent.net.node.cmd.operation.MonoOperation;
 import org.ent.net.node.cmd.operation.Operations;
 import org.ent.net.node.cmd.operation.TriOperation;
 
@@ -19,28 +20,38 @@ public class Commands {
     public static final Command NOP = getByValue(new NopCommand().getValue());
     public static final Command ANCESTOR_EXCHANGE = get(Operations.ANCESTOR_EXCHANGE_OPERATION);
     public static final Command SET = get(Operations.SET_OPERATION);
+    public static final Command EVAL = get(Operations.EVAL_OPERATION, Accessors.DIRECT);
 
     private Commands() {
     }
 
+    public static Command get(MonoOperation operation, Accessor accessor) {
+        Command command = new MonoCommand(operation, accessor);
+        return getByValue(command.getValue());
+    }
+
     public static Command get(BiOperation operation, Accessor accessor1, Accessor accessor2) {
-        BiCommand command = new BiCommand(operation, accessor1, accessor2);
+        Command command = new BiCommand(operation, accessor1, accessor2);
         return getByValue(command.getValue());
     }
 
     public static Command get(BiOperation operation) {
-        BiCommand command = new BiCommand(operation, Accessors.LEFT, Accessors.RIGHT);
+        Command command = new BiCommand(operation, Accessors.LEFT, Accessors.RIGHT);
         return getByValue(command.getValue());
     }
 
     public static Command get(TriOperation operation, Accessor accessor1, Accessor accessor2, Accessor accessor3) {
-        TriCommand command = new TriCommand(operation, accessor1, accessor2, accessor3);
+        Command command = new TriCommand(operation, accessor1, accessor2, accessor3);
         return getByValue(command.getValue());
     }
 
     static  Map<Integer, Command> initializeCommandMap() {
         HashMap<Integer, Command> result = new HashMap<>();
         initializeCommand(new NopCommand(), result);
+        for (Accessor accessor : Accessors.ALL_ACCESSORS) {
+            MonoCommand command = new MonoCommand(Operations.EVAL_OPERATION, accessor);
+            initializeCommand(command, result);
+        }
         List<BiOperation> biOperations = List.of(
                 Operations.SET_OPERATION,
                 Operations.ANCESTOR_EXCHANGE_OPERATION,

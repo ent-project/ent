@@ -23,4 +23,8 @@ public interface Command extends ParameterizedValue {
     int getValue();
 
     String getShortName();
+
+    default boolean isEval() {
+        return false;
+    }
 }

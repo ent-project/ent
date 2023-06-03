@@ -24,21 +24,12 @@ public class BiCommand extends VetoedCommand {
 	private final String shortName;
 
 	public BiCommand(BiOperation operation, Accessor accessor1, Accessor accessor2) {
+		this.operation = operation;
 		this.accessor1 = accessor1;
 		this.accessor2 = accessor2;
-		this.operation = operation;
 		this.valueBase = Command.COMMAND_PATTERN | operation.getCode() ;
 		this.value = valueBase | (accessor1.getCode() << 12) | (accessor2.getCode() << 16);
 		this.shortName = buildShortName();
-	}
-
-	@Override
-	public int getValueBase() {
-		return valueBase;
-	}
-
-	public BiOperation getOperation() {
-		return operation;
 	}
 
 	@Override
@@ -46,6 +37,15 @@ public class BiCommand extends VetoedCommand {
 		Arrow handle1 = accessor1.get(base, ent, Purview.COMMAND);
 		Arrow handle2 = accessor2.get(base, ent, Purview.COMMAND);
 		return operation.apply(handle1, handle2, ent);
+	}
+
+	public BiOperation getOperation() {
+		return operation;
+	}
+
+	@Override
+	public int getValueBase() {
+		return valueBase;
 	}
 
 	@Override
