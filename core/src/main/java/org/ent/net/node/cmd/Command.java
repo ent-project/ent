@@ -3,7 +3,7 @@ package org.ent.net.node.cmd;
 import org.ent.Ent;
 import org.ent.net.node.Node;
 
-public interface Command {
+public interface Command extends ParameterizedValue {
     /*
     value bit pattern:
     |                 |                 |                 |                 |
@@ -23,5 +23,4 @@ public interface Command {
     int getValue();
 
     String getShortName();
-
 }

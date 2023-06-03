@@ -64,4 +64,17 @@ public class Accessors {
         };
     }
 
+    public static Accessor get(ArrowDirection direction1, ArrowDirection direction2) {
+        return switch (direction1) {
+            case LEFT -> switch (direction2) {
+                case LEFT -> LEFT_LEFT;
+                case RIGHT -> LEFT_RIGHT;
+            };
+            case RIGHT -> switch (direction2) {
+                case LEFT -> RIGHT_LEFT;
+                case RIGHT -> RIGHT_RIGHT;
+            };
+        };
+    }
+
 }

@@ -18,6 +18,7 @@ public class BiVeto implements Veto {
     private final boolean not;
 
     private final int value;
+    private final int valueBase;
 
     private final String shortName;
 
@@ -26,11 +27,8 @@ public class BiVeto implements Veto {
         this.accessor2 = accessor2;
         this.condition = condition;
         this.not = not;
-        this.value = Veto.VETO_FLAG |
-                (not ? 1 : 0) |
-                (condition.getCode() << 1) |
-                (accessor1.getCode() << 12) |
-                (accessor2.getCode() << 16);
+        this.valueBase = Veto.VETO_FLAG | (not ? 1 : 0) | (condition.getCode() << 1);
+        this.value = valueBase | (accessor1.getCode() << 12) | (accessor2.getCode() << 16);
         this.shortName = buildShortName();
     }
 
@@ -62,7 +60,17 @@ public class BiVeto implements Veto {
     }
 
     @Override
+    public int getValueBase() {
+        return valueBase;
+    }
+
+    @Override
     public String getShortName() {
         return shortName;
+    }
+
+    @Override
+    public int getNumberOfParameters() {
+        return 2;
     }
 }

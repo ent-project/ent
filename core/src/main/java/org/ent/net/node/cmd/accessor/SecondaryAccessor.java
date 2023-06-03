@@ -42,4 +42,10 @@ public class SecondaryAccessor implements Accessor {
 	public String getShortName() {
 		return shortName;
 	}
+
+	@Override
+	public String toString() {
+		return getShortName();
+	}
+
 }

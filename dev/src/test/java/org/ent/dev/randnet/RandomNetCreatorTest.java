@@ -1,19 +1,13 @@
 package org.ent.dev.randnet;
 
 import org.ent.net.Net;
-import org.ent.net.node.cmd.Command;
-import org.ent.net.node.cmd.Commands;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.ent.net.node.cmd.accessor.Accessors.DIRECT;
-import static org.ent.net.node.cmd.accessor.Accessors.LEFT;
-import static org.ent.net.node.cmd.operation.Operations.SET_OPERATION;
 
 class RandomNetCreatorTest {
 
@@ -26,7 +20,7 @@ class RandomNetCreatorTest {
 		Random randMaster = RandomTestUtil.newRandom();
 		Random randCommandDrawing = new Random(randMaster.nextLong());
 		Random randNetCreator = new Random(randMaster.nextLong());
-		CommandDrawingImpl commandDrawing = buildCommandDrawing(randCommandDrawing);
+		ValueDrawing commandDrawing = new DefaultValueDrawing();
 		netCreator = new RandomNetCreator(randNetCreator, commandDrawing);
 	}
 
@@ -38,17 +32,6 @@ class RandomNetCreatorTest {
 			assertThatCode(() -> drawnNet.ifPresent(Net::consistencyCheck))
 					.doesNotThrowAnyException();
 		}
-	}
-
-	private CommandDrawingImpl buildCommandDrawing(Random rand) {
-		Command nopCommand = Commands.NOP;
-		Command ixCommand = Commands.ANCESTOR_EXCHANGE;
-		Command setCommand = Commands.get(SET_OPERATION, LEFT, DIRECT);
-		return new CommandDrawingImpl(rand,
-				Arrays.asList(
-						new CommandCandidate(nopCommand, 1.0),
-						new CommandCandidate(ixCommand, 5.0),
-						new CommandCandidate(setCommand, 3.0)));
 	}
 
 }

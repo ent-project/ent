@@ -33,6 +33,11 @@ public class Commands {
         return getByValue(command.getValue());
     }
 
+    public static Command get(TriOperation operation, Accessor accessor1, Accessor accessor2, Accessor accessor3) {
+        TriCommand command = new TriCommand(operation, accessor1, accessor2, accessor3);
+        return getByValue(command.getValue());
+    }
+
     static  Map<Integer, Command> initializeCommandMap() {
         HashMap<Integer, Command> result = new HashMap<>();
         initializeCommand(new NopCommand(), result);
@@ -72,7 +77,7 @@ public class Commands {
             for (Accessor accessor2 : Accessors.ALL_ACCESSORS) {
                 for (Accessor accessor3 : Accessors.ALL_ACCESSORS) {
                     for (TriOperation operation : triOperations) {
-                        Command command = new TriCommand(accessor1, accessor2, accessor3, operation);
+                        Command command = new TriCommand(operation, accessor1, accessor2, accessor3);
                         initializeCommand(command, result);
                     }
                 }

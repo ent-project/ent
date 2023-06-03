@@ -21,4 +21,9 @@ public class DirectAccessor implements Accessor {
 	public String getShortName() {
 		return "*";
 	}
+
+	@Override
+	public String toString() {
+		return getShortName();
+	}
 }

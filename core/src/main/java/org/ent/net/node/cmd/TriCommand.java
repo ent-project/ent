@@ -16,16 +16,17 @@ public class TriCommand extends VetoedCommand {
     private final TriOperation operation;
 
     private final int value;
+    private final int valueBase;
 
     private final String shortName;
 
-    public TriCommand(Accessor accessor1, Accessor accessor2, Accessor accessor3, TriOperation operation) {
+    public TriCommand(TriOperation operation, Accessor accessor1, Accessor accessor2, Accessor accessor3) {
         this.accessor1 = accessor1;
         this.accessor2 = accessor2;
         this.accessor3 = accessor3;
         this.operation = operation;
-        this.value = Command.COMMAND_PATTERN |
-                operation.getCode() |
+        this.valueBase = Command.COMMAND_PATTERN | operation.getCode();
+        this.value = valueBase |
                 (accessor1.getCode() << 12) |
                 (accessor2.getCode() << 16) |
                 (accessor3.getCode() << 20);
@@ -50,7 +51,17 @@ public class TriCommand extends VetoedCommand {
         return value;
     }
 
+    @Override
+    public int getValueBase() {
+        return valueBase;
+    }
+
     public String getShortName() {
         return shortName;
+    }
+
+    @Override
+    public int getNumberOfParameters() {
+        return 3;
     }
 }

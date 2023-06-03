@@ -17,7 +17,7 @@ public class RandomNetCreator {
 
 	private final Random rand;
 
-	private final CommandDrawing commandDrawing;
+	private final ValueDrawing valueDrawing;
 
 	private Net net;
 
@@ -25,9 +25,9 @@ public class RandomNetCreator {
 
 	private enum DrawResult { SUCCESS, REJECT }
 
-	public RandomNetCreator(Random rand, CommandDrawing commandDrawing) {
+	public RandomNetCreator(Random rand, ValueDrawing valueDrawing) {
 		this.rand = rand;
-		this.commandDrawing = commandDrawing;
+		this.valueDrawing = valueDrawing;
 	}
 
 	public Optional<Net> drawNet() {
@@ -68,7 +68,7 @@ public class RandomNetCreator {
 			return;
 		}
 		for (int i = 0; i < noNodes; i++) {
-			Node n = net.newNode(commandDrawing.drawCommand());
+			Node n = net.newNode(valueDrawing.drawValue());
 			if (i == 0) {
 				net.setRoot(n);
 			}

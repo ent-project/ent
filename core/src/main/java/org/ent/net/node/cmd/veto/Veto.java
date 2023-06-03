@@ -2,8 +2,9 @@ package org.ent.net.node.cmd.veto;
 
 import org.ent.Ent;
 import org.ent.net.node.Node;
+import org.ent.net.node.cmd.ParameterizedValue;
 
-public interface Veto {
+public interface Veto extends ParameterizedValue {
     /*
     value bit pattern:
     |                 |                 |                 |                 |

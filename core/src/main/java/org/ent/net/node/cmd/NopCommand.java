@@ -12,11 +12,21 @@ public class NopCommand implements Command {
 
 	@Override
 	public int getValue() {
+		return getValueBase();
+	}
+
+	@Override
+	public int getValueBase() {
 		return 0;
 	}
 
 	public String getShortName() {
 		return "o";
+	}
+
+	@Override
+	public int getNumberOfParameters() {
+		return 0;
 	}
 
 	@Override

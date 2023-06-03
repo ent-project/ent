@@ -80,4 +80,8 @@ public class Vetos {
         return Vetos.getByValue(veto.getValue());
     }
 
+    public static Veto get(BiCondition condition, boolean not, Accessor accessor1, Accessor accessor2) {
+        BiVeto veto = new BiVeto(accessor1, accessor2, condition, not);
+        return Vetos.getByValue(veto.getValue());
+    }
 }
