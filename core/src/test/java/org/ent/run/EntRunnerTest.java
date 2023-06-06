@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -20,18 +19,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.ent.net.node.cmd.accessor.Accessors.DIRECT;
 import static org.ent.net.node.cmd.accessor.Accessors.LEFT;
 import static org.ent.net.node.cmd.operation.Operations.INC_OPERATION;
-import static org.ent.net.node.cmd.operation.Operations.SET_OPERATION;
-import static org.ent.net.node.cmd.operation.Operations.SET_VALUE_OPERATION;
 import static org.ent.net.node.cmd.veto.Conditions.IDENTICAL_CONDITION;
 import static org.ent.util.NetBuilder.builder;
 import static org.ent.util.NetBuilder.node;
 import static org.ent.util.NetBuilder.unary;
 import static org.ent.util.NetBuilder.value;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 
 class EntRunnerTest {
@@ -113,7 +108,7 @@ class EntRunnerTest {
 	void loop() throws Exception {
         Net net = parser.parse("""
             line01:<^=>(<?//gt/\\?>((i:#0, #5), FIN:[i]), line02);  ~ goto FIN if i > 5
-            line02:<*inc*>(i, line01);			   					~ i++; goto start
+            line02:<inc>(i, line01);			   					~ i++; goto start
         """);
 		EntRunner runner = new EntRunner(net);
 
@@ -132,44 +127,6 @@ class EntRunnerTest {
 
 	@Nested
 	@ExtendWith(MockitoExtension.class)
-	class Portal {
-
-		@Mock
-		private EntEventListener listener;
-
-		@Test
-		void setValue() {
-			Node portal;
-			Ent ent = builder().ent(unary(Commands.get(SET_VALUE_OPERATION, DIRECT, LEFT), portal = value(-1)));
-			Net domain = builder().net(node(value(7), value(8)));
-			ent.setDomain(1, domain).setEventListener(listener);
-			EntRunner runner = new EntRunner(ent);
-
-			StepResult result = runner.step();
-
-			assertThat(result).isEqualTo(StepResult.SUCCESS);
-			assertThat(portal.getValue()).isEqualTo(7);
-			verify(listener).advancedThroughPortal(any(), any());
-		}
-
-		@Test
-		void set_forbidden() {
-			Ent ent = builder().ent(unary(Commands.get(SET_OPERATION, DIRECT, LEFT), value(-1)));
-			Net domain = builder().net(node(value(0), value(0)));
-			ent.setDomain(1, domain).setEventListener(listener);
-			EntRunner runner = new EntRunner(ent);
-
-			StepResult result = runner.step();
-
-			assertThat(result).isEqualTo(StepResult.COMMAND_EXECUTION_FAILED);
-			InOrder inOrder = inOrder(listener);
-			inOrder.verify(listener).advancedThroughPortal(any(), any());
-			inOrder.verify(listener).domainBreachAttemptInSet(any(), any());
-		}
-	}
-
-	@Nested
-	@ExtendWith(MockitoExtension.class)
 	class Veto {
 
 		@Mock
@@ -179,7 +136,7 @@ class EntRunnerTest {
 		void pass() {
 			Node i;
 			Ent ent = builder().ent(
-					unary(Commands.get(INC_OPERATION, LEFT, LEFT),
+					unary(Commands.get(INC_OPERATION, LEFT),
 							node(Conditions.SAME_VALUE_CONDITION, i = value(3), value(3))));
 			ent.setEventListener(listener);
 			EntRunner runner = new EntRunner(ent);
@@ -195,7 +152,7 @@ class EntRunnerTest {
 		void block() {
 			Node i;
 			Ent ent = builder().ent(
-					unary(Commands.get(INC_OPERATION, LEFT, LEFT),
+					unary(Commands.get(INC_OPERATION, LEFT),
 							node(IDENTICAL_CONDITION, i = value(3), value(3))));
 			ent.setEventListener(listener);
 			EntRunner runner = new EntRunner(ent);

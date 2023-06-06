@@ -36,12 +36,11 @@ public class TertiaryAccessor implements Accessor {
     @Override
     public Arrow get(Node base, Ent ent, Purview purview) {
         Node node1 = base.getLeftChild(purview);
-        Node node1Relayed = ent.relayToOtherDomain(node1);
-        Node node2 = node1Relayed.getChild(direction1, purview);
-        Node node2Relayed = ent.relayToOtherDomain(node2);
-        Node node3 = node2Relayed.getChild(direction2, purview);
-        Node node3Relayed = ent.relayToOtherDomain(node3);
-        return node3Relayed.getArrow(direction3);
+        Arrow arrow1 = ent.getArrowMaybeThroughPortal(node1, direction1);
+        Node node2 = arrow1.getTarget(purview);
+        Arrow arrow2 = ent.getArrowMaybeThroughPortal(node2, direction2);
+        Node node3 = arrow2.getTarget(purview);
+        return ent.getArrowMaybeThroughPortal(node3, direction3);
     }
 
     @Override

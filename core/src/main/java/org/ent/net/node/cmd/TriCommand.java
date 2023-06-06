@@ -2,6 +2,7 @@ package org.ent.net.node.cmd;
 
 import org.ent.Ent;
 import org.ent.net.Arrow;
+import org.ent.net.AccessToken;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
@@ -39,11 +40,11 @@ public class TriCommand extends VetoedCommand {
     }
 
     @Override
-    public ExecutionResult doExecute(Node base, Ent ent) {
+    public ExecutionResult doExecute(Node base, Ent ent, AccessToken accessToken) {
         Arrow handle1 = accessor1.get(base, ent, Purview.COMMAND);
         Arrow handle2 = accessor2.get(base, ent, Purview.COMMAND);
         Arrow handle3 = accessor3.get(base, ent, Purview.COMMAND);
-        return operation.apply(handle1, handle2, handle3);
+        return operation.apply(handle1, handle2, handle3, accessToken);
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.ent.Profile;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
+import org.ent.net.AccessToken;
 import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.cmd.Command;
@@ -112,4 +113,6 @@ public interface Node {
 
 		// FIXME unit tests
 	}
+
+	boolean permittedToSetValue(AccessToken accessToken);
 }

@@ -30,6 +30,10 @@ public class Commands {
         return getByValue(command.getValue());
     }
 
+    public static Command get(MonoOperation operation) {
+        return get(operation, Accessors.DIRECT);
+    }
+
     public static Command get(BiOperation operation, Accessor accessor1, Accessor accessor2) {
         Command command = new BiCommand(operation, accessor1, accessor2);
         return getByValue(command.getValue());
@@ -48,9 +52,16 @@ public class Commands {
     static  Map<Integer, Command> initializeCommandMap() {
         HashMap<Integer, Command> result = new HashMap<>();
         initializeCommand(new NopCommand(), result);
+        List<MonoOperation> monoOperations = List.of(
+                Operations.EVAL_OPERATION,
+                Operations.INC_OPERATION,
+                Operations.DEC_OPERATION
+        );
         for (Accessor accessor : Accessors.ALL_ACCESSORS) {
-            MonoCommand command = new MonoCommand(Operations.EVAL_OPERATION, accessor);
-            initializeCommand(command, result);
+            for (MonoOperation operation : monoOperations) {
+                MonoCommand command = new MonoCommand(operation, accessor);
+                initializeCommand(command, result);
+            }
         }
         List<BiOperation> biOperations = List.of(
                 Operations.SET_OPERATION,
@@ -58,11 +69,8 @@ public class Commands {
                 Operations.ANCESTOR_EXCHANGE_NORMAL_OPERATION,
                 Operations.DUP_OPERATION,
                 Operations.DUP_NORMAL_OPERATION,
-                Operations.IS_IDENTICAL_OPERATION,
                 Operations.SET_VALUE_OPERATION,
-                Operations.NEG_OPERATION,
-                Operations.INC_OPERATION,
-                Operations.DEC_OPERATION
+                Operations.NEG_OPERATION
         );
         for (Accessor accessor1 : Accessors.ALL_ACCESSORS) {
             for (Accessor accessor2 : Accessors.ALL_ACCESSORS) {

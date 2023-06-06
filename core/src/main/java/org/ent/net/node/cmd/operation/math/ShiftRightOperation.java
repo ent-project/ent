@@ -1,6 +1,7 @@
 package org.ent.net.node.cmd.operation.math;
 
 import org.ent.net.node.cmd.operation.Operations;
+import org.ent.net.node.cmd.operation.TriValueOperation;
 
 public class ShiftRightOperation extends TriValueOperation {
     @Override

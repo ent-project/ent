@@ -1,6 +1,8 @@
 package org.ent.net.node.cmd.operation;
 
 import org.ent.Ent;
+import org.ent.net.AccessToken;
+import org.ent.net.Net;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.Commands;
@@ -14,7 +16,11 @@ public class EvalOperation extends MonoNodeOperation {
 	}
 
 	@Override
-	public ExecutionResult doApply(Node node, Ent ent) {
+	public ExecutionResult doApply(Node node, Ent ent, AccessToken accessToken) {
+		Net net = node.getNet();
+		if (!net.isPermittedToEval(node)) {
+			return ExecutionResult.ERROR;
+		}
 		Command command = Commands.getByValue(node.getValue());
 		if (command == null) {
 			return ExecutionResult.ERROR;
@@ -22,7 +28,8 @@ public class EvalOperation extends MonoNodeOperation {
 		if (command.isEval()) {
 			return ExecutionResult.ERROR;
 		}
-		return command.execute(node, ent);
+		AccessToken evalToken = net.getEvalToken();
+		return command.execute(node, ent, evalToken);
 	}
 
 	@Override

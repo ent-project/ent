@@ -24,7 +24,7 @@ class AncestorExchangeNormalOperationTest {
         AncestorExchangeNormalOperation ancestorExchangeNormalOperation = new AncestorExchangeNormalOperation();
 
         Node root = ent.getNet().getRoot();
-        ancestorExchangeNormalOperation.apply(root.getLeftArrow(), root.getRightArrow(), ent);
+        ancestorExchangeNormalOperation.apply(root.getLeftArrow(), root.getRightArrow(), ent, null);
 
         NetFormatter formatter = new NetFormatter()
                 .withForceGivenNodeNames(true);

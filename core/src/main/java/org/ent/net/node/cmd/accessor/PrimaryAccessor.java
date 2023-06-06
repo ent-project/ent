@@ -22,8 +22,8 @@ public class PrimaryAccessor implements Accessor {
 
 	@Override
 	public Arrow get(Node base, Ent ent, Purview purview) {
-		Node node = ent.relayToOtherDomain(base.getLeftChild(purview));
-		return node.getArrow(direction);
+		Node parameters = base.getLeftChild(purview);
+		return ent.getArrowMaybeThroughPortal(parameters, direction);
 	}
 
 	public ArrowDirection getDirection() {

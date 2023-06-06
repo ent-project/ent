@@ -19,7 +19,7 @@ class EvalOperationTest {
         Ent ent = builder().ent(unary(Operations.SET_VALUE_OPERATION, node(x = value(3), value(5))));
         EvalOperation evalOperation = new EvalOperation();
 
-        ExecutionResult executionResult = evalOperation.doApply(ent.getNet().getRoot(), ent);
+        ExecutionResult executionResult = evalOperation.doApply(ent.getNet().getRoot(), ent, null);
 
         assertThat(executionResult).isEqualTo(ExecutionResult.NORMAL);
         assertThat(x.getValue()).isEqualTo(5);

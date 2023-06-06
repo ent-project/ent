@@ -45,7 +45,6 @@ public class Operations {
     public static final EvalOperation EVAL_OPERATION = new EvalOperation();
     public static final AncestorExchangeNormalOperation ANCESTOR_EXCHANGE_NORMAL_OPERATION = new AncestorExchangeNormalOperation();
     public static final DupNormalOperation DUP_NORMAL_OPERATION = new DupNormalOperation();
-    public static final IsIdenticalOperation IS_IDENTICAL_OPERATION = new IsIdenticalOperation();
     public static final SetValueOperation SET_VALUE_OPERATION = new SetValueOperation();
     public static final NegOperation NEG_OPERATION = new NegOperation();
     public static final IncOperation INC_OPERATION = new IncOperation();

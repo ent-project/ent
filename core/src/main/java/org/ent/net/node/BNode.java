@@ -1,5 +1,6 @@
 package org.ent.net.node;
 
+import org.ent.net.AccessToken;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
@@ -33,13 +34,18 @@ public class BNode extends AbstractNode {
 		}
 
 		public Node getTarget(Purview purview) {
-			net.fireGetTargetCall(getOrigin(), getDirection(), purview);
+			net.fireGetTargetCall(BNode.this, ArrowDirection.LEFT, purview);
 			return doGetTarget();
 		}
 
 		public void setTarget(Node target, Purview purview) {
-			net.fireSetTargetCall(getOrigin(), getDirection(), target, purview);
+			net.fireSetTargetCall(BNode.this, ArrowDirection.LEFT, target, purview);
 			doSetTarget(target);
+		}
+
+		@Override
+		public boolean permittedToSetTarget(Node target, AccessToken accessToken) {
+			return net.isPermittedToWrite(accessToken) && target.getNet() == net;
 		}
 
 		private Node doGetTarget() {
@@ -65,13 +71,18 @@ public class BNode extends AbstractNode {
 		}
 
 		public Node getTarget(Purview purview) {
-			net.fireGetTargetCall(getOrigin(), getDirection(), purview);
+			net.fireGetTargetCall(BNode.this, ArrowDirection.RIGHT, purview);
 			return doGetTarget();
 		}
 
 		public void setTarget(Node target, Purview purview) {
-			net.fireSetTargetCall(getOrigin(), getDirection(), target, purview);
+			net.fireSetTargetCall(BNode.this, ArrowDirection.RIGHT, target, purview);
 			doSetTarget(target);
+		}
+
+		@Override
+		public boolean permittedToSetTarget(Node target, AccessToken accessToken) {
+			return net.isPermittedToWrite(accessToken) && target.getNet() == net;
 		}
 
 		private Node doGetTarget() {

@@ -1,5 +1,8 @@
 package org.ent;
 
+import com.google.common.annotations.VisibleForTesting;
+import org.ent.net.Arrow;
+import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
@@ -8,20 +11,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Ent {
-    private static final int PORTAL_MASK = 0b11111111111111111111111111111110;
     private Net net;
 
     private Purview purview;
 
-    private final List<Net> domains;
+    private final List<Net> domains = new ArrayList<>();
+    private final List<Arrow> portals = new ArrayList<>();
 
     EntEventListener eventListener = new NopEventListener();
 
     public Ent(Net net) {
         this.net = net;
-        domains = new ArrayList<>();
-        domains.add(null);
-        domains.add(null);
     }
 
     public Net getNet() {
@@ -32,49 +32,38 @@ public class Ent {
         this.net = net;
     }
 
-    public Node relayToOtherDomain(Node node) {
+    public Arrow getArrowMaybeThroughPortal(Node node, ArrowDirection direction) {
         int value = node.getValue();
-        if (isPortal(value)) {
-            int index = -value;
-            Node domainPointer = getDomainRoot(index);
-            event().advancedThroughPortal(node, domainPointer);
-            return domainPointer;
+        int portalIndex = getPortalIndex(value, direction);
+        if (isPortal(portalIndex)) {
+            return portals.get(portalIndex);
         } else {
-            return node;
+            return node.getArrow(direction);
         }
     }
 
-    private Node getDomainRoot(int index) {
-        Net domain = domains.get(index);
-        if (domain == null) {
-            domain = initializeDomain(index);
-            domains.set(index, domain);
-        }
-        return domain.getRoot();
-    }
-
-    private Net initializeDomain(int index) {
-        Net domain = switch (index) {
-            case 0 -> {
-                Net readDomain = new Net();
-                Node readData = readDomain.newNode(0xbeef1234);
-                readDomain.newRoot(readData, readData);
-                yield readDomain;
-            }
-            case 1 -> {
-                Net writeDomain = new Net();
-                Node writeData = writeDomain.newNode();
-                writeDomain.newRoot(writeData, writeData);
-                yield writeDomain;
-            }
-            default -> throw new IllegalArgumentException();
+    @VisibleForTesting
+    static int getPortalIndex(int value, ArrowDirection direction) {
+        // "main" direction (left) gets the "better" (least significant bits) side of the int
+        int halfValue = switch (direction) {
+            case LEFT -> value & 0xFFFF;
+            case RIGHT -> value >>> 16;
         };
-        domain.setNetIndex(index + 1);
-        return domain;
+        return halfValue ^ 0xFFFF;
     }
 
-    private static boolean isPortal(int value) {
-        return (value & PORTAL_MASK) == PORTAL_MASK;
+    public void addDomain(Net net) {
+        domains.add(net);
+    }
+
+    public int addPortal(Arrow portal) {
+        portals.add(portal);
+        int idx = portals.size();
+        return (-idx) & 0xFFFF;
+    }
+
+    private boolean isPortal(int index) {
+        return index >= 0 && index < portals.size();
     }
 
     public Ent setPurview(Purview purview) {
@@ -104,10 +93,5 @@ public class Ent {
 
     public EntEventListener event() {
         return eventListener;
-    }
-
-    public Ent setDomain(int i, Net domain) {
-        domains.set(i, domain);
-        return this;
     }
 }

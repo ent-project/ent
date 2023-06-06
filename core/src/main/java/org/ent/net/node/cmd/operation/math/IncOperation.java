@@ -1,9 +1,9 @@
 package org.ent.net.node.cmd.operation.math;
 
-import org.ent.net.node.cmd.operation.BiValueOperation;
+import org.ent.net.node.cmd.operation.MonoValueOperation;
 import org.ent.net.node.cmd.operation.Operations;
 
-public class IncOperation extends BiValueOperation {
+public class IncOperation extends MonoValueOperation {
 
 	@Override
 	public int getCode() {

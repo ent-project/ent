@@ -1,5 +1,6 @@
 package org.ent.net.node;
 
+import org.ent.net.AccessToken;
 import org.ent.net.Net;
 
 public abstract class AbstractNode implements Node {
@@ -33,4 +34,8 @@ public abstract class AbstractNode implements Node {
         this.hub = hub;
     }
 
+    @Override
+    public boolean permittedToSetValue(AccessToken accessToken) {
+        return net.isPermittedToWrite(accessToken);
+    }
 }

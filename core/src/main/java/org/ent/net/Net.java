@@ -43,6 +43,11 @@ public class Net {
 
 	Set<ExecutionEventListener> eventListeners = new HashSet<>();
 
+	private final AccessToken evalToken = new AccessToken();
+
+	private boolean permittedToEvalRoot = true;
+	private boolean permittedToWrite = true;
+
 	public Net() {
 		this.nodes = new LinkedHashSet<>();
 	}
@@ -356,5 +361,38 @@ public class Net {
 
 	public int getNodeIndex(Node node) {
 		return nodeIndices.get(node);
+	}
+
+	/**
+	 * Provide token for elevated access rights. Holder of the eval token
+	 * can modify this Net, even if modification is not permitted in general.
+	 */
+	public AccessToken getEvalToken() {
+		return evalToken;
+	}
+
+	public boolean isPermittedToEval(Node node) {
+		return permittedToWrite || (permittedToEvalRoot && node == root);
+	}
+
+	public boolean isPermittedToEvalRoot() {
+		return permittedToEvalRoot;
+	}
+
+	public Net setPermittedToEvalRoot(boolean permittedToEvalRoot) {
+		this.permittedToEvalRoot = permittedToEvalRoot;
+		return this;
+	}
+
+	public boolean isPermittedToWrite(AccessToken accessToken) {
+		if (permittedToWrite) {
+			return true;
+		}
+		return permittedToEvalRoot && accessToken == this.evalToken;
+	}
+
+	public Net setPermittedToWrite(boolean permittedToWrite) {
+		this.permittedToWrite = permittedToWrite;
+		return this;
 	}
 }

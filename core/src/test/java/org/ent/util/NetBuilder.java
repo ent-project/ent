@@ -6,6 +6,7 @@ import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.operation.BiOperation;
+import org.ent.net.node.cmd.operation.MonoOperation;
 import org.ent.net.node.cmd.veto.BiCondition;
 import org.ent.net.node.cmd.veto.Vetos;
 
@@ -74,6 +75,11 @@ public class NetBuilder {
     public static Node unary(BiOperation operation, Node node) {
         return unary(Commands.get(operation), node);
     }
+
+    public static Node unary(MonoOperation operation, Node node) {
+        return unary(Commands.get(operation), node);
+    }
+
     public static Node unary(Command command, Node child) {
         return unary(command.getValue(), child);
     }
@@ -85,4 +91,9 @@ public class NetBuilder {
     public static Node value(int v) {
         return currentNet.get().newNode(v);
     }
+
+    public static Node ignored() {
+        return value(0);
+    }
+
 }
