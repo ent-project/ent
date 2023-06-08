@@ -35,6 +35,7 @@ public class Accessors {
 
     public static final TertiaryAccessor LEFT_LEFT_LEFT = new TertiaryAccessor(ArrowDirection.LEFT, ArrowDirection.LEFT, ArrowDirection.LEFT);
     public static final TertiaryAccessor LEFT_LEFT_RIGHT = new TertiaryAccessor(ArrowDirection.LEFT, ArrowDirection.LEFT, ArrowDirection.RIGHT);
+    public static final TertiaryAccessor LEFT_RIGHT_LEFT = new TertiaryAccessor(ArrowDirection.LEFT, ArrowDirection.RIGHT, ArrowDirection.LEFT);
 
     public static final List<Accessor> ALL_ACCESSORS;
 

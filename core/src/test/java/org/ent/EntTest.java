@@ -94,7 +94,30 @@ class EntTest {
         }
 
         @Test
-        void resetPortalArrow() {
+        void goTroughMultiplePortals() {
+            ent = builder().ent(
+                    unary(Commands.get(Operations.SET_VALUE_OPERATION, Accessors.LEFT_LEFT, Accessors.RIGHT),
+                        portalNode = node(
+                            ignored(),
+                            value(5))));
+            Node portal2;
+            domain = builder().net(portal2 = ignored());
+            domain.setPermittedToWrite(false);
+            setUpLeft();
+            Node x;
+            Net domain2 = builder().net(x = value(7));
+            ent.addDomain(domain2);
+            int portal2Index = ent.addPortal(new PortalArrow(domain2));
+            portal2.setValue(portal2Index);
+
+            StepResult result = runner.step();
+
+            assertThat(result).isEqualTo(StepResult.SUCCESS);
+            assertThat(x.getValue()).isEqualTo(5);
+        }
+
+        @Test
+        void setPortalArrow() {
             ent = builder().ent(unary(Commands.get(Operations.SET_OPERATION, Accessors.LEFT, Accessors.LEFT_LEFT), portalNode = node(ignored(), value(5))));
             Node y;
             domain = builder().net(unary(7, y = value(9)));
@@ -182,6 +205,43 @@ class EntTest {
                 assertThat(x.getValue()).isEqualTo(7);
             }
 
+            @Test
+            void set() {
+                ent = builder().ent(unary(Commands.get(Operations.SET_OPERATION, Accessors.LEFT_LEFT, Accessors.LEFT_RIGHT),
+                        portalNode = ignored()));
+                Node y, a;
+                domain = builder().net(y = node( a = value(5), value(9)));
+                domain.setPermittedToWrite(false);
+                setUpLeft();
+
+                StepResult result = runner.step();
+
+                assertThat(result).isEqualTo(StepResult.COMMAND_EXECUTION_FAILED);
+                assertThat(y.getLeftChild()).isSameAs(a);
+            }
+
+            @ParameterizedTest
+            @ValueSource(booleans = {true, false})
+            void ancestorExchange(boolean permittedToWrite) {
+                ent = builder().ent(unary(Commands.get(Operations.ANCESTOR_EXCHANGE_OPERATION, Accessors.LEFT_LEFT, Accessors.LEFT_RIGHT_LEFT),
+                        portalNode = ignored()));
+                Node y, a, b_parent, b;
+                domain = builder().net(y = node( a = value(5), b_parent = unary(b = value(9))));
+                domain.setPermittedToWrite(permittedToWrite);
+                setUpLeft();
+
+                StepResult result = runner.step();
+
+                if (permittedToWrite) {
+                    assertThat(result).isEqualTo(StepResult.SUCCESS);
+                    assertThat(y.getLeftChild()).isSameAs(b);
+                    assertThat(b_parent.getLeftChild()).isSameAs(a);
+                } else {
+                    assertThat(result).isEqualTo(StepResult.COMMAND_EXECUTION_FAILED);
+                    assertThat(y.getLeftChild()).isSameAs(a);
+                    assertThat(b_parent.getLeftChild()).isSameAs(b);
+                }
+            }
         }
 
         @Test
