@@ -11,7 +11,7 @@ public class PortalArrow implements Arrow {
 
     private Node target;
 
-    private final Net net;
+    protected final Net net;
 
     private boolean readOnly;
 

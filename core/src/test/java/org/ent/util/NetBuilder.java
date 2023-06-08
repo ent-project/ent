@@ -8,6 +8,7 @@ import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.operation.BiOperation;
 import org.ent.net.node.cmd.operation.MonoOperation;
 import org.ent.net.node.cmd.veto.BiCondition;
+import org.ent.net.node.cmd.veto.Veto;
 import org.ent.net.node.cmd.veto.Vetos;
 
 public class NetBuilder {
@@ -50,6 +51,10 @@ public class NetBuilder {
         return node(c.getValue(), n1, n2);
     }
 
+    public static Node node(Veto v, Node n1, Node n2) {
+        return node(v.getValue(), n1, n2);
+    }
+
     public static Node node(Node node1, Node node2) {
         return node(0, node1, node2);
     }
@@ -58,8 +63,16 @@ public class NetBuilder {
         return node(Commands.get(operation), node1, node2);
     }
 
+    public static Node node(MonoOperation operation, Node node1, Node node2) {
+        return node(Commands.get(operation), node1, node2);
+    }
+
     public static Node value(BiCondition c) {
         return value(Vetos.get(c).getValue());
+    }
+
+    public static Node value(Command c) {
+        return value(c.getValue());
     }
 
     public static Node node(BiCondition c, Node n1, Node n2) {

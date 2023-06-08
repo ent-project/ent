@@ -18,6 +18,8 @@ public class Commands {
     private static final Map<String, Command> commandsByName = buildCommandsByName();
 
     public static final Command NOP = getByValue(new NopCommand().getValue());
+    public static final Command FINAL_SUCCESS = getByValue(new FinalSuccessCommand().getValue());
+    public static final Command FINAL_FAILURE = getByValue(new FinalFailureCommand().getValue());
     public static final Command ANCESTOR_EXCHANGE = get(Operations.ANCESTOR_EXCHANGE_OPERATION);
     public static final Command SET = get(Operations.SET_OPERATION);
     public static final Command EVAL = get(Operations.EVAL_OPERATION, Accessors.DIRECT);
@@ -52,8 +54,11 @@ public class Commands {
     static  Map<Integer, Command> initializeCommandMap() {
         HashMap<Integer, Command> result = new HashMap<>();
         initializeCommand(new NopCommand(), result);
+        initializeCommand(new FinalSuccessCommand(), result);
+        initializeCommand(new FinalFailureCommand(), result);
         List<MonoOperation> monoOperations = List.of(
                 Operations.EVAL_OPERATION,
+                Operations.EVAL_FLOW_OPERATION,
                 Operations.INC_OPERATION,
                 Operations.DEC_OPERATION
         );

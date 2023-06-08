@@ -2,12 +2,16 @@ package org.ent.run;
 
 import org.ent.Ent;
 import org.ent.EntEventListener;
+import org.ent.PortalArrow;
+import org.ent.RootPortalArrow;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.io.parser.NetParser;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Commands;
+import org.ent.net.node.cmd.operation.Operations;
 import org.ent.net.node.cmd.veto.Conditions;
+import org.ent.net.node.cmd.veto.Vetos;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,10 +23,17 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.ent.net.node.cmd.accessor.Accessors.FLOW;
 import static org.ent.net.node.cmd.accessor.Accessors.LEFT;
+import static org.ent.net.node.cmd.accessor.Accessors.LEFT_LEFT;
+import static org.ent.net.node.cmd.accessor.Accessors.LEFT_LEFT_LEFT;
+import static org.ent.net.node.cmd.accessor.Accessors.LEFT_LEFT_RIGHT;
+import static org.ent.net.node.cmd.accessor.Accessors.LEFT_RIGHT;
+import static org.ent.net.node.cmd.accessor.Accessors.RIGHT;
 import static org.ent.net.node.cmd.operation.Operations.INC_OPERATION;
 import static org.ent.net.node.cmd.veto.Conditions.IDENTICAL_CONDITION;
 import static org.ent.util.NetBuilder.builder;
+import static org.ent.util.NetBuilder.ignored;
 import static org.ent.util.NetBuilder.node;
 import static org.ent.util.NetBuilder.unary;
 import static org.ent.util.NetBuilder.value;
@@ -31,6 +42,7 @@ import static org.mockito.Mockito.verify;
 
 class EntRunnerTest {
 
+	private static final int STEPS_CUTOFF = 5;
 	private NetParser parser;
 
 	private NetFormatter formatter;
@@ -162,6 +174,56 @@ class EntRunnerTest {
 			assertThat(result).isEqualTo(StepResult.SUCCESS);
 			assertThat(i.getValue()).isEqualTo(3);
 			verify(listener).blockedByVeto(any());
+		}
+	}
+
+	@Nested
+	class VerifierGame {
+		@Test
+		void copyValue() {
+			int targetValue = 7;
+			Node verifierPortal;
+			Ent ent = builder().ent(
+					node(Commands.get(Operations.SET_VALUE_OPERATION, LEFT_LEFT_LEFT, LEFT_LEFT_RIGHT),
+							verifierPortal = ignored(),
+							node(Commands.get(Operations.EVAL_FLOW_OPERATION, LEFT),
+									verifierPortal,
+									node(Commands.get(Operations.EVAL_FLOW_OPERATION, LEFT),
+											verifierPortal,
+											value(Commands.FINAL_SUCCESS)))));
+			Node x;
+			Net input = builder().net(x = value(0));
+			input.setPermittedToWrite(true);
+			ent.addDomain(input);
+			int portalInputCode = ent.addPortal(new PortalArrow(input));
+			Node data;
+			Net verifier = builder().net(
+					node(Commands.NOP,
+							data = node(portalInputCode, ignored(), value(targetValue)),
+							node(Commands.get(Operations.SET_OPERATION, FLOW, RIGHT),
+									node(Vetos.get(Conditions.SAME_VALUE_CONDITION, LEFT_LEFT, LEFT_RIGHT),
+											data,
+											value(Commands.FINAL_SUCCESS)),
+									value(Commands.FINAL_FAILURE))));
+			verifier.setPermittedToWrite(false);
+			verifier.setPermittedToEvalRoot(true);
+			ent.addDomain(verifier);
+			RootPortalArrow rootPortalVerifier = new RootPortalArrow(verifier);
+			int portalVerifierCode = ent.addPortal(rootPortalVerifier);
+			verifierPortal.setValue(portalVerifierCode);
+			EntRunner runner = new EntRunner(ent);
+
+			int i = 0;
+			while (true) {
+				if (ent.getNet().getRoot().getValue() == Commands.FINAL_SUCCESS.getValue()) {
+					break;
+				}
+				StepResult result = runner.step();
+				assertThat(i++).isLessThan(STEPS_CUTOFF);
+			}
+
+			assertThat(verifier.getRoot().getValue()).isEqualTo(Commands.FINAL_SUCCESS.getValue());
+			assertThat(x.getValue()).isEqualTo(targetValue);
 		}
 	}
 }

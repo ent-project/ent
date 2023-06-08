@@ -18,5 +18,9 @@ public interface Arrow {
 
 	void setTarget(Node target, Purview purview);
 
+	default void setTarget(Node target, Purview purview, AccessToken token) {
+		setTarget(target, purview);
+	}
+
 	boolean permittedToSetTarget(Node target, AccessToken accessToken);
 }

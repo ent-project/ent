@@ -138,8 +138,7 @@ class EntTest {
 
             @Test
             void setPortalArrowToOwnNode() {
-                Node root;
-                ent = builder().ent(root = unary(Commands.get(Operations.SET_OPERATION, Accessors.LEFT, Accessors.FLOW),
+                ent = builder().ent(unary(Commands.get(Operations.SET_OPERATION, Accessors.LEFT, Accessors.FLOW),
                         portalNode = ignored()));
                 Node y;
                 domain = builder().net(y = ignored());
@@ -153,8 +152,7 @@ class EntTest {
 
             @Test
             void setDomainArrowToOwnNode() {
-                Node root;
-                ent = builder().ent(root = unary(Commands.get(Operations.SET_OPERATION, Accessors.LEFT_LEFT, Accessors.FLOW),
+                ent = builder().ent(unary(Commands.get(Operations.SET_OPERATION, Accessors.LEFT_LEFT, Accessors.FLOW),
                         portalNode = ignored()));
                 Node a, b;
                 domain = builder().net(a = unary(b = ignored()));
@@ -252,6 +250,49 @@ class EntTest {
             }
 
             @ParameterizedTest
+            @ValueSource(booleans = {true, false})
+            void eval_advanceArrow_thenEvalInner(boolean permittedToWrite) {
+                // Advance the portal arrow and then try to eval.
+                // The idea is that the rooted portal arrow can change the domain root.
+                // This should not work, unless you have permission to write.
+                ent = builder().ent(
+                        node(Commands.get(Operations.SET_OPERATION, Accessors.LEFT, Accessors.LEFT_RIGHT),
+                            portalNode = ignored(),
+                            unary(Commands.get(Operations.EVAL_FLOW_OPERATION, Accessors.LEFT),
+                                portalNode)));
+                Node y1, y2, domainRoot0, domainRoot1;
+                domain = builder().net(
+                        domainRoot0 = node(Operations.INC_OPERATION,
+                            y1 = value(5),
+                            domainRoot1 = unary(Operations.INC_OPERATION,
+                                y2 = value(10))));
+                domain.setPermittedToWrite(permittedToWrite);
+                domain.setPermittedToEvalRoot(true);
+                setUpLeft();
+
+                StepResult result1 = runner.step();
+                assertThat(result1).isEqualTo(StepResult.SUCCESS);
+                assertThat(portalArrow.getTarget(Purview.DIRECT)).isEqualTo(domainRoot1);
+                if (permittedToWrite) {
+                    assertThat(domain.getRoot()).isEqualTo(domainRoot1);
+                } else {
+                    assertThat(domain.getRoot()).isEqualTo(domainRoot0);
+                }
+
+                StepResult result2 = runner.step();
+
+                if (permittedToWrite) {
+                    assertThat(result2).isEqualTo(StepResult.SUCCESS);
+                    assertThat(y1.getValue()).isEqualTo(5);
+                    assertThat(y2.getValue()).isEqualTo(11);
+                } else {
+                    assertThat(result2).isEqualTo(StepResult.COMMAND_EXECUTION_FAILED);
+                    assertThat(y1.getValue()).isEqualTo(5);
+                    assertThat(y2.getValue()).isEqualTo(10);
+                }
+            }
+
+            @ParameterizedTest
             @ValueSource(booleans = { true, false })
             void eval_runsOwnCommand(boolean permittedToWrite) {
                 ent = builder().ent(unary(Operations.EVAL_OPERATION,
@@ -277,7 +318,7 @@ class EntTest {
 
         private void setUp(ArrowDirection direction) {
             this.ent.addDomain(this.domain);
-            this.portalArrow = new PortalArrow(this.domain);
+            this.portalArrow = new RootPortalArrow(this.domain);
             int portalIndex = this.ent.addPortal(this.portalArrow);
             int value = switch (direction) {
                 case LEFT -> portalIndex;

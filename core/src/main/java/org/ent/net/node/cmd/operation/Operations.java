@@ -22,6 +22,7 @@ public class Operations {
     public static final int CODE_DUP_OPERATION = 0b100;
     public static final int CODE_DUP_NORMAL_OPERATION = 0b101;
     public static final int CODE_EVAL_OPERATION = 0b1000;
+    public static final int CODE_EVAL_FLOW_OPERATION = 0b1001;
     public static final int CODE_IS_IDENTICAL_OPERATION = 0b1100;
     public static final int CODE_ADD_OPERATION = 0b10000;
     public static final int CODE_MINUS_OPERATION = 0b10001;
@@ -39,10 +40,14 @@ public class Operations {
     public static final int CODE_INC_OPERATION = 0b100010;
     public static final int CODE_DEC_OPERATION = 0b100011;
 
+    public static final int COMMAND_CODE_FINAL_SUCCESS = 0b11111111;
+    public static final int COMMAND_CODE_FINAL_FAILURE = 0b10101010;
+
     public static final SetOperation SET_OPERATION = new SetOperation();
     public static final AncestorExchangeOperation ANCESTOR_EXCHANGE_OPERATION = new AncestorExchangeOperation();
     public static final DupOperation DUP_OPERATION = new DupOperation();
     public static final EvalOperation EVAL_OPERATION = new EvalOperation();
+    public static final EvalFlowOperation EVAL_FLOW_OPERATION = new EvalFlowOperation();
     public static final AncestorExchangeNormalOperation ANCESTOR_EXCHANGE_NORMAL_OPERATION = new AncestorExchangeNormalOperation();
     public static final DupNormalOperation DUP_NORMAL_OPERATION = new DupNormalOperation();
     public static final SetValueOperation SET_VALUE_OPERATION = new SetValueOperation();

@@ -21,7 +21,7 @@ public class SetOperation implements BiOperation {
 			ent.event().domainBreachAttemptInSet(setter, target);
 			return ExecutionResult.ERROR;
 		}
-		setter.setTarget(target, Purview.COMMAND);
+		setter.setTarget(target, Purview.COMMAND, accessToken);
 		return ExecutionResult.NORMAL;
 	}
 
