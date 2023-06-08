@@ -13,20 +13,9 @@ public class PortalArrow implements Arrow {
 
     protected final Net net;
 
-    private boolean readOnly;
-
     public PortalArrow(Net net) {
         this.net = net;
         this.target = net.getRoot();
-    }
-
-    public boolean isReadOnly() {
-        return readOnly;
-    }
-
-    public PortalArrow setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
-        return this;
     }
 
     @Override
@@ -51,9 +40,6 @@ public class PortalArrow implements Arrow {
 
     @Override
     public boolean permittedToSetTarget(Node target, AccessToken accessToken) {
-        if (readOnly) {
-            return false;
-        }
         return net == target.getNet();
     }
 }

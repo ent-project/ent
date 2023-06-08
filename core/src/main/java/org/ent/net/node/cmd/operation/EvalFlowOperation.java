@@ -23,9 +23,6 @@ public class EvalFlowOperation implements MonoOperation {
         if (!net.isPermittedToEval(node)) {
             return ExecutionResult.ERROR;
         }
-        if (!handle.permittedToSetTarget(node, accessToken)) { // FIXME: clean up
-            return ExecutionResult.ERROR;
-        }
         Command command = Commands.getByValue(node.getValue());
         if (command == null) {
             return ExecutionResult.ERROR;
@@ -37,10 +34,6 @@ public class EvalFlowOperation implements MonoOperation {
         ExecutionResult executionResult = command.execute(node, ent, evalToken);
         // advance pointer
         Node newTarget = node.getRightChild(Purview.COMMAND);
-        if (!handle.permittedToSetTarget(newTarget, accessToken)) {
-            // already covered by check above, but double check
-            return ExecutionResult.ERROR;
-        }
         handle.setTarget(newTarget, Purview.COMMAND, evalToken);
 
         return executionResult;
