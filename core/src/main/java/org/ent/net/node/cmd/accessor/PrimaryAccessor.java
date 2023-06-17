@@ -23,7 +23,7 @@ public class PrimaryAccessor implements Accessor {
 	@Override
 	public Arrow get(Node base, Ent ent, Purview purview) {
 		Node parameters = base.getLeftChild(purview);
-		return ent.getArrowMaybeThroughPortal(parameters, direction);
+		return ent.getArrowMaybeThroughPortal(parameters, direction, purview);
 	}
 
 	public ArrowDirection getDirection() {

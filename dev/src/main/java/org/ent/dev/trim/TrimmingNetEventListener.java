@@ -1,6 +1,6 @@
 package org.ent.dev.trim;
 
-import org.ent.ExecutionEventListener;
+import org.ent.NopNetEventListener;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Purview;
@@ -9,13 +9,13 @@ import org.ent.net.node.Node;
 import java.util.HashSet;
 import java.util.Set;
 
-class TrimmingExecutionEventListener implements ExecutionEventListener {
+public class TrimmingNetEventListener extends NopNetEventListener {
 
 	private final Set<Arrow> requiredArrows;
 
 	private final Set<Arrow> overriddenArrows;
 
-	public TrimmingExecutionEventListener() {
+	public TrimmingNetEventListener() {
 		this.requiredArrows = new HashSet<>();
 		this.overriddenArrows = new HashSet<>();
 	}
@@ -40,10 +40,6 @@ class TrimmingExecutionEventListener implements ExecutionEventListener {
 			Arrow arrow = from.getArrow(arrowDirection);
 			overriddenArrows.add(arrow);
 		}
-	}
-
-	@Override
-	public void calledNewNode(Node n) {
 	}
 
 	public boolean isDead(Arrow arrow) {

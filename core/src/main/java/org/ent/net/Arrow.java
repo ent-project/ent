@@ -23,4 +23,14 @@ public interface Arrow {
 	}
 
 	boolean permittedToSetTarget(Node target, AccessToken accessToken);
+
+	default int getIndex() {
+		Node origin = getOrigin();
+		int index = origin.getIndex();
+		index <<= 1;
+		if (getDirection() == ArrowDirection.RIGHT) {
+			index |= 1;
+		}
+		return index;
+	}
 }

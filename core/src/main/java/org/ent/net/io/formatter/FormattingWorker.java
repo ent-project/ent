@@ -81,14 +81,14 @@ public class FormattingWorker {
 		if (node.isMarkerNode()) {
 			stringBuilder.append(MarkerNode.MARKER_NODE_SYMBOL);
 		} else {
-			if (node.getValue() != 0 || node.isCommandNode()) {
-				String name = Values.getName(node.getValue());
+			if (node.getValue(Purview.DIRECT) != 0 || node.isCommandNode()) {
+				String name = Values.getName(node.getValue(Purview.DIRECT));
 				if (name != null) {
 					stringBuilder.append("<");
 					stringBuilder.append(name);
 					stringBuilder.append(">");
 				} else {
-					stringBuilder.append(String.format("#%x", node.getValue()));
+					stringBuilder.append(String.format("#%x", node.getValue(Purview.DIRECT)));
 				}
 			}
 			if (node.isUnaryNode()) {

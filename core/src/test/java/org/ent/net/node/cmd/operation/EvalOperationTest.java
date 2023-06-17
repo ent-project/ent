@@ -24,4 +24,16 @@ class EvalOperationTest {
         assertThat(executionResult).isEqualTo(ExecutionResult.NORMAL);
         assertThat(x.getValue()).isEqualTo(5);
     }
+
+    @Test
+    void tryToEvalOtherEval() {
+        Node x;
+        Ent ent = builder().ent(unary(Operations.EVAL_OPERATION, unary(Operations.SET_VALUE_OPERATION, node(x = value(3), value(5)))));
+        EvalOperation evalOperation = new EvalOperation();
+
+        ExecutionResult executionResult = evalOperation.doApply(ent.getNet().getRoot(), ent, null);
+
+        assertThat(executionResult).isEqualTo(ExecutionResult.ERROR);
+        assertThat(x.getValue()).isEqualTo(3);
+    }
 }

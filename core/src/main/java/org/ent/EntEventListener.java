@@ -1,6 +1,7 @@
 package org.ent;
 
 import org.ent.net.Arrow;
+import org.ent.net.ArrowDirection;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.veto.Veto;
@@ -23,4 +24,8 @@ public interface EntEventListener {
 	void afterCommandExecution(StepResult stepResult);
 
 	void vetoEvaluation(Veto veto, Node node1, Node node2, boolean result);
+
+    void getArrowThroughPortal(Node node, ArrowDirection direction, Arrow portal);
+
+    void evalFloatOperation(Node node);
 }

@@ -32,9 +32,9 @@ public class SecondaryAccessor implements Accessor {
 	@Override
 	public Arrow get(Node base, Ent ent, Purview purview) {
 		Node node1 = base.getLeftChild(purview);
-		Arrow arrow1 = ent.getArrowMaybeThroughPortal(node1, direction1);
+		Arrow arrow1 = ent.getArrowMaybeThroughPortal(node1, direction1, purview);
 		Node node2 = arrow1.getTarget(purview);
-		return ent.getArrowMaybeThroughPortal(node2, direction2);
+		return ent.getArrowMaybeThroughPortal(node2, direction2, purview);
 	}
 
 	@Override

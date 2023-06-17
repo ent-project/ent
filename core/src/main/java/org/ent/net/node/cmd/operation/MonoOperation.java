@@ -12,4 +12,8 @@ public interface MonoOperation {
     ExecutionResult apply(Arrow handle, Ent ent, AccessToken accessToken);
 
     String getShortName();
+
+    default boolean isEval() {
+        return false;
+    }
 }

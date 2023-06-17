@@ -167,12 +167,14 @@ public class BNode extends AbstractNode {
 	}
 
 	@Override
-	public int getValue() {
+	public int getValue(Purview purview) {
+		net.event().getValue(this, purview);
 		return value;
 	}
 
 	@Override
 	public void setValue(int value) {
+		net.event().setValue(this, this.value, value);
 		this.value = value;
 	}
 

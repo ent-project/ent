@@ -1,22 +1,17 @@
 package org.ent.net.node.cmd.operation;
 
-import org.ent.net.Arrow;
 import org.ent.net.AccessToken;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.ExecutionResult;
 
-public abstract class TriValueOperation implements TriOperation {
-
+public abstract class TriValueOperation extends TriNodeOperation {
     @Override
-    public ExecutionResult apply(Arrow handle1, Arrow handle2, Arrow handle3, AccessToken accessToken) {
-        Node node1 = handle1.getTarget(Purview.COMMAND);
+    public ExecutionResult doApply(Node node1, Node node2, Node node3, AccessToken accessToken) {
         if (!node1.permittedToSetValue(accessToken)) {
             return ExecutionResult.ERROR;
         }
-        Node node2 = handle2.getTarget(Purview.COMMAND);
-        Node node3 = handle3.getTarget(Purview.COMMAND);
-        node1.setValue(compute(node2.getValue(), node3.getValue()));
+        node1.setValue(compute(node2.getValue(Purview.COMMAND), node3.getValue(Purview.COMMAND)));
         return ExecutionResult.NORMAL;
     }
 

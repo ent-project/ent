@@ -7,14 +7,11 @@ import org.ent.dev.hyper.IntegerHyperparameter;
 import org.ent.dev.plan.Counter;
 import org.ent.dev.plan.DataProperties.PropEnt;
 import org.ent.dev.plan.DataProperties.PropReplicator;
-import org.ent.dev.plan.DataProperties.PropSerialNumber;
-import org.ent.dev.plan.DataProperties.PropStepsExamResult;
 import org.ent.dev.plan.FailReasonRecorder;
 import org.ent.dev.plan.Pool;
 import org.ent.dev.plan.RandomNetSource;
 import org.ent.dev.plan.StepsExam;
 import org.ent.dev.plan.StepsExamData;
-import org.ent.dev.plan.StepsExamResult;
 import org.ent.dev.plan.StepsFilter;
 import org.ent.dev.plan.Trimmer;
 import org.ent.dev.stat.BinaryStat;
@@ -26,22 +23,17 @@ import org.ent.dev.stat.PlotInfo;
 import org.ent.dev.stat.PlotRegistry;
 import org.ent.dev.stat.RowType;
 import org.ent.dev.unit.DeliveryStash;
-import org.ent.dev.unit.Req;
 import org.ent.dev.unit.SkewSplitter;
-import org.ent.dev.unit.Sup;
 import org.ent.dev.unit.data.Data;
 import org.ent.dev.unit.data.DataProxy;
 import org.ent.dev.unit.local.TypedProc;
 import org.ent.dev.unit.local.util.FilterListener;
-import org.ent.net.io.formatter.NetFormatter;
 import org.ent.run.StepResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.Color;
-import java.util.ArrayDeque;
 import java.util.EnumMap;
-import java.util.Queue;
 import java.util.Random;
 
 import static org.ent.dev.stat.PlotRow.GROUP_DEFAULT;
@@ -88,57 +80,6 @@ public class DevelopmentPlan {
 	public interface RoundListener {
 		void roundCompleted(Data data);
 	}
-
-	public static class Poller implements Req {
-
-		private Sup upstream;
-
-		private final Queue<Data> queue = new ArrayDeque<>();
-
-		@Override
-		public void setUpstream(Sup upstream) {
-			this.upstream = upstream;
-		}
-
-		public void poll() {
-			upstream.requestNext();
-		}
-
-		@Override
-		public void receiveNext(Data next) {
-			queue.add(next);
-		}
-
-		public Data getFromQueue() {
-			return queue.remove();
-		}
-
-		public boolean queueIsEmpty() {
-			return queue.isEmpty();
-		}
-	}
-
-	public static class Output extends TypedProc<OutputData> {
-
-		String prefix;
-
-		public Output(String prefix) {
-			super(OutputData.class);
-			this.prefix = prefix;
-		}
-
-		@Override
-		public void doAccept(OutputData input) {
-			Ent ent = input.getEnt();
-			StepsExamResult stepsExamResult = input.getStepsExamResult();
-			if (log.isTraceEnabled()) {
-				log.trace("{}#{} [{}] {}", prefix, input.getSerialNumber(), stepsExamResult.steps(), new NetFormatter().format(ent));
-			}
-		}
-
-	}
-
-	public static class OutputData extends DataProxy implements PropEnt, PropStepsExamResult, PropSerialNumber{}
 
 	public static class AddCopyReplicator extends TypedProc<AddCopyReplicatorData> {
 

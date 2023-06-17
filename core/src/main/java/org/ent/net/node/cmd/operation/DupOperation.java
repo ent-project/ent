@@ -20,7 +20,7 @@ public class DupOperation implements BiOperation {
 		if (!setter.permittedToSetTarget(target, accessToken)) {
 			return ExecutionResult.ERROR;
 		}
-		Node copy = target.getNet().newNode(target.getValue(),
+		Node copy = target.getNet().newNode(target.getValue(Purview.COMMAND),
 				target.getLeftChild(Purview.COMMAND),
 				target.getRightChild(Purview.COMMAND));
 		setter.setTarget(copy, Purview.COMMAND);

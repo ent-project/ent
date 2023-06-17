@@ -10,7 +10,7 @@ import org.ent.net.node.cmd.veto.Vetos;
 public abstract class VetoedCommand implements Command {
     @Override
     public ExecutionResult execute(Node base, Ent ent, AccessToken accessToken) {
-        int vetoValue = base.getLeftChild(Purview.COMMAND).getValue();
+        int vetoValue = base.getLeftChild(Purview.COMMAND).getValue(Purview.COMMAND);
         Veto veto = Vetos.getByValue(vetoValue);
         if (veto != null) {
             boolean pass = veto.evaluate(base, ent);

@@ -78,7 +78,12 @@ public interface Node {
 		setRightChild(child, Purview.DIRECT);
 	}
 
-	int getValue();
+	default int getValue() {
+		Profile.verifyTestProfile();
+		return getValue(Purview.DIRECT);
+	}
+
+	int getValue(Purview purview);
 
 	void setValue(int value);
 

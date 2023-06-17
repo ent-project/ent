@@ -3,6 +3,7 @@ package org.ent.net.node.cmd.operation;
 import org.ent.Ent;
 import org.ent.net.AccessToken;
 import org.ent.net.Net;
+import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.Commands;
@@ -21,7 +22,7 @@ public class EvalOperation extends MonoNodeOperation {
 		if (!net.isPermittedToEval(node)) {
 			return ExecutionResult.ERROR;
 		}
-		Command command = Commands.getByValue(node.getValue());
+		Command command = Commands.getByValue(node.getValue(Purview.COMMAND));
 		if (command == null) {
 			return ExecutionResult.ERROR;
 		}
@@ -30,6 +31,11 @@ public class EvalOperation extends MonoNodeOperation {
 		}
 		AccessToken evalToken = net.getEvalToken();
 		return command.execute(node, ent, evalToken);
+	}
+
+	@Override
+	public boolean isEval() {
+		return true;
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 package org.ent.dev.plan;
 
-import org.ent.ExecutionEventListener;
+import org.ent.NetEventListener;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Purview;
@@ -12,7 +12,7 @@ import org.ent.run.EntRunnerListener;
 import java.util.HashMap;
 import java.util.Map;
 
-public class VariabilityCollector implements ExecutionEventListener, EntRunnerListener {
+public class VariabilityCollector implements NetEventListener, EntRunnerListener {
 
     final Map<Command, CommandData> commandDataMap = new HashMap<>();
     final Map<Arrow, ArrowData> arrowDataMap = new HashMap<>();
@@ -119,6 +119,21 @@ public class VariabilityCollector implements ExecutionEventListener, EntRunnerLi
             case BINARY_NODE -> newNodeData.newBNode();
             case MARKER_NODE -> {}
         }
+    }
+
+    @Override
+    public void getValue(Node node, Purview purview) {
+
+    }
+
+    @Override
+    public void setValue(Node node, int previousValue, int newValue) {
+
+    }
+
+    @Override
+    public void evaluatedIsIdenticalCondition(Node node1, Node node2) {
+
     }
 
     @Override

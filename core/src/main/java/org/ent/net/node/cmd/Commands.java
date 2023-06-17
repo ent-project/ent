@@ -23,6 +23,7 @@ public class Commands {
     public static final Command ANCESTOR_EXCHANGE = get(Operations.ANCESTOR_EXCHANGE_OPERATION);
     public static final Command SET = get(Operations.SET_OPERATION);
     public static final Command EVAL = get(Operations.EVAL_OPERATION, Accessors.DIRECT);
+    public static final Command EVAL_FLOW = get(Operations.EVAL_FLOW_OPERATION, Accessors.DIRECT);
 
     private Commands() {
     }

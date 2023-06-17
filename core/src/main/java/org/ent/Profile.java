@@ -2,6 +2,7 @@ package org.ent;
 
 public class Profile {
 
+    public static final boolean PARANOIA = true;
     private static boolean isTest;
 
     private Profile() {

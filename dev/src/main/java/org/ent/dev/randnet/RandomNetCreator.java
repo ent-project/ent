@@ -31,6 +31,7 @@ public class RandomNetCreator {
 	}
 
 	public Optional<Net> drawNet() {
+		valueDrawing.setSeed(rand.nextLong());
 		doDrawNet();
 		return switch (result) {
 			case SUCCESS -> Optional.of(net);
@@ -76,6 +77,7 @@ public class RandomNetCreator {
 	}
 
 	private void rewireToRandomTargets() {
+		// FIXME: use native node index
 		List<Node> nodes = new ArrayList<>(net.getNodes());
 
 		for (Node node : net.getNodes()) {

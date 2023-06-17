@@ -36,7 +36,7 @@ public class BiVeto implements Veto {
     public boolean evaluate(Node base, Ent ent) {
         Node node1 = accessor1.getTarget(base, ent, Purview.COMMAND);
         Node node2 = accessor2.getTarget(base, ent, Purview.COMMAND);
-        boolean result = not ^ condition.evaluate(node1, node2);
+        boolean result = not ^ condition.evaluate(node1, node2, ent);
         ent.event().vetoEvaluation(this, node1, node2, result);
         return result;
     }

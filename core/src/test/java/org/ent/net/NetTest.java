@@ -2,7 +2,7 @@ package org.ent.net;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
-import org.ent.ExecutionEventListener;
+import org.ent.NetEventListener;
 import org.ent.Profile;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.io.parser.NetParser;
@@ -236,7 +236,7 @@ class NetTest {
 	class ControllerFeatures {
 
 		@Mock
-		private ExecutionEventListener eventListener;
+		private NetEventListener eventListener;
 
 		private Node externalNode;
 

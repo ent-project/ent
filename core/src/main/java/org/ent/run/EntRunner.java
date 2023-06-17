@@ -53,8 +53,9 @@ public class EntRunner {
 
 	private StepResult doStep(Node executionPointer) {
 		boolean executionPointerDoesNotAdvance = executionPointer.getRightChild(Purview.RUNNER) == executionPointer;
-		Command command = Commands.getByValue(executionPointer.getValue());
+		Command command = Commands.getByValue(executionPointer.getValue(Purview.RUNNER));
 		if (command == null) {
+			ent.event().beforeCommandExecution(executionPointer, null);
 			if (executionPointerDoesNotAdvance) {
 				return StepResult.ENDLESS_LOOP;
 			} else {

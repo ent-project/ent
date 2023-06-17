@@ -6,6 +6,8 @@ mainClassName = 'org.ent.dev.DevelopmentPlan'
 dependencies {
     implementation project(':core')
     implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
+    implementation("io.javalin:javalin-bundle:5.4.2")
+    implementation("com.j2html:j2html:1.6.0")
 
 }
 

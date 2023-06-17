@@ -4,7 +4,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import org.apache.commons.lang3.Validate;
-import org.ent.ExecutionEventListener;
+import org.ent.MultiNetEventListener;
+import org.ent.NetEventListener;
+import org.ent.NopNetEventListener;
+import org.ent.Profile;
 import org.ent.net.node.BNode;
 import org.ent.net.node.Hub;
 import org.ent.net.node.MarkerNode;
@@ -13,13 +16,7 @@ import org.ent.net.node.cmd.Command;
 import org.ent.net.util.ReferentialGarbageCollection;
 
 import javax.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -33,6 +30,7 @@ public class Net {
 
 	private BiMap<Node, String> nodeNames;
 	private final Map<Node, Integer> nodeIndices = new HashMap<>(); // FIXME: think about performance
+	private final List<Node> nodesByIndex = new ArrayList<>();
 
 	private int currentIndex;
 	private Node root;
@@ -41,7 +39,9 @@ public class Net {
 
 	private MarkerNode markerNode;
 
-	Set<ExecutionEventListener> eventListeners = new HashSet<>();
+	Set<NetEventListener> eventListeners = new HashSet<>();
+
+	NetEventListener netEventListener = new NopNetEventListener();
 
 	private final AccessToken evalToken = new AccessToken();
 
@@ -61,6 +61,25 @@ public class Net {
 		return this;
 	}
 
+	public Net addEventListener(NetEventListener netEventListener) {
+		if (this.netEventListener instanceof NopNetEventListener) {
+			this.netEventListener = netEventListener;
+		} else if (this.netEventListener instanceof MultiNetEventListener multiNetEventListener) {
+			multiNetEventListener.addNetEventListener(netEventListener);
+		} else {
+			NetEventListener current = this.netEventListener;
+			MultiNetEventListener multiNetEventListener = new MultiNetEventListener();
+			multiNetEventListener.addNetEventListener(current);
+			multiNetEventListener.addNetEventListener(netEventListener);
+			this.netEventListener = multiNetEventListener;
+		}
+		return this;
+	}
+
+	public NetEventListener event() {
+		return netEventListener;
+	}
+
 	public Set<Node> getNodes() {
 		return nodes;
 	}
@@ -78,6 +97,8 @@ public class Net {
 	}
 
 	public boolean removeNode(Node node) {
+		int index = node.getIndex();
+		nodesByIndex.set(index, null);
 		nodeIndices.remove(node);
 		if (nodeNames != null) {
 			nodeNames.remove(node);
@@ -90,6 +111,8 @@ public class Net {
 		while (iterator.hasNext()) {
 			Node node = iterator.next();
 			if (filter.test(node)) {
+				int index = node.getIndex();
+				nodesByIndex.set(index, null);
 				nodeIndices.remove(node);
 				if (nodeNames != null) {
 					nodeNames.remove(node);
@@ -104,6 +127,7 @@ public class Net {
 		formerNodes.forEach(n -> n.setNet(null));
 		nodes.clear();
 		nodeIndices.clear();
+		nodesByIndex.clear();
 		if (nodeNames != null) {
 			nodeNames.clear();
 		}
@@ -304,18 +328,24 @@ public class Net {
 	private void addNodeInternal(Node node) {
 		nodes.add(node);
 		nodeIndices.put(node, currentIndex);
+		nodesByIndex.add(node);
+		if (nodesByIndex.size() - 1 != currentIndex) {
+			throw new AssertionError();
+		}
 		currentIndex++;
 	}
 
-	public void addExecutionEventListener(ExecutionEventListener listener) {
+	@Deprecated
+	public void addExecutionEventListener(NetEventListener listener) {
 		eventListeners.add(listener);
 	}
 
-	public void removeExecutionEventListener(ExecutionEventListener listener) {
+	public void removeExecutionEventListener(NetEventListener listener) {
 		eventListeners.remove(listener);
 	}
 
-	public void withExecutionEventListener(ExecutionEventListener listener, Runnable runnable) {
+	@Deprecated
+	public void withExecutionEventListener(NetEventListener listener, Runnable runnable) {
 		addExecutionEventListener(listener);
 		try {
 			runnable.run();
@@ -325,15 +355,20 @@ public class Net {
 	}
 
 	public void fireGetTargetCall(Node n, ArrowDirection arrowDirection, Purview purview) {
+		event().calledGetChild(n, arrowDirection, purview);
 		eventListeners.forEach(listener -> listener.calledGetChild(n, arrowDirection, purview));
 	}
 
 	public void fireSetTargetCall(Node from, ArrowDirection arrowDirection, Node to, Purview purview) {
-		validateBelongsToNet(to);
+		if (Profile.PARANOIA) {
+			validateBelongsToNet(to);
+		}
+		event().calledSetChild(from, arrowDirection, to, purview);
 		eventListeners.forEach(listener -> listener.calledSetChild(from, arrowDirection, to, purview));
 	}
 
 	public void fireNewNodeCall(Node n) {
+		event().calledNewNode(n);
 		eventListeners.forEach(listener -> listener.calledNewNode(n));
 	}
 
@@ -361,6 +396,10 @@ public class Net {
 
 	public int getNodeIndex(Node node) {
 		return nodeIndices.get(node);
+	}
+
+	public List<Node> getNodesAsList() {
+		return nodesByIndex;
 	}
 
 	/**

@@ -23,7 +23,7 @@ public class EvalFlowOperation implements MonoOperation {
         if (!net.isPermittedToEval(node)) {
             return ExecutionResult.ERROR;
         }
-        Command command = Commands.getByValue(node.getValue());
+        Command command = Commands.getByValue(node.getValue(Purview.COMMAND));
         if (command == null) {
             return ExecutionResult.ERROR;
         }
@@ -32,11 +32,17 @@ public class EvalFlowOperation implements MonoOperation {
         }
         AccessToken evalToken = net.getEvalToken();
         ExecutionResult executionResult = command.execute(node, ent, evalToken);
+        ent.event().evalFloatOperation(node);
         // advance pointer
         Node newTarget = node.getRightChild(Purview.COMMAND);
         handle.setTarget(newTarget, Purview.COMMAND, evalToken);
 
         return executionResult;
+    }
+
+    @Override
+    public boolean isEval() {
+        return true;
     }
 
     @Override

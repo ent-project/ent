@@ -1,12 +1,13 @@
 package org.ent;
 
 import org.ent.net.Arrow;
+import org.ent.net.ArrowDirection;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.veto.Veto;
 import org.ent.run.StepResult;
 
-public class NopEventListener implements EntEventListener {
+public class NopEntEventListener implements EntEventListener {
     @Override
     public void blockedByVeto(Veto veto) {
         // do nothing
@@ -39,6 +40,16 @@ public class NopEventListener implements EntEventListener {
 
     @Override
     public void vetoEvaluation(Veto veto, Node node1, Node node2, boolean result) {
+        // do nothing
+    }
+
+    @Override
+    public void getArrowThroughPortal(Node node, ArrowDirection direction, Arrow portal) {
+        // do nothing
+    }
+
+    @Override
+    public void evalFloatOperation(Node node) {
         // do nothing
     }
 }

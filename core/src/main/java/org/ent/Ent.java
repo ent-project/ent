@@ -18,7 +18,7 @@ public class Ent {
     private final List<Net> domains = new ArrayList<>();
     private final List<Arrow> portals = new ArrayList<>();
 
-    EntEventListener eventListener = new NopEventListener();
+    EntEventListener eventListener = new NopEntEventListener();
 
     public Ent(Net net) {
         this.net = net;
@@ -32,11 +32,13 @@ public class Ent {
         this.net = net;
     }
 
-    public Arrow getArrowMaybeThroughPortal(Node node, ArrowDirection direction) {
-        int value = node.getValue();
+    public Arrow getArrowMaybeThroughPortal(Node node, ArrowDirection direction, Purview purview) {
+        int value = node.getValue(purview);
         int portalIndex = getPortalIndex(value, direction);
         if (isPortal(portalIndex)) {
-            return portals.get(portalIndex);
+            Arrow portal = portals.get(portalIndex);
+            event().getArrowThroughPortal(node, direction, portal);
+            return portal;
         } else {
             return node.getArrow(direction);
         }

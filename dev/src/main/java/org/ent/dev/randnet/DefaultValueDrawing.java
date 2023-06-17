@@ -38,6 +38,7 @@ public class DefaultValueDrawing implements ValueDrawing {
         addValueBase(Operations.DUP_OPERATION, WEIGHT1);
         addValueBase(Operations.SET_VALUE_OPERATION, WEIGHT1);
         addValueBase(Operations.EVAL_OPERATION, WEIGHT2);
+        addValueBase(Operations.EVAL_FLOW_OPERATION, WEIGHT2);
 
         addValueBase(Operations.NEG_OPERATION, WEIGHT3);
         addValueBase(Operations.INC_OPERATION, WEIGHT2);
@@ -85,6 +86,17 @@ public class DefaultValueDrawing implements ValueDrawing {
     }
 
     @Override
+    public void setSeed(long seed) {
+        rand.setSeed(seed);
+    }
+
+    public void addValueBase(ParameterizedValue value, int weight) {
+        for (int i = 0; i < weight; i++) {
+            valueSamples.add(value);
+        }
+    }
+
+    @Override
     public int drawValue() {
         int valueDraw = rand.nextInt(valueSamples.size());
         ParameterizedValue pValue = valueSamples.get(valueDraw);
@@ -124,9 +136,7 @@ public class DefaultValueDrawing implements ValueDrawing {
     }
 
     private void addValueBase(BiCondition condition, boolean not, int weight) {
-        for (int i = 0; i < weight; i++) {
-            valueSamples.add(Vetos.get(condition, not, Accessors.FLOW, Accessors.FLOW));
-        }
+        addValueBase(Vetos.get(condition, not, Accessors.FLOW, Accessors.FLOW), weight);
     }
 
     private void addValueBase(TriOperation operation, int weight) {
@@ -147,11 +157,5 @@ public class DefaultValueDrawing implements ValueDrawing {
 
     private Command getCommandBase(BiOperation o) {
         return Commands.get(o, Accessors.FLOW, Accessors.FLOW);
-    }
-
-    private void addValueBase(Command command, int weight) {
-        for (int i = 0; i < weight; i++) {
-            valueSamples.add(command);
-        }
     }
 }

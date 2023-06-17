@@ -62,4 +62,9 @@ public class MonoCommand extends VetoedCommand {
         }
         return this.operation.getShortName() + accessorName;
     }
+
+    @Override
+    public boolean isEval() {
+        return operation.isEval();
+    }
 }
