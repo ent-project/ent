@@ -254,12 +254,12 @@ class NetTest {
 			Net net = parser.parse("u:[_a:<o>]");
 			Node u = net.getByName("u");
 			Node nop = net.getByName("_a");
-			net.addExecutionEventListener(eventListener);
+			net.addEventListener(eventListener);
 
-			Node uTarget = u.getLeftChild();
+			Node uTarget = u.getLeftChild(Purview.COMMAND);
 
 			assertThat(uTarget).isSameAs(nop);
-			verify(eventListener).calledGetChild(u, ArrowDirection.LEFT, Purview.DIRECT);
+			verify(eventListener).calledGetChild(u, ArrowDirection.LEFT, Purview.COMMAND);
 			verifyNoMoreInteractions(eventListener);
 		}
 
@@ -268,11 +268,11 @@ class NetTest {
 			Net net = parser.parse("u:[<o>]; _b:<x>");
 			Node u = net.getByName("u");
 			Node ix = net.getByName("_b");
-			net.addExecutionEventListener(eventListener);
+			net.addEventListener(eventListener);
 
-			u.setLeftChild(ix, Purview.DIRECT);
+			u.setLeftChild(ix, Purview.COMMAND);
 
-			verify(eventListener).calledSetChild(u, ArrowDirection.LEFT, ix, Purview.DIRECT);
+			verify(eventListener).calledSetChild(u, ArrowDirection.LEFT, ix, Purview.COMMAND);
 			verifyNoMoreInteractions(eventListener);
 			assertThat(u.getLeftChild(Purview.DIRECT)).isSameAs(ix);
 		}
@@ -282,7 +282,8 @@ class NetTest {
 			Net net = parser.parse("_a:<o>");
 			Node a = net.getByName("_a");
 
-			assertThatThrownBy(() -> externalArrow.setTarget(a, Purview.DIRECT))
+			assertThatThrownBy(() ->
+					externalArrow.setTarget(a, Purview.DIRECT))
 					.isInstanceOf(IllegalStateException.class)
 					.hasMessage("node belongs to another net");
 		}
@@ -302,7 +303,7 @@ class NetTest {
 		void newUNode_childArg() throws Exception {
 			Net net = parser.parse("_a:<o>");
 			Node nop = net.getByName("_a");
-			net.addExecutionEventListener(eventListener);
+			net.addEventListener(eventListener);
 
 			Node uNode = net.newUNode(nop);
 
@@ -315,7 +316,7 @@ class NetTest {
 		@Test
 		void newNode() {
 			Net net = new Net();
-			net.addExecutionEventListener(eventListener);
+			net.addEventListener(eventListener);
 
 			Node node = net.newNode();
 
@@ -331,7 +332,7 @@ class NetTest {
 			Net net = parser.parse("_a:<o>; _b:<x>");
 			Node nop = net.getByName("_a");
 			Node ix = net.getByName("_b");
-			net.addExecutionEventListener(eventListener);
+			net.addEventListener(eventListener);
 
 			Node bNode = net.newNode(nop, ix);
 
@@ -365,7 +366,7 @@ class NetTest {
 		@Test
 		void newCNode() {
 			Net net = new Net();
-			net.addExecutionEventListener(eventListener);
+			net.addEventListener(eventListener);
 
 			Node cNode = net.newCNode(new NopCommand());
 
@@ -383,7 +384,7 @@ class NetTest {
 				Net net = parser.parse(input);
 				Node a = net.getByName("a");
 				Node b = net.getByName("b");
-				net.addExecutionEventListener(eventListener);
+				net.addEventListener(eventListener);
 
 				Net.ancestorExchange(a, b);
 

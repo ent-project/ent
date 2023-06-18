@@ -18,6 +18,8 @@ public class BNode extends AbstractNode {
 	private Hub leftChildHub;
 	private Hub rightChildHub;
 
+	private int index;
+
 	private final Arrow leftArrow = new BNodeLeftArrow();
 	private final Arrow rightArrow = new BNodeRightArrow();
 	private final List<Arrow> arrows = List.of(leftArrow, rightArrow);
@@ -116,6 +118,12 @@ public class BNode extends AbstractNode {
 		initialize(this, this);
 	}
 
+	public BNode(Net net, int value) {
+		super(net);
+		this.value = value;
+		initialize(this, this);
+	}
+
 	private void initialize(Node leftChild, Node rightChild) {
 		this.leftChildHub = leftChild.getHub();
 		this.leftChildHub.addInverseReference(leftArrow);
@@ -168,7 +176,9 @@ public class BNode extends AbstractNode {
 
 	@Override
 	public int getValue(Purview purview) {
-		net.event().getValue(this, purview);
+		if (purview != Purview.DIRECT) {
+			net.event().getValue(this, purview);
+		}
 		return value;
 	}
 
@@ -204,5 +214,15 @@ public class BNode extends AbstractNode {
 		} else {
 			return NodeType.BINARY_NODE;
 		}
+	}
+
+	@Override
+	public int getIndex() {
+		return index;
+	}
+
+	@Override
+	public void setIndex(int index) {
+		this.index = index;
 	}
 }

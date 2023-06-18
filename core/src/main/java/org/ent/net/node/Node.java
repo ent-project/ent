@@ -107,9 +107,9 @@ public interface Node {
 		return Commands.getByValue(getValue());
 	}
 
-	default int getIndex() {
-		return getNet().getNodeIndex(this);
-	}
+	int getIndex();
+
+	void setIndex(int index);
 
 	default long getAddress() {
 		long index = getIndex();

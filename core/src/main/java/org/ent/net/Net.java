@@ -3,6 +3,7 @@ package org.ent.net;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.Validate;
 import org.ent.MultiNetEventListener;
 import org.ent.NetEventListener;
@@ -29,7 +30,6 @@ public class Net {
 	private int netIndex;
 
 	private BiMap<Node, String> nodeNames;
-	private final Map<Node, Integer> nodeIndices = new HashMap<>(); // FIXME: think about performance
 	private final List<Node> nodesByIndex = new ArrayList<>();
 
 	private int currentIndex;
@@ -39,7 +39,7 @@ public class Net {
 
 	private MarkerNode markerNode;
 
-	Set<NetEventListener> eventListeners = new HashSet<>();
+	List<NetEventListener> eventListeners = new ArrayList<>(); // FIXME get rid
 
 	NetEventListener netEventListener = new NopNetEventListener();
 
@@ -99,7 +99,6 @@ public class Net {
 	public boolean removeNode(Node node) {
 		int index = node.getIndex();
 		nodesByIndex.set(index, null);
-		nodeIndices.remove(node);
 		if (nodeNames != null) {
 			nodeNames.remove(node);
 		}
@@ -113,7 +112,6 @@ public class Net {
 			if (filter.test(node)) {
 				int index = node.getIndex();
 				nodesByIndex.set(index, null);
-				nodeIndices.remove(node);
 				if (nodeNames != null) {
 					nodeNames.remove(node);
 				}
@@ -126,7 +124,6 @@ public class Net {
 		HashSet<Node> formerNodes = new HashSet<>(this.nodes);
 		formerNodes.forEach(n -> n.setNet(null));
 		nodes.clear();
-		nodeIndices.clear();
 		nodesByIndex.clear();
 		if (nodeNames != null) {
 			nodeNames.clear();
@@ -302,8 +299,7 @@ public class Net {
 	}
 
 	public Node newNode(int value) {
-		Node cNode = new BNode(this);
-		cNode.setValue(value);
+		Node cNode = new BNode(this, value);
 		addNodeInternal(cNode);
 		fireNewNodeCall(cNode);
 		return cNode;
@@ -327,7 +323,7 @@ public class Net {
 
 	private void addNodeInternal(Node node) {
 		nodes.add(node);
-		nodeIndices.put(node, currentIndex);
+		node.setIndex(currentIndex);
 		nodesByIndex.add(node);
 		if (nodesByIndex.size() - 1 != currentIndex) {
 			throw new AssertionError();
@@ -337,11 +333,12 @@ public class Net {
 
 	@Deprecated
 	public void addExecutionEventListener(NetEventListener listener) {
-		eventListeners.add(listener);
+		throw new NotImplementedException();
 	}
 
+	@Deprecated
 	public void removeExecutionEventListener(NetEventListener listener) {
-		eventListeners.remove(listener);
+		throw new NotImplementedException();
 	}
 
 	@Deprecated
@@ -355,21 +352,24 @@ public class Net {
 	}
 
 	public void fireGetTargetCall(Node n, ArrowDirection arrowDirection, Purview purview) {
+		if (purview == Purview.DIRECT) {
+			return;
+		}
 		event().calledGetChild(n, arrowDirection, purview);
-		eventListeners.forEach(listener -> listener.calledGetChild(n, arrowDirection, purview));
 	}
 
 	public void fireSetTargetCall(Node from, ArrowDirection arrowDirection, Node to, Purview purview) {
 		if (Profile.PARANOIA) {
 			validateBelongsToNet(to);
 		}
+		if (purview == Purview.DIRECT) {
+			return;
+		}
 		event().calledSetChild(from, arrowDirection, to, purview);
-		eventListeners.forEach(listener -> listener.calledSetChild(from, arrowDirection, to, purview));
 	}
 
 	public void fireNewNodeCall(Node n) {
 		event().calledNewNode(n);
-		eventListeners.forEach(listener -> listener.calledNewNode(n));
 	}
 
 	public void setName(Node node, String name) {
@@ -392,10 +392,6 @@ public class Net {
 			return null;
 		}
 		return nodeNames.inverse().get(name);
-	}
-
-	public int getNodeIndex(Node node) {
-		return nodeIndices.get(node);
 	}
 
 	public List<Node> getNodesAsList() {

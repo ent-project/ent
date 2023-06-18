@@ -72,7 +72,7 @@ public class RandomNetSource implements Source {
 		ValueDrawing drawing = new DefaultValueDrawing();
 		RandomNetCreator creator = new RandomNetCreator(rand, drawing);
 		creator.setNumberOfNodes(noNodes);
-		return creator.drawNet();
+		return creator.drawNetMaybe();
 	}
 
 	private void logReject(long seed) {

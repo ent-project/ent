@@ -122,7 +122,7 @@ public class MainOld {
 		Random rand = new Random(netSeed);
 		ValueDrawing drawing = new DefaultValueDrawing();
 		RandomNetCreator creator = new RandomNetCreator(rand, drawing);
-		return creator.drawNet().orElseThrow(() -> new RuntimeException());
+		return creator.drawNetMaybe().orElseThrow(() -> new RuntimeException());
 	}
 
 	private void next(long netSeed) {

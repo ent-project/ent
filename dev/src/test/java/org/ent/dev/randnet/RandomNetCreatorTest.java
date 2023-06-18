@@ -27,7 +27,7 @@ class RandomNetCreatorTest {
 	@Test
 	void drawNet() {
 		for (int i = 0; i < NO_DRAWS; i++) {
-			Optional<Net> drawnNet = netCreator.drawNet();
+			Optional<Net> drawnNet = netCreator.drawNetMaybe();
 
 			assertThatCode(() -> drawnNet.ifPresent(Net::consistencyCheck))
 					.doesNotThrowAnyException();

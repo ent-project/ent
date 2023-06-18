@@ -5,22 +5,26 @@ import org.ent.net.ArrowDirection;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class TrimmingListener  extends NopNetEventListener {
 
-    private final Set<Integer> requiredArrows = new HashSet<>();
+    private final boolean[] isArrowOverridden;
+    private final boolean[] isArrowRequired;
 
-    private final Set<Integer> overriddenArrows = new HashSet<>();
+    public TrimmingListener(int size) {
+        isArrowRequired = new boolean[size * 2];
+        isArrowOverridden = new boolean[size * 2];
+    }
 
     @Override
     public void calledGetChild(Node n, ArrowDirection arrowDirection, Purview purview) {
         if (isApplicablePurview(purview)) {
             Arrow arrow = n.getArrow(arrowDirection);
             int index = arrow.getIndex();
-            if (!overriddenArrows.contains(index)) {
-                requiredArrows.add(index);
+            if (index >= isArrowOverridden.length) {
+                return;
+            }
+            if (!isArrowOverridden[index]) {
+                isArrowRequired[index] = true;
             }
         }
     }
@@ -33,11 +37,15 @@ public class TrimmingListener  extends NopNetEventListener {
     public void calledSetChild(Node from, ArrowDirection arrowDirection, Node to, Purview purview) {
         if (isApplicablePurview(purview)) {
             Arrow arrow = from.getArrow(arrowDirection);
-            overriddenArrows.add(arrow.getIndex());
+            int index = arrow.getIndex();
+            if (index >= isArrowOverridden.length) {
+                return;
+            }
+            isArrowOverridden[index] = true;
         }
     }
 
     public boolean isDead(Arrow arrow) {
-        return !requiredArrows.contains(arrow.getIndex());
+        return !isArrowRequired[arrow.getIndex()];
     }
 }

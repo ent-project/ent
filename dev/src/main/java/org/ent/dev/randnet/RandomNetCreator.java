@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.Random;
 
 public class RandomNetCreator {
+	public static final int MAX_ATTEMPTS = 1000;
 
 	private int numberOfNodes = 15;
 
@@ -30,7 +31,17 @@ public class RandomNetCreator {
 		this.valueDrawing = valueDrawing;
 	}
 
-	public Optional<Net> drawNet() {
+	public Net drawNet() {
+		for (int i = 0; i < MAX_ATTEMPTS; i++) {
+			Optional<Net> optionalNet = drawNetMaybe();
+			if (optionalNet.isPresent()) {
+				return optionalNet.get();
+			}
+		}
+		throw new IllegalStateException("Max attempts exceeded. Wrong configuration or very bad luck.");
+	}
+
+	public Optional<Net> drawNetMaybe() {
 		valueDrawing.setSeed(rand.nextLong());
 		doDrawNet();
 		return switch (result) {
