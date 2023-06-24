@@ -29,11 +29,11 @@ public class ValueFragmentCrossover {
             int i2 = rand.nextInt(net2.getNodes().size());
             Node node2 = net2.getNodesAsList().get(i2);
             int sel = rand.nextInt(MASKS.length);
-            swapValue(node1, node2, sel);
+            swapValueFragment(node1, node2, sel);
         }
     }
 
-    static void swapValue(Node node1, Node node2, int maskIndex) {
+    static void swapValueFragment(Node node1, Node node2, int maskIndex) {
         int mask = MASKS[maskIndex];
         int value1 = node1.getValue(Purview.DIRECT);
         int value2 = node2.getValue(Purview.DIRECT);

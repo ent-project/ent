@@ -2,27 +2,35 @@ package org.ent;
 
 import org.ent.dev.randnet.DefaultValueDrawing;
 import org.ent.dev.randnet.PortalValue;
+import org.ent.util.Tools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class DevelopmentLevel0 {
 
-    public static void main(String[] args) {
-        DevelopmentLevel0 dev0 = new DevelopmentLevel0();
-        while (true) {
-            long seed = dev0.nextGetTargetValue();
-            log.info("seed: {}", Long.toHexString(seed));
-            log.info("gtv: {} is: {}", dev0.goodSeedsGetTargetValue.size(), dev0.goodSeedsInputSet.size());
-        }
-    }
-
     private static final Logger log = LoggerFactory.getLogger(DevelopmentLevel0.class);
 
     public static final int MAX_STEPS = 100; // hyper-parameter
+
+    public static void main(String[] args) {
+        DevelopmentLevel0 dev0 = new DevelopmentLevel0();
+        long startTime = System.nanoTime();
+        int numHits = 0;
+        for (int i = 0; i < 1000; i++) {
+            long seed = dev0.nextGetTargetValue();
+//            log.info("seed: {}", Long.toHexString(seed));
+//            log.info("gtv: {} is: {}", dev0.goodSeedsGetTargetValue.size(), dev0.goodSeedsInputSet.size());
+            numHits++;
+        }
+        Duration duration = Duration.ofNanos(System.nanoTime() - startTime);
+        log.info("TOTAL DURATION: {}\n{} hits / min", duration, Tools.getHitsPerMinute(numHits, duration));
+    }
+
 
     private final Random randMaster;
     private final Random randNetSeeds;

@@ -1,5 +1,6 @@
 package org.ent.util;
 
+import java.time.Duration;
 import java.util.Arrays;
 
 public final class Tools {
@@ -35,4 +36,7 @@ public final class Tools {
 		return idx;
 	}
 
+	public static String getHitsPerMinute(int numHits, Duration duration) {
+		return String.format("%.2f", numHits * 60_000.0 / duration.toMillis());
+	}
 }

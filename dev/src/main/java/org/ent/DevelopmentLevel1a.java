@@ -3,9 +3,11 @@ package org.ent;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.variation.ValueFragmentCrossover;
 import org.ent.net.Net;
+import org.ent.util.Tools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.Random;
 
 public class DevelopmentLevel1a {
@@ -47,6 +49,8 @@ public class DevelopmentLevel1a {
     boolean verbose = false;
 
     private void next() {
+        long startTime = System.nanoTime();
+
         long seed1 = developmentLevel0.nextGetTargetValue();
         long seed2 = developmentLevel0.nextInputSet();
 
@@ -118,6 +122,7 @@ public class DevelopmentLevel1a {
             }
             numTotal++;
         }
+        Duration duration = Duration.ofNanos(System.nanoTime() - startTime);
         log.info("");
         log.info("miss 1: {}, miss 2: {}", rate(numMiss1, numTotal), rate(numMiss2, numTotal));
         log.info("hit 1: {}, hit 2: {}", rate(numHit1, numTotal), rate(numHit2, numTotal));
@@ -127,6 +132,7 @@ public class DevelopmentLevel1a {
         } else {
             log.info("no full hit");
         }
+        log.info("TOTAL DURATION: {}\n{} hits / min", duration, Tools.getHitsPerMinute(numFullHit1+numFullHit2, duration));
     }
 
     private boolean isPassing(long seed, int targetValue) {

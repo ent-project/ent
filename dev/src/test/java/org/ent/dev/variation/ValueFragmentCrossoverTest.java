@@ -55,7 +55,7 @@ class ValueFragmentCrossoverTest {
         Net net = new Net();
         Node node1 = net.newCNode(inputValue1);
         Node node2 = net.newCNode(inputValue2);
-        ValueFragmentCrossover.swapValue(node1, node2, maskIndex);
+        ValueFragmentCrossover.swapValueFragment(node1, node2, maskIndex);
         assertThat(Integer.toBinaryString(node1.getValue())).isEqualTo(Integer.toBinaryString(expectedOutputValue1));
         assertThat(Integer.toBinaryString(node2.getValue())).isEqualTo(Integer.toBinaryString(expectedOutputValue2));
     }
