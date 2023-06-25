@@ -43,6 +43,7 @@ class CopyValueGame {
     private EntListener entListener;
     VerifierNetListener verifierNetListener;
     InputNetListener inputNetListener;
+    private final Long netCreatorSeed;
     private final int targetValue;
 
     private boolean verbose;
@@ -50,14 +51,25 @@ class CopyValueGame {
     private NetFormatter formatter;
     private Net inputNet;
 
+
     public CopyValueGame(int targetValue, long netCreatorSeed) {
         this.targetValue = targetValue;
+        this.netCreatorSeed = netCreatorSeed;
         this.ent = buildEnt(netCreatorSeed);
     }
 
     public CopyValueGame(int targetValue, Net net) {
         this.targetValue = targetValue;
+        this.netCreatorSeed = null;
         this.ent = buildEnt(net);
+    }
+
+    public long getNetCreatorSeed() {
+        return netCreatorSeed;
+    }
+
+    public int getTargetValue() {
+        return targetValue;
     }
 
     public void setVerbose(boolean verbose) {
@@ -141,6 +153,21 @@ class CopyValueGame {
                 log.info("   (value is now: {} {})", value, value == 0 ? "" : (value == targetValue ? " - TARGET VALUE!" : " - it changed"));
             }
         }
+        if (entListener.numEvalFloatOnVerifierRoot > 0) {
+            log.info("  Eval Float on verifier root: {}", entListener.numEvalFloatOnVerifierRoot);
+        }
+        if (passedVerifierFinished()) {
+            log.info("  Verifier finished with {}.", getFinalStateStr(verifierNet.getRoot()));
+        }
+    }
+
+    private String getFinalStateStr(Node root) {
+        if (root.getValue(Purview.DIRECT) == Commands.FINAL_SUCCESS.getValue()) {
+            return "SUCCESS";
+        } else if (root.getValue(Purview.DIRECT) == Commands.FINAL_FAILURE.getValue()) {
+            return "FAILURE";
+        }
+        throw new IllegalArgumentException("not a final state");
     }
 
     boolean passedGetTargetValue() {
@@ -159,7 +186,26 @@ class CopyValueGame {
         return false;
     }
 
+    public boolean passedEvalFlowOnVerifierRoot() {
+        return entListener.numEvalFloatOnVerifierRoot > 0;
+    }
+
+    public boolean passedVerifierFinished() {
+        return verifierNet != null &&
+                (verifierNet.getRoot().getValue(Purview.DIRECT) == Commands.FINAL_SUCCESS.getValue() ||
+                        verifierNet.getRoot().getValue(Purview.DIRECT) == Commands.FINAL_FAILURE.getValue());
+    }
+
     private class EntListener extends NopEntEventListener {
+
+        private int numEvalFloatOnVerifierRoot;
+
+        @Override
+        public void evalFloatOperation(Node node) {
+            if (verifierNet != null && node == verifierNet.getRoot()) {
+                numEvalFloatOnVerifierRoot++;
+            }
+        }
     }
 
     class VerifierNetListener extends NopNetEventListener {
@@ -176,7 +222,7 @@ class CopyValueGame {
         }
     }
 
-    class InputNetListener extends NopNetEventListener {
+    static class InputNetListener extends NopNetEventListener {
         int numSetValue;
 
         @Override

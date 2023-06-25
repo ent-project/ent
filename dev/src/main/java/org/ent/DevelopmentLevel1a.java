@@ -22,7 +22,6 @@ public class DevelopmentLevel1a {
     public DevelopmentLevel1a() {
         this.developmentLevel0 = new DevelopmentLevel0();
         this.randMaster = new Random(0xe3f9c3);
-        randMaster.nextInt();
         this.randTargetValue = new Random(randMaster.nextLong());
     }
 
@@ -51,8 +50,8 @@ public class DevelopmentLevel1a {
     private void next() {
         long startTime = System.nanoTime();
 
-        long seed1 = developmentLevel0.nextGetTargetValue();
-        long seed2 = developmentLevel0.nextInputSet();
+        long seed1 = developmentLevel0.nextGetTargetValue().getNetCreatorSeed();
+        long seed2 = developmentLevel0.nextInputSet().getNetCreatorSeed();
 
         int numTotal = 0;
         int numMiss1 = 0;
@@ -66,10 +65,10 @@ public class DevelopmentLevel1a {
             int targetValue = randTargetValue.nextInt(5, 17);
             if (i % 50 == 0) {
                 do {
-                    seed1 = developmentLevel0.nextGetTargetValue();
+                    seed1 = developmentLevel0.nextGetTargetValue().getNetCreatorSeed();
                 } while (isPassing(seed1, targetValue));
                 do {
-                    seed2 = developmentLevel0.nextInputSet();
+                    seed2 = developmentLevel0.nextInputSet().getNetCreatorSeed();
                 } while (isPassing(seed2, targetValue));
             }
             RandomNetCreator netCreator1 = new RandomNetCreator(new Random(seed1), CopyValueGame.drawing);
