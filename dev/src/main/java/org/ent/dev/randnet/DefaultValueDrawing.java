@@ -29,8 +29,6 @@ public class DefaultValueDrawing implements ValueDrawing {
     private final List<ParameterizedValue> valueSamples = new ArrayList<>();
     private final List<Accessor> accessorSamples = new ArrayList<>();
 
-    private final Random rand;
-
     public DefaultValueDrawing() {
         addValueBase(Commands.NOP, WEIGHT3);
         addValueBase(Operations.ANCESTOR_EXCHANGE_OPERATION, WEIGHT1);
@@ -81,13 +79,6 @@ public class DefaultValueDrawing implements ValueDrawing {
         if (accessorSamples.size() != 32) {
             throw new AssertionError();
         }
-
-        rand = new Random(7);
-    }
-
-    @Override
-    public void setSeed(long seed) {
-        rand.setSeed(seed);
     }
 
     public void addValueBase(ParameterizedValue value, int weight) {
@@ -97,14 +88,14 @@ public class DefaultValueDrawing implements ValueDrawing {
     }
 
     @Override
-    public int drawValue() {
+    public int drawValue(Random rand) {
         int valueDraw = rand.nextInt(valueSamples.size());
         ParameterizedValue pValue = valueSamples.get(valueDraw);
-        int accessors = drawAccessors(pValue.getNumberOfParameters());
+        int accessors = drawAccessors(pValue.getNumberOfParameters(), rand);
         return pValue.getValueBase() | accessors;
     }
 
-    private int drawAccessors(int numberOfParameters) {
+    private int drawAccessors(int numberOfParameters, Random rand) {
         int result = 0;
         if (numberOfParameters == 0) {
             return result;

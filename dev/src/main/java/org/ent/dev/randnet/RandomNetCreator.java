@@ -42,7 +42,6 @@ public class RandomNetCreator {
 	}
 
 	public Optional<Net> drawNetMaybe() {
-		valueDrawing.setSeed(rand.nextLong());
 		doDrawNet();
 		return switch (result) {
 			case SUCCESS -> Optional.of(net);
@@ -80,7 +79,7 @@ public class RandomNetCreator {
 			return;
 		}
 		for (int i = 0; i < noNodes; i++) {
-			Node n = net.newNode(valueDrawing.drawValue());
+			Node n = net.newNode(valueDrawing.drawValue(rand));
 			if (i == 0) {
 				net.setRoot(n);
 			}

@@ -13,6 +13,9 @@ import java.util.Random;
 public class DevelopmentLevel1b {
     private static final Logger log = LoggerFactory.getLogger(DevelopmentLevel1b.class);
 
+    private final int maxStepsLevel0 = 100;
+    private final int maxSteps = 100;
+
     private final DevelopmentLevel0 developmentLevel0;
     private final Random randMaster;
     private final Random randTargetValue;
@@ -23,9 +26,9 @@ public class DevelopmentLevel1b {
     }
 
     public DevelopmentLevel1b() {
-        this.developmentLevel0 = new DevelopmentLevel0();
         this.randMaster = new Random(0xFA1AFEL);
         this.randTargetValue = new Random(randMaster.nextLong());
+        this.developmentLevel0 = new DevelopmentLevel0(maxStepsLevel0, new Random(randMaster.nextLong()));
     }
 
     private void next() {
@@ -62,7 +65,7 @@ public class DevelopmentLevel1b {
                 mutation.execute();
 //                log.info("after:  {}", formatter.format(net));
 
-                CopyValueGame game = new CopyValueGame(targetValue, net);
+                CopyValueGame game = new CopyValueGame(targetValue, net, maxSteps);
                 game.execute();
 
                 if (!game.passedEvalFlowOnVerifierRoot()) {

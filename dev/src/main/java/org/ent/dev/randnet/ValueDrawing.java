@@ -1,9 +1,9 @@
 package org.ent.dev.randnet;
 
+import java.util.Random;
+
 public interface ValueDrawing {
 
-	void setSeed(long seed);
-
-	int drawValue();
+	int drawValue(Random rand);
 
 }

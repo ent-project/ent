@@ -45,6 +45,7 @@ class CopyValueGame {
     InputNetListener inputNetListener;
     private final Long netCreatorSeed;
     private final int targetValue;
+    private final int maxSteps;
 
     private boolean verbose;
 
@@ -52,15 +53,17 @@ class CopyValueGame {
     private Net inputNet;
 
 
-    public CopyValueGame(int targetValue, long netCreatorSeed) {
+    public CopyValueGame(int targetValue, long netCreatorSeed, int maxSteps) {
         this.targetValue = targetValue;
         this.netCreatorSeed = netCreatorSeed;
+        this.maxSteps = maxSteps;
         this.ent = buildEnt(netCreatorSeed);
     }
 
-    public CopyValueGame(int targetValue, Net net) {
+    public CopyValueGame(int targetValue, Net net, int maxSteps) {
         this.targetValue = targetValue;
         this.netCreatorSeed = null;
+        this.maxSteps = maxSteps;
         this.ent = buildEnt(net);
     }
 
@@ -128,7 +131,7 @@ class CopyValueGame {
         if (verbose) {
             log.info("ent {}", formatter.format(ent));
         }
-        for (int s = 0; s < DevelopmentLevel0.MAX_STEPS; s++) {
+        for (int s = 0; s < maxSteps; s++) {
             runner.step();
             if (verbose) {
                 dumpResults();

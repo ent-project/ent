@@ -17,11 +17,11 @@ public class DevelopmentLevel0 {
 
     private static final Logger log = LoggerFactory.getLogger(DevelopmentLevel0.class);
 
-    public static final int MAX_STEPS = 100; // hyper-parameter
+    public final int maxSteps;
     private int numRuns;
 
     public static void main(String[] args) {
-        DevelopmentLevel0 dev0 = new DevelopmentLevel0();
+        DevelopmentLevel0 dev0 = new DevelopmentLevel0(100, new Random(5L));
         long startTime = System.nanoTime();
         int numHits = 0;
         int numFullHits = 0;
@@ -49,11 +49,10 @@ public class DevelopmentLevel0 {
     private void investigate(long seed, int targetValue) {
         RandomNetCreator netCreator = new RandomNetCreator(new Random(seed), CopyValueGame.drawing);
         Net net = netCreator.drawNet();
-        CopyValueGame game = new CopyValueGame(targetValue, net);
+        CopyValueGame game = new CopyValueGame(targetValue, net, maxSteps);
         game.setVerbose(true);
         game.execute();
     }
-
 
     private final Random randMaster;
     private final Random randNetSeeds;
@@ -68,8 +67,9 @@ public class DevelopmentLevel0 {
     private int lastIndexInputSet = -1;
     private int lastIndexEvalFlowOnVerifierRoot = -1;
 
-    public DevelopmentLevel0() {
-        randMaster = new Random(0x17abc);
+    public DevelopmentLevel0(int maxSteps, Random rand) {
+        this.maxSteps = maxSteps;
+        randMaster = rand;
         randNetSeeds = new Random(randMaster.nextLong());
         randTargets = new Random(randMaster.nextLong());
 
@@ -105,7 +105,7 @@ public class DevelopmentLevel0 {
         int targetValue = randTargets.nextInt(5, 12);
         long netCreatorSeed = randNetSeeds.nextLong();
 
-        CopyValueGame game = new CopyValueGame(targetValue, netCreatorSeed);
+        CopyValueGame game = new CopyValueGame(targetValue, netCreatorSeed, maxSteps);
         game.execute();
         numRuns++;
 //        if (game.passedEvalFlowOnVerifierRoot() || game.passedVerifierFinished()) {

@@ -9,19 +9,20 @@ import java.util.Random;
 
 public class ValueFragmentCrossover {
     public static final int[] MASKS = new int[] {0xFFF, 0xF000, 0xF_0000, 0xF0_0000, 0xFF00_0000};
-    public static final int FREQUENCY_FACTOR = 1;
+    public final double frequencyFactor;
     private final Random rand;
     private final Net net1;
     private final Net net2;
 
-    public ValueFragmentCrossover(Net net1, Net net2, long seed) {
+    public ValueFragmentCrossover(Net net1, Net net2, long seed, double frequencyFactor) {
         this.net1 = net1;
         this.net2 = net2;
         this.rand = new Random(seed);
+        this.frequencyFactor = frequencyFactor;
     }
 
     public void execute() {
-        int num = net1.getNodes().size() * FREQUENCY_FACTOR;
+        int num = (int) (net1.getNodes().size() * frequencyFactor);
         int noNodes = ModifiedPoisson.getModifiedPoisson(num).drawModifiedPoisson(rand);
         for (int i = 0; i < noNodes; i++) {
             int i1 = rand.nextInt(net1.getNodes().size());
