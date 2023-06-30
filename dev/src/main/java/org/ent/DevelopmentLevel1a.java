@@ -17,9 +17,9 @@ public class DevelopmentLevel1a {
     private static final Logger log = LoggerFactory.getLogger(DevelopmentLevel1a.class);
     public static final int ATTEMPTS_PER_UPSTREAM = 400;
     private final double CROSSOVER_FREQUENCY_FACTOR = 1.0;
-    private int maxStepsLevel0 = 6;
-    private int maxSteps = 8;
-    private long masterSeed = 0xfa11afel;
+    private final int maxStepsLevel0 = 6;
+    private final int maxSteps = 8;
+    private final int numberOfNodes = 3;
 
 
     private final DevelopmentLevel0 developmentLevel0;
@@ -37,6 +37,7 @@ public class DevelopmentLevel1a {
     private final Stat stat2 = new Stat(2, CopyValueGame::passedInputSet);
     private int numUpstream1DirectHit, numUpstream2DirectHit;
     private int numUpstream1Total, numUpstream2Total;
+    private int numGenFail, numGenTotal, numGenHit, numGenPartial;
 
     static class Stat {
         private final int id;
@@ -52,20 +53,20 @@ public class DevelopmentLevel1a {
         }
     }
 
-    public DevelopmentLevel1a() {
-        this.randMaster = new Random(masterSeed);
-        this.developmentLevel0 = new DevelopmentLevel0(maxStepsLevel0, new Random(randMaster.nextLong()));
+    public DevelopmentLevel1a(Random random) {
+        this.randMaster = random;
+        this.developmentLevel0 = new DevelopmentLevel0(maxStepsLevel0, numberOfNodes, new Random(randMaster.nextLong()));
         this.randTargetValue = new Random(randMaster.nextLong());
     }
 
     public static void main(String[] args) {
-        DevelopmentLevel1a dev = new DevelopmentLevel1a();
+        DevelopmentLevel1a dev = new DevelopmentLevel1a(new Random(0xFA1AFEL));
         dev.run();
     }
 
     void investigate(long seed1, long seed2, long swapSeed, int targetValue) {
-        RandomNetCreator netCreator1 = new RandomNetCreator(new Random(seed1), CopyValueGame.drawing);
-        RandomNetCreator netCreator2 = new RandomNetCreator(new Random(seed2), CopyValueGame.drawing);
+        RandomNetCreator netCreator1 = new RandomNetCreator(numberOfNodes, new Random(seed1), CopyValueGame.drawing);
+        RandomNetCreator netCreator2 = new RandomNetCreator(numberOfNodes, new Random(seed2), CopyValueGame.drawing);
         Net net1 = netCreator1.drawNet();
         Net net2 = netCreator2.drawNet();
 
@@ -81,7 +82,7 @@ public class DevelopmentLevel1a {
 
 //        investigate(0x84bde80f4f9f8c6aL, 0xfe4e51e929f262b2L, 0x923080f3bcf65cb7L, 6);
 
-        for (int i = 0; i < 400; i++) {
+        for (int i = 0; i < 600; i++) {
             if (i % 20 == 0) {
                 log.info("## i = {}", i);
             }
@@ -90,13 +91,17 @@ public class DevelopmentLevel1a {
 
         Duration duration = Duration.ofNanos(System.nanoTime() - startTime);
         log.info("");
-        log.info("crossover frequency factor: {}, attempts per upstream: {}, max steps lvl0/lvl1a: {}/{} ", CROSSOVER_FREQUENCY_FACTOR, ATTEMPTS_PER_UPSTREAM, maxStepsLevel0, maxSteps);
+        log.info("number of nodes: {}, crossover frequency factor: {}, attempts per upstream: {}, max steps lvl0/lvl1a: {}/{} ", numberOfNodes, CROSSOVER_FREQUENCY_FACTOR, ATTEMPTS_PER_UPSTREAM, maxStepsLevel0, maxSteps);
         log.info("miss 1: {}, miss 2: {}", rate(stat1.numDegraded, stat1.numTotal), rate(stat2.numDegraded, stat2.numTotal));
         log.info("retained 1: {}, retained 2: {}", rate(stat1.numRetained, stat1.numTotal), rate(stat2.numRetained, stat2.numTotal));
         log.info("upstream direct hit: {} + {} = {}",
                 rate(numUpstream1DirectHit, numUpstream1Total),
                 rate(numUpstream2DirectHit, numUpstream2Total),
                 rate(numUpstream1DirectHit + numUpstream2DirectHit, numUpstream1Total + numUpstream2Total));
+        log.info("children per parent couple - none: {}, some: {}, full: {}",
+                rate(numGenFail, numGenTotal),
+                rate(numGenPartial, numGenTotal),
+                rate(numGenHit, numGenTotal));
         if (stat1.numHit + stat2.numHit > 0) {
             log.info("hit 1: {}, hit 2: {}", rate(stat1.numHit, stat1.numTotal), rate(stat2.numHit, stat2.numTotal));
         } else {
@@ -117,7 +122,6 @@ public class DevelopmentLevel1a {
     }
 
     private void next() {
-        int targetValue = randTargetValue.nextInt(5, 17);
         if (seed1 == null) {
             CopyValueGame upstream1 = developmentLevel0.nextGetTargetValue();
             numUpstream1Total++;
@@ -142,10 +146,11 @@ public class DevelopmentLevel1a {
             return;
         }
 
+        int targetValue = randTargetValue.nextInt(5, 17);
         int found1 = 0, found2 = 0;
         for (int i = 0; i < ATTEMPTS_PER_UPSTREAM; i++) {
-            RandomNetCreator netCreator1 = new RandomNetCreator(new Random(seed1), CopyValueGame.drawing);
-            RandomNetCreator netCreator2 = new RandomNetCreator(new Random(seed2), CopyValueGame.drawing);
+            RandomNetCreator netCreator1 = new RandomNetCreator(numberOfNodes, new Random(seed1), CopyValueGame.drawing);
+            RandomNetCreator netCreator2 = new RandomNetCreator(numberOfNodes, new Random(seed2), CopyValueGame.drawing);
             Net net1 = netCreator1.drawNet();
             Net net2 = netCreator2.drawNet();
 
@@ -173,6 +178,14 @@ public class DevelopmentLevel1a {
             if (found1 > 0 && found2 > 0) {
                 break;
             }
+        }
+        numGenTotal++;
+        if (found1 + found2 == 0) {
+            numGenFail++;
+        } else if (found1 > 0 && found2 > 0) {
+            numGenHit++;
+        } else {
+            numGenPartial++;
         }
 
         seed1 = null;

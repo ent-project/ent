@@ -11,20 +11,21 @@ import java.util.Random;
 
 public class ArrowMixMutation {
 
-    public static final int FREQUENCY_FACTOR = 1;
+    private final double frequencyFactor;
 
     private final Net net;
 
     private final Random rand;
 
 
-    public ArrowMixMutation(Net net, Random rand) {
+    public ArrowMixMutation(double frequencyFactor, Net net, Random rand) {
+        this.frequencyFactor = frequencyFactor;
         this.net = net;
         this.rand = rand;
     }
 
     public void execute() {
-        int num = net.getNodes().size() * FREQUENCY_FACTOR;
+        int num = (int) (net.getNodes().size() * frequencyFactor);
         int noMutations = ModifiedPoisson.getModifiedPoisson(num).drawModifiedPoisson(rand);
         for (int i = 0; i < noMutations; i++) {
             int i1 = rand.nextInt(net.getNodes().size());

@@ -17,42 +17,10 @@ public class DevelopmentLevel0 {
 
     private static final Logger log = LoggerFactory.getLogger(DevelopmentLevel0.class);
 
-    public final int maxSteps;
+    private final int maxSteps;
+    private final int numberOfNodes;
+
     private int numRuns;
-
-    public static void main(String[] args) {
-        DevelopmentLevel0 dev0 = new DevelopmentLevel0(100, new Random(5L));
-        long startTime = System.nanoTime();
-        int numHits = 0;
-        int numFullHits = 0;
-//        dev0.investigate(0xdfec9244c7cf21cdL, 5);
-        for (int i = 0; i < 1000; i++) {
-            CopyValueGame game = dev0.nextEvalFlowOnVerifierRoot();
-            log.info("seed: {}", Long.toHexString(game.getNetCreatorSeed()));
-//            log.info("gtv: {} is: {}", dev0.goodSeedsGetTargetValue.size(), dev0.goodSeedsInputSet.size());
-            if (game.passedVerifierFinished()) {
-                numFullHits++;
-            }
-            numHits++;
-        }
-        Duration duration = Duration.ofNanos(System.nanoTime() - startTime);
-        log.info("total runs: {}; getTargetValue: {}; inputSet: {}; evalFlow: {}",
-                dev0.numRuns,
-                dev0.goodSeedsGetTargetValue.size(),
-                dev0.goodSeedsInputSet.size(),
-                dev0.goodSeedsEvalFlowOnVerifierRoot.size());
-        log.info("TOTAL DURATION: {}", duration);
-        log.info("eval-flow on verifier: {} hits / min", Tools.getHitsPerMinute(numHits, duration));
-        log.info("verifier finished: {} hits / min", Tools.getHitsPerMinute(numFullHits, duration));
-    }
-
-    private void investigate(long seed, int targetValue) {
-        RandomNetCreator netCreator = new RandomNetCreator(new Random(seed), CopyValueGame.drawing);
-        Net net = netCreator.drawNet();
-        CopyValueGame game = new CopyValueGame(targetValue, net, maxSteps);
-        game.setVerbose(true);
-        game.execute();
-    }
 
     private final Random randMaster;
     private final Random randNetSeeds;
@@ -67,8 +35,47 @@ public class DevelopmentLevel0 {
     private int lastIndexInputSet = -1;
     private int lastIndexEvalFlowOnVerifierRoot = -1;
 
-    public DevelopmentLevel0(int maxSteps, Random rand) {
+    public static void main(String[] args) {
+        DevelopmentLevel0 dev0 = new DevelopmentLevel0(100, 15, new Random(5L));
+        dev0.run();
+    }
+
+    public void run() {
+        long startTime = System.nanoTime();
+        int numHits = 0;
+        int numFullHits = 0;
+//        dev0.investigate(0xdfec9244c7cf21cdL, 5);
+        for (int i = 0; i < 1000; i++) {
+            CopyValueGame game = nextEvalFlowOnVerifierRoot();
+            log.info("seed: {}", Long.toHexString(game.getNetCreatorSeed()));
+//            log.info("gtv: {} is: {}", dev0.goodSeedsGetTargetValue.size(), dev0.goodSeedsInputSet.size());
+            if (game.passedVerifierFinished()) {
+                numFullHits++;
+            }
+            numHits++;
+        }
+        Duration duration = Duration.ofNanos(System.nanoTime() - startTime);
+        log.info("total runs: {}; getTargetValue: {}; inputSet: {}; evalFlow: {}",
+                numRuns,
+                goodSeedsGetTargetValue.size(),
+                goodSeedsInputSet.size(),
+                goodSeedsEvalFlowOnVerifierRoot.size());
+        log.info("TOTAL DURATION: {}", duration);
+        log.info("eval-flow on verifier: {} hits / min", Tools.getHitsPerMinute(numHits, duration));
+        log.info("verifier finished: {} hits / min", Tools.getHitsPerMinute(numFullHits, duration));
+    }
+
+    private void investigate(long seed, int targetValue) {
+        RandomNetCreator netCreator = new RandomNetCreator(numberOfNodes, new Random(seed), CopyValueGame.drawing);
+        Net net = netCreator.drawNet();
+        CopyValueGame game = new CopyValueGame(targetValue, net, maxSteps);
+        game.setVerbose(true);
+        game.execute();
+    }
+
+    public DevelopmentLevel0(int maxSteps, int numberOfNodes, Random rand) {
         this.maxSteps = maxSteps;
+        this.numberOfNodes = numberOfNodes;
         randMaster = rand;
         randNetSeeds = new Random(randMaster.nextLong());
         randTargets = new Random(randMaster.nextLong());
@@ -105,7 +112,7 @@ public class DevelopmentLevel0 {
         int targetValue = randTargets.nextInt(5, 12);
         long netCreatorSeed = randNetSeeds.nextLong();
 
-        CopyValueGame game = new CopyValueGame(targetValue, netCreatorSeed, maxSteps);
+        CopyValueGame game = new CopyValueGame(targetValue, netCreatorSeed, maxSteps, numberOfNodes);
         game.execute();
         numRuns++;
 //        if (game.passedEvalFlowOnVerifierRoot() || game.passedVerifierFinished()) {

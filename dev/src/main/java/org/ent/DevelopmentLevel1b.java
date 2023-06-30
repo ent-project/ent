@@ -8,92 +8,129 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class DevelopmentLevel1b {
     private static final Logger log = LoggerFactory.getLogger(DevelopmentLevel1b.class);
 
-    private final int maxStepsLevel0 = 100;
-    private final int maxSteps = 100;
+    private final int maxStepsLevel0 = 20;
+    private final int maxSteps = 20;
+    private final int attemptsPerUpstream = 250;
+    private final int numberOfNodes = 20;
+    private final double frequencyFactor = 1.0;
+
 
     private final DevelopmentLevel0 developmentLevel0;
     private final Random randMaster;
     private final Random randTargetValue;
+    private final List<CopyValueGame> goodSeeds = new ArrayList<>();
+    private int nextIndexGoodSeeds;
+    private int numUpstreamTotal;
+    private int numUpstreamDirectHit;
+    private int numTotal, numHit, numDegraded, numRetained;
+    private int numGenTotal, numGenHit, numGenFail;
 
     public static void main(String[] args) {
-        DevelopmentLevel1b developmentLevel1b = new DevelopmentLevel1b();
-        developmentLevel1b.next();
+        DevelopmentLevel1b developmentLevel1b = new DevelopmentLevel1b(new Random(0xFA1AFEL +1));
+        developmentLevel1b.run();
     }
 
-    public DevelopmentLevel1b() {
-        this.randMaster = new Random(0xFA1AFEL);
+    public DevelopmentLevel1b(Random random) {
+        this.randMaster = random;
         this.randTargetValue = new Random(randMaster.nextLong());
-        this.developmentLevel0 = new DevelopmentLevel0(maxStepsLevel0, new Random(randMaster.nextLong()));
+        this.developmentLevel0 = new DevelopmentLevel0(maxStepsLevel0, numberOfNodes, new Random(randMaster.nextLong()));
+    }
+
+    public CopyValueGame getNextVerifierFinished() {
+        while (goodSeeds.size() <= nextIndexGoodSeeds) {
+            next();
+        }
+        CopyValueGame result = goodSeeds.get(nextIndexGoodSeeds);
+        nextIndexGoodSeeds++;
+        return result;
+    }
+
+    private void run() {
+        long startTime = System.nanoTime();
+
+        for (int i = 0; i < 400; i++) {
+            if (i % 20 == 0) {
+                log.info("## i = {}", i);
+            }
+            getNextVerifierFinished();
+        }
+
+        Duration duration = Duration.ofNanos(System.nanoTime() - startTime);
+        log.info("");
+        log.info("number of nodes: {}, max steps lvl0/lvl1b: {}/{}, attempts per upstream: {}, frequency factor: {}",
+                numberOfNodes, maxStepsLevel0, maxSteps, attemptsPerUpstream, frequencyFactor);
+        log.info("hit: {}, miss: {}, retained: {}",
+                rate(numHit, numTotal),
+                rate(numDegraded, numTotal),
+                rate(numRetained, numTotal)
+        );
+        log.info("upstream direct hit: {}", rate(numUpstreamDirectHit, numUpstreamTotal));
+        log.info("children per parent - hit: {}, none: {}",
+                rate(numGenHit, numGenTotal),
+                rate(numGenFail, numGenTotal));
+        log.info("TOTAL DURATION: {}", duration);
+        log.info("upstream: {} hits / min, generated: {} hits / min, total: {} hits / min",
+                Tools.getHitsPerMinute(numUpstreamDirectHit, duration),
+                Tools.getHitsPerMinute(numHit, duration),
+                Tools.getHitsPerMinute(numHit + numUpstreamDirectHit, duration));
     }
 
     private void next() {
-        long startTime = System.nanoTime();
+        numUpstreamTotal++;
+        CopyValueGame upstream = developmentLevel0.nextEvalFlowOnVerifierRoot();
+        if (upstream.passedVerifierFinished()) {
+            numUpstreamDirectHit++;
+            goodSeeds.add(upstream);
+            return;
+        }
 
-        int numSource = 0;
-        int numSourceSuccess = 0;
-        int numTotal = 0;
-        int numHit = 0;
+        numGenTotal++;
+        long seed = upstream.getNetCreatorSeed();
 
-        for (int i = 0; i < 500; i++) {
-            numSource++;
-            log.info("== Source {} ==", numSource);
-            int targetValue = randTargetValue.nextInt(5, 17);
-            CopyValueGame game0 = developmentLevel0.nextEvalFlowOnVerifierRoot();
-            if (game0.passedVerifierFinished()) {
-                numSourceSuccess++;
-                numHit++;
-                continue; // just interested to see the improvements from mutation
-            }
-            long seed = game0.getNetCreatorSeed();
+        int targetValue = randTargetValue.nextInt(5, 17);
+        boolean foundSolution = false;
+        for (int i = 0; i < attemptsPerUpstream; i++) {
 
-            boolean foundSolution = false;
-            for (int j = 0; j < 300; j++) {
-
-                RandomNetCreator netCreator = new RandomNetCreator(new Random(seed), CopyValueGame.drawing);
-                Net net = netCreator.drawNet();
+            RandomNetCreator netCreator = new RandomNetCreator(numberOfNodes, new Random(seed), CopyValueGame.drawing);
+            Net net = netCreator.drawNet();
 
 //                NetFormatter formatter = new NetFormatter();
 //                log.info("before: {}", formatter.format(net));
 
-                long mixSeed = randMaster.nextLong();
-                ArrowMixMutation mutation = new ArrowMixMutation(net, new Random(mixSeed));
-                mutation.execute();
+            long mixSeed = randMaster.nextLong();
+            ArrowMixMutation mutation = new ArrowMixMutation(frequencyFactor, net, new Random(mixSeed));
+            mutation.execute();
 //                log.info("after:  {}", formatter.format(net));
 
-                CopyValueGame game = new CopyValueGame(targetValue, net, maxSteps);
-                game.execute();
+            CopyValueGame game = new CopyValueGame(targetValue, net, maxSteps);
+            game.execute();
 
-                if (!game.passedEvalFlowOnVerifierRoot()) {
-//                    log.info("# regression, no longer eval flow on verifier root");
-                } else {
-                    if (game.passedVerifierFinished()) {
-                        log.info("# verifier finished!");
-                        numHit++;
-                        foundSolution = true;
-                        break;
-                    } else {
-//                        log.info("# ()");
-                    }
-                }
-                numTotal++;
-            }
-            if (!foundSolution) {
-                log.info("## found no solution");
+            if (!game.passedEvalFlowOnVerifierRoot()) {
+                numDegraded++;
             } else {
-                numSourceSuccess++;
+                numRetained++;
+                if (game.passedVerifierFinished()) {
+                    log.info("# verifier finished!");
+                    numHit++;
+                    foundSolution = true;
+                    goodSeeds.add(game);
+                    break;
+                }
             }
+            numTotal++;
         }
-
-        Duration duration = Duration.ofNanos(System.nanoTime() - startTime);
-        log.info("sources with solution: {}", rate(numSourceSuccess, numSource));
-        log.info("hits total: {}", rate(numHit, numTotal));
-        log.info("TOTAL DURATION: {}", duration);
-        log.info("{} hits / min", Tools.getHitsPerMinute(numHit, duration));
+        if (!foundSolution) {
+            numGenFail++;
+        } else {
+            numGenHit++;
+        }
     }
 
     private String rate(int count, int total) {

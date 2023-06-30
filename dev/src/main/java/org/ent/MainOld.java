@@ -121,7 +121,7 @@ public class MainOld {
 	private Net drawNet(long netSeed) {
 		Random rand = new Random(netSeed);
 		ValueDrawing drawing = new DefaultValueDrawing();
-		RandomNetCreator creator = new RandomNetCreator(rand, drawing);
+		RandomNetCreator creator = new RandomNetCreator(15, rand, drawing);
 		return creator.drawNetMaybe().orElseThrow(() -> new RuntimeException());
 	}
 

@@ -21,7 +21,7 @@ class RandomNetCreatorTest {
 		Random randCommandDrawing = new Random(randMaster.nextLong());
 		Random randNetCreator = new Random(randMaster.nextLong());
 		ValueDrawing commandDrawing = new DefaultValueDrawing();
-		netCreator = new RandomNetCreator(randNetCreator, commandDrawing);
+		netCreator = new RandomNetCreator(15, randNetCreator, commandDrawing);
 	}
 
 	@Test

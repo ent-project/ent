@@ -36,6 +36,10 @@ class CopyValueGame {
         drawing.addValueBase(new PortalValue(0, 1), DefaultValueDrawing.WEIGHT3);
     }
 
+    private final Integer numberOfNodes;
+    private final int maxSteps;
+    private final int targetValue;
+
     private Net verifierNet;
     private final Ent ent;
     private Node targetValueNode;
@@ -44,8 +48,6 @@ class CopyValueGame {
     VerifierNetListener verifierNetListener;
     InputNetListener inputNetListener;
     private final Long netCreatorSeed;
-    private final int targetValue;
-    private final int maxSteps;
 
     private boolean verbose;
 
@@ -53,10 +55,11 @@ class CopyValueGame {
     private Net inputNet;
 
 
-    public CopyValueGame(int targetValue, long netCreatorSeed, int maxSteps) {
+    public CopyValueGame(int targetValue, long netCreatorSeed, int maxSteps, int numberOfNodes) {
         this.targetValue = targetValue;
         this.netCreatorSeed = netCreatorSeed;
         this.maxSteps = maxSteps;
+        this.numberOfNodes = numberOfNodes;
         this.ent = buildEnt(netCreatorSeed);
     }
 
@@ -64,6 +67,7 @@ class CopyValueGame {
         this.targetValue = targetValue;
         this.netCreatorSeed = null;
         this.maxSteps = maxSteps;
+        this.numberOfNodes = null;
         this.ent = buildEnt(net);
     }
 
@@ -81,7 +85,7 @@ class CopyValueGame {
     }
 
     private Ent buildEnt(long netCreatorSeed1) {
-        RandomNetCreator netCreator = new RandomNetCreator(new Random(netCreatorSeed1), drawing);
+        RandomNetCreator netCreator = new RandomNetCreator(numberOfNodes, new Random(netCreatorSeed1), drawing);
         return buildEnt(netCreator.drawNet());
     }
 

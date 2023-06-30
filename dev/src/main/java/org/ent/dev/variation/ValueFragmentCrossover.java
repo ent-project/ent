@@ -9,7 +9,9 @@ import java.util.Random;
 
 public class ValueFragmentCrossover {
     public static final int[] MASKS = new int[] {0xFFF, 0xF000, 0xF_0000, 0xF0_0000, 0xFF00_0000};
-    public final double frequencyFactor;
+
+    private final double frequencyFactor;
+
     private final Random rand;
     private final Net net1;
     private final Net net2;

@@ -70,8 +70,7 @@ public class RandomNetSource implements Source {
 	private Optional<Net> drawNet(long netSeed) {
 		Random rand = new Random(netSeed);
 		ValueDrawing drawing = new DefaultValueDrawing();
-		RandomNetCreator creator = new RandomNetCreator(rand, drawing);
-		creator.setNumberOfNodes(noNodes);
+		RandomNetCreator creator = new RandomNetCreator(noNodes, rand, drawing);
 		return creator.drawNetMaybe();
 	}
 

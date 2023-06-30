@@ -14,7 +14,7 @@ import java.util.Random;
 public class RandomNetCreator {
 	public static final int MAX_ATTEMPTS = 1000;
 
-	private int numberOfNodes = 15;
+	private final int numberOfNodes;
 
 	private final Random rand;
 
@@ -26,7 +26,8 @@ public class RandomNetCreator {
 
 	private enum DrawResult { SUCCESS, REJECT }
 
-	public RandomNetCreator(Random rand, ValueDrawing valueDrawing) {
+	public RandomNetCreator(int numberOfNodes, Random rand, ValueDrawing valueDrawing) {
+		this.numberOfNodes = numberOfNodes;
 		this.rand = rand;
 		this.valueDrawing = valueDrawing;
 	}
@@ -57,14 +58,6 @@ public class RandomNetCreator {
 		}
 		rewireToRandomTargets();
 		result = DrawResult.SUCCESS;
-	}
-
-	public int getNumberOfNodes() {
-		return numberOfNodes;
-	}
-
-	public void setNumberOfNodes(int numberOfNodes) {
-		this.numberOfNodes = numberOfNodes;
 	}
 
 	private void initialize() {
