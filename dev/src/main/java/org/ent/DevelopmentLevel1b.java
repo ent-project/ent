@@ -3,7 +3,6 @@ package org.ent;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.variation.ArrowMixMutation;
 import org.ent.net.Net;
-import org.ent.util.Tools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +10,9 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static org.ent.util.Tools.getHitsPerMinute;
+import static org.ent.util.Tools.rate;
 
 public class DevelopmentLevel1b {
     private static final Logger log = LoggerFactory.getLogger(DevelopmentLevel1b.class);
@@ -126,9 +128,9 @@ public class DevelopmentLevel1b {
                 rate(numGenFail, numGenTotal));
         log.info("TOTAL DURATION: {}", duration);
         log.info("upstream: {} hits / min, generated: {} hits / min, total: {} hits / min",
-                Tools.getHitsPerMinute(numUpstreamDirectHit, duration),
-                Tools.getHitsPerMinute(numHit, duration),
-                Tools.getHitsPerMinute(numHit + numUpstreamDirectHit, duration));
+                getHitsPerMinute(numUpstreamDirectHit, duration),
+                getHitsPerMinute(numHit, duration),
+                getHitsPerMinute(numHit + numUpstreamDirectHit, duration));
     }
 
     private void next() {
@@ -175,14 +177,10 @@ public class DevelopmentLevel1b {
             }
             numTotal++;
         }
-        if (!foundSolution) {
-            numGenFail++;
-        } else {
+        if (foundSolution) {
             numGenHit++;
+        } else {
+            numGenFail++;
         }
-    }
-
-    private String rate(int count, int total) {
-        return "%d / %d (%.2f %%)".formatted(count, total, ((double) count) / total * 100);
     }
 }
