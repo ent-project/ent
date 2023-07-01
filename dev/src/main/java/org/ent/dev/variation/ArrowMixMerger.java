@@ -8,24 +8,27 @@ import org.ent.net.node.Node;
 import org.ent.util.ModifiedPoisson;
 
 import java.util.Random;
+import java.util.Set;
 
-public class ArrowMixMutation {
+public class ArrowMixMerger {
 
     private final double frequencyFactor;
 
-    private final Net net;
-
     private final Random rand;
+    private final Net netPrimary;
+    private final Net netJoining;
 
-
-    public ArrowMixMutation(double frequencyFactor, Net net, Random rand) {
+    public ArrowMixMerger(Net netPrimary, Net netJoining, Random random, double frequencyFactor) {
+        this.netPrimary = netPrimary;
+        this.netJoining = netJoining;
+        this.rand = random;
         this.frequencyFactor = frequencyFactor;
-        this.net = net;
-        this.rand = rand;
     }
 
     public void execute() {
-        int num = (int) (net.getNodes().size() * frequencyFactor);
+        Set<Node> nodes = netJoining.removeAllNodes();
+        netPrimary.addNodes(nodes);
+        int num = (int) (netPrimary.getNodes().size() * frequencyFactor);
         int noMutations = ModifiedPoisson.getModifiedPoisson(num).drawModifiedPoisson(rand);
         for (int i = 0; i < noMutations; i++) {
             rewireOneArrowRandomly();
@@ -33,11 +36,11 @@ public class ArrowMixMutation {
     }
 
     private void rewireOneArrowRandomly() {
-        int i = rand.nextInt(net.getNodes().size());
-        Node node = net.getNodesAsList().get(i);
+        int i = rand.nextInt(netPrimary.getNodes().size());
+        Node node = netPrimary.getNodesAsList().get(i);
         Arrow arrow = node.getArrow(rand.nextBoolean() ? ArrowDirection.LEFT : ArrowDirection.RIGHT);
-        int indexTarget = rand.nextInt(net.getNodes().size());
-        Node nodeTarget = net.getNodesAsList().get(indexTarget);
+        int indexTarget = rand.nextInt(netPrimary.getNodes().size());
+        Node nodeTarget = netPrimary.getNodesAsList().get(indexTarget);
         arrow.setTarget(nodeTarget, Purview.DIRECT);
     }
 }

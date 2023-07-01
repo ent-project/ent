@@ -71,6 +71,18 @@ class CopyValueGame {
         this.ent = buildEnt(net);
     }
 
+    public Ent getEnt() {
+        return ent;
+    }
+
+    public Integer getNumberOfNodes() {
+        return numberOfNodes;
+    }
+
+    public int getMaxSteps() {
+        return maxSteps;
+    }
+
     public long getNetCreatorSeed() {
         return netCreatorSeed;
     }
@@ -201,6 +213,11 @@ class CopyValueGame {
         return verifierNet != null &&
                 (verifierNet.getRoot().getValue(Purview.DIRECT) == Commands.FINAL_SUCCESS.getValue() ||
                         verifierNet.getRoot().getValue(Purview.DIRECT) == Commands.FINAL_FAILURE.getValue());
+    }
+
+    public boolean passedVerifierFinishedSuccessfully() {
+        return verifierNet != null &&
+                verifierNet.getRoot().getValue(Purview.DIRECT) == Commands.FINAL_SUCCESS.getValue();
     }
 
     private class EntListener extends NopEntEventListener {

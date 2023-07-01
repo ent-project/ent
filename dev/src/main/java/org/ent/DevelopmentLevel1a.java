@@ -30,7 +30,7 @@ public class DevelopmentLevel1a {
     boolean verbose = false;
 
     Long seed1, seed2;
-    private final List<CopyValueGame> goodSeeds = new ArrayList<>();
+    private final List<Level1aSolution> solutions = new ArrayList<>();
     private int nextIndexGoodSeeds;
 
     private final Stat stat1 = new Stat(1, CopyValueGame::passedGetTargetValue);
@@ -38,6 +38,64 @@ public class DevelopmentLevel1a {
     private int numUpstream1DirectHit, numUpstream2DirectHit;
     private int numUpstream1Total, numUpstream2Total;
     private int numGenFail, numGenTotal, numGenHit, numGenPartial;
+
+    public interface Level1aSolution {
+        Net freshNet();
+
+        CopyValueGame getFinishedGame();
+    }
+
+    public record Level1aSolutionDirect(CopyValueGame finishedGame) implements Level1aSolution {
+        @Override
+        public Net freshNet() {
+            RandomNetCreator netCreator = new RandomNetCreator(finishedGame.getNumberOfNodes(), new Random(finishedGame.getNetCreatorSeed()), CopyValueGame.drawing);
+            return netCreator.drawNet();
+        }
+
+        @Override
+        public CopyValueGame getFinishedGame() {
+            return finishedGame;
+        }
+    }
+
+    public final class Level1aSolutionCombining implements Level1aSolution {
+        private final int index;
+        private final CopyValueGame finishedGame;
+        private final long seed1;
+        private final long seed2;
+        private final long swapSeed;
+
+        public Level1aSolutionCombining(int index, CopyValueGame finishedGame, long seed1, long seed2, long swapSeed) {
+            this.index = index;
+            this.finishedGame = finishedGame;
+            this.seed1 = seed1;
+            this.seed2 = seed2;
+            this.swapSeed = swapSeed;
+        }
+
+        @Override
+        public Net freshNet() {
+            RandomNetCreator netCreator1 = new RandomNetCreator(numberOfNodes, new Random(seed1), CopyValueGame.drawing);
+            RandomNetCreator netCreator2 = new RandomNetCreator(numberOfNodes, new Random(seed2), CopyValueGame.drawing);
+            Net net1 = netCreator1.drawNet();
+            Net net2 = netCreator2.drawNet();
+
+            new ValueFragmentCrossover(net1, net2, swapSeed, CROSSOVER_FREQUENCY_FACTOR).execute();
+
+            if (index == 1) {
+                return net1;
+            } else if (index == 2) {
+                return net2;
+            } else {
+                throw new IllegalArgumentException();
+            }
+        }
+
+        @Override
+        public CopyValueGame getFinishedGame() {
+            return finishedGame;
+        }
+    }
 
     static class Stat {
         private final int id;
@@ -112,22 +170,22 @@ public class DevelopmentLevel1a {
         log.info("including direct hits: {} hits / min", Tools.getHitsPerMinute(stat1.numHit + stat2.numHit + numUpstream1DirectHit + numUpstream2DirectHit, duration));
     }
 
-    public CopyValueGame getNextInputSetToTargetValue() {
-        while (goodSeeds.size() <= nextIndexGoodSeeds) {
+    public Level1aSolution getNextInputSetToTargetValue() {
+        while (solutions.size() <= nextIndexGoodSeeds) {
             next();
         }
-        CopyValueGame result = goodSeeds.get(nextIndexGoodSeeds);
+        Level1aSolution result = solutions.get(nextIndexGoodSeeds);
         nextIndexGoodSeeds++;
         return result;
     }
 
     private void next() {
         if (seed1 == null) {
-            CopyValueGame upstream1 = developmentLevel0.nextGetTargetValue();
+            CopyValueGame upstream1 = developmentLevel0.getNextGetTargetValue();
             numUpstream1Total++;
             if (upstream1.passedInputSetToTargetValue()) {
                 numUpstream1DirectHit++;
-                goodSeeds.add(upstream1);
+                solutions.add(new Level1aSolutionDirect(upstream1));
             } else {
                 seed1 = upstream1.getNetCreatorSeed();
             }
@@ -137,7 +195,7 @@ public class DevelopmentLevel1a {
             numUpstream2Total++;
             if (upstream2.passedInputSetToTargetValue()) {
                 numUpstream2DirectHit++;
-                goodSeeds.add(upstream2);
+                solutions.add(new Level1aSolutionDirect(upstream2));
             } else {
                 seed2 = upstream2.getNetCreatorSeed();
             }
@@ -161,7 +219,7 @@ public class DevelopmentLevel1a {
                 CopyValueGame game1 = new CopyValueGame(targetValue, net1, maxSteps);
                 game1.execute();
                 if (recordSuccess(game1, stat1, swapSeed)) {
-                    goodSeeds.add(game1);
+                    solutions.add(new Level1aSolutionCombining(1, game1, seed1, seed2, swapSeed));
                     found1++;
                 }
             }
@@ -170,7 +228,7 @@ public class DevelopmentLevel1a {
                 CopyValueGame game2 = new CopyValueGame(targetValue, net2, maxSteps);
                 game2.execute();
                 if (recordSuccess(game2, stat2, swapSeed)) {
-                    goodSeeds.add(game2);
+                    solutions.add(new Level1aSolutionCombining(2, game2, seed1, seed2, swapSeed));
                     found2++;
                 }
             }

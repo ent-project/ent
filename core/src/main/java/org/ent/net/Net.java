@@ -398,6 +398,10 @@ public class Net {
 		return nodesByIndex;
 	}
 
+	public Node getNode(int index) {
+		return nodesByIndex.get(index);
+	}
+
 	/**
 	 * Provide token for elevated access rights. Holder of the eval token
 	 * can modify this Net, even if modification is not permitted in general.

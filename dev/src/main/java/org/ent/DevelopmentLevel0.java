@@ -84,7 +84,7 @@ public class DevelopmentLevel0 {
         drawing.addValueBase(new PortalValue(0, 1), DefaultValueDrawing.WEIGHT3);
     }
 
-    public CopyValueGame nextGetTargetValue() {
+    public CopyValueGame getNextGetTargetValue() {
         lastIndexGetTargetValue++;
         while (goodSeedsGetTargetValue.size() <= lastIndexGetTargetValue) {
             performRun();

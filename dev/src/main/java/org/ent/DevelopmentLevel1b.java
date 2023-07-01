@@ -25,12 +25,61 @@ public class DevelopmentLevel1b {
     private final DevelopmentLevel0 developmentLevel0;
     private final Random randMaster;
     private final Random randTargetValue;
-    private final List<CopyValueGame> goodSeeds = new ArrayList<>();
+    private final List<Level1bSolution> goodSeeds = new ArrayList<>();
     private int nextIndexGoodSeeds;
     private int numUpstreamTotal;
     private int numUpstreamDirectHit;
     private int numTotal, numHit, numDegraded, numRetained;
     private int numGenTotal, numGenHit, numGenFail;
+
+
+    public interface Level1bSolution {
+        Net freshNet();
+
+        CopyValueGame getFinishedGame();
+    }
+
+    public record Level1bSolutionDirect(CopyValueGame game) implements Level1bSolution {
+        @Override
+        public Net freshNet() {
+            RandomNetCreator netCreator = new RandomNetCreator(game.getNumberOfNodes(), new Random(game.getNetCreatorSeed()), CopyValueGame.drawing);
+            return netCreator.drawNet();
+        }
+
+        @Override
+        public CopyValueGame getFinishedGame() {
+            return game;
+        }
+    }
+
+    public class Level1bSolutionMutating implements Level1bSolution {
+
+        private final CopyValueGame upstream;
+        private final long mixSeed;
+        private final CopyValueGame game;
+
+        public Level1bSolutionMutating(CopyValueGame upstream, long mixSeed, CopyValueGame game) {
+            this.upstream = upstream;
+            this.mixSeed = mixSeed;
+            this.game = game;
+        }
+
+        @Override
+        public Net freshNet() {
+            RandomNetCreator netCreator = new RandomNetCreator(numberOfNodes, new Random(upstream.getNetCreatorSeed()), CopyValueGame.drawing);
+            Net net = netCreator.drawNet();
+
+            ArrowMixMutation mutation = new ArrowMixMutation(frequencyFactor, net, new Random(mixSeed));
+            mutation.execute();
+
+            return net;
+        }
+
+        @Override
+        public CopyValueGame getFinishedGame() {
+            return game;
+        }
+    }
 
     public static void main(String[] args) {
         DevelopmentLevel1b developmentLevel1b = new DevelopmentLevel1b(new Random(0xFA1AFEL +1));
@@ -43,11 +92,11 @@ public class DevelopmentLevel1b {
         this.developmentLevel0 = new DevelopmentLevel0(maxStepsLevel0, numberOfNodes, new Random(randMaster.nextLong()));
     }
 
-    public CopyValueGame getNextVerifierFinished() {
+    public Level1bSolution getNextVerifierFinished() {
         while (goodSeeds.size() <= nextIndexGoodSeeds) {
             next();
         }
-        CopyValueGame result = goodSeeds.get(nextIndexGoodSeeds);
+        Level1bSolution result = goodSeeds.get(nextIndexGoodSeeds);
         nextIndexGoodSeeds++;
         return result;
     }
@@ -87,7 +136,7 @@ public class DevelopmentLevel1b {
         CopyValueGame upstream = developmentLevel0.nextEvalFlowOnVerifierRoot();
         if (upstream.passedVerifierFinished()) {
             numUpstreamDirectHit++;
-            goodSeeds.add(upstream);
+            goodSeeds.add(new Level1bSolutionDirect(upstream));
             return;
         }
 
@@ -120,7 +169,7 @@ public class DevelopmentLevel1b {
                     log.info("# verifier finished!");
                     numHit++;
                     foundSolution = true;
-                    goodSeeds.add(game);
+                    goodSeeds.add(new Level1bSolutionMutating(upstream, mixSeed, game));
                     break;
                 }
             }

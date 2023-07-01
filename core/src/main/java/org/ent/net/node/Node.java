@@ -56,6 +56,13 @@ public interface Node {
 
 	void setLeftChild(Node child, Purview purview);
 
+	default void setChild(ArrowDirection direction, Node child, Purview purview) {
+		switch (direction) {
+			case LEFT -> setLeftChild(child, purview);
+			case RIGHT -> setRightChild(child, purview);
+		}
+	}
+
 	@VisibleForTesting
 	default void setLeftChild(Node child) {
 		Profile.verifyTestProfile();

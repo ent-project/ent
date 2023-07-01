@@ -39,4 +39,8 @@ public final class Tools {
 	public static String getHitsPerMinute(int numHits, Duration duration) {
 		return String.format("%.2f", numHits * 60_000.0 / duration.toMillis());
 	}
+
+	public static String rate(int count, int total) {
+		return "%d / %d (%.2f %%)".formatted(count, total, ((double) count) / total * 100);
+	}
 }
