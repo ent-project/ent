@@ -1,5 +1,6 @@
 package org.ent.net.io.formatter;
 
+import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.MarkerNode;
@@ -31,6 +32,7 @@ public class FormattingWorker {
 	private int bNodeVariableNameIndex;
 
 	private int cNodeVariableNameIndex;
+	private int[] inverseReferences;
 
 	public FormattingWorker(Net net, List<Node> rootNodes, boolean forceGivenNodeNames, Integer maxDepth) {
 		this.net = net;
@@ -42,8 +44,9 @@ public class FormattingWorker {
 	}
 
 	public String formatRecursively() {
+		inverseReferences = buildInverseReferences();
 
-        String delimiter = null;
+		String delimiter = null;
         for (Node node : rootNodes) {
             if (delimiter == null) {
                 delimiter = "; ";
@@ -54,6 +57,19 @@ public class FormattingWorker {
         }
 
         return stringBuilder.toString();
+	}
+
+	private int[] buildInverseReferences() {
+		int[] inverseRefs = new int[net.getNodesAsList().size()];
+		for (Node node : net.getNodes()) {
+			for (ArrowDirection direction : ArrowDirection.values()) {
+				Node child = node.getChild(direction, Purview.DIRECT);
+				if (!child.isMarkerNode()) {
+					inverseRefs[child.getIndex()]++;
+				}
+			}
+		}
+		return inverseRefs;
 	}
 
 	public Map<Node, String> getVariableBindings() {
@@ -114,7 +130,7 @@ public class FormattingWorker {
 		if (forceGivenNodeNames && net.getName(n) != null) {
 			return true;
 		}
-		int references = n.getHub().getInverseReferences().size();
+		int references = inverseReferences[n.getIndex()];
 		if (n.getRightChild(Purview.DIRECT) == n) {
 			references--;
 			if (n.getLeftChild(Purview.DIRECT) == n) {

@@ -188,7 +188,6 @@ public class Net {
 	}
 
 	private void consistencyCheck(Node node) {
-
 		if (node instanceof MarkerNode) {
 			throw new AssertionError("Net node must not be a marker node");
 		}
@@ -197,16 +196,6 @@ public class Net {
 		}
 		for (Arrow arrow : node.getArrows()) {
 			consistencyCheck(arrow);
-		}
-
-		Hub hub = node.getHub();
-		for (Arrow arrow : hub.getInverseReferences()) {
-			if (!nodes.contains(arrow.getOrigin()))
-				throw new AssertionError("Nodes referencing a net node must be part of the net");
-			Node childOfParent = arrow.getTarget(Purview.DIRECT);
-			if (childOfParent != node) {
-				throw new AssertionError("Node must be child of its parent");
-			}
 		}
 	}
 
@@ -221,11 +210,6 @@ public class Net {
 		} else {
 			if (!nodes.contains(child)) {
 				throw new AssertionError("Child of node must be part of the net");
-			}
-
-			Hub childHub = child.getHub();
-			if (!childHub.getInverseReferences().contains(arrow)) {
-				throw new AssertionError("Child nodes must be aware of their parents");
 			}
 		}
 	}

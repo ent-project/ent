@@ -62,9 +62,7 @@ public class Node {
 
 	private void initialize(Node leftChild, Node rightChild) {
 		this.leftChildHub = leftChild.getHub();
-		this.leftChildHub.addInverseReference(leftArrow);
 		this.rightChildHub = rightChild.getHub();
-		this.rightChildHub.addInverseReference(rightArrow);
 	}
 
 	public Net getNet() {
@@ -269,9 +267,7 @@ public class Node {
 		}
 
 		private void doSetTarget(Node target) {
-			leftChildHub.removeInverseReference(leftArrow);
 			leftChildHub = target.getHub();
-			leftChildHub.addInverseReference(leftArrow);
 		}
 	}
 
@@ -306,9 +302,7 @@ public class Node {
 		}
 
 		private void doSetTarget(Node target) {
-			rightChildHub.removeInverseReference(rightArrow);
 			rightChildHub = target.getHub();
-			rightChildHub.addInverseReference(rightArrow);
 		}
 	}
 }

@@ -21,6 +21,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -82,17 +83,6 @@ class NetTest {
 			}
 
 			@Test
-			void rogueParent() throws Exception {
-				Net net = new NetParser().parse("[#1]");
-				Net net2 = new NetParser().parse("(<o>,<x>)");
-				Node root2 = net2.getRoot();
-				MethodUtils.invokeMethod(root2.getLeftArrow(), true, "doSetTarget", net.getRoot());
-
-				assertThatThrownBy(net::consistencyCheck).isInstanceOf(AssertionError.class)
-						.hasMessage("Nodes referencing a net node must be part of the net");
-			}
-
-			@Test
 			void markerInNet() throws Exception {
 				Net net = new NetParser().parse("[#1]");
 				net.addNode(new MarkerNode(null));
@@ -129,19 +119,6 @@ class NetTest {
 				assertThatThrownBy(net::consistencyCheck).isInstanceOf(AssertionError.class)
 						.hasMessage("Node belongs to another net");
 			}
-
-			@Test
-			void noInverseReference() throws Exception {
-				NetParser parser = new NetParser().permitMarkerNodes();
-				Net net = parser.parse("u:[c:<o>]");
-				Node uNode = net.getByName("u");
-				Node cNode = net.getByName("c");
-				cNode.getHub().removeInverseReference(uNode.getLeftArrow());
-
-				assertThatThrownBy(net::consistencyCheck).isInstanceOf(AssertionError.class)
-						.hasMessage("Child nodes must be aware of their parents");
-			}
-
 		}
 	}
 
@@ -424,5 +401,15 @@ class NetTest {
 					.isInstanceOf(IllegalStateException.class)
 					.hasMessage("node belongs to another net");
 		}
+	}
+
+	@Test
+	void referentialGarbageCollection() throws Exception {
+		Net net = parser.parse("<o>[#1]; <x>");
+
+		net.referentialGarbageCollection();
+
+		assertThat(net.getNodes()).hasSize(2);
+		assertThat(net.getNodesAsList().stream().filter(Objects::nonNull).count()).isEqualTo(2);
 	}
 }
