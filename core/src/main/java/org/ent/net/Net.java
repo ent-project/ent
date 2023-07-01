@@ -10,7 +10,6 @@ import org.ent.NetEventListener;
 import org.ent.NopNetEventListener;
 import org.ent.Profile;
 import org.ent.net.io.formatter.NetFormatter;
-import org.ent.net.node.BNode;
 import org.ent.net.node.Hub;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
@@ -273,14 +272,14 @@ public class Net {
 	public Node newNode(int value, Node leftChild, Node rightChild) {
 		validateBelongsToNet(leftChild);
 		validateBelongsToNet(rightChild);
-		BNode node = new BNode(this, value, leftChild, rightChild);
+		Node node = new Node(this, value, leftChild, rightChild);
 		addNodeInternal(node);
 		fireNewNodeCall(node);
 		return node;
 	}
 
 	public Node newNode() {
-		BNode bNode = new BNode(this);
+		Node bNode = new Node(this);
 		addNodeInternal(bNode);
 		fireNewNodeCall(bNode);
 		return bNode;
@@ -289,7 +288,7 @@ public class Net {
 	public Node newNode(Node leftChild, Node rightChild) {
 		validateBelongsToNet(leftChild);
 		validateBelongsToNet(rightChild);
-		BNode bNode = new BNode(this, leftChild, rightChild);
+		Node bNode = new Node(this, leftChild, rightChild);
 		addNodeInternal(bNode);
 		fireNewNodeCall(bNode);
 		return bNode;
@@ -300,7 +299,7 @@ public class Net {
 	}
 
 	public Node newNode(int value) {
-		Node cNode = new BNode(this, value);
+		Node cNode = new Node(this, value);
 		addNodeInternal(cNode);
 		fireNewNodeCall(cNode);
 		return cNode;
@@ -308,7 +307,7 @@ public class Net {
 
 	public Node newUNode(Node child) {
 		validateBelongsToNet(child);
-		Node uNode = new BNode(this, child);
+		Node uNode = new Node(this, child);
 		addNodeInternal(uNode);
 		fireNewNodeCall(uNode);
 		return uNode;

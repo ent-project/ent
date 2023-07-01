@@ -8,7 +8,7 @@ import org.ent.net.Purview;
 import java.util.Collections;
 import java.util.List;
 
-public class MarkerNode extends BNode {
+public class MarkerNode extends Node {
 
 
 	public static final String MARKER_NODE_SYMBOL = "@";
