@@ -1,16 +1,17 @@
 package org.ent;
 
+import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.dev.variation.ArrowMixMerger;
 import org.ent.net.Arrow;
 import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.net.util.NetCopy2;
+import org.ent.net.util.RandomUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.Random;
 
 import static org.ent.util.Tools.getHitsPerMinute;
 import static org.ent.util.Tools.rate;
@@ -23,23 +24,23 @@ public class DevelopmentLevel2 {
     private final int maxSteps = 40;
     private final int attemptsPerUpstream = 500;
 
-    private final Random randMaster;
-    private final Random randTargetValue;
+    private final UniformRandomProvider randMaster;
+    private final UniformRandomProvider randTargetValue;
     private final DevelopmentLevel1a developmentLevel1a;
     private final DevelopmentLevel1b developmentLevel1b;
     private int numTotal, numHit, numRetained1a, numRetained1b, numRetainedBoth;
     private int numGenTotal, numGenHit;
 
     public static void main(String[] args) {
-        DevelopmentLevel2 dev = new DevelopmentLevel2(new Random(0xFA1AFEL + 3));
+        DevelopmentLevel2 dev = new DevelopmentLevel2(RandomUtil.newRandom2(0xFA1AFEL + 0x4000));
         dev.run();
     }
 
-    public DevelopmentLevel2(Random random) {
+    public DevelopmentLevel2(UniformRandomProvider random) {
         this.randMaster = random;
-        this.developmentLevel1a = new DevelopmentLevel1a(new Random(randMaster.nextLong()));
-        this.developmentLevel1b = new DevelopmentLevel1b(new Random(randMaster.nextLong()));
-        this.randTargetValue = new Random(randMaster.nextLong());
+        this.developmentLevel1a = new DevelopmentLevel1a(RandomUtil.newRandom2(randMaster.nextLong()));
+        this.developmentLevel1b = new DevelopmentLevel1b(RandomUtil.newRandom2(randMaster.nextLong()));
+        this.randTargetValue = RandomUtil.newRandom2(randMaster.nextLong());
     }
 
     private void run() {
@@ -88,7 +89,7 @@ public class DevelopmentLevel2 {
 
 
             long mixSeed = randMaster.nextLong();
-            ArrowMixMerger merger = new ArrowMixMerger(net1, net2, new Random(mixSeed), frequencyFactor);
+            ArrowMixMerger merger = new ArrowMixMerger(net1, net2, RandomUtil.newRandom2(mixSeed), frequencyFactor);
             merger.execute();
 
             boolean investigate = false;//numTotal == 73;

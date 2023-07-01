@@ -28,6 +28,7 @@ import org.ent.dev.unit.data.Data;
 import org.ent.dev.unit.data.DataProxy;
 import org.ent.dev.unit.local.TypedProc;
 import org.ent.dev.unit.local.util.FilterListener;
+import org.ent.net.util.RandomUtil;
 import org.ent.run.StepResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -170,7 +171,7 @@ public class DevelopmentPlan {
 
 	public DevelopmentPlan(PlotRegistry plotRegistry, HyperRegistry hyperRegistry) {
 		this.hyperRegistry = hyperRegistry;
-		this.randMaster = new Random(RANDOM_MASTER_SEED);
+		this.randMaster = RandomUtil.newRandom(RANDOM_MASTER_SEED);
 		this.level1PassingStat = new BinaryStat(10_000);
 		this.level1FailReasonStat = new EnumMap<>(StepResult.class);
 		for (StepResult sr : StepResult.values()) {
@@ -471,7 +472,7 @@ public class DevelopmentPlan {
 	}
 
 	private Random newRandom() {
-		return new Random(randMaster.nextLong());
+		return RandomUtil.newRandom(randMaster.nextLong());
 	}
 
 	public void stop() {

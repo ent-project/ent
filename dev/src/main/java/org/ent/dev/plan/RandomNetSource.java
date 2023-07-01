@@ -1,5 +1,6 @@
 package org.ent.dev.plan;
 
+import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.Ent;
 import org.ent.dev.CopyReplicator;
 import org.ent.dev.plan.DataProperties.PropEnt;
@@ -7,11 +8,11 @@ import org.ent.dev.plan.DataProperties.PropReplicator;
 import org.ent.dev.plan.DataProperties.PropSeed;
 import org.ent.dev.randnet.DefaultValueDrawing;
 import org.ent.dev.randnet.RandomNetCreator;
-import org.ent.dev.randnet.ValueDrawing;
 import org.ent.dev.unit.data.DataImpl;
 import org.ent.dev.unit.local.Source;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
+import org.ent.net.util.RandomUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,8 +69,8 @@ public class RandomNetSource implements Source {
 	}
 
 	private Optional<Net> drawNet(long netSeed) {
-		Random rand = new Random(netSeed);
-		ValueDrawing drawing = new DefaultValueDrawing();
+		UniformRandomProvider rand = RandomUtil.newRandom2(netSeed);
+		DefaultValueDrawing drawing = new DefaultValueDrawing();
 		RandomNetCreator creator = new RandomNetCreator(noNodes, rand, drawing);
 		return creator.drawNetMaybe();
 	}

@@ -1,14 +1,11 @@
 package org.ent.dev.randnet;
 
+import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.net.ArrowDirection;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.ParameterizedValue;
-import org.ent.net.node.cmd.accessor.Accessor;
-import org.ent.net.node.cmd.accessor.Accessors;
-import org.ent.net.node.cmd.accessor.PrimaryAccessor;
-import org.ent.net.node.cmd.accessor.SecondaryAccessor;
-import org.ent.net.node.cmd.accessor.TertiaryAccessor;
+import org.ent.net.node.cmd.accessor.*;
 import org.ent.net.node.cmd.operation.BiOperation;
 import org.ent.net.node.cmd.operation.MonoOperation;
 import org.ent.net.node.cmd.operation.Operations;
@@ -19,9 +16,8 @@ import org.ent.net.node.cmd.veto.Vetos;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-public class DefaultValueDrawing implements ValueDrawing {
+public class DefaultValueDrawing {
 
     public static final int WEIGHT1 = 10;
     public static final int WEIGHT2 = 4;
@@ -87,15 +83,14 @@ public class DefaultValueDrawing implements ValueDrawing {
         }
     }
 
-    @Override
-    public int drawValue(Random rand) {
+    public int drawValue(UniformRandomProvider rand) {
         int valueDraw = rand.nextInt(valueSamples.size());
         ParameterizedValue pValue = valueSamples.get(valueDraw);
         int accessors = drawAccessors(pValue.getNumberOfParameters(), rand);
         return pValue.getValueBase() | accessors;
     }
 
-    private int drawAccessors(int numberOfParameters, Random rand) {
+    private int drawAccessors(int numberOfParameters, UniformRandomProvider rand) {
         int result = 0;
         if (numberOfParameters == 0) {
             return result;

@@ -1,9 +1,10 @@
 package org.ent.dev.randnet;
 
-import java.util.Random;
-
+import org.ent.net.util.RandomUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Random;
 
 public class RandomTestUtil {
 
@@ -21,6 +22,6 @@ public class RandomTestUtil {
 	}
 
 	public static Random newRandom() {
-		return new Random(seed);
+		return RandomUtil.newRandom(seed);
 	}
 }

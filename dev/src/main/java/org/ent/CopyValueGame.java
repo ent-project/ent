@@ -11,20 +11,13 @@ import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.operation.Operations;
 import org.ent.net.node.cmd.veto.Conditions;
 import org.ent.net.node.cmd.veto.Vetos;
+import org.ent.net.util.RandomUtil;
 import org.ent.run.EntRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Random;
-
-import static org.ent.net.node.cmd.accessor.Accessors.FLOW;
-import static org.ent.net.node.cmd.accessor.Accessors.LEFT_LEFT;
-import static org.ent.net.node.cmd.accessor.Accessors.LEFT_RIGHT;
-import static org.ent.net.node.cmd.accessor.Accessors.RIGHT;
-import static org.ent.util.NetBuilder.builder;
-import static org.ent.util.NetBuilder.ignored;
-import static org.ent.util.NetBuilder.node;
-import static org.ent.util.NetBuilder.value;
+import static org.ent.net.node.cmd.accessor.Accessors.*;
+import static org.ent.util.NetBuilder.*;
 
 class CopyValueGame {
     private static final Logger log = LoggerFactory.getLogger(CopyValueGame.class);
@@ -97,7 +90,7 @@ class CopyValueGame {
     }
 
     private Ent buildEnt(long netCreatorSeed1) {
-        RandomNetCreator netCreator = new RandomNetCreator(numberOfNodes, new Random(netCreatorSeed1), drawing);
+        RandomNetCreator netCreator = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(netCreatorSeed1), drawing);
         return buildEnt(netCreator.drawNet());
     }
 

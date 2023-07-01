@@ -1,8 +1,10 @@
 package org.ent;
 
+import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.variation.ValueFragmentCrossover;
 import org.ent.net.Net;
+import org.ent.net.util.RandomUtil;
 import org.ent.util.Tools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Predicate;
 
 public class DevelopmentLevel1a {
@@ -24,8 +25,8 @@ public class DevelopmentLevel1a {
 
     private final DevelopmentLevel0 developmentLevel0;
 
-    private final Random randMaster;
-    private final Random randTargetValue;
+    private final UniformRandomProvider randMaster;
+    private final UniformRandomProvider randTargetValue;
 
     boolean verbose = false;
 
@@ -48,7 +49,7 @@ public class DevelopmentLevel1a {
     public record Level1aSolutionDirect(CopyValueGame finishedGame) implements Level1aSolution {
         @Override
         public Net freshNet() {
-            RandomNetCreator netCreator = new RandomNetCreator(finishedGame.getNumberOfNodes(), new Random(finishedGame.getNetCreatorSeed()), CopyValueGame.drawing);
+            RandomNetCreator netCreator = new RandomNetCreator(finishedGame.getNumberOfNodes(), RandomUtil.newRandom2(finishedGame.getNetCreatorSeed()), CopyValueGame.drawing);
             return netCreator.drawNet();
         }
 
@@ -75,8 +76,8 @@ public class DevelopmentLevel1a {
 
         @Override
         public Net freshNet() {
-            RandomNetCreator netCreator1 = new RandomNetCreator(numberOfNodes, new Random(seed1), CopyValueGame.drawing);
-            RandomNetCreator netCreator2 = new RandomNetCreator(numberOfNodes, new Random(seed2), CopyValueGame.drawing);
+            RandomNetCreator netCreator1 = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(seed1), CopyValueGame.drawing);
+            RandomNetCreator netCreator2 = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(seed2), CopyValueGame.drawing);
             Net net1 = netCreator1.drawNet();
             Net net2 = netCreator2.drawNet();
 
@@ -111,20 +112,20 @@ public class DevelopmentLevel1a {
         }
     }
 
-    public DevelopmentLevel1a(Random random) {
+    public DevelopmentLevel1a(UniformRandomProvider random) {
         this.randMaster = random;
-        this.developmentLevel0 = new DevelopmentLevel0(maxStepsLevel0, numberOfNodes, new Random(randMaster.nextLong()));
-        this.randTargetValue = new Random(randMaster.nextLong());
+        this.developmentLevel0 = new DevelopmentLevel0(maxStepsLevel0, numberOfNodes, RandomUtil.newRandom2(randMaster.nextLong()));
+        this.randTargetValue = RandomUtil.newRandom2(randMaster.nextLong());
     }
 
     public static void main(String[] args) {
-        DevelopmentLevel1a dev = new DevelopmentLevel1a(new Random(0xFA1AFEL));
+        DevelopmentLevel1a dev = new DevelopmentLevel1a(RandomUtil.newRandom2(0xFA1AFEL));
         dev.run();
     }
 
     void investigate(long seed1, long seed2, long swapSeed, int targetValue) {
-        RandomNetCreator netCreator1 = new RandomNetCreator(numberOfNodes, new Random(seed1), CopyValueGame.drawing);
-        RandomNetCreator netCreator2 = new RandomNetCreator(numberOfNodes, new Random(seed2), CopyValueGame.drawing);
+        RandomNetCreator netCreator1 = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(seed1), CopyValueGame.drawing);
+        RandomNetCreator netCreator2 = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(seed2), CopyValueGame.drawing);
         Net net1 = netCreator1.drawNet();
         Net net2 = netCreator2.drawNet();
 
@@ -207,8 +208,8 @@ public class DevelopmentLevel1a {
         int targetValue = randTargetValue.nextInt(5, 17);
         int found1 = 0, found2 = 0;
         for (int i = 0; i < ATTEMPTS_PER_UPSTREAM; i++) {
-            RandomNetCreator netCreator1 = new RandomNetCreator(numberOfNodes, new Random(seed1), CopyValueGame.drawing);
-            RandomNetCreator netCreator2 = new RandomNetCreator(numberOfNodes, new Random(seed2), CopyValueGame.drawing);
+            RandomNetCreator netCreator1 = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(seed1), CopyValueGame.drawing);
+            RandomNetCreator netCreator2 = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(seed2), CopyValueGame.drawing);
             Net net1 = netCreator1.drawNet();
             Net net2 = netCreator2.drawNet();
 

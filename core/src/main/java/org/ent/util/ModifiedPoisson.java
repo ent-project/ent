@@ -1,5 +1,7 @@
 package org.ent.util;
 
+import org.apache.commons.rng.UniformRandomProvider;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -57,6 +59,11 @@ public class ModifiedPoisson {
 	}
 
     public int drawModifiedPoisson(Random rand) {
+        double p = rand.nextDouble() * maxP;
+        return inverseCdfLookup(p);
+    }
+
+    public int drawModifiedPoisson(UniformRandomProvider rand) {
         double p = rand.nextDouble() * maxP;
         return inverseCdfLookup(p);
     }

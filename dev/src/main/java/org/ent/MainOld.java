@@ -3,12 +3,12 @@ package org.ent;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.core.util.StatusPrinter;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.dev.ManagedRun;
 import org.ent.dev.RunSetup;
 import org.ent.dev.randnet.DefaultValueDrawing;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.randnet.ValueCandidate;
-import org.ent.dev.randnet.ValueDrawing;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
@@ -16,6 +16,7 @@ import org.ent.net.io.parser.NetParser;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.accessor.Accessors;
 import org.ent.net.node.cmd.operation.Operations;
+import org.ent.net.util.RandomUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +65,7 @@ public class MainOld {
 	public void run1() {
 		log.error("sdf");
 
-		Random randSeeds = new Random(0x12345abcL);
+		Random randSeeds = RandomUtil.newRandom(0x12345abcL);
 
 		valueCandidates = setupCommandCandidates();
 
@@ -119,8 +120,8 @@ public class MainOld {
 	}
 
 	private Net drawNet(long netSeed) {
-		Random rand = new Random(netSeed);
-		ValueDrawing drawing = new DefaultValueDrawing();
+		UniformRandomProvider rand = RandomUtil.newRandom2(netSeed);
+		DefaultValueDrawing drawing = new DefaultValueDrawing();
 		RandomNetCreator creator = new RandomNetCreator(15, rand, drawing);
 		return creator.drawNetMaybe().orElseThrow(() -> new RuntimeException());
 	}

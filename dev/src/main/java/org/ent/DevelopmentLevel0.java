@@ -1,9 +1,9 @@
 package org.ent;
 
-import org.ent.dev.randnet.DefaultValueDrawing;
-import org.ent.dev.randnet.PortalValue;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.net.Net;
+import org.ent.net.util.RandomUtil;
 import org.ent.util.Tools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class DevelopmentLevel0 {
 
@@ -22,11 +21,11 @@ public class DevelopmentLevel0 {
 
     private int numRuns;
 
-    private final Random randMaster;
-    private final Random randNetSeeds;
-    private final Random randTargets;
+    private final UniformRandomProvider randMaster;
+    private final UniformRandomProvider randNetSeeds;
+    private final UniformRandomProvider randTargets;
 
-    private final DefaultValueDrawing drawing;
+//    private final DefaultValueDrawing drawing;
 
     private final List<CopyValueGame> goodSeedsGetTargetValue = new ArrayList<>();
     private final List<CopyValueGame> goodSeedsInputSet = new ArrayList<>();
@@ -36,7 +35,7 @@ public class DevelopmentLevel0 {
     private int lastIndexEvalFlowOnVerifierRoot = -1;
 
     public static void main(String[] args) {
-        DevelopmentLevel0 dev0 = new DevelopmentLevel0(100, 15, new Random(5L));
+        DevelopmentLevel0 dev0 = new DevelopmentLevel0(100, 15, RandomUtil.newRandom2(5L));
         dev0.run();
     }
 
@@ -45,7 +44,7 @@ public class DevelopmentLevel0 {
         int numHits = 0;
         int numFullHits = 0;
 //        dev0.investigate(0xdfec9244c7cf21cdL, 5);
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100; i++) {
             CopyValueGame game = nextEvalFlowOnVerifierRoot();
             log.info("seed: {}", Long.toHexString(game.getNetCreatorSeed()));
 //            log.info("gtv: {} is: {}", dev0.goodSeedsGetTargetValue.size(), dev0.goodSeedsInputSet.size());
@@ -66,22 +65,19 @@ public class DevelopmentLevel0 {
     }
 
     private void investigate(long seed, int targetValue) {
-        RandomNetCreator netCreator = new RandomNetCreator(numberOfNodes, new Random(seed), CopyValueGame.drawing);
+        RandomNetCreator netCreator = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(seed), CopyValueGame.drawing);
         Net net = netCreator.drawNet();
         CopyValueGame game = new CopyValueGame(targetValue, net, maxSteps);
         game.setVerbose(true);
         game.execute();
     }
 
-    public DevelopmentLevel0(int maxSteps, int numberOfNodes, Random rand) {
+    public DevelopmentLevel0(int maxSteps, int numberOfNodes, UniformRandomProvider rand) {
         this.maxSteps = maxSteps;
         this.numberOfNodes = numberOfNodes;
         randMaster = rand;
-        randNetSeeds = new Random(randMaster.nextLong());
-        randTargets = new Random(randMaster.nextLong());
-
-        drawing = new DefaultValueDrawing();
-        drawing.addValueBase(new PortalValue(0, 1), DefaultValueDrawing.WEIGHT3);
+        randNetSeeds = RandomUtil.newRandom2(randMaster.nextLong());
+        randTargets = RandomUtil.newRandom2(randMaster.nextLong());
     }
 
     public CopyValueGame getNextGetTargetValue() {

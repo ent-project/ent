@@ -1,15 +1,16 @@
 package org.ent;
 
+import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.variation.ArrowMixMutation;
 import org.ent.net.Net;
+import org.ent.net.util.RandomUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import static org.ent.util.Tools.getHitsPerMinute;
 import static org.ent.util.Tools.rate;
@@ -25,8 +26,8 @@ public class DevelopmentLevel1b {
 
 
     private final DevelopmentLevel0 developmentLevel0;
-    private final Random randMaster;
-    private final Random randTargetValue;
+    private final UniformRandomProvider randMaster;
+    private final UniformRandomProvider randTargetValue;
     private final List<Level1bSolution> goodSeeds = new ArrayList<>();
     private int nextIndexGoodSeeds;
     private int numUpstreamTotal;
@@ -44,7 +45,7 @@ public class DevelopmentLevel1b {
     public record Level1bSolutionDirect(CopyValueGame game) implements Level1bSolution {
         @Override
         public Net freshNet() {
-            RandomNetCreator netCreator = new RandomNetCreator(game.getNumberOfNodes(), new Random(game.getNetCreatorSeed()), CopyValueGame.drawing);
+            RandomNetCreator netCreator = new RandomNetCreator(game.getNumberOfNodes(), RandomUtil.newRandom2(game.getNetCreatorSeed()), CopyValueGame.drawing);
             return netCreator.drawNet();
         }
 
@@ -68,10 +69,10 @@ public class DevelopmentLevel1b {
 
         @Override
         public Net freshNet() {
-            RandomNetCreator netCreator = new RandomNetCreator(numberOfNodes, new Random(upstream.getNetCreatorSeed()), CopyValueGame.drawing);
+            RandomNetCreator netCreator = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(upstream.getNetCreatorSeed()), CopyValueGame.drawing);
             Net net = netCreator.drawNet();
 
-            ArrowMixMutation mutation = new ArrowMixMutation(frequencyFactor, net, new Random(mixSeed));
+            ArrowMixMutation mutation = new ArrowMixMutation(frequencyFactor, net, RandomUtil.newRandom2(mixSeed));
             mutation.execute();
 
             return net;
@@ -84,14 +85,14 @@ public class DevelopmentLevel1b {
     }
 
     public static void main(String[] args) {
-        DevelopmentLevel1b developmentLevel1b = new DevelopmentLevel1b(new Random(0xFA1AFEL +1));
+        DevelopmentLevel1b developmentLevel1b = new DevelopmentLevel1b(RandomUtil.newRandom2(0xFA1AFEL + 1));
         developmentLevel1b.run();
     }
 
-    public DevelopmentLevel1b(Random random) {
+    public DevelopmentLevel1b(UniformRandomProvider random) {
         this.randMaster = random;
-        this.randTargetValue = new Random(randMaster.nextLong());
-        this.developmentLevel0 = new DevelopmentLevel0(maxStepsLevel0, numberOfNodes, new Random(randMaster.nextLong()));
+        this.randTargetValue = RandomUtil.newRandom2(randMaster.nextLong());
+        this.developmentLevel0 = new DevelopmentLevel0(maxStepsLevel0, numberOfNodes, RandomUtil.newRandom2(randMaster.nextLong()));
     }
 
     public Level1bSolution getNextVerifierFinished() {
@@ -149,14 +150,14 @@ public class DevelopmentLevel1b {
         boolean foundSolution = false;
         for (int i = 0; i < attemptsPerUpstream; i++) {
 
-            RandomNetCreator netCreator = new RandomNetCreator(numberOfNodes, new Random(seed), CopyValueGame.drawing);
+            RandomNetCreator netCreator = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(seed), CopyValueGame.drawing);
             Net net = netCreator.drawNet();
 
 //                NetFormatter formatter = new NetFormatter();
 //                log.info("before: {}", formatter.format(net));
 
             long mixSeed = randMaster.nextLong();
-            ArrowMixMutation mutation = new ArrowMixMutation(frequencyFactor, net, new Random(mixSeed));
+            ArrowMixMutation mutation = new ArrowMixMutation(frequencyFactor, net, RandomUtil.newRandom2(mixSeed));
             mutation.execute();
 //                log.info("after:  {}", formatter.format(net));
 
