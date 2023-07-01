@@ -30,7 +30,7 @@ public class Net {
 	private int netIndex;
 
 	private BiMap<Node, String> nodeNames;
-	private final List<Node> nodesByIndex = new ArrayList<>();
+	private final List<Node> nodesByIndex;
 
 	private int currentIndex;
 	private Node root;
@@ -50,6 +50,12 @@ public class Net {
 
 	public Net() {
 		this.nodes = new LinkedHashSet<>();
+		this.nodesByIndex = new ArrayList<>();
+	}
+
+	public Net(int noNodes) {
+		this.nodes = new LinkedHashSet<>((int)(noNodes / .75f) + 1);
+		this.nodesByIndex = new ArrayList<>(noNodes);
 	}
 
 	public int getNetIndex() {

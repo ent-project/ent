@@ -49,26 +49,23 @@ public class RandomNetCreator {
 	}
 
 	private void doDrawNet() {
-		initialize();
-		createNodes();
-		if (result == DrawResult.REJECT) {
-			return;
-		}
-		rewireToRandomTargets();
-		result = DrawResult.SUCCESS;
-	}
-
-	private void initialize() {
-    	net = new Net();
-    	result = null;
-	}
-
-	private void createNodes() {
 		int noNodes = ModifiedPoisson.getModifiedPoisson(numberOfNodes).drawModifiedPoisson(rand);
 		if (noNodes == 0) {
 			result = DrawResult.REJECT;
 			return;
 		}
+		initialize(noNodes);
+		createNodes(noNodes);
+		rewireToRandomTargets();
+		result = DrawResult.SUCCESS;
+	}
+
+	private void initialize(int noNodes) {
+    	net = new Net(noNodes);
+    	result = null;
+	}
+
+	private void createNodes(int noNodes) {
 		for (int i = 0; i < noNodes; i++) {
 			Node n = net.newNode(valueDrawing.drawValue(rand));
 			if (i == 0) {

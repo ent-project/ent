@@ -25,8 +25,6 @@ public class DevelopmentLevel0 {
     private final UniformRandomProvider randNetSeeds;
     private final UniformRandomProvider randTargets;
 
-//    private final DefaultValueDrawing drawing;
-
     private final List<CopyValueGame> goodSeedsGetTargetValue = new ArrayList<>();
     private final List<CopyValueGame> goodSeedsInputSet = new ArrayList<>();
     private final List<CopyValueGame> goodSeedsEvalFlowOnVerifierRoot = new ArrayList<>();
@@ -35,7 +33,7 @@ public class DevelopmentLevel0 {
     private int lastIndexEvalFlowOnVerifierRoot = -1;
 
     public static void main(String[] args) {
-        DevelopmentLevel0 dev0 = new DevelopmentLevel0(100, 15, RandomUtil.newRandom2(5L));
+        DevelopmentLevel0 dev0 = new DevelopmentLevel0(100, 15, RandomUtil.newRandom2(12345L));
         dev0.run();
     }
 
@@ -44,7 +42,7 @@ public class DevelopmentLevel0 {
         int numHits = 0;
         int numFullHits = 0;
 //        dev0.investigate(0xdfec9244c7cf21cdL, 5);
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
             CopyValueGame game = nextEvalFlowOnVerifierRoot();
             log.info("seed: {}", Long.toHexString(game.getNetCreatorSeed()));
 //            log.info("gtv: {} is: {}", dev0.goodSeedsGetTargetValue.size(), dev0.goodSeedsInputSet.size());
@@ -54,6 +52,7 @@ public class DevelopmentLevel0 {
             numHits++;
         }
         Duration duration = Duration.ofNanos(System.nanoTime() - startTime);
+        log.info("");
         log.info("total runs: {}; getTargetValue: {}; inputSet: {}; evalFlow: {}",
                 numRuns,
                 goodSeedsGetTargetValue.size(),
