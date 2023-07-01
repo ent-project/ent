@@ -13,8 +13,8 @@ allprojects {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_20
+    targetCompatibility = JavaVersion.VERSION_20
 }
 
 ext {
@@ -63,6 +63,6 @@ subprojects {
 
 // task for gradle wrapper upgrade: change gradleVersion here, then run "./gradlew wrapper"
 tasks.named('wrapper') {
-   gradleVersion = '7.4.2'
+   gradleVersion = '8.2'
    distributionType = Wrapper.DistributionType.ALL
 }
