@@ -9,6 +9,7 @@ import org.ent.MultiNetEventListener;
 import org.ent.NetEventListener;
 import org.ent.NopNetEventListener;
 import org.ent.Profile;
+import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.node.BNode;
 import org.ent.net.node.Hub;
 import org.ent.net.node.MarkerNode;
@@ -120,8 +121,8 @@ public class Net {
 		}
 	}
 
-	public Set<Node> removeAllNodes() {
-		HashSet<Node> formerNodes = new HashSet<>(this.nodes);
+	public List<Node> removeAllNodes() {
+		List<Node> formerNodes = new ArrayList<>(this.nodesByIndex);
 		formerNodes.forEach(n -> n.setNet(null));
 		nodes.clear();
 		nodesByIndex.clear();
@@ -433,5 +434,9 @@ public class Net {
 	public Net setPermittedToWrite(boolean permittedToWrite) {
 		this.permittedToWrite = permittedToWrite;
 		return this;
+	}
+
+	public String format() {
+		return new NetFormatter().format(this);
 	}
 }

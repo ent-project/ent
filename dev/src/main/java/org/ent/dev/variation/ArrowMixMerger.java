@@ -7,8 +7,8 @@ import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.util.ModifiedPoisson;
 
+import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 public class ArrowMixMerger {
 
@@ -26,7 +26,7 @@ public class ArrowMixMerger {
     }
 
     public void execute() {
-        Set<Node> nodes = netJoining.removeAllNodes();
+        List<Node> nodes = netJoining.removeAllNodes();
         netPrimary.addNodes(nodes);
         int num = (int) (netPrimary.getNodes().size() * frequencyFactor);
         int noMutations = ModifiedPoisson.getModifiedPoisson(num).drawModifiedPoisson(rand);

@@ -1,17 +1,16 @@
 package org.ent.dev;
 
+import org.ent.net.Arrow;
+import org.ent.net.Net;
+import org.ent.net.Purview;
+import org.ent.net.node.MarkerNode;
+import org.ent.net.node.Node;
+import org.ent.util.ModifiedPoisson;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
-
-import org.ent.net.Arrow;
-import org.ent.net.Purview;
-import org.ent.net.Net;
-import org.ent.net.node.MarkerNode;
-import org.ent.net.node.Node;
-import org.ent.util.ModifiedPoisson;
 
 public class NetMixer {
 
@@ -53,7 +52,7 @@ public class NetMixer {
 	}
 
 	private void doJoinNets() {
-		Set<Node> joiningNodes = joiningNet.removeAllNodes();
+		List<Node> joiningNodes = joiningNet.removeAllNodes();
 		primaryNet.addNodes(joiningNodes);
 		nodesList = new ArrayList<>(primaryNet.getNodes());
 	}

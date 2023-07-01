@@ -31,7 +31,7 @@ public class DevelopmentLevel2 {
     private int numGenTotal, numGenHit;
 
     public static void main(String[] args) {
-        DevelopmentLevel2 dev = new DevelopmentLevel2(new Random(0xFA1AFEL + 2));
+        DevelopmentLevel2 dev = new DevelopmentLevel2(new Random(0xFA1AFEL + 3));
         dev.run();
     }
 
@@ -45,7 +45,7 @@ public class DevelopmentLevel2 {
     private void run() {
         long startTime = System.nanoTime();
 
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < 400; i++) {
             next();
         }
 
@@ -71,17 +71,27 @@ public class DevelopmentLevel2 {
         numGenTotal++;
         DevelopmentLevel1a.Level1aSolution level1a = developmentLevel1a.getNextInputSetToTargetValue();
         DevelopmentLevel1b.Level1bSolution level1b = developmentLevel1b.getNextVerifierFinished();
+//        Net netBlueprint1 = level1a.freshNet();
+//        Net netBlueprint2 = level1b.freshNet();
 
         boolean foundSolution = false;
         for (int i = 0; i < attemptsPerUpstream; i++) {
+//            Net net1 = NetCopy2.createCopy(netBlueprint1);
+//            Net net2 = NetCopy2.createCopy(netBlueprint2);
+
             Net net1 = level1a.freshNet();
             Net net2 = level1b.freshNet();
+
+
+//            log.info("net1: {}", net1.format());
+//            log.info("net2: {}", net2.format());
+
 
             long mixSeed = randMaster.nextLong();
             ArrowMixMerger merger = new ArrowMixMerger(net1, net2, new Random(mixSeed), frequencyFactor);
             merger.execute();
 
-            boolean investigate = numTotal == 73;
+            boolean investigate = false;//numTotal == 73;
             if (investigate) {
                 Net copy = NetCopy2.createCopy(net1);
                 CopyValueGame game0 = new CopyValueGame(targetValue, copy, 8);
@@ -110,6 +120,8 @@ public class DevelopmentLevel2 {
             if (investigate) {
                 game.setVerbose(true);
             }
+//            game.setVerbose(true);
+
             game.execute();
 
             if (game.passedVerifierFinishedSuccessfully()) {
