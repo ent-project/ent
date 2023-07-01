@@ -7,8 +7,6 @@ import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.util.ModifiedPoisson;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class RandomNetCreator {
@@ -80,19 +78,13 @@ public class RandomNetCreator {
 	}
 
 	private void rewireToRandomTargets() {
-		// FIXME: use native node index
-		List<Node> nodes = new ArrayList<>(net.getNodes());
-
+		int size = net.getNodes().size();
 		for (Node node : net.getNodes()) {
 			for (Arrow arrow : node.getArrows()) {
-				Node target = getRandomTarget(nodes);
+				int targetIndex = rand.nextInt(size);
+				Node target = net.getNode(targetIndex);
 				arrow.setTarget(target, Purview.DIRECT);
 			}
 		}
-	}
-
-	private Node getRandomTarget(List<Node> nodes) {
-		int idx = rand.nextInt(nodes.size());
-		return nodes.get(idx);
 	}
 }
