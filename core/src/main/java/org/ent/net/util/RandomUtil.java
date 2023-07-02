@@ -18,4 +18,8 @@ public class RandomUtil {
     public static UniformRandomProvider newRandom2(long seed) {
         return RandomSource.PCG_MCG_XSH_RR_32.create(seed);
     }
+
+    public static UniformRandomProvider newRandom2() {
+        return RandomSource.PCG_MCG_XSH_RR_32.create();
+    }
 }

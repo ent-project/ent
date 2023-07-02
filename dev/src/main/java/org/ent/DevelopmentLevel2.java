@@ -20,7 +20,7 @@ public class DevelopmentLevel2 {
 
     private static final Logger log = LoggerFactory.getLogger(DevelopmentLevel2.class);
 
-    private final double frequencyFactor = 0.6;
+    private final double frequencyFactor = 0.8;
     private final int maxSteps = 40;
     private final int attemptsPerUpstream = 500;
 
