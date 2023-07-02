@@ -23,409 +23,406 @@ import java.util.function.Predicate;
 
 public class Net {
 
-	private static final boolean VALIDATE = true;
-
-	private final Set<Node> nodes;
-
-	private int netIndex;
-
-	private BiMap<Node, String> nodeNames;
-	private final List<Node> nodesByIndex;
-
-	private int currentIndex;
-	private Node root;
-
-	private boolean markerNodePermitted;
-
-	private MarkerNode markerNode;
-
-	List<NetEventListener> eventListeners = new ArrayList<>(); // FIXME get rid
-
-	NetEventListener netEventListener = new NopNetEventListener();
-
-	private final AccessToken evalToken = new AccessToken();
-
-	private boolean permittedToEvalRoot = true;
-	private boolean permittedToWrite = true;
-
-	public Net() {
-		this.nodes = new LinkedHashSet<>();
-		this.nodesByIndex = new ArrayList<>();
-	}
-
-	public Net(int noNodes) {
-		this.nodes = new LinkedHashSet<>((int)(noNodes / .75f) + 1);
-		this.nodesByIndex = new ArrayList<>(noNodes);
-	}
-
-	public int getNetIndex() {
-		return netIndex;
-	}
-
-	public Net setNetIndex(int netIndex) {
-		this.netIndex = netIndex;
-		return this;
-	}
-
-	public Net addEventListener(NetEventListener netEventListener) {
-		if (this.netEventListener instanceof NopNetEventListener) {
-			this.netEventListener = netEventListener;
-		} else if (this.netEventListener instanceof MultiNetEventListener multiNetEventListener) {
-			multiNetEventListener.addNetEventListener(netEventListener);
-		} else {
-			NetEventListener current = this.netEventListener;
-			MultiNetEventListener multiNetEventListener = new MultiNetEventListener();
-			multiNetEventListener.addNetEventListener(current);
-			multiNetEventListener.addNetEventListener(netEventListener);
-			this.netEventListener = multiNetEventListener;
-		}
-		return this;
-	}
-
-	public NetEventListener event() {
-		return netEventListener;
-	}
-
-	public Set<Node> getNodes() {
-		return nodes;
-	}
-
-	public void addNode(Node node) {
-		if (node.getNet() != null) {
-			throw new IllegalArgumentException("net in node must be unset");
-		}
-		node.setNet(this);
-		addNodeInternal(node);
-	}
-
-	public void addNodes(Collection<Node> nodes) {
-		nodes.forEach(this::addNode);
-	}
-
-	public boolean removeNode(Node node) {
-		int index = node.getIndex();
-		nodesByIndex.set(index, null);
-		if (nodeNames != null) {
-			nodeNames.remove(node);
-		}
-		return nodes.remove(node);
-	}
-
-	public void removeNodeIf(Predicate<? super Node> filter) {
-		Iterator<Node> iterator = nodes.iterator();
-		while (iterator.hasNext()) {
-			Node node = iterator.next();
-			if (filter.test(node)) {
-				int index = node.getIndex();
-				nodesByIndex.set(index, null);
-				if (nodeNames != null) {
-					nodeNames.remove(node);
-				}
-				iterator.remove();
-			}
-		}
-	}
-
-	public List<Node> removeAllNodes() {
-		List<Node> formerNodes = new ArrayList<>(this.nodesByIndex);
-		formerNodes.forEach(n -> n.setNet(null));
-		nodes.clear();
-		nodesByIndex.clear();
-		if (nodeNames != null) {
-			nodeNames.clear();
-		}
-		return formerNodes;
-	}
-
-	public Node getRoot() {
-		return root;
-	}
-
-	public void setRoot(Node root) {
-		// FIXME check it is part of net
-		this.root = root;
-	}
-
-	@VisibleForTesting
-	void validateBelongsToNet(@NotNull Node node) {
-		Validate.notNull(node);
-		if (VALIDATE) {
-			if (node.getNet() != this) {
-				throw new IllegalStateException("node belongs to another net");
-			}
-			if (node != markerNode && !nodes.contains(node)) {
-				throw new IllegalStateException("node does not belong to this net");
-			}
-		}
-	}
-
-	public MarkerNode permitMarkerNode() {
-		this.markerNodePermitted = true;
-		this.markerNode = new MarkerNode(this);
-		return this.markerNode;
-	}
-
-	public void forbidMarkerNode() {
-		if (VALIDATE) {
-			consistencyCheck(); // check marker is not referenced
-		}
-		this.markerNodePermitted = false;
-		this.markerNode = null;
-	}
-
-	public boolean isMarkerNodePermitted() {
-		return markerNodePermitted;
-	}
-
-	public MarkerNode getMarkerNode() {
-		return markerNode;
-	}
-
-	public void consistencyCheck() {
-		if (root == null) {
-			throw new AssertionError("Root is null");
-		}
-		if (!this.nodes.contains(root)) {
-			throw new AssertionError("Root must be one of the net nodes");
-		}
-		for (Node node : nodes) {
-			consistencyCheck(node);
-		}
-	}
-
-	private void consistencyCheck(Node node) {
-		if (node instanceof MarkerNode) {
-			throw new AssertionError("Net node must not be a marker node");
-		}
-		if (node.getNet() != this) {
-			throw new AssertionError("Node belongs to another net");
-		}
-		for (Arrow arrow : node.getArrows()) {
-			consistencyCheck(arrow);
-		}
-	}
-
-	private void consistencyCheck(Arrow arrow) {
-		Node child = arrow.getTarget(Purview.DIRECT);
-		if (child instanceof MarkerNode) {
-			if (!markerNodePermitted) {
-				throw new AssertionError("Child of node is marker node, but they are not permitted");
-			} else if (child != markerNode) {
-				throw new AssertionError("Child of node is marker node, but not the designated one");
-			}
-		} else {
-			if (!nodes.contains(child)) {
-				throw new AssertionError("Child of node must be part of the net");
-			}
-		}
-	}
-
-	public void referentialGarbageCollection() {
-		new ReferentialGarbageCollection(this).run();
-	}
-
-	public void runWithMarkerNode(Consumer<MarkerNode> consumer) {
-		MarkerNode marker = permitMarkerNode();
-		consumer.accept(marker);
-		forbidMarkerNode();
-	}
-
-	public static void ancestorExchange(Node node1, Node node2) {
-		Net net = node1.getNet();
-		net.validateBelongsToNet(node2);
-		Hub hub1 = node1.getHub();
-		Hub hub2 = node2.getHub();
-		node1.setHub(hub2);
-		hub2.setNode(node1);
-		node2.setHub(hub1);
-		hub1.setNode(node2);
-	}
-
-	public Node newRoot() {
-		Node newRoot = newNode();
-		setRoot(newRoot);
-		return newRoot;
-	}
-
-	public Node newRoot(int value, Node leftChild, Node rightChild) {
-		Node newRoot = newNode(value, leftChild, rightChild);
-		setRoot(newRoot);
-		return newRoot;
-	}
-
-	public Node newRoot(Node leftChild, Node rightChild) {
-		Node newRoot = newNode(leftChild, rightChild);
-		setRoot(newRoot);
-		return newRoot;
-	}
-
-	public Node newNode(int value, Node leftChild, Node rightChild) {
-		validateBelongsToNet(leftChild);
-		validateBelongsToNet(rightChild);
-		Node node = new Node(this, value, leftChild, rightChild);
-		addNodeInternal(node);
-		fireNewNodeCall(node);
-		return node;
-	}
-
-	public Node newNode() {
-		Node bNode = new Node(this);
-		addNodeInternal(bNode);
-		fireNewNodeCall(bNode);
-		return bNode;
-	}
-
-	public Node newNode(Node leftChild, Node rightChild) {
-		validateBelongsToNet(leftChild);
-		validateBelongsToNet(rightChild);
-		Node bNode = new Node(this, leftChild, rightChild);
-		addNodeInternal(bNode);
-		fireNewNodeCall(bNode);
-		return bNode;
-	}
-
-	public Node newNode(Command command) {
-		return newNode(command.getValue());
-	}
-
-	public Node newNode(int value) {
-		Node cNode = new Node(this, value);
-		addNodeInternal(cNode);
-		fireNewNodeCall(cNode);
-		return cNode;
-	}
-
-	public Node newUNode(Node child) {
-		validateBelongsToNet(child);
-		Node uNode = new Node(this, child);
-		addNodeInternal(uNode);
-		fireNewNodeCall(uNode);
-		return uNode;
-	}
-
-	public Node newCNode(Command command) {
-		return newNode(command);
-	}
-
-	public Node newCNode(int value) {
-		return newNode(value);
-	}
-
-	private void addNodeInternal(Node node) {
-		nodes.add(node);
-		node.setIndex(currentIndex);
-		nodesByIndex.add(node);
-		if (nodesByIndex.size() - 1 != currentIndex) {
-			throw new AssertionError();
-		}
-		currentIndex++;
-	}
-
-	@Deprecated
-	public void addExecutionEventListener(NetEventListener listener) {
-		throw new NotImplementedException();
-	}
-
-	@Deprecated
-	public void removeExecutionEventListener(NetEventListener listener) {
-		throw new NotImplementedException();
-	}
-
-	@Deprecated
-	public void withExecutionEventListener(NetEventListener listener, Runnable runnable) {
-		addExecutionEventListener(listener);
-		try {
-			runnable.run();
-		} finally {
-			removeExecutionEventListener(listener);
-		}
-	}
-
-	public void fireGetTargetCall(Node n, ArrowDirection arrowDirection, Purview purview) {
-		if (purview == Purview.DIRECT) {
-			return;
-		}
-		event().calledGetChild(n, arrowDirection, purview);
-	}
-
-	public void fireSetTargetCall(Node from, ArrowDirection arrowDirection, Node to, Purview purview) {
-		if (Profile.PARANOIA) {
-			validateBelongsToNet(to);
-		}
-		if (purview == Purview.DIRECT) {
-			return;
-		}
-		event().calledSetChild(from, arrowDirection, to, purview);
-	}
-
-	public void fireNewNodeCall(Node n) {
-		event().calledNewNode(n);
-	}
-
-	public void setName(Node node, String name) {
-		validateBelongsToNet(node);
-		if (nodeNames == null) {
-			nodeNames = HashBiMap.create();
-		}
-		nodeNames.put(node, name);
-	}
-
-	public String getName(Node node) {
-		if (nodeNames == null) {
-			return null;
-		}
-		return nodeNames.get(node);
-	}
-
-	public Node getByName(String name) {
-		if (nodeNames == null) {
-			return null;
-		}
-		return nodeNames.inverse().get(name);
-	}
-
-	public List<Node> getNodesAsList() {
-		return nodesByIndex;
-	}
-
-	public Node getNode(int index) {
-		return nodesByIndex.get(index);
-	}
-
-	/**
-	 * Provide token for elevated access rights. Holder of the eval token
-	 * can modify this Net, even if modification is not permitted in general.
-	 */
-	public AccessToken getEvalToken() {
-		return evalToken;
-	}
-
-	public boolean isPermittedToEval(Node node) {
-		return permittedToWrite || (permittedToEvalRoot && node == root);
-	}
-
-	public boolean isPermittedToEvalRoot() {
-		return permittedToEvalRoot;
-	}
-
-	public Net setPermittedToEvalRoot(boolean permittedToEvalRoot) {
-		this.permittedToEvalRoot = permittedToEvalRoot;
-		return this;
-	}
-
-	public boolean isPermittedToWrite(AccessToken accessToken) {
-		if (permittedToWrite) {
-			return true;
-		}
-		return permittedToEvalRoot && accessToken == this.evalToken;
-	}
-
-	public Net setPermittedToWrite(boolean permittedToWrite) {
-		this.permittedToWrite = permittedToWrite;
-		return this;
-	}
-
-	public String format() {
-		return new NetFormatter().format(this);
-	}
+    private static final boolean VALIDATE = true;
+    private static final boolean VALIDATE_MORE = false;
+
+    private int netIndex;
+
+    private BiMap<Node, String> nodeNames;
+    private final List<Node> nodes;
+
+    private int currentIndex;
+    private Node root;
+
+    private boolean markerNodePermitted;
+
+    private MarkerNode markerNode;
+
+    List<NetEventListener> eventListeners = new ArrayList<>(); // FIXME get rid
+
+    NetEventListener netEventListener = new NopNetEventListener();
+
+    private final AccessToken evalToken = new AccessToken();
+
+    private boolean permittedToEvalRoot = true;
+    private boolean permittedToWrite = true;
+
+    public Net() {
+        this.nodes = new ArrayList<>();
+    }
+
+    public Net(int noNodes) {
+        this.nodes = new ArrayList<>(noNodes);
+    }
+
+    public int getNetIndex() {
+        return netIndex;
+    }
+
+    public Net setNetIndex(int netIndex) {
+        this.netIndex = netIndex;
+        return this;
+    }
+
+    public Net addEventListener(NetEventListener netEventListener) {
+        if (this.netEventListener instanceof NopNetEventListener) {
+            this.netEventListener = netEventListener;
+        } else if (this.netEventListener instanceof MultiNetEventListener multiNetEventListener) {
+            multiNetEventListener.addNetEventListener(netEventListener);
+        } else {
+            NetEventListener current = this.netEventListener;
+            MultiNetEventListener multiNetEventListener = new MultiNetEventListener();
+            multiNetEventListener.addNetEventListener(current);
+            multiNetEventListener.addNetEventListener(netEventListener);
+            this.netEventListener = multiNetEventListener;
+        }
+        return this;
+    }
+
+    public NetEventListener event() {
+        return netEventListener;
+    }
+
+    public List<Node> getNodes() {
+        return nodes;
+    }
+
+    public void addNode(Node node) {
+        if (node.getNet() != null) {
+            throw new IllegalArgumentException("net in node must be unset");
+        }
+        node.setNet(this);
+        addNodeInternal(node);
+    }
+
+    public void addNodes(Collection<Node> nodes) {
+        nodes.forEach(this::addNode);
+    }
+
+    public void removeNode(Node node) {
+        int index = node.getIndex();
+        nodes.set(index, null);
+        if (nodeNames != null) {
+            nodeNames.remove(node);
+        }
+    }
+
+    public void removeNodeIf(Predicate<? super Node> filter) {
+        for (int i = 0; i < nodes.size(); i++) {
+            Node node = nodes.get(i);
+            if (node != null && filter.test(node)) {
+                nodes.set(i, null);
+                if (nodeNames != null) {
+                    nodeNames.remove(node);
+                }
+            }
+        }
+    }
+
+    public List<Node> removeAllNodes() {
+        List<Node> formerNodes = new ArrayList<>(this.nodes);
+        formerNodes.forEach(n -> n.setNet(null));
+        nodes.clear();
+        if (nodeNames != null) {
+            nodeNames.clear();
+        }
+        return formerNodes;
+    }
+
+    public Node getRoot() {
+        return root;
+    }
+
+    public void setRoot(Node root) {
+        // FIXME check it is part of net
+        this.root = root;
+    }
+
+    @VisibleForTesting
+    void validateBelongsToNet(@NotNull Node node) {
+        Validate.notNull(node);
+        if (VALIDATE) {
+            if (node.getNet() != this) {
+                throw new IllegalStateException("node belongs to another net");
+            }
+            if (VALIDATE_MORE) {
+                if (node != markerNode && !nodes.contains(node)) {
+                    throw new IllegalStateException("node does not belong to this net");
+                }
+            }
+        }
+    }
+
+    public MarkerNode permitMarkerNode() {
+        this.markerNodePermitted = true;
+        this.markerNode = new MarkerNode(this);
+        return this.markerNode;
+    }
+
+    public void forbidMarkerNode() {
+        if (VALIDATE) {
+            consistencyCheck(); // check marker is not referenced
+        }
+        this.markerNodePermitted = false;
+        this.markerNode = null;
+    }
+
+    public boolean isMarkerNodePermitted() {
+        return markerNodePermitted;
+    }
+
+    public MarkerNode getMarkerNode() {
+        return markerNode;
+    }
+
+    public void consistencyCheck() {
+        if (root == null) {
+            throw new AssertionError("Root is null");
+        }
+        if (VALIDATE_MORE) {
+            if (!this.nodes.contains(root)) {
+                throw new AssertionError("Root must be one of the net nodes");
+            }
+        }
+        for (Node node : nodes) {
+            consistencyCheck(node);
+        }
+    }
+
+    private void consistencyCheck(Node node) {
+        if (node instanceof MarkerNode) {
+            throw new AssertionError("Net node must not be a marker node");
+        }
+        if (node.getNet() != this) {
+            throw new AssertionError("Node belongs to another net");
+        }
+        for (Arrow arrow : node.getArrows()) {
+            consistencyCheck(arrow);
+        }
+    }
+
+    private void consistencyCheck(Arrow arrow) {
+        Node child = arrow.getTarget(Purview.DIRECT);
+        if (child instanceof MarkerNode) {
+            if (!markerNodePermitted) {
+                throw new AssertionError("Child of node is marker node, but they are not permitted");
+            } else if (child != markerNode) {
+                throw new AssertionError("Child of node is marker node, but not the designated one");
+            }
+        } else {
+            if (VALIDATE_MORE) {
+                if (!nodes.contains(child)) {
+                    throw new AssertionError("Child of node must be part of the net");
+                }
+            }
+        }
+    }
+
+    public void referentialGarbageCollection() {
+        new ReferentialGarbageCollection(this).run();
+    }
+
+    public void runWithMarkerNode(Consumer<MarkerNode> consumer) {
+        MarkerNode marker = permitMarkerNode();
+        consumer.accept(marker);
+        forbidMarkerNode();
+    }
+
+    public static void ancestorExchange(Node node1, Node node2) {
+        Net net = node1.getNet();
+        net.validateBelongsToNet(node2);
+        Hub hub1 = node1.getHub();
+        Hub hub2 = node2.getHub();
+        node1.setHub(hub2);
+        hub2.setNode(node1);
+        node2.setHub(hub1);
+        hub1.setNode(node2);
+    }
+
+    public Node newRoot() {
+        Node newRoot = newNode();
+        setRoot(newRoot);
+        return newRoot;
+    }
+
+    public Node newRoot(int value, Node leftChild, Node rightChild) {
+        Node newRoot = newNode(value, leftChild, rightChild);
+        setRoot(newRoot);
+        return newRoot;
+    }
+
+    public Node newRoot(Node leftChild, Node rightChild) {
+        Node newRoot = newNode(leftChild, rightChild);
+        setRoot(newRoot);
+        return newRoot;
+    }
+
+    public Node newNode(int value, Node leftChild, Node rightChild) {
+        validateBelongsToNet(leftChild);
+        validateBelongsToNet(rightChild);
+        Node node = new Node(this, value, leftChild, rightChild);
+        addNodeInternal(node);
+        fireNewNodeCall(node);
+        return node;
+    }
+
+    public Node newNode() {
+        Node bNode = new Node(this);
+        addNodeInternal(bNode);
+        fireNewNodeCall(bNode);
+        return bNode;
+    }
+
+    public Node newNode(Node leftChild, Node rightChild) {
+        validateBelongsToNet(leftChild);
+        validateBelongsToNet(rightChild);
+        Node bNode = new Node(this, leftChild, rightChild);
+        addNodeInternal(bNode);
+        fireNewNodeCall(bNode);
+        return bNode;
+    }
+
+    public Node newNode(Command command) {
+        return newNode(command.getValue());
+    }
+
+    public Node newNode(int value) {
+        Node cNode = new Node(this, value);
+        addNodeInternal(cNode);
+        fireNewNodeCall(cNode);
+        return cNode;
+    }
+
+    public Node newUNode(Node child) {
+        validateBelongsToNet(child);
+        Node uNode = new Node(this, child);
+        addNodeInternal(uNode);
+        fireNewNodeCall(uNode);
+        return uNode;
+    }
+
+    public Node newCNode(Command command) {
+        return newNode(command);
+    }
+
+    public Node newCNode(int value) {
+        return newNode(value);
+    }
+
+    private void addNodeInternal(Node node) {
+        node.setIndex(currentIndex);
+        nodes.add(node);
+        if (nodes.size() - 1 != currentIndex) {
+            throw new AssertionError();
+        }
+        currentIndex++;
+    }
+
+    @Deprecated
+    public void addExecutionEventListener(NetEventListener listener) {
+        throw new NotImplementedException();
+    }
+
+    @Deprecated
+    public void removeExecutionEventListener(NetEventListener listener) {
+        throw new NotImplementedException();
+    }
+
+    @Deprecated
+    public void withExecutionEventListener(NetEventListener listener, Runnable runnable) {
+        addExecutionEventListener(listener);
+        try {
+            runnable.run();
+        } finally {
+            removeExecutionEventListener(listener);
+        }
+    }
+
+    public void fireGetTargetCall(Node n, ArrowDirection arrowDirection, Purview purview) {
+        if (purview == Purview.DIRECT) {
+            return;
+        }
+        event().calledGetChild(n, arrowDirection, purview);
+    }
+
+    public void fireSetTargetCall(Node from, ArrowDirection arrowDirection, Node to, Purview purview) {
+        if (Profile.PARANOIA) {
+            validateBelongsToNet(to);
+        }
+        if (purview == Purview.DIRECT) {
+            return;
+        }
+        event().calledSetChild(from, arrowDirection, to, purview);
+    }
+
+    public void fireNewNodeCall(Node n) {
+        event().calledNewNode(n);
+    }
+
+    public void setName(Node node, String name) {
+        validateBelongsToNet(node);
+        if (nodeNames == null) {
+            nodeNames = HashBiMap.create();
+        }
+        nodeNames.put(node, name);
+    }
+
+    public String getName(Node node) {
+        if (nodeNames == null) {
+            return null;
+        }
+        return nodeNames.get(node);
+    }
+
+    public Node getByName(String name) {
+        if (nodeNames == null) {
+            return null;
+        }
+        return nodeNames.inverse().get(name);
+    }
+
+    public List<Node> getNodesAsList() {
+        return nodes;
+    }
+
+    public Node getNode(int index) {
+        return nodes.get(index);
+    }
+
+    /**
+     * Provide token for elevated access rights. Holder of the eval token
+     * can modify this Net, even if modification is not permitted in general.
+     */
+    public AccessToken getEvalToken() {
+        return evalToken;
+    }
+
+    public boolean isPermittedToEval(Node node) {
+        return permittedToWrite || (permittedToEvalRoot && node == root);
+    }
+
+    public boolean isPermittedToEvalRoot() {
+        return permittedToEvalRoot;
+    }
+
+    public Net setPermittedToEvalRoot(boolean permittedToEvalRoot) {
+        this.permittedToEvalRoot = permittedToEvalRoot;
+        return this;
+    }
+
+    public boolean isPermittedToWrite(AccessToken accessToken) {
+        if (permittedToWrite) {
+            return true;
+        }
+        return permittedToEvalRoot && accessToken == this.evalToken;
+    }
+
+    public Net setPermittedToWrite(boolean permittedToWrite) {
+        this.permittedToWrite = permittedToWrite;
+        return this;
+    }
+
+    public String format() {
+        return new NetFormatter().format(this);
+    }
 }
