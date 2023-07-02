@@ -17,7 +17,9 @@ import java.util.function.Predicate;
 public class DevelopmentLevel1a {
     private static final Logger log = LoggerFactory.getLogger(DevelopmentLevel1a.class);
     public static final int ATTEMPTS_PER_UPSTREAM = 400;
-    private final double CROSSOVER_FREQUENCY_FACTOR = 1.0;
+    private final double CROSSOVER_FREQUENCY_START = 1.0;
+    private final double CROSSOVER_FREQUENCY_END = 3.0;
+    private final double CROSSOVER_FREQUENCY_FACTOR = Math.pow(CROSSOVER_FREQUENCY_END / CROSSOVER_FREQUENCY_START, 1.0 / (ATTEMPTS_PER_UPSTREAM - 1));
     private final int maxStepsLevel0 = 6;
     private final int maxSteps = 8;
     private final int numberOfNodes = 3;
@@ -65,13 +67,15 @@ public class DevelopmentLevel1a {
         private final long seed1;
         private final long seed2;
         private final long swapSeed;
+        private final double crossoverFrequency;
 
-        public Level1aSolutionCombining(int index, CopyValueGame finishedGame, long seed1, long seed2, long swapSeed) {
+        public Level1aSolutionCombining(int index, CopyValueGame finishedGame, long seed1, long seed2, long swapSeed, double crossoverFrequency) {
             this.index = index;
             this.finishedGame = finishedGame;
             this.seed1 = seed1;
             this.seed2 = seed2;
             this.swapSeed = swapSeed;
+            this.crossoverFrequency = crossoverFrequency;
         }
 
         @Override
@@ -81,7 +85,7 @@ public class DevelopmentLevel1a {
             Net net1 = netCreator1.drawNet();
             Net net2 = netCreator2.drawNet();
 
-            new ValueFragmentCrossover(net1, net2, swapSeed, CROSSOVER_FREQUENCY_FACTOR).execute();
+            new ValueFragmentCrossover(net1, net2, swapSeed, crossoverFrequency).execute();
 
             if (index == 1) {
                 return net1;
@@ -123,13 +127,13 @@ public class DevelopmentLevel1a {
         dev.run();
     }
 
-    void investigate(long seed1, long seed2, long swapSeed, int targetValue) {
+    void investigate(long seed1, long seed2, long swapSeed, int targetValue, double crossoverFrequency) {
         RandomNetCreator netCreator1 = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(seed1), CopyValueGame.drawing);
         RandomNetCreator netCreator2 = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(seed2), CopyValueGame.drawing);
         Net net1 = netCreator1.drawNet();
         Net net2 = netCreator2.drawNet();
 
-        new ValueFragmentCrossover(net1, net2, swapSeed, CROSSOVER_FREQUENCY_FACTOR).execute();
+        new ValueFragmentCrossover(net1, net2, swapSeed, crossoverFrequency).execute();
 
         CopyValueGame game1 = new CopyValueGame(targetValue, net1, maxSteps);
         game1.setVerbose(true);
@@ -141,7 +145,7 @@ public class DevelopmentLevel1a {
 
 //        investigate(0x84bde80f4f9f8c6aL, 0xfe4e51e929f262b2L, 0x923080f3bcf65cb7L, 6);
 
-        for (int i = 0; i < 600; i++) {
+        for (int i = 0; i < 1000; i++) {
             if (i % 20 == 0) {
                 log.info("## i = {}", i);
             }
@@ -150,7 +154,7 @@ public class DevelopmentLevel1a {
 
         Duration duration = Duration.ofNanos(System.nanoTime() - startTime);
         log.info("");
-        log.info("number of nodes: {}, crossover frequency factor: {}, attempts per upstream: {}, max steps lvl0/lvl1a: {}/{} ", numberOfNodes, CROSSOVER_FREQUENCY_FACTOR, ATTEMPTS_PER_UPSTREAM, maxStepsLevel0, maxSteps);
+        log.info("number of nodes: {}, crossover frequency: {}..{}, attempts per upstream: {}, max steps lvl0/lvl1a: {}/{} ", numberOfNodes, CROSSOVER_FREQUENCY_START, CROSSOVER_FREQUENCY_END, ATTEMPTS_PER_UPSTREAM, maxStepsLevel0, maxSteps);
         log.info("miss 1: {}, miss 2: {}", rate(stat1.numDegraded, stat1.numTotal), rate(stat2.numDegraded, stat2.numTotal));
         log.info("retained 1: {}, retained 2: {}", rate(stat1.numRetained, stat1.numTotal), rate(stat2.numRetained, stat2.numTotal));
         log.info("upstream direct hit: {} + {} = {}",
@@ -207,6 +211,7 @@ public class DevelopmentLevel1a {
 
         int targetValue = randTargetValue.nextInt(5, 17);
         int found1 = 0, found2 = 0;
+        double crossoverFrequency = CROSSOVER_FREQUENCY_START;
         for (int i = 0; i < ATTEMPTS_PER_UPSTREAM; i++) {
             RandomNetCreator netCreator1 = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(seed1), CopyValueGame.drawing);
             RandomNetCreator netCreator2 = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(seed2), CopyValueGame.drawing);
@@ -214,13 +219,13 @@ public class DevelopmentLevel1a {
             Net net2 = netCreator2.drawNet();
 
             long swapSeed = randMaster.nextLong();
-            new ValueFragmentCrossover(net1, net2, swapSeed, CROSSOVER_FREQUENCY_FACTOR).execute();
+            new ValueFragmentCrossover(net1, net2, swapSeed, crossoverFrequency).execute();
 
             if (found1 < 2) {
                 CopyValueGame game1 = new CopyValueGame(targetValue, net1, maxSteps);
                 game1.execute();
                 if (recordSuccess(game1, stat1, swapSeed)) {
-                    solutions.add(new Level1aSolutionCombining(1, game1, seed1, seed2, swapSeed));
+                    solutions.add(new Level1aSolutionCombining(1, game1, seed1, seed2, swapSeed, crossoverFrequency));
                     found1++;
                 }
             }
@@ -229,14 +234,14 @@ public class DevelopmentLevel1a {
                 CopyValueGame game2 = new CopyValueGame(targetValue, net2, maxSteps);
                 game2.execute();
                 if (recordSuccess(game2, stat2, swapSeed)) {
-                    solutions.add(new Level1aSolutionCombining(2, game2, seed1, seed2, swapSeed));
+                    solutions.add(new Level1aSolutionCombining(2, game2, seed1, seed2, swapSeed, crossoverFrequency));
                     found2++;
                 }
             }
-
             if (found1 > 0 && found2 > 0) {
                 break;
             }
+            crossoverFrequency *= CROSSOVER_FREQUENCY_FACTOR;
         }
         numGenTotal++;
         if (found1 + found2 == 0) {
