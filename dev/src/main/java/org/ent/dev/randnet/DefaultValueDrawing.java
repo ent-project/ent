@@ -22,8 +22,9 @@ public class DefaultValueDrawing {
     public static final int WEIGHT1 = 10;
     public static final int WEIGHT2 = 4;
     public static final int WEIGHT3 = 3;
-    private final List<ParameterizedValue> valueSamples = new ArrayList<>();
-    private final List<Accessor> accessorSamples = new ArrayList<>();
+    private final List<Integer> valueSamples_valueBase = new ArrayList<>();
+    private final List<Integer> valueSamples_numberOfParameters = new ArrayList<>();
+    private final List<Integer> accessorSamples_code = new ArrayList<>();
 
     public DefaultValueDrawing() {
         addValueBase(Commands.NOP, WEIGHT3);
@@ -72,22 +73,23 @@ public class DefaultValueDrawing {
                 }
             }
         }
-        if (accessorSamples.size() != 32) {
+        if (accessorSamples_code.size() != 32) {
             throw new AssertionError();
         }
     }
 
     public void addValueBase(ParameterizedValue value, int weight) {
         for (int i = 0; i < weight; i++) {
-            valueSamples.add(value);
+            // optimization: direct access for fields "valueBase" and "numberOfParameters" of ParameterizedValue
+            valueSamples_valueBase.add(value.getValueBase());
+            valueSamples_numberOfParameters.add(value.getNumberOfParameters());
         }
     }
 
     public int drawValue(UniformRandomProvider rand) {
-        int valueDraw = rand.nextInt(valueSamples.size());
-        ParameterizedValue pValue = valueSamples.get(valueDraw);
-        int accessors = drawAccessors(pValue.getNumberOfParameters(), rand);
-        return pValue.getValueBase() | accessors;
+        int valueIndex = rand.nextInt(valueSamples_valueBase.size());
+        int accessors = drawAccessors(valueSamples_numberOfParameters.get(valueIndex), rand);
+        return valueSamples_valueBase.get(valueIndex) | accessors;
     }
 
     private int drawAccessors(int numberOfParameters, UniformRandomProvider rand) {
@@ -97,23 +99,24 @@ public class DefaultValueDrawing {
         }
         int draw = rand.nextInt();
         int accIdx1 = draw & 0b11111;
-        result |= accessorSamples.get(accIdx1).getCode() << 12;
+        result |= accessorSamples_code.get(accIdx1) << 12;
         if (numberOfParameters == 1) {
             return result;
         }
         int accIdx2 = (draw >> 5) & 0b11111;
-        result |= accessorSamples.get(accIdx2).getCode() << 16;
+        result |= accessorSamples_code.get(accIdx2) << 16;
         if (numberOfParameters == 2) {
             return result;
         }
         int accIdx3 = (draw >> 10) & 0b11111;
-        result |= accessorSamples.get(accIdx3).getCode() << 20;
+        result |= accessorSamples_code.get(accIdx3) << 20;
         return result;
     }
 
     private void addAccessor(Accessor accessor, int weight) {
         for (int i = 0; i < weight; i++) {
-            accessorSamples.add(accessor);
+            // optimization: direct access for field "code" of Accessor
+            accessorSamples_code.add(accessor.getCode());
         }
     }
 
