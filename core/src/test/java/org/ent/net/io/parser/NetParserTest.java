@@ -18,7 +18,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,7 +45,7 @@ class NetParserTest {
 		void value() throws Exception {
 			Net net = parser.parse("#123abc");
 
-			Set<Node> nodes = net.getNodes();
+			List<Node> nodes = net.getNodes();
 			assertThat(nodes).hasSize(1);
 			Node root = net.getRoot();
 
@@ -58,7 +57,7 @@ class NetParserTest {
 		void command() throws Exception {
 			Net net = parser.parse("<x>");
 
-			Set<Node> nodes = net.getNodes();
+			List<Node> nodes = net.getNodes();
 			assertThat(nodes).hasSize(1);
 			Node root = net.getRoot();
 
@@ -70,7 +69,7 @@ class NetParserTest {
 		void condition() throws Exception {
 			Net net = parser.parse("<?===?>");
 
-			Set<Node> nodes = net.getNodes();
+			List<Node> nodes = net.getNodes();
 			assertThat(nodes).hasSize(1);
 			Node root = net.getRoot();
 
@@ -82,7 +81,7 @@ class NetParserTest {
 		void unary() throws Exception {
 			Net net = parser.parse("[<o>]");
 
-			Set<Node> nodes = net.getNodes();
+			List<Node> nodes = net.getNodes();
 			assertThat(nodes).hasSize(2);
 			Node root = net.getRoot();
 
@@ -95,7 +94,7 @@ class NetParserTest {
 		void valued_unary() throws Exception {
 			Net net = parser.parse("#1a[<o>]");
 
-			Set<Node> nodes = net.getNodes();
+			List<Node> nodes = net.getNodes();
 			assertThat(nodes).hasSize(2);
 			Node root = net.getRoot();
 
@@ -107,7 +106,7 @@ class NetParserTest {
 		void binary() throws Exception {
 			Net net = parser.parse("(<o>, <x>)");
 
-			Set<Node> nodes = net.getNodes();
+			List<Node> nodes = net.getNodes();
 			assertThat(nodes).hasSize(3);
 			Node root = net.getRoot();
 
@@ -122,7 +121,7 @@ class NetParserTest {
 		void someExample() throws Exception {
 			Net net = parser.parse("(<o>, [<o>])");
 
-			Set<Node> nodes = net.getNodes();
+			List<Node> nodes = net.getNodes();
 			assertThat(nodes).hasSize(4);
 			Node root = net.getRoot();
 			Node c = root.getLeftChild();
@@ -139,7 +138,7 @@ class NetParserTest {
 		void chain() throws Exception {
 			Net net = parser.parse("A:B; B:C; C:<o>");
 
-			Set<Node> nodes = net.getNodes();
+			List<Node> nodes = net.getNodes();
 			assertThat(nodes).hasSize(1);
 		}
 
@@ -147,7 +146,7 @@ class NetParserTest {
 		void selfReference() throws Exception {
 			Net net = parser.parse("A:[[A]]");
 
-			Set<Node> nodes = net.getNodes();
+			List<Node> nodes = net.getNodes();
 			assertThat(nodes).hasSize(2);
 
 			Node u = nodes.iterator().next();
@@ -159,7 +158,7 @@ class NetParserTest {
 		void comment() throws Exception {
 			Net net = parser.parse("A:[B]; ~ definition of B follows\nB:A");
 
-			Set<Node> nodes = net.getNodes();
+			List<Node> nodes = net.getNodes();
 			assertThat(nodes).hasSize(1);
 		}
 
@@ -168,7 +167,7 @@ class NetParserTest {
 			parser.permitMarkerNodes();
 			Net net = parser.parse("A:[@]");
 
-			Set<Node> nodes = net.getNodes();
+			List<Node> nodes = net.getNodes();
 			assertThat(nodes).hasSize(1);
 		}
 

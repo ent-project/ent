@@ -21,8 +21,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -140,7 +140,7 @@ class NetTest {
 		assertThat(net.getNodes()).hasSize(1);
 		Net net2 = parser.parse("<x>");
 
-		Set<Node> net2Nodes = net2.getNodes();
+		List<Node> net2Nodes = net2.getNodes();
 
 		assertThatExceptionOfType(IllegalArgumentException.class)
 				.isThrownBy(() -> net.addNodes(net2Nodes))

@@ -24,7 +24,7 @@ public class NetBuilder {
         return new NetBuilder();
     }
 
-    public Net net(Node root) {
+    public Net net(Node root, Node... otherNodes) {
         Net net = currentNet.get();
         net.setRoot(root);
         currentNet.remove();

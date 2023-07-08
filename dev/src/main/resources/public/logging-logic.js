@@ -11,14 +11,26 @@ ws.onclose = () => {
 }
 
 function updateLogs(msg) {
-    console.log("updateLogs '"+msg.data+"'")
-
     let logs = id("logs");
-    let atBottom = logs.scrollTop + logs.clientHeight >= logs.scrollHeight;
-    console.log("atBottom: " + atBottom);
     let data = JSON.parse(msg.data);
-    logs.insertAdjacentHTML("beforeend", data.message);
-    if (atBottom) {
-        logs.scrollTop = logs.scrollHeight;
+    if (data.type === 'log') {
+        let atBottom = logs.scrollTop + logs.clientHeight >= logs.scrollHeight;
+        logs.insertAdjacentHTML("beforeend", data.message);
+        if (atBottom) {
+            logs.scrollTop = logs.scrollHeight;
+        }
+    } else if (data.type === 'dot') {
+        const article = document.createElement('article');
+        logs.insertAdjacentElement("beforeend", article);
+        Viz.instance().then(function(viz) {
+            let atBottom = logs.scrollTop + logs.clientHeight >= logs.scrollHeight;
+            article.appendChild(viz.renderSVGElement(data.dot));
+            if (atBottom) {
+                logs.scrollTop = logs.scrollHeight;
+            }
+        });
+    } else {
+        console.error("unknown type: " + data.type);
+        return;
     }
 }

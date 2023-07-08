@@ -59,9 +59,13 @@ public class Ent {
     }
 
     public int addPortal(Arrow portal) {
+        int index = portals.size();
         portals.add(portal);
-        int idx = portals.size();
-        return (-idx) & 0xFFFF;
+        return getPortalCode(index);
+    }
+
+    public static int getPortalCode(int index) {
+        return index ^ 0xFFFF;
     }
 
     private boolean isPortal(int index) {

@@ -27,9 +27,14 @@ public class WebUI {
 
     public static Set<WsContext> sessions = new HashSet<>();
 
-    static Queue<String> buffer = new ConcurrentLinkedQueue<>();
+    static Queue<Object> buffer = new ConcurrentLinkedQueue<>();
 
     public static void main(String[] args) {
+        setUpJavalin();
+        loopForever();
+    }
+
+    public static void setUpJavalin() {
         Javalin app = Javalin.create(config ->
                 config.staticFiles.add("/public", Location.CLASSPATH)).start(7070);
         // fixme try with resource
@@ -39,8 +44,9 @@ public class WebUI {
                 System.err.println("connect");
                 sessions.add(ctx);
                 ctx.session.setIdleTimeout(Duration.ofMinutes(15));
-                for (String message : buffer) {
-                    sendToSession(ctx, message);
+                for (Object message : buffer) {
+                    ctx.send(message);
+//                    sendToSession(ctx, message);
                 }
             });
             ws.onClose(ctx -> {
@@ -48,7 +54,9 @@ public class WebUI {
                 sessions.remove(ctx);
             });
         });
+    }
 
+    public static void loopForever() {
         int i = 1;
         while (true) {
             try {
@@ -57,29 +65,42 @@ public class WebUI {
                 throw new RuntimeException(e);
             }
             log.info("Msg {}", i);
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            broadcastDot("digraph { a -> c%s }".formatted(i));
             i++;
         }
     }
 
     public static void broadcastLogMessage(String message) {
         System.err.println("broadcast");
-        buffer.add(message);
-        sessions.stream().filter(ctx -> ctx.session.isOpen()).forEach(session -> {
-            sendToSession(session, message);
-        });
-    }
-
-    private static void sendToSession(WsContext session, String message) {
-        session.send(
-                Map.of(
-                        "type", "log",
-                        "message", createHtmlLogEntry(message)
-                )
+        Object payload = Map.of(
+                "type", "log",
+                "message", createHtmlLogEntry(message)
         );
+        buffer.add(payload);
+        sessions.stream().filter(ctx -> ctx.session.isOpen()).forEach(session -> {
+            session.send(payload);
+        });
     }
 
     private static String createHtmlLogEntry(String message) {
         return article(p(message)).render();
+    }
+
+    public static void broadcastDot(String dotString) {
+        System.err.println("broadcast dot");
+        Object payload = Map.of(
+                "type", "dot",
+                "dot", dotString
+        );
+        buffer.add(payload);
+        sessions.stream().filter(ctx -> ctx.session.isOpen()).forEach(session -> {
+            session.send(payload);
+        });
     }
 
 }
