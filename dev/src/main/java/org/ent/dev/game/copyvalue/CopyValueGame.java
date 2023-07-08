@@ -1,5 +1,11 @@
-package org.ent;
+package org.ent.dev.game.copyvalue;
 
+import org.ent.Ent;
+import org.ent.LazyPortalArrow;
+import org.ent.NopEntEventListener;
+import org.ent.NopNetEventListener;
+import org.ent.PortalArrow;
+import org.ent.RootPortalArrow;
 import org.ent.dev.randnet.DefaultValueDrawing;
 import org.ent.dev.randnet.PortalValue;
 import org.ent.dev.randnet.RandomNetCreator;
@@ -16,8 +22,14 @@ import org.ent.run.EntRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.ent.net.node.cmd.accessor.Accessors.*;
-import static org.ent.util.NetBuilder.*;
+import static org.ent.net.node.cmd.accessor.Accessors.FLOW;
+import static org.ent.net.node.cmd.accessor.Accessors.LEFT_LEFT;
+import static org.ent.net.node.cmd.accessor.Accessors.LEFT_RIGHT;
+import static org.ent.net.node.cmd.accessor.Accessors.RIGHT;
+import static org.ent.util.NetBuilder.builder;
+import static org.ent.util.NetBuilder.ignored;
+import static org.ent.util.NetBuilder.node;
+import static org.ent.util.NetBuilder.value;
 
 class CopyValueGame {
     private static final Logger log = LoggerFactory.getLogger(CopyValueGame.class);

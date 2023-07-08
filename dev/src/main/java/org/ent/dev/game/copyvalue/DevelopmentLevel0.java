@@ -1,4 +1,4 @@
-package org.ent;
+package org.ent.dev.game.copyvalue;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.dev.randnet.RandomNetCreator;
