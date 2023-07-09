@@ -14,9 +14,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static j2html.TagCreator.article;
-import static j2html.TagCreator.p;
-
 public class WebUI {
 
     static {
@@ -79,7 +76,7 @@ public class WebUI {
         System.err.println("broadcast");
         Object payload = Map.of(
                 "type", "log",
-                "message", createHtmlLogEntry(message)
+                "message", message
         );
         buffer.add(payload);
         sessions.stream().filter(ctx -> ctx.session.isOpen()).forEach(session -> {
@@ -87,14 +84,11 @@ public class WebUI {
         });
     }
 
-    private static String createHtmlLogEntry(String message) {
-        return article(p(message)).render();
-    }
-
     public static void broadcastDot(String dotString) {
         System.err.println("broadcast dot");
         Object payload = Map.of(
                 "type", "dot",
+                "scale", 0.7,
                 "dot", dotString
         );
         buffer.add(payload);

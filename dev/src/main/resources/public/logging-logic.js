@@ -15,7 +15,11 @@ function updateLogs(msg) {
     let data = JSON.parse(msg.data);
     if (data.type === 'log') {
         let atBottom = logs.scrollTop + logs.clientHeight >= logs.scrollHeight;
-        logs.insertAdjacentHTML("beforeend", data.message);
+        const article = document.createElement('article');
+        const pre = document.createElement('pre');
+        pre.innerText = data.message;
+        article.appendChild(pre);
+        logs.insertAdjacentElement("beforeend", article);
         if (atBottom) {
             logs.scrollTop = logs.scrollHeight;
         }
@@ -24,7 +28,19 @@ function updateLogs(msg) {
         logs.insertAdjacentElement("beforeend", article);
         Viz.instance().then(function(viz) {
             let atBottom = logs.scrollTop + logs.clientHeight >= logs.scrollHeight;
-            article.appendChild(viz.renderSVGElement(data.dot));
+            const div = document.createElement('div');
+            article.appendChild(div);
+            let svg = viz.renderSVGElement(data.dot);
+            if ("scale" in data) {
+                let width = parseFloat(svg.getAttribute("width"));
+                let height = parseFloat(svg.getAttribute("height"));
+                let scale = data.scale
+                width = width * scale;
+                height = height * scale;
+                svg.setAttribute("width", width + "pt");
+                svg.setAttribute("height", height + "pt");
+            }
+            div.appendChild(svg);
             if (atBottom) {
                 logs.scrollTop = logs.scrollHeight;
             }
