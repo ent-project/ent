@@ -114,7 +114,7 @@ class CopyValueGame {
             if (verifierNet == null) {
                 buildVerifier(targetValue);
             }
-            return new PortalArrow(verifierNet);
+            return new PortalArrow(verifierNet); // FIXME RootPortalArrow?
         }));
         return ent;
     }

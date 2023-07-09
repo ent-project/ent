@@ -45,6 +45,14 @@ public class LazyPortalArrow implements Arrow {
     }
 
     @Override
+    public void setTarget(Node target, Purview purview, AccessToken token) {
+        if (delegate == null) {
+            createDelegate();
+        }
+        delegate.setTarget(target, purview, token);
+    }
+
+    @Override
     public boolean permittedToSetTarget(Node target, AccessToken accessToken) {
         if (delegate == null) {
             createDelegate();
