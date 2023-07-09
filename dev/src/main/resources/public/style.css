@@ -16,6 +16,10 @@ body {
     font-family: monospace;
 }
 
+#logs pre {
+    white-space: pre-wrap;
+}
+
 #header, #footer {
     flex-shrink: 0;
     background-color: #ccc;

@@ -27,6 +27,7 @@ public class Net {
     private static final boolean VALIDATE_MORE = false;
 
     private int netIndex;
+    private String name;
 
     private BiMap<Node, String> nodeNames;
     private final List<Node> nodes;
@@ -62,6 +63,14 @@ public class Net {
     public Net setNetIndex(int netIndex) {
         this.netIndex = netIndex;
         return this;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Net addEventListener(NetEventListener netEventListener) {

@@ -13,6 +13,6 @@ public class DotLogger {
     }
 
     public static void log(Ent ent) {
-        log(ent.getNet());
+        logger.atInfo().log(() -> DotRenderer.render(ent));
     }
 }

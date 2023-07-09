@@ -207,7 +207,7 @@ public class Node {
 		return rightChildHub.getNode() == this && leftChildHub.getNode() != this;
 	}
 
-	public boolean isCommandNode() {
+	public boolean isLeafNode() {
 		return leftChildHub.getNode() == this && rightChildHub.getNode() == this;
 	}
 

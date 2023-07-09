@@ -119,10 +119,12 @@ public class TwoNumberArithmeticForwardGame {
                                 value(Commands.FINAL_FAILURE)))));
         verifierNet.setPermittedToWrite(false);
         verifierNet.setPermittedToEvalRoot(true);
+        verifierNet.setName("verifier");
         ent.addDomain(verifierNet);
 
         answerNet = builder().net(answerNode = value(0));
         answerNet.setPermittedToWrite(true);
+        answerNet.setName("answer");
         ent.addDomain(answerNet);
         int answerPortalCode = ent.addPortal(new PortalArrow(answerNet));
         portalAnswer.setValue(answerPortalCode);
@@ -134,16 +136,14 @@ public class TwoNumberArithmeticForwardGame {
         EntRunner runner = new EntRunner(ent);
         if (verbose) {
             log.info("ent {}", formatter.format(ent));
-            DotLogger.log(ent.getNet());
+            DotLogger.log(ent);
         }
         for (int step = 0; step < maxSteps; step++) {
             runner.step();
             if (verbose) {
                 dumpResults();
                 log.info("after step {}: {}", step, formatter.format(ent));
-                DotLogger.log(ent.getNet());
-                DotLogger.log(verifierNet);
-                DotLogger.log(answerNet);
+                DotLogger.log(ent);
             }
         }
     }

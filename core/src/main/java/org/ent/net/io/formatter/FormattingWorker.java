@@ -100,7 +100,7 @@ public class FormattingWorker {
 		if (node.isMarkerNode()) {
 			stringBuilder.append(MarkerNode.MARKER_NODE_SYMBOL);
 		} else {
-			if (node.getValue(Purview.DIRECT) != 0 || node.isCommandNode()) {
+			if (node.getValue(Purview.DIRECT) != 0 || node.isLeafNode()) {
 				String name = Values.getName(node.getValue(Purview.DIRECT));
 				if (name != null) {
 					stringBuilder.append("<");
@@ -114,7 +114,7 @@ public class FormattingWorker {
 				stringBuilder.append("[");
 				doFormatRecursively(node.getLeftChild(Purview.DIRECT), level + 1);
 				stringBuilder.append("]");
-			} else if (!node.isCommandNode()) {
+			} else if (!node.isLeafNode()) {
 				stringBuilder.append("(");
 				Node leftChild = node.getLeftChild(Purview.DIRECT);
 				doFormatRecursively(leftChild, level + 1);

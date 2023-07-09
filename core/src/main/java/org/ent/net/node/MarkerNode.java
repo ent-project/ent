@@ -63,11 +63,6 @@ public class MarkerNode extends Node {
 	}
 
 	@Override
-	public boolean isCommandNode() {
-		return false;
-	}
-
-	@Override
 	public NodeType getNodeType() {
 		return NodeType.MARKER_NODE;
 	}

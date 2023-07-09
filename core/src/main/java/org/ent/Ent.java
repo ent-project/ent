@@ -32,6 +32,14 @@ public class Ent {
         this.net = net;
     }
 
+    public List<Net> getDomains() {
+        return domains;
+    }
+
+    public List<Arrow> getPortals() {
+        return portals;
+    }
+
     public Arrow getArrowMaybeThroughPortal(Node node, ArrowDirection direction, Purview purview) {
         int value = node.getValue(purview);
         int portalIndex = getPortalIndex(value, direction);
