@@ -15,9 +15,8 @@ import org.ent.net.node.cmd.operation.Operations;
 import org.ent.net.node.cmd.operation.TriOperation;
 import org.ent.net.node.cmd.veto.Conditions;
 import org.ent.net.node.cmd.veto.Vetos;
-import org.ent.net.util.DotRenderer;
 import org.ent.run.EntRunner;
-import org.ent.webui.WebUI;
+import org.ent.util.DotLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,20 +134,16 @@ public class TwoNumberArithmeticForwardGame {
         EntRunner runner = new EntRunner(ent);
         if (verbose) {
             log.info("ent {}", formatter.format(ent));
-            String dot = DotRenderer.render(ent.getNet());
-            WebUI.broadcastDot(dot);
+            DotLogger.log(ent.getNet());
         }
         for (int step = 0; step < maxSteps; step++) {
             runner.step();
             if (verbose) {
                 dumpResults();
                 log.info("after step {}: {}", step, formatter.format(ent));
-                String dot = DotRenderer.render(ent.getNet());
-                WebUI.broadcastDot(dot);
-                String dot2 = DotRenderer.render(verifierNet);
-                WebUI.broadcastDot(dot2);
-                String dot3 = DotRenderer.render(answerNet);
-                WebUI.broadcastDot(dot3);
+                DotLogger.log(ent.getNet());
+                DotLogger.log(verifierNet);
+                DotLogger.log(answerNet);
             }
         }
     }

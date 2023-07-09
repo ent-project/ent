@@ -19,6 +19,9 @@ public class ReferentialGarbageCollection {
 	public void run() {
 		Set<Node> reachableNodes = NetUtils.collectReachable(net.getRoot());
 		for (Node n : net.getNodes()) {
+			if (n == null) {
+				continue;
+			}
 			if (!reachableNodes.contains(n)) {
 				unlink(n);
 			}

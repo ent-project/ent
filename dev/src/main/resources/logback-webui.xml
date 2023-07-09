@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="logback-common.xml"/>
+
+    <appender name="WEBUI" class="org.ent.webui.WebsocketAppender">
+        <encoder>
+            <pattern>| %d{HH:mm:ss.SSS} %-5level %logger{20} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="WEBUI-DOT" class="org.ent.webui.WebsocketAppender">
+        <dot>true</dot>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="WEBUI"/>
+    </root>
+
+    <logger name="webui" level="OFF"/>
+
+    <logger name="webui.dot" level="INFO" additivity="false">
+        <appender-ref ref="WEBUI-DOT"/>
+    </logger>
+
+</configuration>

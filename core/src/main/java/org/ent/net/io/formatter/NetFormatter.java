@@ -17,6 +17,8 @@ public class NetFormatter {
 
 	private boolean forceGivenNodeNames;
 
+	private boolean includeOrphans;
+
 	private Integer maxDepth;
 
 	public Integer getMaxDepth() {
@@ -36,6 +38,15 @@ public class NetFormatter {
 		return this;
 	}
 
+	public void setIncludeOrphans(boolean includeOrphans) {
+		this.includeOrphans = includeOrphans;
+	}
+
+	public NetFormatter withIncludeOrphans(boolean includeOrphans) {
+		setIncludeOrphans(includeOrphans);
+		return this;
+	}
+
 	public String format(Ent ent) {
 		return format(ent.getNet());
 	}
@@ -47,14 +58,16 @@ public class NetFormatter {
 
         collectRecursively(net.getRoot(), collected, net.isMarkerNodePermitted());
 
-        Set<Node> missing = new LinkedHashSet<>(net.getNodes());
-        missing.removeAll(collected);
+		if (includeOrphans) {
+			Set<Node> missing = new LinkedHashSet<>(net.getNodes());
+			missing.removeAll(collected);
 
-        while (!missing.isEmpty()) {
-            Node nextRoot = missing.iterator().next();
-            collectRecursivelyInverted(nextRoot, missing);
-            rootNodes.add(nextRoot);
-        }
+			while (!missing.isEmpty()) {
+				Node nextRoot = missing.iterator().next();
+				collectRecursivelyInverted(nextRoot, missing);
+				rootNodes.add(nextRoot);
+			}
+		}
 
         FormattingWorker worker = new FormattingWorker(net, rootNodes, forceGivenNodeNames, maxDepth);
 

@@ -12,6 +12,7 @@ import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.NopCommand;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,6 +64,7 @@ class NetTest {
 			}
 
 			@Test
+			@Disabled("depends on VALIDATE_MORE")
 			void rootNotInNet() throws Exception {
 				Net net = parser.parse("[#1]");
 				Net net2 = parser.parse("(<o>,<x>)");
@@ -72,6 +74,7 @@ class NetTest {
 			}
 
 			@Test
+			@Disabled("depends on VALIDATE_MORE")
 			void rogueChild() throws Exception {
 				Net net = new NetParser().parse("[#1]");
 				Net net2 = new NetParser().parse("(<o>,<x>)");
@@ -156,6 +159,7 @@ class NetTest {
 	}
 
 	@Test
+	@Disabled("depends on VALIDATE_MORE")
 	void validateBelongsToNet_netDoesNotKnowTheNode_error() {
 		Net net = new Net();
 		Node node = net.newCNode(Commands.NOP);
@@ -367,6 +371,7 @@ class NetTest {
 
 				verifyNoMoreInteractions(eventListener);
 				NetFormatter formatter = new NetFormatter()
+						.withIncludeOrphans(true)
 						.withForceGivenNodeNames(true);
 				assertThat(formatter.format(net)).isEqualTo(expectedOutput);
 			}
@@ -409,7 +414,6 @@ class NetTest {
 
 		net.referentialGarbageCollection();
 
-		assertThat(net.getNodes()).hasSize(2);
 		assertThat(net.getNodesAsList().stream().filter(Objects::nonNull).count()).isEqualTo(2);
 	}
 }

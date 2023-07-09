@@ -205,8 +205,8 @@ class NetFormatterTest {
 			assertThat(str1).isEqualTo("(a:[[a]], b:[[b]])");
 
 			root.setLeftChild(net.newCNode(Commands.NOP));
-			net.getNodes().remove(u1.getLeftChild());
-			net.getNodes().remove(u1);
+			net.removeNode(u1.getLeftChild());
+			net.removeNode(u1);
 
 			String str2 = formatter.format(net);
 
@@ -222,6 +222,7 @@ class NetFormatterTest {
 			net.newUNode(root);
 			net.setRoot(root);
 
+			formatter.setIncludeOrphans(true);
 			String str = formatter.format(net);
 
 			assertThat(str).isEqualTo("A:(a:[[a]], <o>); [A]");

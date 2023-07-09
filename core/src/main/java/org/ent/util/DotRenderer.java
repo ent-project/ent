@@ -1,4 +1,4 @@
-package org.ent.net.util;
+package org.ent.util;
 
 import org.ent.net.Arrow;
 import org.ent.net.Net;

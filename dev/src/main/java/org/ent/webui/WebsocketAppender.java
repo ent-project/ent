@@ -10,6 +10,12 @@ public class WebsocketAppender extends UnsynchronizedAppenderBase<ILoggingEvent>
 
     protected Encoder<ILoggingEvent> encoder;
 
+    private boolean dot;
+
+    public void setDot(boolean dot) {
+        this.dot = dot;
+    }
+
     @Override
     public void start() {
         super.start();
@@ -20,10 +26,18 @@ public class WebsocketAppender extends UnsynchronizedAppenderBase<ILoggingEvent>
         if (!isStarted()) {
             return;
         }
-        byte[] byteArray = encoder.encode(event);
-
-        System.err.println("hi there!");
-        WebUI.broadcastLogMessage(new String(byteArray, StandardCharsets.UTF_8));
+        String message;
+        if (encoder != null) {
+            byte[] byteArray = encoder.encode(event);
+            message = new String(byteArray, StandardCharsets.UTF_8);
+        } else {
+            message = event.getMessage();
+        }
+        if (dot) {
+            WebUI.broadcastDot(message);
+        } else {
+            WebUI.broadcastLogMessage(message);
+        }
     }
 
     public Encoder<ILoggingEvent> getEncoder() {

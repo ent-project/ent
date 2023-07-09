@@ -1,8 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<included>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>hey dev %d{HH:mm:ss.SSS} %-5level %logger{20} - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{20} - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -12,20 +11,15 @@
         </encoder>
     </appender>
 
-    <appender name="WEBUI" class="org.ent.webui.WebsocketAppender">
-        <encoder>
-            <pattern>| %d{HH:mm:ss.SSS} %-5level %logger{20} - %msg%n</pattern>
-        </encoder>
-    </appender>
-
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
-        <appender-ref ref="WEBUI"/>
     </root>
 
     <logger name="plain" level="DEBUG" additivity="false">
         <appender-ref ref="PLAIN"/>
     </logger>
+
+    <logger name="webui" level="OFF"/>
 
     <logger name="org.ent.run.EntRunner" level="INFO"/>
     <logger name="org.ent.dev.ManagedRun" level="TRACE"/>
@@ -34,5 +28,4 @@
     <logger name="org.ent.gui.BinaryStatsDataSet" level="INFO"/>
     <logger name="org.ent.dev.unit.DeliveryStash" level="INFO"/>
 
-
-</configuration>
+</included>

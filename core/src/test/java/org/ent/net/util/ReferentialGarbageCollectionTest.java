@@ -9,8 +9,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,14 +27,14 @@ class ReferentialGarbageCollectionTest {
 	@ParameterizedTest(name = "{index} => run()")
 	@MethodSource("run_testData")
 	void run(Net net, Net netExtraNodes) {
-		Set<Node> originalNodes = new HashSet<>(net.getNodes());
+		List<Node> originalNodes = new ArrayList<>(net.getNodes());
 		for (Node n : netExtraNodes.removeAllNodes()) {
 			net.addNode(n);
 		}
 
 		new ReferentialGarbageCollection(net).run();
 
-		assertThat(net.getNodes()).isEqualTo(originalNodes);
+		assertThat(net.getNodes().stream().filter(Objects::nonNull).toList()).isEqualTo(originalNodes);
 	}
 
 	private static Stream<Arguments> run_testData() {

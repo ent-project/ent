@@ -18,20 +18,18 @@ import static org.ent.util.NetBuilder.unary;
 
 class TwoNumberArithmeticForwardGameTest {
 
+    private static boolean WEB_UI = false;
+
     @BeforeAll
     static void setTestEnvironment() {
         Profile.setTest(true);
     }
 
     @Test
-    void guiTest() {
-        WebUI.setUpJavalin();
-        WebUI.loopForever();
-    }
-
-    @Test
     void test() {
-        WebUI.setUpJavalin();
+        if (WEB_UI) {
+            WebUI.setUpJavalin();
+        }
 
         Node verifierPortal1, verifierPortal2;
         Node operationCopy, operand1Copy, operand2Copy, operandsCopy, solutionTarget;
@@ -77,9 +75,12 @@ class TwoNumberArithmeticForwardGameTest {
         game.setVerbose(true);
         game.execute();
 
-//        WebUI.loopForever();
         Assertions.assertThat(game.passedVerifierFinished()).isTrue();
         Assertions.assertThat(game.passedVerifierFinishedSuccessfully()).isTrue();
+
+        if (WEB_UI) {
+            WebUI.loopForever();
+        }
     }
 
 }

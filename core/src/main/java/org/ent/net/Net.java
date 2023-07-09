@@ -100,6 +100,11 @@ public class Net {
     }
 
     public void removeNode(Node node) {
+        if (VALIDATE) {
+            if (node.getNet() != this) {
+                throw new IllegalStateException("node does not belong to this net");
+            }
+        }
         int index = node.getIndex();
         nodes.set(index, null);
         if (nodeNames != null) {

@@ -73,7 +73,6 @@ public class WebUI {
     }
 
     public static void broadcastLogMessage(String message) {
-        System.err.println("broadcast");
         Object payload = Map.of(
                 "type", "log",
                 "message", message
@@ -85,7 +84,6 @@ public class WebUI {
     }
 
     public static void broadcastDot(String dotString) {
-        System.err.println("broadcast dot");
         Object payload = Map.of(
                 "type", "dot",
                 "scale", 0.7,

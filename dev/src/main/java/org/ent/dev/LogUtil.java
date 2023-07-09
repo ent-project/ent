@@ -11,7 +11,7 @@ import java.net.URL;
 
 public class LogUtil {
 
-    private static final String LOGBACK_CONFIG_FILE = "logback-dev.xml";
+    private static final String LOGBACK_CONFIG_FILE = "logback-webui.xml";
 
     private LogUtil() {
     }

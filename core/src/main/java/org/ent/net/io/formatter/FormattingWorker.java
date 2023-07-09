@@ -62,6 +62,9 @@ public class FormattingWorker {
 	private int[] buildInverseReferences() {
 		int[] inverseRefs = new int[net.getNodesAsList().size()];
 		for (Node node : net.getNodes()) {
+			if (node == null) {
+				continue;
+			}
 			for (ArrowDirection direction : ArrowDirection.values()) {
 				Node child = node.getChild(direction, Purview.DIRECT);
 				if (!child.isMarkerNode()) {
