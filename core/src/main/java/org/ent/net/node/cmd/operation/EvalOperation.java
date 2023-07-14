@@ -29,8 +29,11 @@ public class EvalOperation extends MonoNodeOperation {
 		if (command.isEval()) {
 			return ExecutionResult.ERROR;
 		}
+		net.event().beforeEvalExecution(node, false);
+
 		AccessToken evalToken = net.getEvalToken();
-		return command.execute(node, ent, evalToken);
+		ExecutionResult result = command.execute(node, ent, evalToken);
+		return result;
 	}
 
 	@Override

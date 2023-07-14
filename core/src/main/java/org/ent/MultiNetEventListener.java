@@ -57,4 +57,11 @@ public class MultiNetEventListener implements NetEventListener {
             eventListener.evaluatedIsIdenticalCondition(node1, node2);
         }
     }
+
+    @Override
+    public void beforeEvalExecution(Node target, boolean flow) {
+        for (NetEventListener eventListener : eventListeners) {
+            eventListener.beforeEvalExecution(target, flow);
+        }
+    }
 }

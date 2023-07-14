@@ -12,7 +12,7 @@ public interface Accessor {
 	default
 	Node getTarget(Node base, Ent ent, Purview purview) {
 		Arrow arrow = get(base, ent, purview);
-		return arrow.getTarget(Purview.COMMAND);
+		return arrow.getTarget(purview);
 	}
 
 	int getCode();

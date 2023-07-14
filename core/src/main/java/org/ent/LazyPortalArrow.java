@@ -18,6 +18,10 @@ public class LazyPortalArrow implements Arrow {
         this.arrowSupplier = arrowSupplier;
     }
 
+    public boolean isInitialized() {
+        return delegate != null;
+    }
+
     @Override
     public ArrowDirection getDirection() {
         throw new IllegalStateException();

@@ -39,6 +39,18 @@ public class TriCommand extends VetoedCommand {
         return operation;
     }
 
+    public Accessor getAccessor1() {
+        return accessor1;
+    }
+
+    public Accessor getAccessor2() {
+        return accessor2;
+    }
+
+    public Accessor getAccessor3() {
+        return accessor3;
+    }
+
     @Override
     public ExecutionResult doExecute(Node base, Ent ent, AccessToken accessToken) {
         Arrow handle1 = accessor1.get(base, ent, Purview.COMMAND);

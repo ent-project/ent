@@ -1,6 +1,5 @@
 package org.ent;
 
-import com.google.common.annotations.VisibleForTesting;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
@@ -52,8 +51,7 @@ public class Ent {
         }
     }
 
-    @VisibleForTesting
-    static int getPortalIndex(int value, ArrowDirection direction) {
+    public static int getPortalIndex(int value, ArrowDirection direction) {
         // "main" direction (left) gets the "better" (least significant bits) side of the int
         int halfValue = switch (direction) {
             case LEFT -> value & 0xFFFF;
@@ -76,7 +74,7 @@ public class Ent {
         return index ^ 0xFFFF;
     }
 
-    private boolean isPortal(int index) {
+    public boolean isPortal(int index) {
         return index >= 0 && index < portals.size();
     }
 

@@ -61,13 +61,13 @@ public class WebUI {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            log.info("Msg {}", i);
+//            log.info("Msg {}", i);
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            broadcastDot("digraph { a -> c%s }".formatted(i));
+//            broadcastDot("digraph { a -> c%s }".formatted(i));
             i++;
         }
     }

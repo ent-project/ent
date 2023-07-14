@@ -63,6 +63,14 @@ public class BiCommand extends VetoedCommand {
 		return 2;
 	}
 
+	public Accessor getAccessor1() {
+		return accessor1;
+	}
+
+	public Accessor getAccessor2() {
+		return accessor2;
+	}
+
 	private String buildShortName() {
 		String accessor1Name = this.accessor1.getShortName();
 		if (this.accessor1 instanceof PrimaryAccessor primaryLeft && primaryLeft.getDirection() == ArrowDirection.LEFT) {

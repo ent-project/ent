@@ -13,6 +13,8 @@ import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.accessor.Accessors;
 import org.ent.net.node.cmd.operation.Operations;
 import org.ent.net.node.cmd.operation.TriOperation;
+import org.ent.net.node.cmd.operation.TriValueOperation;
+import org.ent.net.node.cmd.operation.math.ModuloOperation;
 import org.ent.net.node.cmd.veto.Conditions;
 import org.ent.net.node.cmd.veto.Vetos;
 import org.ent.run.EntRunner;
@@ -20,12 +22,14 @@ import org.ent.util.DotLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.function.Consumer;
+
 import static org.ent.util.NetBuilder.builder;
 import static org.ent.util.NetBuilder.ignored;
 import static org.ent.util.NetBuilder.node;
 import static org.ent.util.NetBuilder.value;
 
-public class TwoNumberArithmeticForwardGame {
+public class ArithmeticForwardGame {
     public static final TriOperation[] TRI_OPERATIONS = new TriOperation[]{
             Operations.PLUS_OPERATION,
             Operations.MINUS_OPERATION,
@@ -39,13 +43,15 @@ public class TwoNumberArithmeticForwardGame {
             Operations.SHIFT_RIGHT_OPERATION
     };
 
-    private static final Logger log = LoggerFactory.getLogger(TwoNumberArithmeticForwardGame.class);
+    private static final Logger log = LoggerFactory.getLogger(ArithmeticForwardGame.class);
 
     private final int operand1;
     private final int operand2;
     private final TriOperation operation;
     private final Ent ent;
     private final int maxSteps;
+
+    private final int expectedSolution;
 
     private boolean verbose;
     private NetFormatter formatter;
@@ -55,13 +61,49 @@ public class TwoNumberArithmeticForwardGame {
     private Node answerNode;
     private int verifierPortalCode1;
     private int verifierPortalCode2;
+    private Node operationNode;
+    private Node operand1Node;
+    private Node operand2Node;
 
-    public TwoNumberArithmeticForwardGame(int operand1, int operand2, TriOperation operation, Net net, int maxSteps) {
+    private Consumer<Net> postVerifierCreateHook;
+
+    public ArithmeticForwardGame(int operand1, int operand2, TriOperation operation, Net net, int maxSteps) {
         this.operand1 = operand1;
         this.operand2 = operand2;
         this.operation = operation;
         this.ent = buildEnt(net);
         this.maxSteps = maxSteps;
+        this.expectedSolution = calculateExpectedSolution();
+    }
+
+    private int calculateExpectedSolution() {
+        if (operation instanceof TriValueOperation valueOperation) {
+            return valueOperation.compute(operand1, operand2);
+        } else if (operation instanceof ModuloOperation modulo) {
+            return modulo.compute(operand1, operand2);
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    public void setPostVerifierCreateCallback(Consumer<Net> postVerifierCreateHook) {
+        this.postVerifierCreateHook = postVerifierCreateHook;
+    }
+
+    public Node getOperationNode() {
+        return operationNode;
+    }
+
+    public Node getOperand1Node() {
+        return operand1Node;
+    }
+
+    public Node getOperand2Node() {
+        return operand2Node;
+    }
+
+    public int getExpectedSolution() {
+        return expectedSolution;
     }
 
     public int getVerifierPortalCode1() {
@@ -77,12 +119,20 @@ public class TwoNumberArithmeticForwardGame {
         this.formatter = new NetFormatter();
     }
 
+    public Net getVerifierNet() {
+        return verifierNet;
+    }
+
+    public Ent getEnt() {
+        return ent;
+    }
+
     public static TriOperation drawOperation(UniformRandomProvider random) {
         return TRI_OPERATIONS[random.nextInt(TRI_OPERATIONS.length)];
     }
 
     public static int drawOperand(UniformRandomProvider random) {
-        // modulo: second operand should not be 0 -> some lower bound > 0
+        // "modulo" operation: second operand should not be 0 -> some lower bound > 0
         return random.nextInt(3, 100);
     }
 
@@ -107,9 +157,9 @@ public class TwoNumberArithmeticForwardGame {
         Node portalAnswer, answerCopy, solution;
         Net verifierNet = builder().net(node(Commands.get(Operations.SET_VALUE_OPERATION, Accessors.RIGHT, Accessors.LEFT),
                 portalAnswer = node(ignored(), answerCopy = node()),
-                node(Commands.get(this.operation, Accessors.RIGHT, Accessors.LEFT_LEFT, Accessors.LEFT_RIGHT),
+                operationNode = node(Commands.get(this.operation, Accessors.RIGHT, Accessors.LEFT_LEFT, Accessors.LEFT_RIGHT),
                         node(
-                                node(value(this.operand1), value(this.operand2)),
+                                node(operand1Node = value(this.operand1), operand2Node = value(this.operand2)),
                                 solution = node()
                         ),
                         node(Commands.get(Operations.SET_OPERATION, Accessors.FLOW, Accessors.RIGHT),
@@ -128,6 +178,10 @@ public class TwoNumberArithmeticForwardGame {
         ent.addDomain(answerNet);
         int answerPortalCode = ent.addPortal(new PortalArrow(answerNet));
         portalAnswer.setValue(answerPortalCode);
+
+        if (postVerifierCreateHook != null) {
+            postVerifierCreateHook.accept(verifierNet);
+        }
 
         return verifierNet;
     }
@@ -163,4 +217,5 @@ public class TwoNumberArithmeticForwardGame {
         return verifierNet != null &&
                 verifierNet.getRoot().getValue(Purview.DIRECT) == Commands.FINAL_SUCCESS.getValue();
     }
+
 }

@@ -1,6 +1,5 @@
 package org.ent.dev.game.forwardarithmetic;
 
-import org.assertj.core.api.Assertions;
 import org.ent.Profile;
 import org.ent.net.Net;
 import org.ent.net.node.Node;
@@ -10,15 +9,17 @@ import org.ent.net.node.cmd.operation.Operations;
 import org.ent.webui.WebUI;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.ent.util.NetBuilder.builder;
 import static org.ent.util.NetBuilder.ignored;
 import static org.ent.util.NetBuilder.node;
 import static org.ent.util.NetBuilder.unary;
 
-class TwoNumberArithmeticForwardGameTest {
+class ArithmeticForwardGameTest {
 
-    private static boolean WEB_UI = false;
+    private static final boolean WEB_UI = true;
 
     @BeforeAll
     static void setTestEnvironment() {
@@ -67,7 +68,7 @@ class TwoNumberArithmeticForwardGameTest {
         operationCopy.setRightChild(operationCopyContinuation);
 
 
-        TwoNumberArithmeticForwardGame game = new TwoNumberArithmeticForwardGame(7, 3, Operations.MULTIPLY_OPERATION, net, 15);
+        ArithmeticForwardGame game = new ArithmeticForwardGame(7, 3, Operations.MULTIPLY_OPERATION, net, 15);
 
         verifierPortal1.setValue(game.getVerifierPortalCode1());
         verifierPortal2.setValue(game.getVerifierPortalCode2());
@@ -75,12 +76,22 @@ class TwoNumberArithmeticForwardGameTest {
         game.setVerbose(true);
         game.execute();
 
-        Assertions.assertThat(game.passedVerifierFinished()).isTrue();
-        Assertions.assertThat(game.passedVerifierFinishedSuccessfully()).isTrue();
+        assertThat(game.passedVerifierFinished()).isTrue();
+        assertThat(game.passedVerifierFinishedSuccessfully()).isTrue();
 
         if (WEB_UI) {
             WebUI.loopForever();
         }
+    }
+
+    @Test
+    void expectedSolution() {
+        ArithmeticForwardGame game = new ArithmeticForwardGame(
+                15, 3, Operations.MINUS_OPERATION, Mockito.mock(Net.class), 15);
+
+        int expectedSolution = game.getExpectedSolution();
+
+        assertThat(expectedSolution).isEqualTo(12);
     }
 
 }

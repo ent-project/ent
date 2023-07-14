@@ -24,8 +24,12 @@ public class ModuloOperation extends TriNodeOperation {
         if (b == 0) {
             return ExecutionResult.ERROR;
         }
-        node1.setValue(a % b);
+        node1.setValue(compute(a, b));
         return ExecutionResult.NORMAL;
+    }
+
+    public int compute(int a, int b) {
+        return a % b;
     }
 
     @Override

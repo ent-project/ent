@@ -34,4 +34,9 @@ public class NopNetEventListener implements NetEventListener {
     public void evaluatedIsIdenticalCondition(Node node1, Node node2) {
         // do nothing
     }
+
+    @Override
+    public void beforeEvalExecution(Node target, boolean flow) {
+        // do nothing
+    }
 }

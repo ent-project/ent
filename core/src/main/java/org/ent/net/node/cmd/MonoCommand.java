@@ -55,6 +55,10 @@ public class MonoCommand extends VetoedCommand {
         return 1;
     }
 
+    public Accessor getAccessor() {
+        return accessor;
+    }
+
     private String buildShortName() {
         String accessorName = this.accessor.getShortName();
         if (this.accessor instanceof DirectAccessor) {

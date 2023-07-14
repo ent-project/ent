@@ -17,4 +17,6 @@ public interface NetEventListener {
 	void setValue(Node node, int previousValue, int newValue);
 
 	void evaluatedIsIdenticalCondition(Node node1, Node node2);
+
+	void beforeEvalExecution(Node target, boolean flow);
 }

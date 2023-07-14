@@ -137,6 +137,11 @@ public class VariabilityCollector implements NetEventListener, EntRunnerListener
     }
 
     @Override
+    public void beforeEvalExecution(Node target, boolean flow) {
+
+    }
+
+    @Override
     public void fireCommandExecuted(Node commandNode, ExecutionResult executeResult) {
         CommandData commandData = getCommandData(commandNode.getCommand());
         commandData.executed();

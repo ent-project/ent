@@ -12,6 +12,15 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Create random Ents from scratch. Collect "interesting" specimen:
+ * (1) "get target value":
+ *  read operation on the "interesting" target value was performed
+ * (2) "input set":
+ *  the input (answer node) was written to
+ * (3) "eval_flow on verifier root":
+ *  it ran the verifier one step, by means of eval_flow
+ */
 public class DevelopmentLevel0 {
 
     private static final Logger log = LoggerFactory.getLogger(DevelopmentLevel0.class);

@@ -30,6 +30,8 @@ public class EvalFlowOperation implements MonoOperation {
         if (command.isEval()) {
             return ExecutionResult.ERROR;
         }
+        net.event().beforeEvalExecution(node, true);
+
         AccessToken evalToken = net.getEvalToken();
         ExecutionResult executionResult = command.execute(node, ent, evalToken);
         ent.event().evalFloatOperation(node);
