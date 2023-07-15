@@ -13,7 +13,7 @@ public class RootPortalArrow extends PortalArrow {
     @Override
     public void setTarget(Node target, Purview purview, AccessToken token) {
         super.setTarget(target, purview);
-        if (net.isPermittedToWrite(token)) {
+        if (net.isPermittedToSetRoot(token)) {
             net.setRoot(target);
         }
     }

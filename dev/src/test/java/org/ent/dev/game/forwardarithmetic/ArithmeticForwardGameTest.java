@@ -27,7 +27,7 @@ class ArithmeticForwardGameTest {
     }
 
     @Test
-    void test() {
+    void syntheticSolution() {
         if (WEB_UI) {
             WebUI.setUpJavalin();
         }

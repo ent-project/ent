@@ -39,4 +39,9 @@ public class NopNetEventListener implements NetEventListener {
     public void beforeEvalExecution(Node target, boolean flow) {
         // do nothing
     }
+
+    @Override
+    public void setRoot(Node previousRoot, Node newRoot) {
+        // do nothing
+    }
 }

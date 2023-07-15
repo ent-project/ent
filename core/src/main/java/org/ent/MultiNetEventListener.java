@@ -64,4 +64,11 @@ public class MultiNetEventListener implements NetEventListener {
             eventListener.beforeEvalExecution(target, flow);
         }
     }
+
+    @Override
+    public void setRoot(Node previousRoot, Node newRoot) {
+        for (NetEventListener eventListener : eventListeners) {
+            eventListener.setRoot(previousRoot, newRoot);
+        }
+    }
 }

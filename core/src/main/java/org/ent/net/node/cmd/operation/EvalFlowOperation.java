@@ -32,12 +32,12 @@ public class EvalFlowOperation implements MonoOperation {
         }
         net.event().beforeEvalExecution(node, true);
 
-        AccessToken evalToken = net.getEvalToken();
-        ExecutionResult executionResult = command.execute(node, ent, evalToken);
+        ExecutionResult executionResult = command.execute(node, ent, net.getEvalToken());
         ent.event().evalFloatOperation(node);
         // advance pointer
         Node newTarget = node.getRightChild(Purview.COMMAND);
-        handle.setTarget(newTarget, Purview.COMMAND, evalToken);
+
+        handle.setTarget(newTarget, Purview.COMMAND, net.getSetRootToken());
 
         return executionResult;
     }

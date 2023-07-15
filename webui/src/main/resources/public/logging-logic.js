@@ -47,6 +47,5 @@ function updateLogs(msg) {
         });
     } else {
         console.error("unknown type: " + data.type);
-        return;
     }
 }

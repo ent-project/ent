@@ -44,6 +44,7 @@ public class Net {
     NetEventListener netEventListener = new NopNetEventListener();
 
     private final AccessToken evalToken = new AccessToken();
+    private final AccessToken setRootToken = new AccessToken();
 
     private boolean permittedToEvalRoot = true;
     private boolean permittedToWrite = true;
@@ -149,6 +150,7 @@ public class Net {
 
     public void setRoot(Node root) {
         // FIXME check it is part of net
+        event().setRoot(this.root, root);
         this.root = root;
     }
 
@@ -411,6 +413,11 @@ public class Net {
         return evalToken;
     }
 
+    public AccessToken getSetRootToken() {
+        return setRootToken;
+    }
+
+
     public boolean isPermittedToEval(Node node) {
         return permittedToWrite || (permittedToEvalRoot && node == root);
     }
@@ -434,6 +441,10 @@ public class Net {
     public Net setPermittedToWrite(boolean permittedToWrite) {
         this.permittedToWrite = permittedToWrite;
         return this;
+    }
+
+    public boolean isPermittedToSetRoot(AccessToken token) {
+        return permittedToEvalRoot && token == setRootToken;
     }
 
     public String format() {

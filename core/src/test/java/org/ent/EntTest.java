@@ -9,8 +9,9 @@ import org.ent.net.node.cmd.accessor.Accessors;
 import org.ent.net.node.cmd.operation.Operations;
 import org.ent.run.EntRunner;
 import org.ent.run.StepResult;
+import org.ent.webui.WebUI;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,6 +19,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,9 +33,25 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class EntTest {
 
+    private static final boolean WEB_UI = false;
+
+    @BeforeAll
+    static void enableWebUI() {
+        if (WEB_UI) {
+            WebUI.setUpJavalin();
+        }
+    }
+
     @BeforeAll
     static void setTestEnvironment() {
         Profile.setTest(true);
+    }
+
+    @AfterAll
+    static void idleForWebUI() {
+        if (WEB_UI) {
+            WebUI.loopForever();
+        }
     }
 
     public static Stream<Arguments> getPortalIndexData() {
@@ -340,7 +359,7 @@ class EntTest {
                 void eval_advanceArrow_thenEvalInner(boolean permittedToWrite) {
                     // Advance the portal arrow and then try to eval.
                     // The idea is that the rooted portal arrow can change the domain root.
-                    // This should not work, unless you have permission to write.
+                    // This should not work in any case.
                     ent = builder().ent(
                             node(Commands.get(Operations.SET_OPERATION, Accessors.LEFT, Accessors.LEFT_RIGHT),
                                     portalNode = ignored(),
@@ -359,11 +378,7 @@ class EntTest {
                     StepResult result1 = runner.step();
                     assertThat(result1).isEqualTo(StepResult.SUCCESS);
                     assertThat(portalArrow.getTarget(Purview.DIRECT)).isEqualTo(domainRoot1);
-                    if (permittedToWrite) {
-                        assertThat(domain.getRoot()).isEqualTo(domainRoot1);
-                    } else {
-                        assertThat(domain.getRoot()).isEqualTo(domainRoot0);
-                    }
+                    assertThat(domain.getRoot()).isEqualTo(domainRoot0);
 
                     StepResult result2 = runner.step();
 
@@ -401,30 +416,42 @@ class EntTest {
                     }
                 }
 
-                @Test
-                @Disabled("TODO")
-                void test() {
+                @ParameterizedTest
+                @ValueSource(booleans = {true, false})
+                void setPortalToInnerNode(boolean permittedToWrite) {
+                    // This is a strategy to move the rooted portal arrow (and thereby the domain root) to an arbitrary
+                    // inner domain node.
+                    // This attempted by eval-flow-ing a SET command with according parameters (left argument refers
+                    // to the portal arrow and right argument to the inner target node).
+                    // (Currently it may not be possible to make use of the exploit, should it be possible. (The portal
+                    // arrow gets overridden at the end of EVAL_FLOW.) It shouldn't happen nonetheless.)
                     ent = builder().ent(unary(Commands.get(Operations.EVAL_FLOW_OPERATION, Accessors.LEFT),
                             portalNode = ignored()));
-                    Node y, portalInDomain, innerCommand;
+                    Node portalInDomain, legalDomainRoot2;
                     domain = builder().net(node(Commands.SET,
                             portalInDomain = node(
                                     ignored(),
-                                    innerCommand = unary(Commands.get(Operations.INC_OPERATION), y = value(12))
-                                    ),
-                            value(Commands.FINAL_SUCCESS)));
-                    domain.setPermittedToWrite(false);
+                                    unary(Commands.get(Operations.INC_OPERATION),
+                                            value(12))),
+                            legalDomainRoot2 = value(Commands.FINAL_SUCCESS)));
+                    domain.setPermittedToWrite(permittedToWrite);
                     domain.setPermittedToEvalRoot(true);
                     setUpLeft();
                     portalInDomain.setValue(portalNode.getValue());
 
+                    List<Node> roots = new ArrayList<>();
+                    class SetRootListener extends NopNetEventListener {
+                        @Override
+                        public void setRoot(Node previousRoot, Node newRoot) {
+                            roots.add(newRoot);
+                        }
+                    }
+                    domain.addEventListener(new SetRootListener());
+
                     runner.step();
-                    // alright so far, just checking
-                    assertThat(portalArrow.getTarget(Purview.DIRECT)).isSameAs(innerCommand);
 
-                    StepResult result = runner.step();
-
-                    assertThat(result).isEqualTo(StepResult.COMMAND_EXECUTION_FAILED);
+                    assertThat(roots).containsExactly(legalDomainRoot2);
+                    assertThat(portalArrow.getTarget(Purview.DIRECT)).isSameAs(legalDomainRoot2);
                 }
             }
         }

@@ -19,4 +19,6 @@ public interface NetEventListener {
 	void evaluatedIsIdenticalCondition(Node node1, Node node2);
 
 	void beforeEvalExecution(Node target, boolean flow);
+
+    void setRoot(Node previousRoot, Node newRoot);
 }

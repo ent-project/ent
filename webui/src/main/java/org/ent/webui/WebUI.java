@@ -3,7 +3,6 @@ package org.ent.webui;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.websocket.WsContext;
-import org.ent.dev.LogUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,16 +21,23 @@ public class WebUI {
 
     private static final Logger log = LoggerFactory.getLogger(WebUI.class);
 
-    public static Set<WsContext> sessions = new HashSet<>();
+    private static final Set<WsContext> sessions = new HashSet<>();
 
-    static Queue<Object> buffer = new ConcurrentLinkedQueue<>();
+    private static final Queue<Object> buffer = new ConcurrentLinkedQueue<>();
+
+    private static boolean started;
 
     public static void main(String[] args) {
         setUpJavalin();
-        loopForever();
+//        loopForever();
     }
 
     public static void setUpJavalin() {
+        if (started) {
+            return;
+        }
+        started = true;
+
         Javalin app = Javalin.create(config ->
                 config.staticFiles.add("/public", Location.CLASSPATH)).start(7070);
         // fixme try with resource
@@ -78,9 +84,8 @@ public class WebUI {
                 "message", message
         );
         buffer.add(payload);
-        sessions.stream().filter(ctx -> ctx.session.isOpen()).forEach(session -> {
-            session.send(payload);
-        });
+        sessions.stream().filter(ctx -> ctx.session.isOpen())
+                .forEach(session -> session.send(payload));
     }
 
     public static void broadcastDot(String dotString) {
@@ -90,9 +95,8 @@ public class WebUI {
                 "dot", dotString
         );
         buffer.add(payload);
-        sessions.stream().filter(ctx -> ctx.session.isOpen()).forEach(session -> {
-            session.send(payload);
-        });
+        sessions.stream().filter(ctx -> ctx.session.isOpen())
+                .forEach(session -> session.send(payload));
     }
 
 }
