@@ -86,6 +86,10 @@ public class StageReadInfo {
                 }
             }
         }
+
+        public boolean isAnyOperandBeforeEval() {
+            return numGetOperand1BeforeEval > 0 || numGetOperand2BeforeEval > 0;
+        }
     }
 
     private static class ListenerHolder {
@@ -124,11 +128,18 @@ public class StageReadInfo {
         long startTime = System.nanoTime();
 
         for (int i = 0; i < 5000_000; i++) {
-            if (i % 4000 == 0) {
+            if (i % 20_000 == 0) {
                 log.info("= i={} =", i);
+                if (i % 100_000 == 0) {
+                    printRunInfo(startTime);
+                }
             }
             performRun();
         }
+        printRunInfo(startTime);
+    }
+
+    private void printRunInfo(long startTime) {
         Duration duration = Duration.ofNanos(System.nanoTime() - startTime);
         log.info("total Runs: {}, get any Operand before Eval: {}, get both operands before Eval:{}, get Operation: {}, get any Operand: {}, get both Operands: {}",
                 numRuns,
@@ -138,18 +149,19 @@ public class StageReadInfo {
                 numGetAnyOperand,
                 numGetBothOperands);
         log.info("TOTAL DURATION: {}", duration);
-        log.info("Get any Operand: {} hits / min", Tools.getHitsPerMinute(numGetAnyOperand, duration));
+        log.info("Get any Operand: {} hits / min", Tools.getHitsPerMinute(numGetAnyOperandBeforeEval, duration));
     }
 
     private void performRun() {
         int operand1 = ArithmeticForwardGame.drawOperand(randTargets);
         int operand2 = ArithmeticForwardGame.drawOperand(randTargets);
         TriOperation operation = ArithmeticForwardGame.drawOperation(randTargets);
-        ArithmeticForwardGame game = new ArithmeticForwardGame(operand1, operand2, operation, buildNet(), maxSteps);
+        long netSeed = randNetSeeds.nextLong();
+        ArithmeticForwardGame game = new ArithmeticForwardGame(operand1, operand2, operation, buildNet(netSeed), maxSteps);
         ListenerHolder holder = new ListenerHolder();
         game.setPostVerifierCreateCallback(verifier -> verifier.addEventListener(holder.create(game)));
 //        if (numRuns == 633937 ){//|| numRuns ==1000976) { //1184310
-        boolean interesting = numRuns == 633937;
+        boolean interesting = false;// numRuns == 1000976;
 //        boolean interesting = numRuns == 1;
         if (interesting){//|| numRuns ==1000976) { //1184310
             game.setVerbose(true);
@@ -165,10 +177,33 @@ public class StageReadInfo {
         game.execute();
 
         printRunInformation(holder);
+
+        if (holder.getListener() != null && holder.getListener().isAnyOperandBeforeEval()) {
+            replayWithDetails(netSeed, operand1, operand2, operation);
+            log.info("replay done.");
+        }
+
         numRuns++;
         if (interesting) {
             System.err.println();
         }
+    }
+
+    private void replayWithDetails(long netSeed, int operand1, int operand2, TriOperation operation) {
+        ArithmeticForwardGame game = new ArithmeticForwardGame(operand1, operand2, operation, buildNet(netSeed), maxSteps);
+        ListenerHolder holder = new ListenerHolder();
+        game.setPostVerifierCreateCallback(verifier -> verifier.addEventListener(holder.create(game)));
+        game.setVerbose(true);
+        class StageEntEventListener extends NopEntEventListener {
+            @Override
+            public void afterCommandExecution(StepResult stepResult) {
+                printRunInformation(holder);
+            }
+        }
+        game.getEnt().setEventListener(new StageEntEventListener());
+
+        game.execute();
+        printRunInformation(holder);
     }
 
     private void printRunInformation(ListenerHolder holder) {
@@ -185,18 +220,16 @@ public class StageReadInfo {
             }
             if (listener.numGetOperand1BeforeEval > 0 || listener.numGetOperand2BeforeEval > 0) {
                 numGetAnyOperandBeforeEval++;
+                log.info("#{} Get Info Before Eval - x: {}, op: {}, y: {}", numRuns, listener.numGetOperand1BeforeEval, listener.numGetOperation, listener.numGetOperand2BeforeEval);
                 if (listener.numGetOperand1BeforeEval > 0 && listener.numGetOperand2BeforeEval > 0) {
                     numGetBothOperandsBeforeEval++;
                 }
             }
-            if (listener.numGetOperand1BeforeEval + listener.numGetOperand2BeforeEval > 0) {
-                log.info("#{} Get Info Before Eval - x: {}, op: {}, y: {}", numRuns, listener.numGetOperand1BeforeEval, listener.numGetOperation, listener.numGetOperand2BeforeEval);
-            }
         }
     }
 
-    private Net buildNet() {
-        RandomNetCreator netCreator = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(randNetSeeds.nextLong()), drawing);
+    private Net buildNet(Long netSeed) {
+        RandomNetCreator netCreator = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(netSeed), drawing);
         return netCreator.drawNet();
     }
 
