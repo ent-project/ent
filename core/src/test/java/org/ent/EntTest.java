@@ -10,6 +10,7 @@ import org.ent.net.node.cmd.operation.Operations;
 import org.ent.run.EntRunner;
 import org.ent.run.StepResult;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -97,9 +98,9 @@ class EntTest {
         void goTroughMultiplePortals() {
             ent = builder().ent(
                     unary(Commands.get(Operations.SET_VALUE_OPERATION, Accessors.LEFT_LEFT, Accessors.RIGHT),
-                        portalNode = node(
-                            ignored(),
-                            value(5))));
+                            portalNode = node(
+                                    ignored(),
+                                    value(5))));
             Node portal2;
             domain = builder().net(portal2 = ignored());
             domain.setPermittedToWrite(false);
@@ -134,7 +135,7 @@ class EntTest {
             ent = builder().ent(unary(Commands.get(Operations.SET_OPERATION, Accessors.LEFT_LEFT, Accessors.LEFT_RIGHT),
                     portalNode = ignored()));
             Node y, b;
-            domain = builder().net(y = node( value(5), b = value(9)));
+            domain = builder().net(y = node(value(5), b = value(9)));
             setUpLeft();
 
             StepResult result = runner.step();
@@ -210,7 +211,7 @@ class EntTest {
                 ent = builder().ent(unary(Commands.get(Operations.SET_OPERATION, Accessors.LEFT_LEFT, Accessors.LEFT_RIGHT),
                         portalNode = ignored()));
                 Node y, a;
-                domain = builder().net(y = node( a = value(5), value(9)));
+                domain = builder().net(y = node(a = value(5), value(9)));
                 domain.setPermittedToWrite(false);
                 setUpLeft();
 
@@ -226,7 +227,7 @@ class EntTest {
                 ent = builder().ent(unary(Commands.get(Operations.ANCESTOR_EXCHANGE_OPERATION, Accessors.LEFT_LEFT, Accessors.LEFT_RIGHT_LEFT),
                         portalNode = ignored()));
                 Node y, a, b_parent, b;
-                domain = builder().net(y = node( a = value(5), b_parent = unary(b = value(9))));
+                domain = builder().net(y = node(a = value(5), b_parent = unary(b = value(9))));
                 domain.setPermittedToWrite(permittedToWrite);
                 setUpLeft();
 
@@ -271,13 +272,15 @@ class EntTest {
         }
 
         @Nested
-        class VerifierMode {
+        class EvalOnly {
             @ParameterizedTest
-            @ValueSource(booleans = { true, false })
-            void eval_toplevel(boolean permittedToEvalRoot) {
-                ent = builder().ent(unary(Commands.get(Operations.EVAL_OPERATION, Accessors.LEFT), portalNode = ignored()));
-                Node y;
-                domain = builder().net(unary(Operations.INC_OPERATION, y = value(14)));
+            @ValueSource(booleans = {true, false})
+            void evalFlow_goodCase(boolean permittedToEvalRoot) {
+                ent = builder().ent(unary(Commands.get(Operations.EVAL_FLOW_OPERATION, Accessors.LEFT), portalNode = ignored()));
+                Node y, domainRoot1, domainRoot2;
+                domain = builder().net(domainRoot1 = node(Operations.INC_OPERATION,
+                        y = value(14),
+                        domainRoot2 = ignored()));
                 domain.setPermittedToWrite(false);
                 domain.setPermittedToEvalRoot(permittedToEvalRoot);
                 setUpLeft();
@@ -287,91 +290,141 @@ class EntTest {
                 if (permittedToEvalRoot) {
                     assertThat(result).isEqualTo(StepResult.SUCCESS);
                     assertThat(y.getValue()).isEqualTo(15);
+                    assertThat(domain.getRoot()).isSameAs(domainRoot2);
                 } else {
                     assertThat(result).isEqualTo(StepResult.COMMAND_EXECUTION_FAILED);
                     assertThat(y.getValue()).isEqualTo(14);
+                    assertThat(domain.getRoot()).isSameAs(domainRoot1);
                 }
             }
 
-            @Test
-            void eval_inner() {
-                // can eval the toplevel node, but not an inner node of the domain
-                ent = builder().ent(unary(Commands.get(Operations.EVAL_OPERATION, Accessors.LEFT_LEFT), portalNode = ignored()));
-                Node y;
-                domain = builder().net(unary(unary(Operations.INC_OPERATION, y = value(14))));
-                domain.setPermittedToWrite(false);
-                domain.setPermittedToEvalRoot(true);
-                setUpLeft();
+            @Nested
+            class Forbidden {
+                @Test
+                void withoutAdvancing() {
+                    // It is important that the domain root is advanced after remote execution.
+                    // I.e. EVAL_FLOW should work in verifier mode, but EVAL not.
+                    // (otherwise you would break with the intended execution flow)
+                    ent = builder().ent(unary(Commands.get(Operations.EVAL_OPERATION, Accessors.LEFT), portalNode = ignored()));
+                    Node y, domainRoot1;
+                    domain = builder().net(domainRoot1 = unary(Operations.INC_OPERATION, y = value(14)));
+                    domain.setPermittedToWrite(false);
+                    domain.setPermittedToEvalRoot(true);
+                    setUpLeft();
 
-                StepResult result = runner.step();
+                    StepResult result = runner.step();
 
-                assertThat(result).isEqualTo(StepResult.COMMAND_EXECUTION_FAILED);
-                assertThat(y.getValue()).isEqualTo(14);
-            }
-
-            @ParameterizedTest
-            @ValueSource(booleans = {true, false})
-            void eval_advanceArrow_thenEvalInner(boolean permittedToWrite) {
-                // Advance the portal arrow and then try to eval.
-                // The idea is that the rooted portal arrow can change the domain root.
-                // This should not work, unless you have permission to write.
-                ent = builder().ent(
-                        node(Commands.get(Operations.SET_OPERATION, Accessors.LEFT, Accessors.LEFT_RIGHT),
-                            portalNode = ignored(),
-                            unary(Commands.get(Operations.EVAL_FLOW_OPERATION, Accessors.LEFT),
-                                portalNode)));
-                Node y1, y2, domainRoot0, domainRoot1;
-                domain = builder().net(
-                        domainRoot0 = node(Operations.INC_OPERATION,
-                            y1 = value(5),
-                            domainRoot1 = unary(Operations.INC_OPERATION,
-                                y2 = value(10))));
-                domain.setPermittedToWrite(permittedToWrite);
-                domain.setPermittedToEvalRoot(true);
-                setUpLeft();
-
-                StepResult result1 = runner.step();
-                assertThat(result1).isEqualTo(StepResult.SUCCESS);
-                assertThat(portalArrow.getTarget(Purview.DIRECT)).isEqualTo(domainRoot1);
-                if (permittedToWrite) {
-                    assertThat(domain.getRoot()).isEqualTo(domainRoot1);
-                } else {
-                    assertThat(domain.getRoot()).isEqualTo(domainRoot0);
-                }
-
-                StepResult result2 = runner.step();
-
-                if (permittedToWrite) {
-                    assertThat(result2).isEqualTo(StepResult.SUCCESS);
-                    assertThat(y1.getValue()).isEqualTo(5);
-                    assertThat(y2.getValue()).isEqualTo(11);
-                } else {
-                    assertThat(result2).isEqualTo(StepResult.COMMAND_EXECUTION_FAILED);
-                    assertThat(y1.getValue()).isEqualTo(5);
-                    assertThat(y2.getValue()).isEqualTo(10);
-                }
-            }
-
-            @ParameterizedTest
-            @ValueSource(booleans = { true, false })
-            void eval_runsOwnCommand(boolean permittedToWrite) {
-                ent = builder().ent(unary(Operations.EVAL_OPERATION,
-                        unary(Commands.get(Operations.INC_OPERATION, Accessors.LEFT), portalNode = ignored())));
-                Node y;
-                domain = builder().net(y = value(14));
-                domain.setPermittedToWrite(permittedToWrite);
-                domain.setPermittedToEvalRoot(true);
-                setUpLeft();
-
-                StepResult result = runner.step();
-
-                if (permittedToWrite) {
-                    assertThat(result).isEqualTo(StepResult.SUCCESS);
-                    assertThat(y.getValue()).isEqualTo(15);
-                } else {
-                    // eval of <set> in own net must not modify domain nodes
                     assertThat(result).isEqualTo(StepResult.COMMAND_EXECUTION_FAILED);
                     assertThat(y.getValue()).isEqualTo(14);
+                    assertThat(domain.getRoot()).isSameAs(domainRoot1);
+                }
+
+                @Test
+                void eval_inner() {
+                    // can eval the toplevel node, but not an inner node of the domain
+                    ent = builder().ent(unary(Commands.get(Operations.EVAL_FLOW_OPERATION, Accessors.LEFT_LEFT), portalNode = ignored()));
+                    Node y;
+                    domain = builder().net(unary(unary(Operations.INC_OPERATION, y = value(14))));
+                    domain.setPermittedToWrite(false);
+                    domain.setPermittedToEvalRoot(true);
+                    setUpLeft();
+
+                    StepResult result = runner.step();
+
+                    assertThat(result).isEqualTo(StepResult.COMMAND_EXECUTION_FAILED);
+                    assertThat(y.getValue()).isEqualTo(14);
+                }
+
+                @ParameterizedTest
+                @ValueSource(booleans = {true, false})
+                void eval_advanceArrow_thenEvalInner(boolean permittedToWrite) {
+                    // Advance the portal arrow and then try to eval.
+                    // The idea is that the rooted portal arrow can change the domain root.
+                    // This should not work, unless you have permission to write.
+                    ent = builder().ent(
+                            node(Commands.get(Operations.SET_OPERATION, Accessors.LEFT, Accessors.LEFT_RIGHT),
+                                    portalNode = ignored(),
+                                    unary(Commands.get(Operations.EVAL_FLOW_OPERATION, Accessors.LEFT),
+                                            portalNode)));
+                    Node y1, y2, domainRoot0, domainRoot1;
+                    domain = builder().net(
+                            domainRoot0 = node(Operations.INC_OPERATION,
+                                    y1 = value(5),
+                                    domainRoot1 = unary(Operations.INC_OPERATION,
+                                            y2 = value(10))));
+                    domain.setPermittedToWrite(permittedToWrite);
+                    domain.setPermittedToEvalRoot(true);
+                    setUpLeft();
+
+                    StepResult result1 = runner.step();
+                    assertThat(result1).isEqualTo(StepResult.SUCCESS);
+                    assertThat(portalArrow.getTarget(Purview.DIRECT)).isEqualTo(domainRoot1);
+                    if (permittedToWrite) {
+                        assertThat(domain.getRoot()).isEqualTo(domainRoot1);
+                    } else {
+                        assertThat(domain.getRoot()).isEqualTo(domainRoot0);
+                    }
+
+                    StepResult result2 = runner.step();
+
+                    if (permittedToWrite) {
+                        assertThat(result2).isEqualTo(StepResult.SUCCESS);
+                        assertThat(y1.getValue()).isEqualTo(5);
+                        assertThat(y2.getValue()).isEqualTo(11);
+                    } else {
+                        assertThat(result2).isEqualTo(StepResult.COMMAND_EXECUTION_FAILED);
+                        assertThat(y1.getValue()).isEqualTo(5);
+                        assertThat(y2.getValue()).isEqualTo(10);
+                    }
+                }
+
+                @ParameterizedTest
+                @ValueSource(booleans = {true, false})
+                void eval_runsOwnCommand(boolean permittedToWrite) {
+                    ent = builder().ent(unary(Operations.EVAL_OPERATION,
+                            unary(Commands.get(Operations.INC_OPERATION, Accessors.LEFT), portalNode = ignored())));
+                    Node y;
+                    domain = builder().net(y = value(14));
+                    domain.setPermittedToWrite(permittedToWrite);
+                    domain.setPermittedToEvalRoot(true);
+                    setUpLeft();
+
+                    StepResult result = runner.step();
+
+                    if (permittedToWrite) {
+                        assertThat(result).isEqualTo(StepResult.SUCCESS);
+                        assertThat(y.getValue()).isEqualTo(15);
+                    } else {
+                        // eval of <set> in own net must not modify domain nodes
+                        assertThat(result).isEqualTo(StepResult.COMMAND_EXECUTION_FAILED);
+                        assertThat(y.getValue()).isEqualTo(14);
+                    }
+                }
+
+                @Test
+                @Disabled("TODO")
+                void test() {
+                    ent = builder().ent(unary(Commands.get(Operations.EVAL_FLOW_OPERATION, Accessors.LEFT),
+                            portalNode = ignored()));
+                    Node y, portalInDomain, innerCommand;
+                    domain = builder().net(node(Commands.SET,
+                            portalInDomain = node(
+                                    ignored(),
+                                    innerCommand = unary(Commands.get(Operations.INC_OPERATION), y = value(12))
+                                    ),
+                            value(Commands.FINAL_SUCCESS)));
+                    domain.setPermittedToWrite(false);
+                    domain.setPermittedToEvalRoot(true);
+                    setUpLeft();
+                    portalInDomain.setValue(portalNode.getValue());
+
+                    runner.step();
+                    // alright so far, just checking
+                    assertThat(portalArrow.getTarget(Purview.DIRECT)).isSameAs(innerCommand);
+
+                    StepResult result = runner.step();
+
+                    assertThat(result).isEqualTo(StepResult.COMMAND_EXECUTION_FAILED);
                 }
             }
         }

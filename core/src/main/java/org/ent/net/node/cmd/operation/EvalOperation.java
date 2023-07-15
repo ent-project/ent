@@ -19,7 +19,7 @@ public class EvalOperation extends MonoNodeOperation {
 	@Override
 	public ExecutionResult doApply(Node node, Ent ent, AccessToken accessToken) {
 		Net net = node.getNet();
-		if (!net.isPermittedToEval(node)) {
+		if (!net.isPermittedToWrite(accessToken)) {
 			return ExecutionResult.ERROR;
 		}
 		Command command = Commands.getByValue(node.getValue(Purview.COMMAND));
@@ -31,8 +31,7 @@ public class EvalOperation extends MonoNodeOperation {
 		}
 		net.event().beforeEvalExecution(node, false);
 
-		AccessToken evalToken = net.getEvalToken();
-		ExecutionResult result = command.execute(node, ent, evalToken);
+		ExecutionResult result = command.execute(node, ent, accessToken);
 		return result;
 	}
 
