@@ -24,6 +24,9 @@ public class DupNormalOperation implements BiOperation {
 		if (!setter.permittedToSetTarget(target, accessToken)) {
 			return ExecutionResult.ERROR;
 		}
+		if (!target.getNet().isPermittedToWrite(accessToken)) {
+			return ExecutionResult.ERROR;
+		}
 		Node copy = target.getNet().newNode(target.getValue(Purview.COMMAND));
 		if (target.hasProperLeftChild()) {
 			copy.setLeftChild(target.getLeftChild(Purview.COMMAND), Purview.DIRECT);

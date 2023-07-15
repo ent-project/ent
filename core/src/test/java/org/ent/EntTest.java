@@ -6,6 +6,7 @@ import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.accessor.Accessors;
+import org.ent.net.node.cmd.operation.BiOperation;
 import org.ent.net.node.cmd.operation.Operations;
 import org.ent.run.EntRunner;
 import org.ent.run.StepResult;
@@ -452,6 +453,29 @@ class EntTest {
 
                     assertThat(roots).containsExactly(legalDomainRoot2);
                     assertThat(portalArrow.getTarget(Purview.DIRECT)).isSameAs(legalDomainRoot2);
+                }
+
+                @ParameterizedTest
+                @MethodSource("duplicate_source")
+                void duplicate(BiOperation operation) {
+                    // verify, that you cannot duplicate a node inside the read-only domain
+                    ent = builder().ent(unary(Commands.get(operation, Accessors.LEFT, Accessors.LEFT_LEFT),
+                            portalNode = ignored()));
+                    Node root;
+                    domain = builder().net(root = unary(Commands.NOP, value(3)));
+                    domain.setPermittedToWrite(false);
+                    domain.setPermittedToEvalRoot(true);
+                    setUpLeft();
+                    assertThat(domain.getNodes()).hasSize(2);
+
+                    runner.step();
+
+                    assertThat(portalArrow.getTarget(Purview.DIRECT)).isSameAs(root);
+                    assertThat(domain.getNodes()).hasSize(2);
+                }
+
+                private static Stream<BiOperation> duplicate_source() {
+                    return Stream.of(Operations.DUP_OPERATION, Operations.DUP_NORMAL_OPERATION);
                 }
             }
         }
