@@ -149,7 +149,7 @@ public class StageReadInfo {
         ListenerHolder holder = new ListenerHolder();
         game.setPostVerifierCreateCallback(verifier -> verifier.addEventListener(holder.create(game)));
 //        if (numRuns == 633937 ){//|| numRuns ==1000976) { //1184310
-        boolean interesting = numRuns == 1000976;
+        boolean interesting = numRuns == 633937;
 //        boolean interesting = numRuns == 1;
         if (interesting){//|| numRuns ==1000976) { //1184310
             game.setVerbose(true);

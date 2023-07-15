@@ -18,6 +18,11 @@ public class PortalArrow implements Arrow {
         this.target = net.getRoot();
     }
 
+    protected PortalArrow(Net net, Node target) {
+        this.net = net;
+        this.target = target;
+    }
+
     @Override
     public ArrowDirection getDirection() {
         throw new IllegalStateException();

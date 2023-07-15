@@ -57,6 +57,7 @@ public class ArithmeticForwardGame {
     private NetFormatter formatter;
 
     private Net verifierNet;
+    private Node verifierNetOriginalRoot;
     private Net answerNet;
     private Node answerNode;
     private int verifierPortalCode1;
@@ -141,14 +142,16 @@ public class ArithmeticForwardGame {
         verifierPortalCode1 = ent.addPortal(new LazyPortalArrow(() -> {
             if (this.verifierNet == null) {
                 this.verifierNet = buildVerifier();
+                this.verifierNetOriginalRoot = verifierNet.getRoot();
             }
-            return new RootPortalArrow(this.verifierNet);
+            return new RootPortalArrow(this.verifierNet, this.verifierNetOriginalRoot);
         }));
         verifierPortalCode2 = ent.addPortal(new LazyPortalArrow(() -> {
             if (this.verifierNet == null) {
                 this.verifierNet = buildVerifier();
+                this.verifierNetOriginalRoot = verifierNet.getRoot();
             }
-            return new RootPortalArrow(this.verifierNet);
+            return new RootPortalArrow(this.verifierNet, this.verifierNetOriginalRoot);
         }));
         return ent;
     }

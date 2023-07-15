@@ -10,6 +10,10 @@ public class RootPortalArrow extends PortalArrow {
         super(net);
     }
 
+    public RootPortalArrow(Net net, Node target) {
+        super(net, target);
+    }
+
     @Override
     public void setTarget(Node target, Purview purview, AccessToken token) {
         super.setTarget(target, purview);
