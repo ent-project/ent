@@ -73,7 +73,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("<=>");
+				assertThat(str).isEqualTo("<::>");
 			}
 
 			@Test
@@ -91,7 +91,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("[<=>]");
+				assertThat(str).isEqualTo("[<::>]");
 			}
 
 			@Test
@@ -101,7 +101,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("#1a[<=>]");
+				assertThat(str).isEqualTo("#1a[<::>]");
 			}
 
 			@Test
@@ -111,7 +111,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("<x>[<=>]");
+				assertThat(str).isEqualTo("<x>[<::>]");
 			}
 
 			@Test
@@ -121,7 +121,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("(<=>, <x>)");
+				assertThat(str).isEqualTo("(<::>, <x>)");
 			}
 
 			@Test
@@ -132,7 +132,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("#abc(<=>, <x>)");
+				assertThat(str).isEqualTo("#abc(<::>, <x>)");
 			}
 
 			@Test
@@ -177,7 +177,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("(A:(<=>, <x>), A)");
+				assertThat(str).isEqualTo("(A:(<::>, <x>), A)");
 			}
 
 			@Test

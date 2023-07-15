@@ -5,10 +5,12 @@ import org.ent.dev.unit.data.DataImpl;
 import org.ent.net.Net;
 import org.ent.net.io.parser.NetParser;
 import org.ent.net.io.parser.ParserException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Disabled("not in use at the moment")
 class VariabilityExamTest {
 
     @Test

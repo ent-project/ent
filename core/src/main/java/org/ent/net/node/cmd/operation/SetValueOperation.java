@@ -14,6 +14,6 @@ public class SetValueOperation extends BiValueOperation {
 
 	@Override
 	public String getShortName() {
-		return "=+";
+		return "=";
 	}
 }

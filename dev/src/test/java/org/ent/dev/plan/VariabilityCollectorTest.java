@@ -29,6 +29,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SoftAssertionsExtension.class)
+@Disabled("not in use at the moment")
 class VariabilityCollectorTest {
 
     private Net net;

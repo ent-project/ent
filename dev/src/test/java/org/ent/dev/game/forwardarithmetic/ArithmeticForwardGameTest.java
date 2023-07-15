@@ -19,7 +19,7 @@ import static org.ent.util.NetBuilder.unary;
 
 class ArithmeticForwardGameTest {
 
-    private static final boolean WEB_UI = true;
+    private static final boolean WEB_UI = false;
 
     @BeforeAll
     static void setTestEnvironment() {

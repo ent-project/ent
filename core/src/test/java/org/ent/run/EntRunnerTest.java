@@ -57,7 +57,7 @@ class EntRunnerTest {
 	@Test
 	void testNetRunner1() throws Exception {
 		doTestNetRunner(true, StepResult.ENDLESS_LOOP, Arrays.asList(
-				"<=>(params:(@, [#1]), [params])",
+				"<::>(params:(@, [#1]), [params])",
 				"[params:(a:[#1], a)]"));
 	}
 
@@ -119,8 +119,8 @@ class EntRunnerTest {
 	@Test
 	void loop() throws Exception {
         Net net = parser.parse("""
-            line01:<^=>(<?//gt/\\?>((i:#0, #5), FIN:[i]), line02);  ~ goto FIN if i > 5
-            line02:<inc>(i, line01);			   					~ i++; goto start
+            line01:<^::>(<?//gt/\\?>((i:#0, #5), FIN:[i]), line02);  ~ goto FIN if i > 5
+            line02:<inc>(i, line01);			   		  			 ~ i++; goto start
         """);
 		EntRunner runner = new EntRunner(net);
 

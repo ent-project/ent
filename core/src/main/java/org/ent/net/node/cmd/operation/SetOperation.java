@@ -27,7 +27,7 @@ public class SetOperation implements BiOperation {
 
 	@Override
 	public String getShortName() {
-		return "=";
+		return "::";
 	}
 
 }
