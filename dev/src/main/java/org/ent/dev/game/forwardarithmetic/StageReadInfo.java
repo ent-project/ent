@@ -18,6 +18,7 @@ import org.ent.hyper.IntHyperDefinition;
 import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
+import org.ent.net.node.cmd.operation.Operations;
 import org.ent.net.node.cmd.operation.TriOperation;
 import org.ent.net.util.RandomUtil;
 import org.ent.run.StepResult;
@@ -33,16 +34,24 @@ import java.util.Map;
 
 public class StageReadInfo {
 
-    private static final boolean WEB_UI = true;
+    private static final boolean WEB_UI = false;
 
     private static final Logger log = LoggerFactory.getLogger(StageReadInfo.class);
 
-    public static final DefaultValueDrawing drawing;
+    public static final DefaultValueDrawing drawing = new MyValueDrawing();
 
-    static {
-        drawing = new DefaultValueDrawing();
-        drawing.addValueBase(new PortalValue(0, 1), DefaultValueDrawing.WEIGHT3);
+    static class MyValueDrawing extends DefaultValueDrawing {
+        @Override
+        protected void initializeValues() {
+            addValueBase(Operations.SET_OPERATION, WEIGHT1);
+            addValueBase(Operations.SET_VALUE_OPERATION, WEIGHT1);
+            addValueBase(new PortalValue(0, 1), DefaultValueDrawing.WEIGHT3);
+        }
     }
+//    static {
+//        drawing = new DefaultValueDrawing();
+//        drawing.addValueBase(new PortalValue(0, 1), DefaultValueDrawing.WEIGHT3);
+//    }
 
     private final int maxSteps;
     private final int numberOfNodes;
@@ -120,7 +129,7 @@ public class StageReadInfo {
     }
 
     public static void main(String[] args) throws IOException {
-        if (true) {
+        if (false) {
             for (int i = 0; i < 200; i++) {
                 mainHpo();
             }
@@ -234,7 +243,7 @@ public class StageReadInfo {
                 numGetAnyOperand,
                 numGetBothOperands);
         log.info("TOTAL DURATION: {}", duration);
-        log.info("Get any Operand: {} hits / min", Tools.getHitsPerMinute(numGetAnyOperandBeforeEval, duration));
+        log.info("Get any Operand before eval: {} hits / min", Tools.getHitsPerMinute(numGetAnyOperandBeforeEval, duration));
     }
 
     private void performRun() {
@@ -263,9 +272,12 @@ public class StageReadInfo {
 
         printRunInformation(holder);
 
-        if (holder.getListener() != null && holder.getListener().isAnyOperandBeforeEval()) {
-            replayWithDetails(netSeed, operand1, operand2, operation);
-            log.info("replay done.");
+        boolean replayHits = false;
+        if (replayHits) {
+            if (holder.getListener() != null && holder.getListener().isAnyOperandBeforeEval()) {
+                replayWithDetails(netSeed, operand1, operand2, operation);
+                log.info("replay done.");
+            }
         }
 
         numRuns++;

@@ -27,6 +27,11 @@ public class DefaultValueDrawing {
     private final List<Integer> accessorSamples_code = new ArrayList<>();
 
     public DefaultValueDrawing() {
+        initializeValues();
+        initializeAccessors();
+    }
+
+    protected void initializeValues() {
         addValueBase(Commands.NOP, WEIGHT3);
         addValueBase(Operations.ANCESTOR_EXCHANGE_OPERATION, WEIGHT1);
         addValueBase(Operations.SET_OPERATION, WEIGHT1);
@@ -55,7 +60,9 @@ public class DefaultValueDrawing {
         addValueBase(Conditions.SAME_VALUE_CONDITION, true, WEIGHT3);
         addValueBase(Conditions.GREATER_THAN_CONDITION, false, WEIGHT3);
         addValueBase(Conditions.GREATER_THAN_CONDITION, true, WEIGHT3);
+    }
 
+    protected void initializeAccessors() {
         addAccessor(Accessors.FLOW, 4);
         addAccessor(Accessors.DIRECT, 4);
         for (ArrowDirection direction1 : ArrowDirection.values()) {
@@ -140,7 +147,7 @@ public class DefaultValueDrawing {
         return Commands.get(operation, Accessors.FLOW, Accessors.FLOW, Accessors.FLOW);
     }
 
-    private void addValueBase(BiOperation operation, int weight) {
+    protected void addValueBase(BiOperation operation, int weight) {
         addValueBase(getCommandBase(operation), weight);
     }
 

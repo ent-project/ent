@@ -27,4 +27,14 @@ public abstract class NumericHyperDefinition<T> extends HyperDefinition {
     public void setMaxValue(T maxValue) {
         this.maxValue = maxValue;
     }
+
+    @Override
+    public String toString() {
+        return "NumericHyperDefinition{" +
+                "name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                ", minValue=" + minValue +
+                ", maxValue=" + maxValue +
+                '}';
+    }
 }
