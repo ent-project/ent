@@ -1,11 +1,20 @@
 package org.ent.dev.game.forwardarithmetic;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.NopEntEventListener;
 import org.ent.NopNetEventListener;
 import org.ent.dev.randnet.DefaultValueDrawing;
 import org.ent.dev.randnet.PortalValue;
 import org.ent.dev.randnet.RandomNetCreator;
+import org.ent.hyper.HpoService;
+import org.ent.hyper.HyperDefinition;
+import org.ent.hyper.IntHyperDefinition;
 import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
@@ -17,7 +26,10 @@ import org.ent.webui.WebUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
+import java.util.Map;
 
 public class StageReadInfo {
 
@@ -34,6 +46,7 @@ public class StageReadInfo {
 
     private final int maxSteps;
     private final int numberOfNodes;
+    private Integer numEpoch;
 
     private int numRuns;
 
@@ -45,6 +58,7 @@ public class StageReadInfo {
     private int numGetBothOperands;
     private int numGetAnyOperandBeforeEval;
     private int numGetBothOperandsBeforeEval;
+    private Duration duration;
 
     private static class VerifierNetListener extends NopNetEventListener {
 
@@ -105,14 +119,79 @@ public class StageReadInfo {
         }
     }
 
-    public static void main(String[] args) {
-        if (WEB_UI) {
-            WebUI.setUpJavalin();
+    public static void main(String[] args) throws IOException {
+        if (true) {
+            for (int i = 0; i < 200; i++) {
+                mainHpo();
+            }
+        } else {
+            if (WEB_UI) {
+                WebUI.setUpJavalin();
+            }
+            StageReadInfo dev0 = new StageReadInfo(30, 15, RandomUtil.newRandom2(12345L));
+            dev0.run();
+            if (WEB_UI) {
+                WebUI.loopForever();
+            }
         }
-        StageReadInfo dev0 = new StageReadInfo(30, 15, RandomUtil.newRandom2(12345L));
-        dev0.run();
-        if (WEB_UI) {
-            WebUI.loopForever();
+    }
+
+    public static void mainHpo() throws IOException {
+        UniformRandomProvider randomRun = RandomUtil.newRandom2(12345L);
+        ObjectMapper objectMapper = new ObjectMapper();
+        OkHttpClient okHttpClient = new OkHttpClient();
+
+        List<HyperDefinition> hyperDefinitions = List.of(
+                new IntHyperDefinition("maxSteps", 3, 200),
+                new IntHyperDefinition("noNodes", 2, 100));
+
+        String jsonInputString = objectMapper.writeValueAsString(hyperDefinitions);
+        RequestBody requestBody = RequestBody.create(
+                jsonInputString,
+                MediaType.get("application/json; charset=utf-8"));
+
+        Request request = new Request.Builder()
+                .url("http://localhost:5005/suggest")
+                .post(requestBody)
+                .build();
+
+        Response response = okHttpClient.newCall(request).execute();
+        String responseBody = response.body().string();
+        System.err.println(responseBody);
+        HpoService.SuggestResponse suggestResponse = objectMapper.readValue(responseBody, HpoService.SuggestResponse.class);
+
+        Map<String, Object> hps = suggestResponse.getParameters();
+        log.info("Hyperparameters: " + hps);
+        int maxStepsHP = (int) (hps.get("maxSteps"));
+        int numberOfNodesHP = (int) (hps.get("noNodes"));
+        StageReadInfo dev = new StageReadInfo(maxStepsHP, numberOfNodesHP, RandomUtil.newRandom2(randomRun.nextLong()));
+        dev.setNumEpoch(50_000);
+
+        dev.run();
+
+        int hits = dev.numGetAnyOperand;
+        double hitsPerMinute = hits * 60_000.0 / dev.duration.toMillis();
+        log.info("hpm: " + hitsPerMinute);
+
+        complete(suggestResponse.getTrial_number(), hitsPerMinute, okHttpClient);
+    }
+
+    private static void complete(int trialNumber, double value, OkHttpClient okHttpClient) throws IOException {
+        HpoService.CompleteRequest completeRequest = new HpoService.CompleteRequest(trialNumber, value);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String completeRequestJson = objectMapper.writeValueAsString(completeRequest);
+
+        RequestBody requestBody = RequestBody.create(
+                completeRequestJson,
+                MediaType.get("application/json; charset=utf-8"));
+
+        Request request = new Request.Builder()
+                .url("http://localhost:5005/complete")
+                .post(requestBody)
+                .build();
+
+        try (Response response = okHttpClient.newCall(request).execute()) {
+            System.err.println("complete response: " + response);
         }
     }
 
@@ -124,10 +203,15 @@ public class StageReadInfo {
         this.randTargets = RandomUtil.newRandom2(randMaster.nextLong());
     }
 
+    public void setNumEpoch(Integer numEpoch) {
+        this.numEpoch = numEpoch;
+    }
+
     private void run() {
         long startTime = System.nanoTime();
 
-        for (int i = 0; i < 5000_000; i++) {
+        int numEpochReal = numEpoch != null ? numEpoch : 5_000_000;
+        for (int i = 0; i < numEpochReal; i++) {
             if (i % 20_000 == 0) {
                 log.info("= i={} =", i);
                 if (i % 100_000 == 0) {
@@ -136,6 +220,7 @@ public class StageReadInfo {
             }
             performRun();
         }
+        this.duration = Duration.ofNanos(System.nanoTime() - startTime);
         printRunInfo(startTime);
     }
 
@@ -163,7 +248,7 @@ public class StageReadInfo {
 //        if (numRuns == 633937 ){//|| numRuns ==1000976) { //1184310
         boolean interesting = false;// numRuns == 1000976;
 //        boolean interesting = numRuns == 1;
-        if (interesting){//|| numRuns ==1000976) { //1184310
+        if (interesting) {//|| numRuns ==1000976) { //1184310
             game.setVerbose(true);
             class StageEntEventListener extends NopEntEventListener {
                 @Override

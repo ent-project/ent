@@ -6,6 +6,8 @@ dependencies {
     implementation project(':core')
     implementation project(':webui')
     implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
 }
 
 
