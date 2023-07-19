@@ -8,8 +8,14 @@ public class CollectingHyperManager extends HyperManager {
     private final List<HyperDefinition> hyperDefinitions = new ArrayList<>();
 
     @Override
-    public float getFloat(String propertyName, float minValue, float maxValue) {
-        hyperDefinitions.add(new FloatHyperDefinition(propertyName, minValue, maxValue));
+    public double getDouble(String propertyName, double minValue, double maxValue) {
+        hyperDefinitions.add(new DoubleHyperDefinition(propertyName, minValue, maxValue));
+        return (minValue + maxValue) / 2;
+    }
+
+    @Override
+    public int getInt(String propertyName, int minValue, int maxValue) {
+        hyperDefinitions.add(new IntHyperDefinition(propertyName, minValue, maxValue));
         return (minValue + maxValue) / 2;
     }
 

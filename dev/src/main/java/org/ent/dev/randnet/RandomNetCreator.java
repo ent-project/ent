@@ -16,7 +16,7 @@ public class RandomNetCreator {
 
 	private final UniformRandomProvider rand;
 
-	private final DefaultValueDrawing valueDrawing;
+	private final ValueDrawing valueDrawing;
 
 	private Net net;
 
@@ -24,7 +24,7 @@ public class RandomNetCreator {
 
 	private enum DrawResult { SUCCESS, REJECT }
 
-	public RandomNetCreator(int numberOfNodes, UniformRandomProvider rand, DefaultValueDrawing valueDrawing) {
+	public RandomNetCreator(int numberOfNodes, UniformRandomProvider rand, ValueDrawing valueDrawing) {
 		this.numberOfNodes = numberOfNodes;
 		this.rand = rand;
 		this.valueDrawing = valueDrawing;

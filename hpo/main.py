@@ -7,7 +7,7 @@ import optuna
 
 app = Flask(__name__)
 
-study = optuna.create_study(study_name="test-cma-es",
+study = optuna.create_study(study_name="test-2023-07-19_with-portal",
                             # sampler=optuna.samplers.CmaEsSampler(),
                             storage="sqlite:///ent.db",
                             direction=optuna.study.StudyDirection.MAXIMIZE,
@@ -22,9 +22,11 @@ def suggest():
     for hyper in data:
         if hyper['type'] == 'int':
             suggested = trial.suggest_int(hyper['name'], hyper['minValue'], hyper['maxValue'])
-            params[hyper['name']] = suggested
+        elif hyper['type'] == 'float':
+            suggested = trial.suggest_float(hyper['name'], hyper['minValue'], hyper['maxValue'])
         else:
             raise Exception('unknown type')
+        params[hyper['name']] = suggested
         print(hyper)
     print("new trial {}, suggesting hyperparameters {}".format(trial.number, params))
     return {'parameters': params, 'trial_number': trial.number}

@@ -1,24 +1,18 @@
 package org.ent.dev.game.forwardarithmetic;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.NopEntEventListener;
 import org.ent.NopNetEventListener;
-import org.ent.dev.randnet.DefaultValueDrawing;
 import org.ent.dev.randnet.PortalValue;
 import org.ent.dev.randnet.RandomNetCreator;
-import org.ent.hyper.HpoService;
-import org.ent.hyper.HyperDefinition;
-import org.ent.hyper.IntHyperDefinition;
+import org.ent.dev.randnet.ValueDrawing;
+import org.ent.dev.randnet.ValueDrawingHp;
+import org.ent.hyper.CollectingHyperManager;
+import org.ent.hyper.HyperManager;
+import org.ent.hyper.RemoteHyperManager;
 import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
-import org.ent.net.node.cmd.operation.Operations;
 import org.ent.net.node.cmd.operation.TriOperation;
 import org.ent.net.util.RandomUtil;
 import org.ent.run.StepResult;
@@ -29,29 +23,33 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.List;
-import java.util.Map;
 
 public class StageReadInfo {
 
     private static final boolean WEB_UI = false;
+    public static final boolean REPLAY_HITS = false || WEB_UI;
 
     private static final Logger log = LoggerFactory.getLogger(StageReadInfo.class);
 
-    public static final DefaultValueDrawing drawing = new MyValueDrawing();
+    public final ValueDrawing drawing;
 
-    static class MyValueDrawing extends DefaultValueDrawing {
+    static class MyValueDrawingHp extends ValueDrawingHp {
+        public MyValueDrawingHp(HyperManager hyperManager) {
+            super(hyperManager);
+        }
+
         @Override
-        protected void initializeValues() {
-            addValueBase(Operations.SET_OPERATION, WEIGHT1);
-            addValueBase(Operations.SET_VALUE_OPERATION, WEIGHT1);
-            addValueBase(new PortalValue(0, 1), DefaultValueDrawing.WEIGHT3);
+        protected ValueDrawingHp.DistributionNode initializeDistribution() {
+            double fracPortal = hyperManager.getDouble("fraction_portals", 0.0f, 1.0f);
+            ValueDrawingHp.DistributionNode distribution = super.initializeDistribution();
+            if (hyperManager.isCollecting()) {
+                return null;
+            }
+            return new ValueDrawingHp.DistributionSplit(fracPortal)
+                    .first(new ValueDrawingHp.DistributionLeaf().add(new PortalValue(0, 1), 1.0))
+                    .rest(distribution);
         }
     }
-//    static {
-//        drawing = new DefaultValueDrawing();
-//        drawing.addValueBase(new PortalValue(0, 1), DefaultValueDrawing.WEIGHT3);
-//    }
 
     private final int maxSteps;
     private final int numberOfNodes;
@@ -67,6 +65,7 @@ public class StageReadInfo {
     private int numGetBothOperands;
     private int numGetAnyOperandBeforeEval;
     private int numGetBothOperandsBeforeEval;
+    private int numPortalMoved;
     private Duration duration;
 
     private static class VerifierNetListener extends NopNetEventListener {
@@ -78,6 +77,7 @@ public class StageReadInfo {
         private int numGetOperand1;
         private int numGetOperand2;
         private boolean hasEvaluatedOperation;
+        private boolean hasEvalFlowed;
         private int numGetOperand1BeforeEval;
         private int numGetOperand2BeforeEval;
 
@@ -87,6 +87,9 @@ public class StageReadInfo {
 
         @Override
         public void beforeEvalExecution(Node target, boolean flow) {
+            if (flow) {
+                hasEvalFlowed = true;
+            }
             if (target == game.getOperationNode()) {
                 hasEvaluatedOperation = true;
             }
@@ -129,84 +132,49 @@ public class StageReadInfo {
     }
 
     public static void main(String[] args) throws IOException {
-        if (false) {
-            for (int i = 0; i < 200; i++) {
-                mainHpo();
-            }
+        if (WEB_UI) {
+            WebUI.setUpJavalin();
+        }
+        if (true) {
+            mainHpo();
         } else {
-            if (WEB_UI) {
-                WebUI.setUpJavalin();
-            }
-            StageReadInfo dev0 = new StageReadInfo(30, 15, RandomUtil.newRandom2(12345L));
+            StageReadInfo dev0 = null;//new StageReadInfo(30, 15, RandomUtil.newRandom2(12345L));
             dev0.run();
-            if (WEB_UI) {
-                WebUI.loopForever();
-            }
+        }
+        if (WEB_UI) {
+            WebUI.loopForever();
         }
     }
 
     public static void mainHpo() throws IOException {
         UniformRandomProvider randomRun = RandomUtil.newRandom2(12345L);
-        ObjectMapper objectMapper = new ObjectMapper();
-        OkHttpClient okHttpClient = new OkHttpClient();
 
-        List<HyperDefinition> hyperDefinitions = List.of(
-                new IntHyperDefinition("maxSteps", 3, 200),
-                new IntHyperDefinition("noNodes", 2, 100));
+        CollectingHyperManager hyperCollector = new CollectingHyperManager();
+        new StageReadInfo(hyperCollector, RandomUtil.newRandom2(5L));
 
-        String jsonInputString = objectMapper.writeValueAsString(hyperDefinitions);
-        RequestBody requestBody = RequestBody.create(
-                jsonInputString,
-                MediaType.get("application/json; charset=utf-8"));
+        RemoteHyperManager remoteHyperManager = new RemoteHyperManager(hyperCollector.getHyperDefinitions());
 
-        Request request = new Request.Builder()
-                .url("http://localhost:5005/suggest")
-                .post(requestBody)
-                .build();
+        for (int i = 0; i < 200000000; i++) {
+            int trial = remoteHyperManager.suggest();
 
-        Response response = okHttpClient.newCall(request).execute();
-        String responseBody = response.body().string();
-        System.err.println(responseBody);
-        HpoService.SuggestResponse suggestResponse = objectMapper.readValue(responseBody, HpoService.SuggestResponse.class);
+            StageReadInfo dev = new StageReadInfo(remoteHyperManager, RandomUtil.newRandom2(randomRun.nextLong()));
+            dev.setNumEpoch(500_000);
 
-        Map<String, Object> hps = suggestResponse.getParameters();
-        log.info("Hyperparameters: " + hps);
-        int maxStepsHP = (int) (hps.get("maxSteps"));
-        int numberOfNodesHP = (int) (hps.get("noNodes"));
-        StageReadInfo dev = new StageReadInfo(maxStepsHP, numberOfNodesHP, RandomUtil.newRandom2(randomRun.nextLong()));
-        dev.setNumEpoch(50_000);
+            dev.run();
 
-        dev.run();
+            int hits = dev.numPortalMoved;
+            double hitsPerMinute = hits * 60_000.0 / dev.duration.toMillis();
+            log.info("hpm: " + hitsPerMinute);
 
-        int hits = dev.numGetAnyOperand;
-        double hitsPerMinute = hits * 60_000.0 / dev.duration.toMillis();
-        log.info("hpm: " + hitsPerMinute);
-
-        complete(suggestResponse.getTrial_number(), hitsPerMinute, okHttpClient);
-    }
-
-    private static void complete(int trialNumber, double value, OkHttpClient okHttpClient) throws IOException {
-        HpoService.CompleteRequest completeRequest = new HpoService.CompleteRequest(trialNumber, value);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String completeRequestJson = objectMapper.writeValueAsString(completeRequest);
-
-        RequestBody requestBody = RequestBody.create(
-                completeRequestJson,
-                MediaType.get("application/json; charset=utf-8"));
-
-        Request request = new Request.Builder()
-                .url("http://localhost:5005/complete")
-                .post(requestBody)
-                .build();
-
-        try (Response response = okHttpClient.newCall(request).execute()) {
-            System.err.println("complete response: " + response);
+            remoteHyperManager.complete(trial, hitsPerMinute);
         }
     }
 
-    public StageReadInfo(int maxSteps, int numberOfNodes, UniformRandomProvider random) {
-        this.maxSteps = maxSteps;
-        this.numberOfNodes = numberOfNodes;
+    public StageReadInfo(HyperManager hyperManager, UniformRandomProvider random) {
+        this.drawing = new MyValueDrawingHp(hyperManager);
+        this.maxSteps = hyperManager.getInt("max-steps", 3, 200);
+        this.numberOfNodes = hyperManager.getInt("no-nodes", 2, 100);
+        log.info("Suggestions, got maxSteps={}, numberOfNodes={}", maxSteps, numberOfNodes);
         this.randMaster = random;
         this.randNetSeeds = RandomUtil.newRandom2(randMaster.nextLong());
         this.randTargets = RandomUtil.newRandom2(randMaster.nextLong());
@@ -242,8 +210,9 @@ public class StageReadInfo {
                 numGetOperation,
                 numGetAnyOperand,
                 numGetBothOperands);
+        log.info("                portal moved: {}", numPortalMoved);
         log.info("TOTAL DURATION: {}", duration);
-        log.info("Get any Operand before eval: {} hits / min", Tools.getHitsPerMinute(numGetAnyOperandBeforeEval, duration));
+        log.info("Portal moved: {} hits / min", Tools.getHitsPerMinute(numPortalMoved, duration));
     }
 
     private void performRun() {
@@ -262,7 +231,7 @@ public class StageReadInfo {
             class StageEntEventListener extends NopEntEventListener {
                 @Override
                 public void afterCommandExecution(StepResult stepResult) {
-                    printRunInformation(holder);
+                    printRunInformation(game, holder);
                 }
             }
             game.getEnt().setEventListener(new StageEntEventListener());
@@ -270,11 +239,12 @@ public class StageReadInfo {
 
         game.execute();
 
-        printRunInformation(holder);
+        recordRunInformation(game, holder);
 
-        boolean replayHits = false;
-        if (replayHits) {
-            if (holder.getListener() != null && holder.getListener().isAnyOperandBeforeEval()) {
+        if (REPLAY_HITS) {
+//            boolean isHit = holder.getListener() != null && holder.getListener().isAnyOperandBeforeEval();
+            boolean isHit =  holder.getListener() != null && !holder.getListener().hasEvalFlowed && game.passedPortalMoved();
+            if (isHit) {
                 replayWithDetails(netSeed, operand1, operand2, operation);
                 log.info("replay done.");
             }
@@ -294,16 +264,16 @@ public class StageReadInfo {
         class StageEntEventListener extends NopEntEventListener {
             @Override
             public void afterCommandExecution(StepResult stepResult) {
-                printRunInformation(holder);
+                printRunInformation(game, holder);
             }
         }
         game.getEnt().setEventListener(new StageEntEventListener());
 
         game.execute();
-        printRunInformation(holder);
+        printRunInformation(game, holder);
     }
 
-    private void printRunInformation(ListenerHolder holder) {
+    private void recordRunInformation(ArithmeticForwardGame game, ListenerHolder holder) {
         VerifierNetListener listener = holder.getListener();
         if (listener != null) {
             if (listener.numGetOperation > 0) {
@@ -322,8 +292,26 @@ public class StageReadInfo {
                     numGetBothOperandsBeforeEval++;
                 }
             }
+            if (game.passedPortalMoved() && !listener.hasEvalFlowed) {
+//                log.info("#{} portal moved", numRuns);
+                numPortalMoved++;
+            }
         }
     }
+
+    private void printRunInformation(ArithmeticForwardGame game, ListenerHolder holder) {
+        VerifierNetListener listener = holder.getListener();
+        if (listener != null) {
+            if (listener.numGetOperand1BeforeEval > 0 || listener.numGetOperand2BeforeEval > 0) {
+                log.info("#{} Get Info Before Eval - x: {}, op: {}, y: {}", numRuns, listener.numGetOperand1BeforeEval, listener.numGetOperation, listener.numGetOperand2BeforeEval);
+            }
+            if (game.passedPortalMoved() && !listener.hasEvalFlowed) {
+                log.info("#{} portal moved", numRuns);
+            }
+        }
+
+    }
+
 
     private Net buildNet(Long netSeed) {
         RandomNetCreator netCreator = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(netSeed), drawing);

@@ -23,7 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class DefaultValueDrawing2 {
+public abstract class DefaultValueDrawing2 implements ValueDrawing {
 
     public static final int WEIGHT1 = 10;
     public static final int WEIGHT2 = 4;
@@ -34,27 +34,27 @@ public abstract class DefaultValueDrawing2 {
 
     public static class ValueCollector {
 
-        private final Map<ParameterizedValue, Float> collector = new LinkedHashMap<>();
-        private float totalWeight;
+        private final Map<ParameterizedValue, Double> collector = new LinkedHashMap<>();
+        private double totalWeight;
 
         private int[] valueBase;
         private byte[] numberOfParameters;
 
-        public void addValueBase(ParameterizedValue value, float weight) {
+        public void addValueBase(ParameterizedValue value, double weight) {
             collector.put(value, weight);
             totalWeight += weight;
         }
 
 
-        protected void addValueBase(MonoOperation operation, float weight) {
+        protected void addValueBase(MonoOperation operation, double weight) {
             addValueBase(getCommandBase(operation), weight);
         }
 
-        protected void addValueBase(BiCondition condition, boolean not, float weight) {
+        protected void addValueBase(BiCondition condition, boolean not, double weight) {
             addValueBase(Vetos.get(condition, not, Accessors.FLOW, Accessors.FLOW), weight);
         }
 
-        protected void addValueBase(TriOperation operation, float weight) {
+        protected void addValueBase(TriOperation operation, double weight) {
             addValueBase(getCommandBase(operation), weight);
         }
 
@@ -66,7 +66,7 @@ public abstract class DefaultValueDrawing2 {
             return Commands.get(operation, Accessors.FLOW, Accessors.FLOW, Accessors.FLOW);
         }
 
-        protected void addValueBase(BiOperation operation, float weight) {
+        protected void addValueBase(BiOperation operation, double weight) {
             addValueBase(getCommandBase(operation), weight);
         }
 
@@ -76,18 +76,18 @@ public abstract class DefaultValueDrawing2 {
 
         public void buildValueSamples(int targetSize) {
             int discreteTotalWeight = 0;
-            for (float weight : collector.values()) {
-                int discreteWeight = Math.round(weight * targetSize / totalWeight);
+            for (double weight : collector.values()) {
+                int discreteWeight = (int) Math.round(weight * targetSize / totalWeight);
                 discreteTotalWeight += discreteWeight;
             }
 
             valueBase = new int[discreteTotalWeight];
             numberOfParameters = new byte[discreteTotalWeight];
             int i = 0;
-            for (Map.Entry<ParameterizedValue, Float> entry : collector.entrySet()) {
+            for (Map.Entry<ParameterizedValue, Double> entry : collector.entrySet()) {
                 ParameterizedValue value = entry.getKey();
-                float weight = entry.getValue();
-                int discreteWeight = Math.round(weight * targetSize / totalWeight);
+                double weight = entry.getValue();
+                int discreteWeight = (int) Math.round(weight * targetSize / totalWeight);
                 for (int j = 0; j < discreteWeight; j++) {
                     // optimization: direct access for fields "valueBase" and "numberOfParameters" of ParameterizedValue
                     valueBase[i] = value.getValueBase();
@@ -118,7 +118,9 @@ public abstract class DefaultValueDrawing2 {
         valueSamples_numberOfParameters = collector.getNumberOfParameters();
     }
 
-    protected abstract void initializeValues(ValueCollector collector);
+    protected void initializeValues(ValueCollector collector) {
+        // override
+    }
 
     public void defaultInitializeValues(ValueCollector collector) {
         collector.addValueBase(Commands.NOP, WEIGHT3);

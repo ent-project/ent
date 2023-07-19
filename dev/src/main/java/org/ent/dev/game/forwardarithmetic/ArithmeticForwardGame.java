@@ -60,12 +60,9 @@ public class ArithmeticForwardGame {
     private Node verifierNetOriginalRoot;
     private Net answerNet;
     private Node answerNode;
-    private int verifierPortalCode1;
-    private int verifierPortalCode2;
-    private Node operationNode;
-    private Node operand1Node;
-    private Node operand2Node;
-
+    private int verifierPortalCode1, verifierPortalCode2;
+    private LazyPortalArrow verifierPortal1, verifierPortal2;
+    private Node operationNode, operand1Node, operand2Node, verifierRoot;
     private Consumer<Net> postVerifierCreateHook;
 
     public ArithmeticForwardGame(int operand1, int operand2, TriOperation operation, Net net, int maxSteps) {
@@ -139,26 +136,28 @@ public class ArithmeticForwardGame {
 
     private Ent buildEnt(Net net) {
         Ent ent = new Ent(net);
-        verifierPortalCode1 = ent.addPortal(new LazyPortalArrow(() -> {
+        verifierPortal1 = new LazyPortalArrow(() -> {
             if (this.verifierNet == null) {
                 this.verifierNet = buildVerifier();
                 this.verifierNetOriginalRoot = verifierNet.getRoot();
             }
             return new RootPortalArrow(this.verifierNet, this.verifierNetOriginalRoot);
-        }));
-        verifierPortalCode2 = ent.addPortal(new LazyPortalArrow(() -> {
+        });
+        verifierPortalCode1 = ent.addPortal(verifierPortal1);
+        verifierPortal2 = new LazyPortalArrow(() -> {
             if (this.verifierNet == null) {
                 this.verifierNet = buildVerifier();
                 this.verifierNetOriginalRoot = verifierNet.getRoot();
             }
             return new RootPortalArrow(this.verifierNet, this.verifierNetOriginalRoot);
-        }));
+        });
+        verifierPortalCode2 = ent.addPortal(verifierPortal2);
         return ent;
     }
 
     private Net buildVerifier() {
         Node portalAnswer, answerCopy, solution;
-        Net verifierNet = builder().net(node(Commands.get(Operations.SET_VALUE_OPERATION, Accessors.RIGHT, Accessors.LEFT),
+        Net verifierNet = builder().net(verifierRoot = node(Commands.get(Operations.SET_VALUE_OPERATION, Accessors.RIGHT, Accessors.LEFT),
                 portalAnswer = node(ignored(), answerCopy = node()),
                 operationNode = node(Commands.get(this.operation, Accessors.RIGHT, Accessors.LEFT_LEFT, Accessors.LEFT_RIGHT),
                         node(
@@ -221,4 +220,17 @@ public class ArithmeticForwardGame {
                 verifierNet.getRoot().getValue(Purview.DIRECT) == Commands.FINAL_SUCCESS.getValue();
     }
 
+    public boolean passedPortalMoved() {
+        if (verifierPortal1.isInitialized()) {
+            if (verifierPortal1.getTarget(Purview.DIRECT) != verifierRoot) {
+                return true;
+            }
+        }
+        if (verifierPortal2.isInitialized()) {
+            if (verifierPortal2.getTarget(Purview.DIRECT) != verifierRoot) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

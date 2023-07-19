@@ -17,7 +17,7 @@ import org.ent.net.node.cmd.veto.Vetos;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DefaultValueDrawing {
+public class DefaultValueDrawing implements ValueDrawing {
 
     public static final int WEIGHT1 = 10;
     public static final int WEIGHT2 = 4;
@@ -93,6 +93,7 @@ public class DefaultValueDrawing {
         }
     }
 
+    @Override
     public int drawValue(UniformRandomProvider rand) {
         int valueIndex = rand.nextInt(valueSamples_valueBase.size());
         int accessors = drawAccessors(valueSamples_numberOfParameters.get(valueIndex), rand);
