@@ -1,5 +1,6 @@
 package org.ent.dev.randnet;
 
+import org.ent.hyper.DoubleHyperDefinition;
 import org.ent.hyper.HyperManager;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.Commands;
@@ -21,6 +22,17 @@ import java.util.Map;
 public class ValueDrawingHp extends DefaultValueDrawing2 {
     private static final Logger log = LoggerFactory.getLogger(ValueDrawingHp.class);
 
+    public static DoubleHyperDefinition FRAC_COMMANDS = new DoubleHyperDefinition("fraction_commands", 0.0, 1.0);
+    public static DoubleHyperDefinition FRAC_MAJOR_COMMANDS = new DoubleHyperDefinition("fraction_major_commands", 0.0, 1.0);
+    public static DoubleHyperDefinition FRAC_MAJOR_SPLIT = new DoubleHyperDefinition("fraction_major_split", 0.0, 1.0);
+    public static DoubleHyperDefinition FRAC_SET = new DoubleHyperDefinition("fraction_set", 0.0, 1.0);
+
+    public static void registerHyperparameter(HyperManager hyperManager) {
+        hyperManager.get(FRAC_COMMANDS);
+        hyperManager.get(FRAC_MAJOR_COMMANDS);
+        hyperManager.get(FRAC_MAJOR_SPLIT);
+        hyperManager.get(FRAC_SET);
+    }
     protected final HyperManager hyperManager;
 
     public interface DistributionNode {
@@ -107,20 +119,14 @@ public class ValueDrawingHp extends DefaultValueDrawing2 {
     public ValueDrawingHp(HyperManager hyperManager) {
         this.hyperManager = hyperManager;
         DistributionNode distribution = initializeDistribution();
-        if (hyperManager.isCollecting()) {
-            return;
-        }
         initialize(distribution, 50_000);
     }
 
     protected DistributionNode initializeDistribution() {
-        double fracCommands = hyperManager.getDouble("fraction_commands", 0.0f, 1.0f);
-        double fracMajorCommands = hyperManager.getDouble("fraction_major_commands", 0.0f, 1.0f);
-        double fracMajorSplit = hyperManager.getDouble("fraction_major_split", 0.0f, 1.0f);
-        double fracSet = hyperManager.getDouble("fraction_set", 0.0f, 1.0f);
-        if (hyperManager.isCollecting()) {
-            return null;
-        }
+        double fracCommands = hyperManager.get(FRAC_COMMANDS);
+        double fracMajorCommands = hyperManager.get(FRAC_MAJOR_COMMANDS);
+        double fracMajorSplit = hyperManager.get(FRAC_MAJOR_SPLIT);
+        double fracSet = hyperManager.get(FRAC_SET);
         log.info("got HPs: fracCommands={}, fracMajorCommands={}, fracMajorSplit={}, fracSet={}", fracCommands, fracMajorCommands, fracMajorSplit, fracSet);
 
         return new DistributionSplit(fracCommands)

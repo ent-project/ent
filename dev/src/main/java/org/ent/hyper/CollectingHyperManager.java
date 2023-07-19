@@ -20,8 +20,15 @@ public class CollectingHyperManager extends HyperManager {
     }
 
     @Override
-    public boolean isCollecting() {
-        return true;
+    public double get(DoubleHyperDefinition hyperDefinition) {
+        hyperDefinitions.add(hyperDefinition);
+        return (hyperDefinition.getMinValue() + hyperDefinition.getMaxValue()) / 2;
+    }
+
+    @Override
+    public int get(IntHyperDefinition hyperDefinition) {
+        hyperDefinitions.add(hyperDefinition);
+        return (hyperDefinition.getMinValue() + hyperDefinition.getMaxValue()) / 2;
     }
 
     public List<HyperDefinition> getHyperDefinitions() {

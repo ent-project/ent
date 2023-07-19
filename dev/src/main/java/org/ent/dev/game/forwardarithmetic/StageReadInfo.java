@@ -8,7 +8,9 @@ import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.randnet.ValueDrawing;
 import org.ent.dev.randnet.ValueDrawingHp;
 import org.ent.hyper.CollectingHyperManager;
+import org.ent.hyper.DoubleHyperDefinition;
 import org.ent.hyper.HyperManager;
+import org.ent.hyper.IntHyperDefinition;
 import org.ent.hyper.RemoteHyperManager;
 import org.ent.net.Net;
 import org.ent.net.Purview;
@@ -31,20 +33,43 @@ public class StageReadInfo {
 
     private static final Logger log = LoggerFactory.getLogger(StageReadInfo.class);
 
+    public static IntHyperDefinition HYPER_MAX_STEPS = new IntHyperDefinition("max-steps", 3, 200);
+    public static IntHyperDefinition HYPER_NO_NODES = new IntHyperDefinition("no-nodes", 2, 100);
+    public static void registerHyperparameter(HyperManager hyperManager) {
+        hyperManager.get(HYPER_MAX_STEPS);
+        hyperManager.get(HYPER_NO_NODES);
+        MyValueDrawingHp.registerHyperparameter(hyperManager);
+    }
+
+    private static final String HYPER_SELECTION = """
+            {
+              'fraction_commands': 0.8867647226720414,
+              'fraction_major_commands': 0.9989939340398684,
+              'fraction_major_split': 0.924552028785329,
+              'fraction_portals': 0.6575066779888346,
+              'fraction_set': 0.9901816298961561,
+              'max-steps': 15,
+              'no-nodes': 53
+            }
+            """;
+
     public final ValueDrawing drawing;
 
     static class MyValueDrawingHp extends ValueDrawingHp {
+        public static DoubleHyperDefinition FRAC_PORTALS = new DoubleHyperDefinition("fraction_portals", 0.0, 1.0);
+        public static void registerHyperparameter(HyperManager hyperManager) {
+            hyperManager.get(FRAC_PORTALS);
+            ValueDrawingHp.registerHyperparameter(hyperManager);
+        }
+
         public MyValueDrawingHp(HyperManager hyperManager) {
             super(hyperManager);
         }
 
         @Override
         protected ValueDrawingHp.DistributionNode initializeDistribution() {
-            double fracPortal = hyperManager.getDouble("fraction_portals", 0.0f, 1.0f);
+            double fracPortal = hyperManager.get(FRAC_PORTALS);
             ValueDrawingHp.DistributionNode distribution = super.initializeDistribution();
-            if (hyperManager.isCollecting()) {
-                return null;
-            }
             return new ValueDrawingHp.DistributionSplit(fracPortal)
                     .first(new ValueDrawingHp.DistributionLeaf().add(new PortalValue(0, 1), 1.0))
                     .rest(distribution);
@@ -150,12 +175,13 @@ public class StageReadInfo {
         UniformRandomProvider randomRun = RandomUtil.newRandom2(12345L);
 
         CollectingHyperManager hyperCollector = new CollectingHyperManager();
-        new StageReadInfo(hyperCollector, RandomUtil.newRandom2(5L));
+        StageReadInfo.registerHyperparameter(hyperCollector);
 
         RemoteHyperManager remoteHyperManager = new RemoteHyperManager(hyperCollector.getHyperDefinitions());
+        remoteHyperManager.fixParameters(HYPER_SELECTION);
 
-        for (int i = 0; i < 200000000; i++) {
-            int trial = remoteHyperManager.suggest();
+        for (int i = 0; i < 1; i++) {
+            Integer trial = remoteHyperManager.suggest();
 
             StageReadInfo dev = new StageReadInfo(remoteHyperManager, RandomUtil.newRandom2(randomRun.nextLong()));
             dev.setNumEpoch(500_000);
