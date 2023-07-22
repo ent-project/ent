@@ -1,7 +1,7 @@
 package org.ent.dev.game.copyvalue;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.ent.TrimmingListener;
+import org.ent.dev.trim2.TrimmingListener;
 import org.ent.dev.variation.ArrowMixMerger;
 import org.ent.net.Arrow;
 import org.ent.net.Net;

@@ -1,5 +1,6 @@
-package org.ent;
+package org.ent.dev.trim2;
 
+import org.ent.NopNetEventListener;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Purview;

@@ -7,6 +7,8 @@ import org.ent.dev.randnet.PortalValue;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.randnet.ValueDrawing;
 import org.ent.dev.randnet.ValueDrawingHp;
+import org.ent.dev.trim2.TrimmingHelper;
+import org.ent.dev.trim2.TrimmingListener;
 import org.ent.hyper.CollectingHyperManager;
 import org.ent.hyper.DoubleHyperDefinition;
 import org.ent.hyper.HyperManager;
@@ -274,13 +276,17 @@ public class StageReadInfo {
         if (REPLAY_HITS) {
             boolean isHit = holder.getListener() != null && holder.getListener().isAnyOperandBeforeEval();
 //            boolean isHit =  holder.getListener() != null && !holder.getListener().hasEvalFlowed && game.passedPortalMoved();
-            String uuid = UUID.randomUUID().toString();
             if (isHit) {
+                String uuid = UUID.randomUUID().toString();
                 WebUiStoryOutput.addStory("game-"+uuid, () -> {
                     replayWithDetails(netSeed, operand1, operand2, operation);
                     log.info("replay done.");
                 });
-                Logging.logHtml(() -> "hey <b>there</b>!<a href=\"/?story=game-%s\" target=\"_blank\">game</a>".formatted(uuid));
+                WebUiStoryOutput.addStory("game-trimmed-"+uuid, () -> {
+                    replayTrimmedWithDetails(netSeed, operand1, operand2, operation);
+                    log.info("replay done.");
+                });
+                Logging.logHtml(() -> "hey <b>there</b>!<a href=\"/?story=game-%s\" target=\"_blank\">game</a> <a href=\"/?story=game-trimmed-%s\" target=\"_blank\">game-trimmed</a>".formatted(uuid, uuid));
                 log.info("replay registered.");
             }
         }
@@ -293,6 +299,10 @@ public class StageReadInfo {
 
     private void replayWithDetails(long netSeed, int operand1, int operand2, TriOperation operation) {
         ArithmeticForwardGame game = new ArithmeticForwardGame(operand1, operand2, operation, buildNet(netSeed), maxSteps);
+        replayWithDetails(game);
+    }
+
+    private void replayWithDetails(ArithmeticForwardGame game) {
         ListenerHolder holder = new ListenerHolder();
         game.setPostVerifierCreateCallback(verifier -> verifier.addEventListener(holder.create(game)));
         game.setVerbose(true);
@@ -306,6 +316,17 @@ public class StageReadInfo {
 
         game.execute();
         printRunInformation(game, holder);
+    }
+
+    private void replayTrimmedWithDetails(long netSeed, int operand1, int operand2, TriOperation operation) {
+        ArithmeticForwardGame game0 = new ArithmeticForwardGame(operand1, operand2, operation, buildNet(netSeed), maxSteps);
+        TrimmingListener trimmingListener = new TrimmingListener(game0.getEnt().getNet().getNodes().size());
+        game0.getEnt().getNet().addEventListener(trimmingListener);
+        game0.execute();
+
+        ArithmeticForwardGame game = new ArithmeticForwardGame(operand1, operand2, operation, buildNet(netSeed), maxSteps);
+        TrimmingHelper.trim(game.getEnt().getNet(), trimmingListener);
+        replayWithDetails(game);
     }
 
     private void recordRunInformation(ArithmeticForwardGame game, ListenerHolder holder) {
