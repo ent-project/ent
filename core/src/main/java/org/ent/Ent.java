@@ -98,8 +98,18 @@ public class Ent {
         return eventListener;
     }
 
-    public Ent setEventListener(EntEventListener eventListener) {
-        this.eventListener = eventListener;
+    public Ent addEventListener(EntEventListener eventListener) {
+        if (this.eventListener.getClass() == NopEntEventListener.class) {
+            this.eventListener = eventListener;
+        } else if (this.eventListener instanceof MultiEntEventListener multiEntEventListener) {
+            multiEntEventListener.addEntEventListener(eventListener);
+        } else {
+            EntEventListener current = this.eventListener;
+            MultiEntEventListener multiEntEventListener = new MultiEntEventListener();
+            multiEntEventListener.addEntEventListener(current);
+            multiEntEventListener.addEntEventListener(eventListener);
+            this.eventListener = multiEntEventListener;
+        }
         return this;
     }
 

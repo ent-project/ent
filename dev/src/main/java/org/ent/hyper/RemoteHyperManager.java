@@ -11,6 +11,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,7 +28,7 @@ public class RemoteHyperManager extends HyperManager {
     private final List<HyperDefinition> hyperDefinitions;
 
     private Map<String, Object> suggested;
-    private Map<String, Object> fixed;
+    private Map<String, Object> fixed = new HashMap<>();
 
 
     public RemoteHyperManager(List<HyperDefinition> hyperDefinitions) {
@@ -81,16 +82,6 @@ public class RemoteHyperManager extends HyperManager {
         }
     }
 
-    @Override
-    public double getDouble(String propertyName, double minValue, double maxValue) {
-        return (double) getProp(propertyName);
-    }
-
-    @Override
-    public int getInt(String propertyName, int minValue, int maxValue) {
-        return (int) getProp(propertyName);
-    }
-
     public Object getProp(String propertyName) {
         Object fixedProp = this.fixed.get(propertyName);
         if (fixedProp != null) {
@@ -114,7 +105,7 @@ public class RemoteHyperManager extends HyperManager {
     public void fixParameters(String hyperSelectionJson) {
         TypeReference<Map<String, Object>> typeRef = new TypeReference<>() {};
         try {
-            this.fixed = objectMapper.readValue(hyperSelectionJson, typeRef);
+            this.fixed.putAll(objectMapper.readValue(hyperSelectionJson, typeRef));
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException(e);
         }

@@ -17,4 +17,8 @@ public class Logging {
     public static void logHtml(Supplier<String> html) {
         htmlLogger.atInfo().log(html);
     }
+
+    public static void logHtml(String html) {
+        htmlLogger.info(html);
+    }
 }

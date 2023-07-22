@@ -150,7 +150,7 @@ class EntRunnerTest {
 			Ent ent = builder().ent(
 					unary(Commands.get(INC_OPERATION, LEFT),
 							node(Conditions.SAME_VALUE_CONDITION, i = value(3), value(3))));
-			ent.setEventListener(listener);
+			ent.addEventListener(listener);
 			EntRunner runner = new EntRunner(ent);
 
 			StepResult result = runner.step();
@@ -166,7 +166,7 @@ class EntRunnerTest {
 			Ent ent = builder().ent(
 					unary(Commands.get(INC_OPERATION, LEFT),
 							node(IDENTICAL_CONDITION, i = value(3), value(3))));
-			ent.setEventListener(listener);
+			ent.addEventListener(listener);
 			EntRunner runner = new EntRunner(ent);
 
 			StepResult result = runner.step();

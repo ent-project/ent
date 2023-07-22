@@ -108,7 +108,7 @@ class CopyValueGame {
 
     private Ent buildEnt(Net net) {
         Ent ent = new Ent(net);
-        ent.setEventListener(entListener = new EntListener());
+        ent.addEventListener(entListener = new EntListener());
 
         ent.addPortal(new LazyPortalArrow(() -> {
             if (verifierNet == null) {

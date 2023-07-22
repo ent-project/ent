@@ -7,7 +7,6 @@ import io.javalin.http.staticfiles.Location;
 import io.javalin.websocket.WsConnectContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -21,7 +20,6 @@ import java.util.concurrent.Executors;
 public class WebUI {
 
     public static final String STORY_ID_MAIN = "main";
-    public static final String MDC_KEY_STORY = "story";
     public static final String QUERY_KEY_STORY = "story";
 
     static {
@@ -73,14 +71,14 @@ public class WebUI {
                     if (runnable != null) {
                         String storyIdFinal = storyId;
                         EXECUTOR_SERVICE.submit(() -> {
-                            MDC.put(MDC_KEY_STORY, storyIdFinal);
+                            WebUiStoryOutput.startStory(storyIdFinal);
                             runnable.run();
-                            MDC.remove(MDC_KEY_STORY);
+                            WebUiStoryOutput.endStory();
                         });
                     } else {
-                        MDC.put(MDC_KEY_STORY, storyId);
+                        WebUiStoryOutput.startStory(storyId);
                         log.warn("No content found.");
-                        MDC.remove(MDC_KEY_STORY);
+                        WebUiStoryOutput.endStory();
                     }
                 }
             });

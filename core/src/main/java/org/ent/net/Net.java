@@ -75,7 +75,7 @@ public class Net {
     }
 
     public Net addEventListener(NetEventListener netEventListener) {
-        if (this.netEventListener instanceof NopNetEventListener) {
+        if (this.netEventListener.getClass() == NopNetEventListener.class) {
             this.netEventListener = netEventListener;
         } else if (this.netEventListener instanceof MultiNetEventListener multiNetEventListener) {
             multiNetEventListener.addNetEventListener(netEventListener);

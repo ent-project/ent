@@ -29,24 +29,29 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
-public class StageReadInfo {
+public class StageReadInfo1 {
 
-    private static final boolean WEB_UI = true;
+    private static final boolean WEB_UI = false;
     public static final boolean REPLAY_HITS = false || WEB_UI;
+    public static final boolean TRACK_HASHES = false;
 
-    private static final Logger log = LoggerFactory.getLogger(StageReadInfo.class);
+    private static final Logger log = LoggerFactory.getLogger(StageReadInfo1.class);
 
     public static IntHyperDefinition HYPER_MAX_STEPS = new IntHyperDefinition("max-steps", 3, 200);
     public static IntHyperDefinition HYPER_NO_NODES = new IntHyperDefinition("no-nodes", 2, 100);
+
     public static void registerHyperparameter(HyperManager hyperManager) {
         hyperManager.get(HYPER_MAX_STEPS);
         hyperManager.get(HYPER_NO_NODES);
         MyValueDrawingHp.registerHyperparameter(hyperManager);
     }
 
-    private static final String HYPER_SELECTION = """
+    public static final String HYPER_SELECTION = """
             {
               'fraction_commands': 0.8867647226720414,
               'fraction_major_commands': 0.9989939340398684,
@@ -59,6 +64,16 @@ public class StageReadInfo {
             """;
 
     public final ValueDrawing drawing;
+
+    public static class Solution {
+        public final ArithmeticForwardGame game;
+        public final long netSeed;
+
+        public Solution(ArithmeticForwardGame game, long netSeed) {
+            this.game = game;
+            this.netSeed = netSeed;
+        }
+    }
 
     static class MyValueDrawingHp extends ValueDrawingHp {
         public static DoubleHyperDefinition FRAC_PORTALS = new DoubleHyperDefinition("fraction_portals", 0.0, 1.0);
@@ -86,6 +101,8 @@ public class StageReadInfo {
     private Integer numEpoch;
 
     private int numRuns;
+    private final List<Solution> solutions = new ArrayList<>();
+    private int nextSolutionIndex;
 
     private final UniformRandomProvider randMaster;
     private final UniformRandomProvider randNetSeeds;
@@ -96,6 +113,8 @@ public class StageReadInfo {
     private int numGetAnyOperandBeforeEval;
     private int numGetBothOperandsBeforeEval;
     private int numPortalMoved;
+    private int[] firstRepetitions;
+    private int numNoRepetition;
     private Duration duration;
 
     private static class VerifierNetListener extends NopNetEventListener {
@@ -148,19 +167,6 @@ public class StageReadInfo {
         }
     }
 
-    private static class ListenerHolder {
-        VerifierNetListener listener;
-
-        VerifierNetListener create(ArithmeticForwardGame game) {
-            listener = new VerifierNetListener(game);
-            return listener;
-        }
-
-        public VerifierNetListener getListener() {
-            return listener;
-        }
-    }
-
     public static void main(String[] args) throws IOException {
         if (WEB_UI) {
             WebUI.setUpJavalin();
@@ -168,8 +174,8 @@ public class StageReadInfo {
         if (true) {
             mainHpo();
         } else {
-            StageReadInfo dev0 = null;//new StageReadInfo(30, 15, RandomUtil.newRandom2(12345L));
-            dev0.run();
+            StageReadInfo1 dev0 = null;//new StageReadInfo(30, 15, RandomUtil.newRandom2(12345L));
+            dev0.runBatch();
         }
         if (WEB_UI) {
             WebUI.loopForever();
@@ -180,7 +186,7 @@ public class StageReadInfo {
         UniformRandomProvider randomRun = RandomUtil.newRandom2(12345L);
 
         CollectingHyperManager hyperCollector = new CollectingHyperManager();
-        StageReadInfo.registerHyperparameter(hyperCollector);
+        StageReadInfo1.registerHyperparameter(hyperCollector);
 
         RemoteHyperManager remoteHyperManager = new RemoteHyperManager(hyperCollector.getHyperDefinitions());
         remoteHyperManager.fixParameters(HYPER_SELECTION);
@@ -188,10 +194,10 @@ public class StageReadInfo {
         for (int i = 0; i < 1; i++) {
             Integer trial = remoteHyperManager.suggest();
 
-            StageReadInfo dev = new StageReadInfo(remoteHyperManager, RandomUtil.newRandom2(randomRun.nextLong()));
+            StageReadInfo1 dev = new StageReadInfo1(remoteHyperManager, RandomUtil.newRandom2(randomRun.nextLong()));
             dev.setNumEpoch(500_000);
 
-            dev.run();
+            dev.runBatch();
 
             int hits = dev.numPortalMoved;
             double hitsPerMinute = hits * 60_000.0 / dev.duration.toMillis();
@@ -201,21 +207,41 @@ public class StageReadInfo {
         }
     }
 
-    public StageReadInfo(HyperManager hyperManager, UniformRandomProvider random) {
+    public StageReadInfo1(HyperManager hyperManager, UniformRandomProvider random) {
         this.drawing = new MyValueDrawingHp(hyperManager);
-        this.maxSteps = hyperManager.getInt("max-steps", 3, 200);
-        this.numberOfNodes = hyperManager.getInt("no-nodes", 2, 100);
+        this.maxSteps = hyperManager.get(HYPER_MAX_STEPS);
+        this.numberOfNodes = hyperManager.get(HYPER_NO_NODES);
         log.info("Suggestions, got maxSteps={}, numberOfNodes={}", maxSteps, numberOfNodes);
         this.randMaster = random;
         this.randNetSeeds = RandomUtil.newRandom2(randMaster.nextLong());
         this.randTargets = RandomUtil.newRandom2(randMaster.nextLong());
+        if (TRACK_HASHES) {
+            this.firstRepetitions = new int[maxSteps];
+        }
+    }
+
+    public int getMaxSteps() {
+        return maxSteps;
+    }
+
+    public int getNumberOfNodes() {
+        return numberOfNodes;
     }
 
     public void setNumEpoch(Integer numEpoch) {
         this.numEpoch = numEpoch;
     }
 
-    private void run() {
+    public Solution getNextSolution() {
+        while (solutions.size() <= nextSolutionIndex) {
+            next();
+        }
+        Solution solution = solutions.get(nextSolutionIndex);
+        nextSolutionIndex++;
+        return solution;
+    }
+
+    private void runBatch() {
         long startTime = System.nanoTime();
 
         int numEpochReal = numEpoch != null ? numEpoch : 5_000_000;
@@ -226,7 +252,7 @@ public class StageReadInfo {
                     printRunInfo(startTime);
                 }
             }
-            performRun();
+            next();
         }
         this.duration = Duration.ofNanos(System.nanoTime() - startTime);
         printRunInfo(startTime);
@@ -243,22 +269,27 @@ public class StageReadInfo {
         log.info("             get both operand before eval: {}", Tools.rate(numGetBothOperandsBeforeEval, numRuns));
         log.info("                portal moved: {}", Tools.rate(numPortalMoved, numRuns));
         log.info("                portal moved: {}", Tools.rate(numPortalMoved, numRuns));
+        if (TRACK_HASHES) {
+            log.info("  no repetition: {}", Tools.rate(numNoRepetition, numRuns));
+            log.info("  first repetitions: {}", Arrays.toString(firstRepetitions));
+        }
         log.info("TOTAL DURATION: {}", duration);
         log.info("Portal moved: {} hits / min", Tools.getHitsPerMinute(numPortalMoved, duration));
     }
 
-    private void performRun() {
+    private void next() {
         int operand1 = ArithmeticForwardGame.drawOperand(randTargets);
         int operand2 = ArithmeticForwardGame.drawOperand(randTargets);
         TriOperation operation = ArithmeticForwardGame.drawOperation(randTargets);
         long netSeed = randNetSeeds.nextLong();
+
         ArithmeticForwardGame game = new ArithmeticForwardGame(operand1, operand2, operation, buildNet(netSeed), maxSteps);
-        ListenerHolder holder = new ListenerHolder();
-        game.setPostVerifierCreateCallback(verifier -> verifier.addEventListener(holder.create(game)));
-//        if (numRuns == 633937 ){//|| numRuns ==1000976) { //1184310
+        Holder<VerifierNetListener> holder = new Holder<>();
+        game.setPostVerifierCreateCallback(verifier ->
+                verifier.addEventListener(holder.put(new VerifierNetListener(game))));
+
         boolean interesting = false;// numRuns == 1000976;
-//        boolean interesting = numRuns == 1;
-        if (interesting) {//|| numRuns ==1000976) { //1184310
+        if (interesting) {
             game.setVerbose(true);
             class StageEntEventListener extends NopEntEventListener {
                 @Override
@@ -266,16 +297,34 @@ public class StageReadInfo {
                     printRunInformation(game, holder);
                 }
             }
-            game.getEnt().setEventListener(new StageEntEventListener());
+            game.getEnt().addEventListener(new StageEntEventListener());
+        }
+        HashEntEventListener hashEntEventListener = null;
+        if (TRACK_HASHES) {
+            hashEntEventListener = new HashEntEventListener(game.getEnt());
+            game.getEnt().addEventListener(hashEntEventListener);
         }
 
         game.execute();
 
+        boolean isPortalMoved =  holder.get() != null && !holder.get().hasEvalFlowed && game.passedPortalMoved();
+        if (isPortalMoved) {
+            solutions.add(new Solution(game, netSeed));
+        }
+
         recordRunInformation(game, holder);
+        if (TRACK_HASHES) {
+            if (hashEntEventListener.firstRepetition == null) {
+                numNoRepetition++;
+            } else {
+                firstRepetitions[hashEntEventListener.firstRepetition]++;
+            }
+        }
 
         if (REPLAY_HITS) {
-            boolean isHit = holder.getListener() != null && holder.getListener().isAnyOperandBeforeEval();
+//            boolean isHit = holder.getListener() != null && holder.getListener().isAnyOperandBeforeEval();
 //            boolean isHit =  holder.getListener() != null && !holder.getListener().hasEvalFlowed && game.passedPortalMoved();
+            boolean isHit = TRACK_HASHES && hashEntEventListener.firstRepetition != null && hashEntEventListener.firstRepetition <= 3;
             if (isHit) {
                 String uuid = UUID.randomUUID().toString();
                 WebUiStoryOutput.addStory("game-"+uuid, () -> {
@@ -303,8 +352,8 @@ public class StageReadInfo {
     }
 
     private void replayWithDetails(ArithmeticForwardGame game) {
-        ListenerHolder holder = new ListenerHolder();
-        game.setPostVerifierCreateCallback(verifier -> verifier.addEventListener(holder.create(game)));
+        Holder<VerifierNetListener> holder = new Holder<>();
+        game.setPostVerifierCreateCallback(verifier -> verifier.addEventListener(holder.put(new VerifierNetListener(game))));
         game.setVerbose(true);
         class StageEntEventListener extends NopEntEventListener {
             @Override
@@ -312,7 +361,7 @@ public class StageReadInfo {
                 printRunInformation(game, holder);
             }
         }
-        game.getEnt().setEventListener(new StageEntEventListener());
+        game.getEnt().addEventListener(new StageEntEventListener());
 
         game.execute();
         printRunInformation(game, holder);
@@ -329,8 +378,8 @@ public class StageReadInfo {
         replayWithDetails(game);
     }
 
-    private void recordRunInformation(ArithmeticForwardGame game, ListenerHolder holder) {
-        VerifierNetListener listener = holder.getListener();
+    private void recordRunInformation(ArithmeticForwardGame game, Holder<VerifierNetListener> holder) {
+        VerifierNetListener listener = holder.get();
         if (listener != null) {
             if (listener.numGetOperation > 0) {
                 numGetOperation++;
@@ -355,8 +404,8 @@ public class StageReadInfo {
         }
     }
 
-    private void printRunInformation(ArithmeticForwardGame game, ListenerHolder holder) {
-        VerifierNetListener listener = holder.getListener();
+    private void printRunInformation(ArithmeticForwardGame game, Holder<VerifierNetListener> holder) {
+        VerifierNetListener listener = holder.get();
         if (listener != null) {
             if (listener.numGetOperand1BeforeEval > 0 || listener.numGetOperand2BeforeEval > 0) {
                 log.info("#{} Get Info Before Eval - x: {}, op: {}, y: {}", numRuns, listener.numGetOperand1BeforeEval, listener.numGetOperation, listener.numGetOperand2BeforeEval);
@@ -368,10 +417,8 @@ public class StageReadInfo {
 
     }
 
-
-    private Net buildNet(Long netSeed) {
+    public Net buildNet(Long netSeed) {
         RandomNetCreator netCreator = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(netSeed), drawing);
         return netCreator.drawNet();
     }
-
 }

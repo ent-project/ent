@@ -71,7 +71,7 @@ class TrimmingHelperTest {
             }
         }
         HashingEntEventListener entEventListener = new HashingEntEventListener();
-        ent.setEventListener(entEventListener);
+        ent.addEventListener(entEventListener);
 
         EntRunner runner = new EntRunner(ent);
         for (int i = 0; i < MAX_STEPS; i++) {

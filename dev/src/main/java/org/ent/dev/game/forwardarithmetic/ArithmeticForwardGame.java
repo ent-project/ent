@@ -56,6 +56,7 @@ public class ArithmeticForwardGame {
     private boolean verbose;
     private NetFormatter formatter;
 
+    private int step;
     private Net verifierNet;
     private Node verifierNetOriginalRoot;
     private Net answerNet;
@@ -72,6 +73,34 @@ public class ArithmeticForwardGame {
         this.ent = buildEnt(net);
         this.maxSteps = maxSteps;
         this.expectedSolution = calculateExpectedSolution();
+    }
+
+    public int getOperand1() {
+        return operand1;
+    }
+
+    public int getOperand2() {
+        return operand2;
+    }
+
+    public TriOperation getOperation() {
+        return operation;
+    }
+
+    public int getMaxSteps() {
+        return maxSteps;
+    }
+
+    public LazyPortalArrow getVerifierPortal1() {
+        return verifierPortal1;
+    }
+
+    public LazyPortalArrow getVerifierPortal2() {
+        return verifierPortal2;
+    }
+
+    public Node getVerifierNetOriginalRoot() {
+        return verifierNetOriginalRoot;
     }
 
     private int calculateExpectedSolution() {
@@ -115,6 +144,10 @@ public class ArithmeticForwardGame {
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
         this.formatter = new NetFormatter();
+    }
+
+    public int getStep() {
+        return step;
     }
 
     public Net getVerifierNet() {
@@ -195,6 +228,7 @@ public class ArithmeticForwardGame {
             Logging.logDot(ent);
         }
         for (int step = 0; step < maxSteps; step++) {
+            this.step = step;
             runner.step();
             if (verbose) {
                 dumpResults();

@@ -5,6 +5,10 @@ import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
 
+/**
+ * Copy a Net.
+ * Input net must be dense, i.e. no null values in Node array.
+ */
 public class NetCopy2 {
 
     private NetCopy2() {
