@@ -1,7 +1,14 @@
 
 let id = id => document.getElementById(id);
 
-let ws = new WebSocket("ws://" + location.hostname + ":" + location.port + "/logs");
+let webSocketUrl = "ws://" + location.hostname + ":" + location.port + "/logs";
+let query = new URLSearchParams(location.search);
+let storyId = query.get("story");
+if (storyId !== null) {
+    webSocketUrl += "?story=" + storyId;
+}
+
+let ws = new WebSocket(webSocketUrl);
 ws.onopen = () => {
     id("disconnected").innerText = "connected"
 }
@@ -13,12 +20,18 @@ ws.onclose = () => {
 function updateLogs(msg) {
     let logs = id("logs");
     let data = JSON.parse(msg.data);
-    if (data.type === 'log') {
+    if (data.type === 'log' || data.type === 'html') {
         let atBottom = logs.scrollTop + logs.clientHeight >= logs.scrollHeight;
         const article = document.createElement('article');
-        const pre = document.createElement('pre');
-        pre.innerText = data.message;
-        article.appendChild(pre);
+        if (data.type === 'log') {
+            const pre = document.createElement('pre');
+            pre.innerText = data.message;
+            article.appendChild(pre);
+        } else if (data.type === 'html') {
+            const p = document.createElement('p');
+            p.innerHTML = data.html;
+            article.appendChild(p);
+        }
         logs.insertAdjacentElement("beforeend", article);
         if (atBottom) {
             logs.scrollTop = logs.scrollHeight;

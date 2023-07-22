@@ -9,7 +9,11 @@
     </appender>
 
     <appender name="WEBUI-DOT" class="org.ent.webui.WebsocketAppender">
-        <dot>true</dot>
+        <channel>dot</channel>
+    </appender>
+
+    <appender name="WEBUI-HTML" class="org.ent.webui.WebsocketAppender">
+        <channel>html</channel>
     </appender>
 
     <root level="INFO">
@@ -20,6 +24,10 @@
 
     <logger name="webui.dot" level="INFO" additivity="false">
         <appender-ref ref="WEBUI-DOT"/>
+    </logger>
+
+    <logger name="webui.html" level="INFO" additivity="false">
+        <appender-ref ref="WEBUI-HTML"/>
     </logger>
 
 </configuration>

@@ -2,4 +2,5 @@
 dependencies {
     implementation("io.javalin:javalin:5.4.2")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
+    implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
 }

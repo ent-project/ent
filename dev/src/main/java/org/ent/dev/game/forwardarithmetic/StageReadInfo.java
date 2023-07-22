@@ -18,17 +18,20 @@ import org.ent.net.node.Node;
 import org.ent.net.node.cmd.operation.TriOperation;
 import org.ent.net.util.RandomUtil;
 import org.ent.run.StepResult;
+import org.ent.util.Logging;
 import org.ent.util.Tools;
 import org.ent.webui.WebUI;
+import org.ent.webui.WebUiStoryOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.UUID;
 
 public class StageReadInfo {
 
-    private static final boolean WEB_UI = false;
+    private static final boolean WEB_UI = true;
     public static final boolean REPLAY_HITS = false || WEB_UI;
 
     private static final Logger log = LoggerFactory.getLogger(StageReadInfo.class);
@@ -214,7 +217,7 @@ public class StageReadInfo {
         long startTime = System.nanoTime();
 
         int numEpochReal = numEpoch != null ? numEpoch : 5_000_000;
-        for (int i = 0; i < numEpochReal; i++) {
+        for (int i = 1; i <= numEpochReal; i++) {
             if (i % 20_000 == 0) {
                 log.info("= i={} =", i);
                 if (i % 100_000 == 0) {
@@ -229,14 +232,15 @@ public class StageReadInfo {
 
     private void printRunInfo(long startTime) {
         Duration duration = Duration.ofNanos(System.nanoTime() - startTime);
-        log.info("total Runs: {}, get any Operand before Eval: {}, get both operands before Eval:{}, get Operation: {}, get any Operand: {}, get both Operands: {}",
+        log.info("total Runs: {}, get Operation: {}, get any Operand: {}, get both Operands: {}",
                 numRuns,
-                numGetAnyOperandBeforeEval,
-                numGetBothOperandsBeforeEval,
                 numGetOperation,
                 numGetAnyOperand,
                 numGetBothOperands);
-        log.info("                portal moved: {}", numPortalMoved);
+        log.info("             get any operand before eval: {}", Tools.rate(numGetAnyOperandBeforeEval, numRuns));
+        log.info("             get both operand before eval: {}", Tools.rate(numGetBothOperandsBeforeEval, numRuns));
+        log.info("                portal moved: {}", Tools.rate(numPortalMoved, numRuns));
+        log.info("                portal moved: {}", Tools.rate(numPortalMoved, numRuns));
         log.info("TOTAL DURATION: {}", duration);
         log.info("Portal moved: {} hits / min", Tools.getHitsPerMinute(numPortalMoved, duration));
     }
@@ -268,11 +272,16 @@ public class StageReadInfo {
         recordRunInformation(game, holder);
 
         if (REPLAY_HITS) {
-//            boolean isHit = holder.getListener() != null && holder.getListener().isAnyOperandBeforeEval();
-            boolean isHit =  holder.getListener() != null && !holder.getListener().hasEvalFlowed && game.passedPortalMoved();
+            boolean isHit = holder.getListener() != null && holder.getListener().isAnyOperandBeforeEval();
+//            boolean isHit =  holder.getListener() != null && !holder.getListener().hasEvalFlowed && game.passedPortalMoved();
+            String uuid = UUID.randomUUID().toString();
             if (isHit) {
-                replayWithDetails(netSeed, operand1, operand2, operation);
-                log.info("replay done.");
+                WebUiStoryOutput.addStory("game-"+uuid, () -> {
+                    replayWithDetails(netSeed, operand1, operand2, operation);
+                    log.info("replay done.");
+                });
+                Logging.logHtml(() -> "hey <b>there</b>!<a href=\"/?story=game-%s\" target=\"_blank\">game</a>".formatted(uuid));
+                log.info("replay registered.");
             }
         }
 

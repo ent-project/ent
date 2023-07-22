@@ -10,10 +10,10 @@ public class WebsocketAppender extends UnsynchronizedAppenderBase<ILoggingEvent>
 
     protected Encoder<ILoggingEvent> encoder;
 
-    private boolean dot;
+    private String channel;
 
-    public void setDot(boolean dot) {
-        this.dot = dot;
+    public void setChannel(String channel) {
+        this.channel = channel;
     }
 
     @Override
@@ -33,10 +33,13 @@ public class WebsocketAppender extends UnsynchronizedAppenderBase<ILoggingEvent>
         } else {
             message = event.getMessage();
         }
-        if (dot) {
-            WebUI.broadcastDot(message);
+        String storyId = event.getMDCPropertyMap().get("story");
+        if ("dot".equals(channel)) {
+            WebUI.broadcast(storyId, LogEntryType.DOT, message);
+        } else if ("html".equals(channel)) {
+            WebUI.broadcast(storyId, LogEntryType.HTML, message);
         } else {
-            WebUI.broadcastLogMessage(message);
+            WebUI.broadcast(storyId, LogEntryType.PLAIN, message);
         }
     }
 

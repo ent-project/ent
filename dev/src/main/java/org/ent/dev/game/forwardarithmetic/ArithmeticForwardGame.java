@@ -18,7 +18,7 @@ import org.ent.net.node.cmd.operation.math.ModuloOperation;
 import org.ent.net.node.cmd.veto.Conditions;
 import org.ent.net.node.cmd.veto.Vetos;
 import org.ent.run.EntRunner;
-import org.ent.util.DotLogger;
+import org.ent.util.Logging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -192,14 +192,14 @@ public class ArithmeticForwardGame {
         EntRunner runner = new EntRunner(ent);
         if (verbose) {
             log.info("ent {}", formatter.format(ent));
-            DotLogger.log(ent);
+            Logging.logDot(ent);
         }
         for (int step = 0; step < maxSteps; step++) {
             runner.step();
             if (verbose) {
                 dumpResults();
                 log.info("after step {}: {}", step, formatter.format(ent));
-                DotLogger.log(ent);
+                Logging.logDot(ent);
             }
         }
     }
