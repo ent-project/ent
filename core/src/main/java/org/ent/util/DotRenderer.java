@@ -23,13 +23,21 @@ import org.ent.net.node.cmd.operation.SetOperation;
 import org.ent.net.node.cmd.veto.Veto;
 import org.ent.net.node.cmd.veto.Vetos;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 public class DotRenderer {
 
     private static final String COLOR_PORTAL = "wheat1";
     private static final String COLOR_NODE = "ivory2";
+    public static final String COLOR_VETO = "beige";
+    public static final String COLOR_DOT = "lightcyan4";
+    public static final String COLOR_TARGET1 = "black";
+    public static final String COLOR_TARGET2 = "darkblue";
+    public static final String COLOR_TARGET3 = "palevioletred4";
+    private static final int TARGET_HIGHLIGHT_PENWIDTH = 4;
     private final Ent ent;
     private final StringBuilder sb;
     private Node target1, target2, target3;
@@ -42,7 +50,8 @@ public class DotRenderer {
 
     public String render() {
         sb.append("digraph G {\n");
-        sb.append(" node[style=filled, color=").append(COLOR_NODE).append("];\n");
+        sb.append(" node[style=filled color=%s height=0 width=0];\n"
+                .formatted(COLOR_NODE));
         sb.append(" edge[arrowsize=0.6];\n");
         determineCommandTargets();
         Set<Node> nodesConnectedToRoot = new LinkedHashSet<>();
@@ -50,7 +59,8 @@ public class DotRenderer {
         renderNetNodes(nodesConnectedToRoot, ent.getNet(), "n");
         // portals
         for (int i = 0; i < ent.getPortals().size(); i++) {
-            sb.append(" p").append(i).append("[label=\"Portal ").append(i).append("\" shape=invhouse color=").append(COLOR_PORTAL).append("];\n");
+            sb.append(" p%s[label=\"Portal %s\" shape=invhouse color=%s height=0.5];\n"
+                    .formatted(i, i, COLOR_PORTAL));
         }
         for (int i = 0; i < ent.getDomains().size(); i++) {
             Net domain = ent.getDomains().get(i);
@@ -75,7 +85,7 @@ public class DotRenderer {
                     collectNodesRightToLeft(target, domainNodesToRender);
                 }
             }
-            renderNetNodes(domainNodesToRender, domain, "d"+i+"n");
+            renderNetNodes(domainNodesToRender, domain, "d" + i + "n");
             sb.append(" }\n");
         }
         // edges for portals
@@ -97,9 +107,7 @@ public class DotRenderer {
         }
 
         sb.append("}\n");
-        String string = sb.toString();
-        System.err.println(string);
-        return string;
+        return sb.toString();
     }
 
     private void determineCommandTargets() {
@@ -171,54 +179,95 @@ public class DotRenderer {
         sb.append(" ").append(nodeName);
         int value = node.getValue(Purview.DIRECT);
         if (value == 0) {
-            String size = isTarget(node) ? "0.2" : "0.1";
-            String color = getOutlineColor(node);
-            sb.append("[shape=Mrecord][label=\"<l>|<r>\", width=%s, height=%s, fixedsize=true, style=filled, color=%s]"
-                    .formatted(size, size, color));
+            if (isTarget(node)) {
+                TableBuilder table = new TableBuilder();
+                table.textCenter = "";
+                table.fillColor = COLOR_DOT;
+                table.rounded = true;
+                table.vanishEmptySides = true;
+                table.cellpaddingTable = 0;
+                table.cellpaddingCenter = 4;
+                table.outlineColors = getOutlineColors(node);
+                table.renderTable(sb);
+            } else {
+                sb.append("[shape=Mrecord label=\"<l>|<r>\" width=0.1 height=0.1 fixedsize=true color=%s]"
+                        .formatted(COLOR_DOT));
+            }
         } else {
             Command command = Commands.getByValue(value);
             if (command != null) {
                 if (isTarget(node)) {
-                   sb.append("[shape=plain style=\"\" label=");
-                   sb.append("<<table border='4' color='%s' cellborder='0' style='rounded' cellspacing='5' cellpadding='0' bgcolor='%s'>".formatted(getOutlineColor(node), getFillColor(command)));
-                   sb.append("<tr><td port='l'></td>");
-                   sb.append("<td>%s</td>".formatted(escape(command.getShortName())));
-                   sb.append("<td port='r'></td></tr></table>>]");
+                    TableBuilder table = new TableBuilder();
+                    table.textCenter = escape(command.getShortName());
+                    table.outlineColors = getOutlineColors(node);
+                    table.rounded = true;
+                    table.fillColor = getCommandFillColor(command);
+                    table.renderTable(sb);
                 } else {
-                    sb.append("[shape=Mrecord][label=\"<l>|").append(escape(command.getShortName())).append("|<r>\"]");
-                    String color = getFillColor(command);
-                    if (color != COLOR_NODE) {
-                        sb.append("[color=%s]".formatted(color));
+                    sb.append("[shape=Mrecord label=\"<l>|%s|<r>\"".formatted(escape(command.getShortName())));
+                    String color = getCommandFillColor(command);
+                    if (!COLOR_NODE.equals(color)) {
+                        sb.append(" color=%s".formatted(color));
                     }
-               }
+                    sb.append("]");
+                }
             } else {
                 Veto veto = Vetos.getByValue(value);
                 if (veto != null) {
-                    sb.append("[shape=record][label=\"<l>|").append(escape(veto.getShortName())).append("|<r>\"][color=beige]");
+                    if (isTarget(node)) {
+                        TableBuilder table = new TableBuilder();
+                        table.fillColor = COLOR_VETO;
+                        table.textCenter = escape(veto.getShortName());
+                        table.rounded = false;
+                        table.outlineColors = getOutlineColors(node);
+                        table.renderTable(sb);
+                    } else {
+                        sb.append("[shape=record][label=\"<l>|%s|<r>\"][color=%s]"
+                                .formatted(escape(veto.getShortName()), COLOR_VETO));
+                    }
                 } else {
                     String hexString = Integer.toHexString(value);
                     Integer portalIndexLeft = getPortalIndex(value, ArrowDirection.LEFT);
                     Integer portalIndexRight = getPortalIndex(value, ArrowDirection.RIGHT);
                     if (portalIndexLeft != null || portalIndexRight != null) {
-                        // render html table
-                        sb.append("[shape=plain label=<<table border=\"0\" cellspacing=\"0\" cellpadding=\"11\"><tr>");
+                        TableBuilder table = new TableBuilder();
+                        table.rounded = false;
+                        table.vanishEmptySides = true;
+                        table.outlineColors = getOutlineColors(node);
+                        table.fillColor = COLOR_NODE;
                         if (portalIndexLeft != null) {
-                            sb.append("<td port=\"l\" cellpadding=\"5\" bgcolor=\"").append(COLOR_PORTAL).append("\">P").append(portalIndexLeft).append("</td>");
+                            table.textLeft = "P" + portalIndexLeft;
+                            table.fillColorLeft = COLOR_PORTAL;
                         } else {
-                            sb.append("<td port=\"l\" cellpadding=\"0\" bgcolor=\"").append(COLOR_NODE).append("\">").append("</td>");
+                            table.fillColorLeft = COLOR_NODE;
                         }
-                        sb.append("<td bgcolor=\"").append(COLOR_NODE).append("\">").append(hexString).append("</td>");
                         if (portalIndexRight != null) {
-                            sb.append("<td port=\"r\" cellpadding=\"5\" bgcolor=\"").append(COLOR_PORTAL).append("\">P").append(portalIndexRight).append("</td>");
+                            table.textRight = "P" + portalIndexRight;
+                            table.fillColorRight = COLOR_PORTAL;
                         } else {
-                            sb.append("<td port=\"r\" cellpadding=\"0\" bgcolor=\"").append(COLOR_NODE).append("\">").append("</td>");
+                            table.fillColorRight = COLOR_NODE;
                         }
-                        sb.append("</tr></table>>]");
+                        table.textCenter = hexString;
+                        table.renderTable(sb);
                     } else {
                         if (node.isLeafNode()) {
-                            sb.append("[shape=circle, label=\"").append(hexString).append("\"]");
-                            if (isTarget(node)) {
-                                sb.append("[color=%s fillcolor=%s penwidth=4]".formatted(getOutlineColor(node), COLOR_NODE));
+                            List<String> outlineColors = getOutlineColors(node);
+                            if (outlineColors.size() <= 1) {
+                                sb.append("[shape=rect style=\"filled,rounded\" label=\"%s\" fillcolor=%s margin=0.07 height=0 width=0"
+                                        .formatted(hexString, COLOR_NODE));
+                                if (outlineColors.size() > 0) {
+                                    sb.append(" color=%s penwidth=%s"
+                                            .formatted(getOutlineColors(node).get(0), TARGET_HIGHLIGHT_PENWIDTH));
+                                }
+                                sb.append("]");
+                            } else {
+                                TableBuilder table = new TableBuilder();
+                                table.textCenter = hexString;
+                                table.fillColor = COLOR_NODE;
+                                table.rounded = true;
+                                table.outlineColors = outlineColors;
+                                table.skipSides = true;
+                                table.renderTable(sb);
                             }
                         } else {
                             sb.append("[shape=record][label=\"<l>|").append(hexString).append("|<r>\"]");
@@ -228,24 +277,133 @@ public class DotRenderer {
             }
         }
         if (node == net.getRoot()) {
-            sb.append("[color=slategray1]");
+            sb.append("[xlabel=\"⤷\"]");
         }
         sb.append(";\n");
         return nodeName;
     }
 
-    private String getOutlineColor(Node node) {
-        if (node == target1) {
-            return "black";
-        } else if (node == target2) {
-            return "darkblue";
-        } else if (node == target3) {
-            return "palevioletred4";
+    private static class TableBuilder {
+        boolean rounded;
+        String textCenter;
+        String textLeft;
+        String textRight;
+        String fillColor;
+        String fillColorLeft;
+        String fillColorRight;
+        List<String> outlineColors;
+        boolean skipSides;
+        Integer cellpaddingTable;
+        Integer cellpaddingCenter;
+        boolean vanishEmptySides;
+
+        private Boolean consistentColor;
+        private boolean paddedSides;
+
+        void renderTable(StringBuilder sb) {
+            consistentColor = fillColorLeft == null && fillColorRight == null;
+            String mainOutlineColor = outlineColors != null && outlineColors.size() > 0 ? outlineColors.get(0) : null;
+            paddedSides = !vanishEmptySides && textLeft == null && textRight == null;
+            if (cellpaddingTable == null) {
+                cellpaddingTable = 4;
+            }
+
+            sb.append("[shape=plain style=\"\" label=<");
+            if (outlineColors != null) {
+                borderStart(sb);
+            }
+            sb.append("<table cellspacing=\"0\"");
+            if (mainOutlineColor != null) {
+                sb.append(" border=\"%s\" color=\"%s\" cellborder=\"0\""
+                        .formatted(TARGET_HIGHLIGHT_PENWIDTH, mainOutlineColor));
+            } else {
+                sb.append(" border=\"0\"");
+            }
+            if (consistentColor) {
+                sb.append(" bgcolor=\"%s\"".formatted(fillColor));
+            }
+            if (rounded) {
+                sb.append(" style=\"rounded\"");
+            }
+            sb.append(" cellpadding=\"%s\"".formatted(cellpaddingTable));
+            sb.append(">");
+            sb.append("<tr>");
+            renderSideCell(sb, "l", textLeft, fillColorLeft);
+            renderCenterCell(sb);
+            renderSideCell(sb, "r", textRight, fillColorRight);
+            sb.append("</tr></table>");
+            if (outlineColors != null) {
+                borderEnd(sb);
+            }
+            sb.append(">]");
         }
-        return "black";
+
+        private void renderCenterCell(StringBuilder sb) {
+            sb.append("<td");
+            if (!consistentColor) {
+                sb.append(" bgcolor=\"%s\"".formatted(fillColor));
+            }
+            if (cellpaddingCenter != null) {
+                sb.append(" cellpadding=\"%s\"".formatted(cellpaddingCenter));
+            }
+            sb.append(">%s</td>".formatted(textCenter));
+        }
+
+        private void renderSideCell(StringBuilder sb, String port, String text, String fillColorSide) {
+            if (skipSides) {
+                return;
+            }
+            sb.append("<td port=\"%s\"".formatted(port));
+            if (text != null) {
+                sb.append(" cellpadding=\"5\"");
+            } else if (vanishEmptySides) {
+                sb.append(" cellpadding=\"0\"");
+            }
+            if (!consistentColor) {
+                sb.append(" bgcolor=\"%s\"".formatted(fillColorSide));
+            }
+            sb.append(">");
+            if (text != null) {
+                sb.append(text);
+            } else if (paddedSides) {
+                sb.append("   ");
+            }
+            sb.append("</td>");
+        }
+
+        private void borderStart(StringBuilder sb) {
+            for (int i = outlineColors.size() - 1; i > 0; i--) {
+                sb.append("<table border=\"%s\" color=\"%s\" cellborder=\"0\" cellspacing=\"0\""
+                        .formatted(TARGET_HIGHLIGHT_PENWIDTH, outlineColors.get(i)));
+                if (rounded) {
+                    sb.append(" style=\"rounded\"");
+                }
+                sb.append("><tr><td>");
+            }
+        }
+
+        private void borderEnd(StringBuilder sb) {
+            for (int i = outlineColors.size() - 1; i > 0; i--) {
+                sb.append("</td></tr></table>");
+            }
+        }
     }
 
-    private String getFillColor(Command command) {
+    private List<String> getOutlineColors(Node node) {
+        ArrayList<String> result = new ArrayList<>();
+        if (node == target1) {
+            result.add(COLOR_TARGET1);
+        }
+        if (node == target2) {
+            result.add(COLOR_TARGET2);
+        }
+        if (node == target3) {
+            result.add(COLOR_TARGET3);
+        }
+        return result;
+    }
+
+    private String getCommandFillColor(Command command) {
         if (command.getValue() == Commands.FINAL_SUCCESS.getValue()) {
             return "palegreen";
         } else if (command.getValue() == Commands.FINAL_FAILURE.getValue()) {
