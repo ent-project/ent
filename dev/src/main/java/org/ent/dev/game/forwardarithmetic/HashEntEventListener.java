@@ -8,14 +8,20 @@ import org.ent.net.node.cmd.Command;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class HashEntEventListener extends NopEntEventListener {
     Set<Integer> hashes = new HashSet<>();
     Integer firstRepetition;
     private final Ent ent;
+    private Consumer<Integer> onFirstRepetition;
 
     HashEntEventListener(Ent ent) {
         this.ent = ent;
+    }
+
+    public void setOnFirstRepetition(Consumer<Integer> onFirstRepetition) {
+        this.onFirstRepetition = onFirstRepetition;
     }
 
     @Override
@@ -25,6 +31,7 @@ public class HashEntEventListener extends NopEntEventListener {
             boolean isNew = hashes.add(hash);
             if (!isNew) {
                 firstRepetition = hashes.size();
+                onFirstRepetition.accept(firstRepetition);
             }
         }
     }

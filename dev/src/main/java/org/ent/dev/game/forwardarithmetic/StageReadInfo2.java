@@ -1,8 +1,6 @@
 package org.ent.dev.game.forwardarithmetic;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.ent.LazyPortalArrow;
-import org.ent.NopEntEventListener;
 import org.ent.NopNetEventListener;
 import org.ent.dev.trim2.TrimmingHelper;
 import org.ent.dev.trim2.TrimmingListener;
@@ -15,7 +13,6 @@ import org.ent.net.node.Node;
 import org.ent.net.util.NetCopy2;
 import org.ent.net.util.NetCopyPack;
 import org.ent.net.util.RandomUtil;
-import org.ent.run.StepResult;
 import org.ent.util.Logging;
 import org.ent.util.Tools;
 import org.ent.webui.WebUI;
@@ -27,6 +24,18 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.UUID;
 
+/**
+ * This demonstrates how to reduce a net to the bare minimum size
+ * by identifying the first and last "interesting" step.
+ * "Interesting" means it performs the intended modification.
+ *
+ * 1. Fast-forward to the first interesting step
+ * 2. Trim, but only consider usages in steps up to the last interesting step
+ *
+ * Results:
+ * 1. Major reduction in node count in the net.
+ * 2. Very first step does the intended action.
+ */
 public class StageReadInfo2 {
 
     private static final boolean WEB_UI = true;
@@ -152,8 +161,8 @@ public class StageReadInfo2 {
     private void next() {
         Stats stats = baseStats;
         StageReadInfo1.Solution upstream = this.stageReadInfo1.getNextSolution();
-        ArithmeticForwardGame game0 = upstream.game;
-        Net net = this.stageReadInfo1.buildNet(upstream.netSeed);
+        ArithmeticForwardGame game0 = upstream.game();
+        Net net = this.stageReadInfo1.buildNet(upstream.netSeed());
         stats.recordNetSize(net.getNodes().size());
         ArithmeticForwardGame game = new ArithmeticForwardGame(
                 game0.getOperand1(),
@@ -180,13 +189,13 @@ public class StageReadInfo2 {
             stats.numNoEvalFlowOnVerifier++;
         }
         stats.statNumPortalMoved[entEventListener.totalTargetChanges()]++;
-        if (entEventListener.firstTimePortalMoved != null) {
-            stats.statFirstPortalMoved[entEventListener.firstTimePortalMoved]++;
+        if (entEventListener.firstTimePortalMoved() != null) {
+            stats.statFirstPortalMoved[entEventListener.firstTimePortalMoved()]++;
         } else {
             throw new AssertionError();
         }
         stats.numRuns++;
-        phase2(upstream, entEventListener.firstTimePortalMoved, entEventListener.lastTimePortalMoved);
+        phase2(upstream, entEventListener.firstTimePortalMoved(), entEventListener.lastTimePortalMoved());
     }
 
     private void phase2(StageReadInfo1.Solution upstream, int firstTimePortalMoved, int lastTimeTortalMoved) {
@@ -199,8 +208,8 @@ public class StageReadInfo2 {
         }
 
         // move forward and trim
-        ArithmeticForwardGame game0 = upstream.game;
-        Net net = this.stageReadInfo1.buildNet(upstream.netSeed);
+        ArithmeticForwardGame game0 = upstream.game();
+        Net net = this.stageReadInfo1.buildNet(upstream.netSeed());
         int stepsForward = firstTimePortalMoved;
         ArithmeticForwardGame gameAdvance = new ArithmeticForwardGame(
                 game0.getOperand1(),
@@ -295,8 +304,8 @@ public class StageReadInfo2 {
             stats.numNoEvalFlowOnVerifier++;
         }
         stats.statNumPortalMoved[entEventListener.totalTargetChanges()]++;
-        if (entEventListener.firstTimePortalMoved != null) {
-            stats.statFirstPortalMoved[entEventListener.firstTimePortalMoved]++;
+        if (entEventListener.firstTimePortalMoved() != null) {
+            stats.statFirstPortalMoved[entEventListener.firstTimePortalMoved()]++;
         } else {
             stats.numPortalDidNotMove++;
         }
@@ -361,54 +370,4 @@ public class StageReadInfo2 {
         }
     }
 
-    private static class TargetTracker {
-        final LazyPortalArrow verifierPortal;
-        Node lastTarget;
-        int targetChanges;
-
-        TargetTracker(LazyPortalArrow verifierPortal) {
-            this.verifierPortal = verifierPortal;
-        }
-    }
-
-    private static class PortalMoveEntEventListener extends NopEntEventListener {
-        final TargetTracker tracker1, tracker2;
-        final ArithmeticForwardGame game;
-        Integer firstTimePortalMoved;
-        Integer lastTimePortalMoved;
-
-        PortalMoveEntEventListener(ArithmeticForwardGame game) {
-            this.game = game;
-            this.tracker1 = new TargetTracker(game.getVerifierPortal1());
-            this.tracker2 = new TargetTracker(game.getVerifierPortal2());
-        }
-
-        @Override
-        public void afterCommandExecution(StepResult stepResult) {
-            checkPortal(tracker1);
-            checkPortal(tracker2);
-        }
-
-        private int totalTargetChanges() {
-            return tracker1.targetChanges + tracker2.targetChanges;
-        }
-
-        private void checkPortal(TargetTracker tracker) {
-            if (tracker.verifierPortal.isInitialized()) {
-                Node target = tracker.verifierPortal.getTarget(Purview.DIRECT);
-                if (target == game.getVerifierNetOriginalRoot()) {
-                    target = null;
-                }
-                boolean targetChanged = target != tracker.lastTarget;
-                if (targetChanged) {
-                    if (totalTargetChanges() == 0) {
-                        firstTimePortalMoved = game.getStep();
-                    }
-                    lastTimePortalMoved = game.getStep();
-                    tracker.targetChanges++;
-                    tracker.lastTarget = target;
-                }
-            }
-        }
-    }
 }

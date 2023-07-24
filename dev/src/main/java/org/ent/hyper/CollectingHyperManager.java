@@ -8,15 +8,9 @@ public class CollectingHyperManager extends HyperManager {
     private final List<HyperDefinition> hyperDefinitions = new ArrayList<>();
 
     @Override
-    public double get(DoubleHyperDefinition hyperDefinition) {
+    public <T> T get(NumericHyperDefinition<T> hyperDefinition) {
         hyperDefinitions.add(hyperDefinition);
-        return (hyperDefinition.getMinValue() + hyperDefinition.getMaxValue()) / 2;
-    }
-
-    @Override
-    public int get(IntHyperDefinition hyperDefinition) {
-        hyperDefinitions.add(hyperDefinition);
-        return (hyperDefinition.getMinValue() + hyperDefinition.getMaxValue()) / 2;
+        return hyperDefinition.getAverageValue();
     }
 
     public List<HyperDefinition> getHyperDefinitions() {

@@ -54,6 +54,8 @@ public class ArithmeticForwardGame {
     private final int expectedSolution;
 
     private boolean verbose;
+    private boolean executionStopped;
+
     private NetFormatter formatter;
 
     private int step;
@@ -101,6 +103,10 @@ public class ArithmeticForwardGame {
 
     public Node getVerifierNetOriginalRoot() {
         return verifierNetOriginalRoot;
+    }
+
+    public void stopExecution() {
+        this.executionStopped = true;
     }
 
     private int calculateExpectedSolution() {
@@ -154,6 +160,10 @@ public class ArithmeticForwardGame {
         return verifierNet;
     }
 
+    public Node getAnswerNode() {
+        return answerNode;
+    }
+
     public Ent getEnt() {
         return ent;
     }
@@ -170,22 +180,23 @@ public class ArithmeticForwardGame {
     private Ent buildEnt(Net net) {
         Ent ent = new Ent(net);
         verifierPortal1 = new LazyPortalArrow(() -> {
-            if (this.verifierNet == null) {
-                this.verifierNet = buildVerifier();
-                this.verifierNetOriginalRoot = verifierNet.getRoot();
-            }
+            initializeVerifier();
             return new RootPortalArrow(this.verifierNet, this.verifierNetOriginalRoot);
         });
         verifierPortalCode1 = ent.addPortal(verifierPortal1);
         verifierPortal2 = new LazyPortalArrow(() -> {
-            if (this.verifierNet == null) {
-                this.verifierNet = buildVerifier();
-                this.verifierNetOriginalRoot = verifierNet.getRoot();
-            }
+            initializeVerifier();
             return new RootPortalArrow(this.verifierNet, this.verifierNetOriginalRoot);
         });
         verifierPortalCode2 = ent.addPortal(verifierPortal2);
         return ent;
+    }
+
+    public void initializeVerifier() {
+        if (this.verifierNet == null) {
+            this.verifierNet = buildVerifier();
+            this.verifierNetOriginalRoot = verifierNet.getRoot();
+        }
     }
 
     private Net buildVerifier() {
@@ -234,6 +245,10 @@ public class ArithmeticForwardGame {
                 dumpResults();
                 log.info("after step {}: {}", step, formatter.format(ent));
                 Logging.logDot(ent);
+            }
+            if (this.executionStopped) {
+                log.info("execution stopped after step {}", step);
+                break;
             }
         }
     }

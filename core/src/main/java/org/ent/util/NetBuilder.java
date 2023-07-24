@@ -67,14 +67,6 @@ public class NetBuilder {
         return node(Commands.get(operation), node1, node2);
     }
 
-    public static Node value(BiCondition c) {
-        return value(Vetos.get(c).getValue());
-    }
-
-    public static Node value(Command c) {
-        return value(c.getValue());
-    }
-
     public static Node node(BiCondition c, Node n1, Node n2) {
         return node(Vetos.get(c).getValue(), n1, n2);
     }
@@ -97,12 +89,24 @@ public class NetBuilder {
         return unary(command.getValue(), child);
     }
 
-        public static Node unary(Node child) {
+    public static Node unary(Node child) {
         return currentNet.get().newUNode(child);
     }
 
     public static Node value(int v) {
         return currentNet.get().newNode(v);
+    }
+
+    public static Node value(BiCondition c) {
+        return value(Vetos.get(c).getValue());
+    }
+
+    public static Node value(Command c) {
+        return value(c.getValue());
+    }
+
+    public static Node value(Veto v) {
+        return value(v.getValue());
     }
 
     public static Node ignored() {

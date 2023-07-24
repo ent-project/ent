@@ -1,9 +1,13 @@
 package org.ent.hyper;
 
-public class IntHyperDefinition extends NumericHyperDefinition<Integer> {
+public class IntHyperDefinition extends AbstractNumericHyperDefinition<Integer> {
 
     public IntHyperDefinition(String name, Integer minValue, Integer maxValue) {
-        super(name, minValue, maxValue);
-        this.type = "int";
+        super(name, "int", minValue, maxValue);
+    }
+
+    @Override
+    public Integer getAverageValue() {
+        return (getMinValue() + getMaxValue()) / 2;
     }
 }

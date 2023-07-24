@@ -28,7 +28,7 @@ public class RemoteHyperManager extends HyperManager {
     private final List<HyperDefinition> hyperDefinitions;
 
     private Map<String, Object> suggested;
-    private Map<String, Object> fixed = new HashMap<>();
+    private final Map<String, Object> fixed = new HashMap<>();
 
 
     public RemoteHyperManager(List<HyperDefinition> hyperDefinitions) {
@@ -92,15 +92,11 @@ public class RemoteHyperManager extends HyperManager {
     }
 
     @Override
-    public double get(DoubleHyperDefinition hyperDefinition) {
-        return (double) getProp(hyperDefinition.getName());
+    public <T> T get(NumericHyperDefinition<T> hyperDefinition) {
+        @SuppressWarnings("unchecked")
+        T result = (T) getProp(hyperDefinition.getName());
+        return result;
     }
-
-    @Override
-    public int get(IntHyperDefinition hyperDefinition) {
-        return (int) getProp(hyperDefinition.getName());
-    }
-
 
     public void fixParameters(String hyperSelectionJson) {
         TypeReference<Map<String, Object>> typeRef = new TypeReference<>() {};

@@ -3,14 +3,11 @@ package org.ent.dev.game.forwardarithmetic;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.NopEntEventListener;
 import org.ent.NopNetEventListener;
-import org.ent.dev.randnet.PortalValue;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.randnet.ValueDrawing;
-import org.ent.dev.randnet.ValueDrawingHp;
 import org.ent.dev.trim2.TrimmingHelper;
 import org.ent.dev.trim2.TrimmingListener;
 import org.ent.hyper.CollectingHyperManager;
-import org.ent.hyper.DoubleHyperDefinition;
 import org.ent.hyper.HyperManager;
 import org.ent.hyper.IntHyperDefinition;
 import org.ent.hyper.RemoteHyperManager;
@@ -48,7 +45,7 @@ public class StageReadInfo1 {
     public static void registerHyperparameter(HyperManager hyperManager) {
         hyperManager.get(HYPER_MAX_STEPS);
         hyperManager.get(HYPER_NO_NODES);
-        MyValueDrawingHp.registerHyperparameter(hyperManager);
+        ValueDrawingWithPortals.registerHyperparameter(hyperManager);
     }
 
     public static final String HYPER_SELECTION = """
@@ -65,39 +62,11 @@ public class StageReadInfo1 {
 
     public final ValueDrawing drawing;
 
-    public static class Solution {
-        public final ArithmeticForwardGame game;
-        public final long netSeed;
-
-        public Solution(ArithmeticForwardGame game, long netSeed) {
-            this.game = game;
-            this.netSeed = netSeed;
-        }
-    }
-
-    static class MyValueDrawingHp extends ValueDrawingHp {
-        public static DoubleHyperDefinition FRAC_PORTALS = new DoubleHyperDefinition("fraction_portals", 0.0, 1.0);
-        public static void registerHyperparameter(HyperManager hyperManager) {
-            hyperManager.get(FRAC_PORTALS);
-            ValueDrawingHp.registerHyperparameter(hyperManager);
-        }
-
-        public MyValueDrawingHp(HyperManager hyperManager) {
-            super(hyperManager);
-        }
-
-        @Override
-        protected ValueDrawingHp.DistributionNode initializeDistribution() {
-            double fracPortal = hyperManager.get(FRAC_PORTALS);
-            ValueDrawingHp.DistributionNode distribution = super.initializeDistribution();
-            return new ValueDrawingHp.DistributionSplit(fracPortal)
-                    .first(new ValueDrawingHp.DistributionLeaf().add(new PortalValue(0, 1), 1.0))
-                    .rest(distribution);
-        }
-    }
+    public record Solution(ArithmeticForwardGame game, long netSeed, PortalMoveEntEventListener portalMoveEntEventListener) {}
 
     private final int maxSteps;
     private final int numberOfNodes;
+
     private Integer numEpoch;
 
     private int numRuns;
@@ -113,7 +82,10 @@ public class StageReadInfo1 {
     private int numGetAnyOperandBeforeEval;
     private int numGetBothOperandsBeforeEval;
     private int numPortalMoved;
-    private int[] firstRepetitions;
+    private int[] statFirstRepetitions;
+    private int[] statNumPortalMoved;
+    private int[] statFirstPortalMoved;
+    private int[] statImportantMovesInterval;
     private int numNoRepetition;
     private Duration duration;
 
@@ -208,7 +180,7 @@ public class StageReadInfo1 {
     }
 
     public StageReadInfo1(HyperManager hyperManager, UniformRandomProvider random) {
-        this.drawing = new MyValueDrawingHp(hyperManager);
+        this.drawing = new ValueDrawingWithPortals(hyperManager);
         this.maxSteps = hyperManager.get(HYPER_MAX_STEPS);
         this.numberOfNodes = hyperManager.get(HYPER_NO_NODES);
         log.info("Suggestions, got maxSteps={}, numberOfNodes={}", maxSteps, numberOfNodes);
@@ -216,8 +188,11 @@ public class StageReadInfo1 {
         this.randNetSeeds = RandomUtil.newRandom2(randMaster.nextLong());
         this.randTargets = RandomUtil.newRandom2(randMaster.nextLong());
         if (TRACK_HASHES) {
-            this.firstRepetitions = new int[maxSteps];
+            this.statFirstRepetitions = new int[maxSteps];
         }
+        this.statNumPortalMoved = new int[maxSteps*2];
+        this.statFirstPortalMoved = new int[maxSteps];
+        this.statImportantMovesInterval = new int[maxSteps + 1];
     }
 
     public int getMaxSteps() {
@@ -268,11 +243,14 @@ public class StageReadInfo1 {
         log.info("             get any operand before eval: {}", Tools.rate(numGetAnyOperandBeforeEval, numRuns));
         log.info("             get both operand before eval: {}", Tools.rate(numGetBothOperandsBeforeEval, numRuns));
         log.info("                portal moved: {}", Tools.rate(numPortalMoved, numRuns));
-        log.info("                portal moved: {}", Tools.rate(numPortalMoved, numRuns));
+        log.info("        number of portal moves: {}", Arrays.toString(statNumPortalMoved));
+        log.info("        first time portal moved at step: {}", Arrays.toString(statFirstPortalMoved));
+        log.info("        interval size of interesting moves: {}", Arrays.toString(statImportantMovesInterval));
         if (TRACK_HASHES) {
             log.info("  no repetition: {}", Tools.rate(numNoRepetition, numRuns));
-            log.info("  first repetitions: {}", Arrays.toString(firstRepetitions));
+            log.info("  first repetitions: {}", Arrays.toString(statFirstRepetitions));
         }
+        log.info("    ");
         log.info("TOTAL DURATION: {}", duration);
         log.info("Portal moved: {} hits / min", Tools.getHitsPerMinute(numPortalMoved, duration));
     }
@@ -304,20 +282,22 @@ public class StageReadInfo1 {
             hashEntEventListener = new HashEntEventListener(game.getEnt());
             game.getEnt().addEventListener(hashEntEventListener);
         }
+        PortalMoveEntEventListener portalMoveEntEventListener = new PortalMoveEntEventListener(game);
+        game.getEnt().addEventListener(portalMoveEntEventListener);
 
         game.execute();
 
-        boolean isPortalMoved =  holder.get() != null && !holder.get().hasEvalFlowed && game.passedPortalMoved();
+        boolean isPortalMoved = portalMoveEntEventListener.totalTargetChanges() > 0;
         if (isPortalMoved) {
-            solutions.add(new Solution(game, netSeed));
+            solutions.add(new Solution(game, netSeed, portalMoveEntEventListener));
         }
 
-        recordRunInformation(game, holder);
+        recordRunInformation(game, holder, portalMoveEntEventListener);
         if (TRACK_HASHES) {
             if (hashEntEventListener.firstRepetition == null) {
                 numNoRepetition++;
             } else {
-                firstRepetitions[hashEntEventListener.firstRepetition]++;
+                statFirstRepetitions[hashEntEventListener.firstRepetition]++;
             }
         }
 
@@ -378,7 +358,15 @@ public class StageReadInfo1 {
         replayWithDetails(game);
     }
 
-    private void recordRunInformation(ArithmeticForwardGame game, Holder<VerifierNetListener> holder) {
+    private void recordRunInformation(ArithmeticForwardGame game, Holder<VerifierNetListener> holder, PortalMoveEntEventListener portalMoveListener) {
+        statNumPortalMoved[portalMoveListener.totalTargetChanges()]++;
+        if (portalMoveListener.firstTimePortalMoved() != null) {
+            statFirstPortalMoved[portalMoveListener.firstTimePortalMoved()]++;
+        }
+        if (portalMoveListener.lastTimePortalMoved() != null) {
+            int interval = portalMoveListener.lastTimePortalMoved() - portalMoveListener.firstTimePortalMoved() + 1;
+            statImportantMovesInterval[interval]++;
+        }
         VerifierNetListener listener = holder.get();
         if (listener != null) {
             if (listener.numGetOperation > 0) {

@@ -1,40 +1,13 @@
 package org.ent.hyper;
 
-public abstract class NumericHyperDefinition<T> extends HyperDefinition {
+public interface NumericHyperDefinition<T> extends HyperDefinition {
+    T getMinValue();
 
-    protected T minValue;
+    T getMaxValue();
 
-    protected T maxValue;
+    T getAverageValue();
 
-    public NumericHyperDefinition(String name, T minValue, T maxValue) {
-        this.name = name;
-        this.minValue = minValue;
-        this.maxValue = maxValue;
-    }
-
-    public T getMinValue() {
-        return minValue;
-    }
-
-    public void setMinValue(T minValue) {
-        this.minValue = minValue;
-    }
-
-    public T getMaxValue() {
-        return maxValue;
-    }
-
-    public void setMaxValue(T maxValue) {
-        this.maxValue = maxValue;
-    }
-
-    @Override
-    public String toString() {
-        return "NumericHyperDefinition{" +
-                "name='" + name + '\'' +
-                ", type='" + type + '\'' +
-                ", minValue=" + minValue +
-                ", maxValue=" + maxValue +
-                '}';
+    default NumericHyperDefinition<T> group(String group) {
+        return new SubNumericHyperDefinition<>(this, group);
     }
 }
