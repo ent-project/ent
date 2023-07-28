@@ -14,7 +14,7 @@ class ValueDrawingHpTest {
 
         new ValueDrawingHp(hyperManager);
 
-        List<HyperDefinition> hyperDefinitions = hyperManager.getHyperDefinitions();
+        List<HyperDefinition<?>> hyperDefinitions = hyperManager.getHyperDefinitions();
         System.err.println(hyperDefinitions);
     }
 

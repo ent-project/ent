@@ -1,13 +1,13 @@
 package org.ent.hyper;
 
-public class DoubleHyperDefinition extends AbstractNumericHyperDefinition<Double> {
+public class DoubleHyperDefinition extends NumericHyperDefinition<Double> {
 
     public DoubleHyperDefinition(String name, Double minValue, Double maxValue) {
         super(name, "float", minValue, maxValue);
     }
 
     @Override
-    public Double getAverageValue() {
-        return (getMinValue() + getMaxValue()) / 2;
+    public HyperDefinition<Double> cloneWithName(String otherName) {
+        return new DoubleHyperDefinition(otherName, minValue, maxValue);
     }
 }

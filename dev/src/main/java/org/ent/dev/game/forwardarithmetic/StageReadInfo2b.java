@@ -10,7 +10,6 @@ import org.ent.dev.trim2.TrimmingListener;
 import org.ent.hyper.FixedHyperManager;
 import org.ent.hyper.HyperManager;
 import org.ent.hyper.IntHyperDefinition;
-import org.ent.hyper.PropertyNameResolver;
 import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
@@ -91,9 +90,11 @@ public class StageReadInfo2b extends StageBase {
         UniformRandomProvider randomRun = RandomUtil.newRandom2(12345L);
 
         FixedHyperManager hyperManager = new FixedHyperManager();
-        hyperManager.setParameters(StageReadInfo1.HYPER_SELECTION, new PropertyNameResolver(HYPER_GROUP_STAGE1));
-        PropertyNameResolver resolverThis = new PropertyNameResolver(HYPER_GROUP_THIS);
-        hyperManager.setParameters("""
+        HyperManager hyperManagerThis = hyperManager.group(HYPER_GROUP_THIS);
+        HyperManager hyperManagerStage1 = hyperManager.group(HYPER_GROUP_STAGE1);
+
+        hyperManagerStage1.fix(StageReadInfo1.HYPER_SELECTION);
+        hyperManagerThis.fix("""
             {
               'fraction_portals': 0.2,
               'fraction_commands': 0.9,
@@ -101,10 +102,10 @@ public class StageReadInfo2b extends StageBase {
               'fraction_major_split': 0.5,
               'fraction_set': 0.5
             }
-                """, resolverThis);
-        hyperManager.setParameter(HYPER_MAX_STEPS, 30, resolverThis);
-        hyperManager.setParameter(HYPER_NO_NODES, 53, resolverThis);
-        hyperManager.setParameter(HYPER_ATTEMPTS_PER_UPSTREAM, 100, resolverThis);
+                """);
+        hyperManagerThis.fix(HYPER_MAX_STEPS, 30);
+        hyperManagerThis.fix(HYPER_NO_NODES, 53);
+        hyperManagerThis.fix(HYPER_ATTEMPTS_PER_UPSTREAM, 100);
 
         int numTrials = 1;
         for (int indexTrial = 0; indexTrial < numTrials; indexTrial++) {
@@ -162,7 +163,7 @@ public class StageReadInfo2b extends StageBase {
                         log.info("replay done.");
                     });
                     Logging.logHtml(() -> "<a href=\"/?story=%s\" target=\"_blank\">%s</a>".formatted(storyId, storyId));
-                    System.err.println("");
+                    breakPointForReplay();
                 }
                 break;
             }
@@ -172,6 +173,10 @@ public class StageReadInfo2b extends StageBase {
             numHit++;
         }
         numUpstream++;
+    }
+
+    private void breakPointForReplay() {
+
     }
 
     private void replayWithDetails(StageReadInfo1.Solution upstream, long netSeed) {

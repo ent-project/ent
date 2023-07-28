@@ -14,8 +14,22 @@ public class SubHyperManager extends HyperManager {
     }
 
     @Override
-    public <T> T get(NumericHyperDefinition<T> hyperDefinition) {
-        return delegate.get(hyperDefinition.group(this.group));
+    protected QualifiedKey resolve(String simpleKey) {
+        return new QualifiedKey(group + "." + simpleKey);
     }
 
+    @Override
+    protected <T> T doGet(QualifiedKey qualifiedKey) {
+        return delegate.doGet(qualifiedKey);
+    }
+
+    @Override
+    protected void doFix(QualifiedKey qualifiedKey, Object value) {
+        delegate.doFix(qualifiedKey, value);
+    }
+
+    @Override
+    public <T> T get(HyperDefinition<T> hyperDefinition) {
+        return delegate.get(hyperDefinition.cloneWithName(resolve(hyperDefinition.getName()).get()));
+    }
 }

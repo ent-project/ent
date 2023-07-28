@@ -91,8 +91,8 @@ public class StageReadInfo2 {
 //        StageReadInfo2.registerHyperparameter(hyperCollector);
 
         FixedHyperManager hyperManager = new FixedHyperManager();
-        hyperManager.setParameters(StageReadInfo1.HYPER_SELECTION);
-        hyperManager.setParameter(HYPER_MAX_COMBINATION_ATTEMPTS, 100);
+        hyperManager.fix(StageReadInfo1.HYPER_SELECTION);
+        hyperManager.fix(HYPER_MAX_COMBINATION_ATTEMPTS, 100);
 
         for (int i = 0; i < 1; i++) {
             StageReadInfo2 dev = new StageReadInfo2(hyperManager, RandomUtil.newRandom2(randomRun.nextLong()));

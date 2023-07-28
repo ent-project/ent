@@ -1,8 +1,6 @@
 package org.ent.hyper;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -16,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class RemoteHyperManager extends HyperManager {
+public class RemoteHyperManager extends FixedHyperManager {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
     static {
@@ -25,18 +23,18 @@ public class RemoteHyperManager extends HyperManager {
     private static final OkHttpClient okHttpClient = new OkHttpClient();
 
 
-    private final List<HyperDefinition> hyperDefinitions;
+    private final List<HyperDefinition<?>> hyperDefinitions;
 
     private Map<String, Object> suggested;
     private final Map<String, Object> fixed = new HashMap<>();
 
 
-    public RemoteHyperManager(List<HyperDefinition> hyperDefinitions) {
+    public RemoteHyperManager(List<HyperDefinition<?>> hyperDefinitions) {
         this.hyperDefinitions = hyperDefinitions;
     }
 
     public Integer suggest() throws IOException {
-        List<HyperDefinition> toQuery = hyperDefinitions.stream().filter(hd -> !fixed.containsKey(hd.getName())).toList();
+        List<HyperDefinition<?>> toQuery = hyperDefinitions.stream().filter(hd -> !fixed.containsKey(hd.getName())).toList();
         if (toQuery.isEmpty()) {
             return null;
         }
@@ -53,7 +51,7 @@ public class RemoteHyperManager extends HyperManager {
         Response response = okHttpClient.newCall(request).execute();
         String responseBody = response.body().string();
         System.err.println(responseBody);
-        HpoService.SuggestResponse suggestResponse = objectMapper.readValue(responseBody, HpoService.SuggestResponse.class);
+        SuggestResponse suggestResponse = objectMapper.readValue(responseBody, SuggestResponse.class);
 
         Map<String, Object> hps = suggestResponse.getParameters();
         this.suggested = hyperDefinitions.stream().collect(Collectors.toMap(HyperDefinition::getName, hd -> hps.get(hd.getName())));
@@ -64,7 +62,7 @@ public class RemoteHyperManager extends HyperManager {
         if (trialNumber == null) {
             return;
         }
-        HpoService.CompleteRequest completeRequest = new HpoService.CompleteRequest(trialNumber, value);
+        CompleteRequest completeRequest = new CompleteRequest(trialNumber, value);
         ObjectMapper objectMapper = new ObjectMapper();
         String completeRequestJson = objectMapper.writeValueAsString(completeRequest);
 
@@ -82,28 +80,66 @@ public class RemoteHyperManager extends HyperManager {
         }
     }
 
-    public Object getProp(String propertyName) {
+    @Override
+    public <T> T doGet(QualifiedKey qualifiedKey) {
+        Object result;
+        String propertyName = qualifiedKey.get();
         Object fixedProp = this.fixed.get(propertyName);
         if (fixedProp != null) {
-            return fixedProp;
+            result = fixedProp;
         } else {
-            return suggested.get(propertyName);
+            result = suggested.get(propertyName);
+        }
+        @SuppressWarnings("unchecked")
+        T castedResult = (T) result;
+        return castedResult;
+    }
+
+    public static class SuggestResponse {
+        public int trial_number;
+        public Map<String, Object> parameters;
+
+        public int getTrial_number() {
+            return trial_number;
+        }
+
+        public void setTrial_number(int trial_number) {
+            this.trial_number = trial_number;
+        }
+
+        public Map<String, Object> getParameters() {
+            return parameters;
+        }
+
+        public void setParameters(Map<String, Object> parameters) {
+            this.parameters = parameters;
         }
     }
 
-    @Override
-    public <T> T get(NumericHyperDefinition<T> hyperDefinition) {
-        @SuppressWarnings("unchecked")
-        T result = (T) getProp(hyperDefinition.getName());
-        return result;
-    }
+    public static class CompleteRequest {
+        private int trial_number;
 
-    public void fixParameters(String hyperSelectionJson) {
-        TypeReference<Map<String, Object>> typeRef = new TypeReference<>() {};
-        try {
-            this.fixed.putAll(objectMapper.readValue(hyperSelectionJson, typeRef));
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException(e);
+        private double value;
+
+        public CompleteRequest(int trial_number, double value) {
+            this.trial_number = trial_number;
+            this.value = value;
+        }
+
+        public int getTrial_number() {
+            return trial_number;
+        }
+
+        public void setTrial_number(int trial_number) {
+            this.trial_number = trial_number;
+        }
+
+        public double getValue() {
+            return value;
+        }
+
+        public void setValue(double value) {
+            this.value = value;
         }
     }
 }

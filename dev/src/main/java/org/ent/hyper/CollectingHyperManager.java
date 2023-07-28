@@ -5,15 +5,25 @@ import java.util.List;
 
 public class CollectingHyperManager extends HyperManager {
 
-    private final List<HyperDefinition> hyperDefinitions = new ArrayList<>();
+    private final List<HyperDefinition<?>> hyperDefinitions = new ArrayList<>();
 
     @Override
-    public <T> T get(NumericHyperDefinition<T> hyperDefinition) {
-        hyperDefinitions.add(hyperDefinition);
-        return hyperDefinition.getAverageValue();
+    public <T> T get(HyperDefinition<T> hyperDefinition) {
+        hyperDefinitions.add(hyperDefinition.cloneWithName(resolve(hyperDefinition.getName()).get()));
+        return null;
     }
 
-    public List<HyperDefinition> getHyperDefinitions() {
+    @Override
+    protected <T> T doGet(QualifiedKey qualifiedKey) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    protected void doFix(QualifiedKey qualifiedKey, Object value) {
+        throw new UnsupportedOperationException();
+    }
+
+    public List<HyperDefinition<?>> getHyperDefinitions() {
         return hyperDefinitions;
     }
 }
