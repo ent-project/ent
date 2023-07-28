@@ -35,6 +35,7 @@ public class DupNormalOperation implements BiOperation {
 			copy.setRightChild(target.getRightChild(Purview.COMMAND), Purview.DIRECT);
 		}
 		setter.setTarget(copy, Purview.COMMAND);
+		ent.event().transverValue(target, copy);
 		return ExecutionResult.NORMAL;
 	}
 

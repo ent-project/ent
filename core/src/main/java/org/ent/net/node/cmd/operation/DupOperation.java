@@ -27,6 +27,7 @@ public class DupOperation implements BiOperation {
 				target.getLeftChild(Purview.COMMAND),
 				target.getRightChild(Purview.COMMAND));
 		setter.setTarget(copy, Purview.COMMAND);
+		ent.event().transverValue(target, copy);
 		return ExecutionResult.NORMAL;
 	}
 

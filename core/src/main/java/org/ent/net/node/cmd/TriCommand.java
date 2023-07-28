@@ -56,7 +56,7 @@ public class TriCommand extends VetoedCommand {
         Arrow handle1 = accessor1.get(base, ent, Purview.COMMAND);
         Arrow handle2 = accessor2.get(base, ent, Purview.COMMAND);
         Arrow handle3 = accessor3.get(base, ent, Purview.COMMAND);
-        return operation.apply(handle1, handle2, handle3, accessToken);
+        return operation.apply(handle1, handle2, handle3, ent, accessToken);
     }
 
     @Override

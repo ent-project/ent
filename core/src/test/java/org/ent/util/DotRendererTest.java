@@ -64,7 +64,7 @@ class DotRendererTest {
 
     private static Stream<Ent> render() {
         Ent ent2 = entBase();
-        ent2.getNet().getRoot().setValue(Commands.get(Operations.MULTIPLY_OPERATION, Accessors.DIRECT, Accessors.LEFT, Accessors.RIGHT).getValue());
+        ent2.getNet().getRoot().setValue(Commands.get(Operations.BITWISE_OR_OPERATION, Accessors.DIRECT, Accessors.LEFT, Accessors.RIGHT).getValue());
         Ent ent3 = entBase();
         ent3.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LEFT_LEFT, Accessors.LEFT_RIGHT, Accessors.FLOW).getValue());
         Ent entTripleTargetCommand = entBase();

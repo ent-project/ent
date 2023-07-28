@@ -152,6 +152,10 @@ public class ArithmeticForwardGame {
         this.formatter = new NetFormatter();
     }
 
+    public boolean isVerbose() {
+        return verbose;
+    }
+
     public int getStep() {
         return step;
     }
@@ -281,5 +285,9 @@ public class ArithmeticForwardGame {
             }
         }
         return false;
+    }
+
+    public boolean isVerifierExecuted() {
+        return verifierNet != null && verifierNet.getRoot() != verifierNetOriginalRoot;
     }
 }

@@ -5,9 +5,11 @@ import optuna
 # curl -X POST http://localhost:5005/complete -H 'Content-Type: application/json' -d '{"trial_number":0, "value": 5}'
 # curl localhost:5005/results
 
+# optuna-dashboard sqlite:///ent.db
+
 app = Flask(__name__)
 
-study = optuna.create_study(study_name="test-2023-07-19_with-portal",
+study = optuna.create_study(study_name="test-2023-07-28_transfer",
                             # sampler=optuna.samplers.CmaEsSampler(),
                             storage="sqlite:///ent.db",
                             direction=optuna.study.StudyDirection.MAXIMIZE,

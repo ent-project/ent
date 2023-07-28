@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class FixedHyperManager extends HyperManager {
 
-    private final Map<String, Object> fixed = new HashMap<>();
+    protected final Map<String, Object> fixed = new HashMap<>();
 
     @Override
     public void doFix(QualifiedKey qualifiedKey, Object value) {

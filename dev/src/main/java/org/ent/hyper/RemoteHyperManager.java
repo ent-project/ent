@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class RemoteHyperManager extends FixedHyperManager {
 
@@ -26,8 +25,6 @@ public class RemoteHyperManager extends FixedHyperManager {
     private final List<HyperDefinition<?>> hyperDefinitions;
 
     private Map<String, Object> suggested;
-    private final Map<String, Object> fixed = new HashMap<>();
-
 
     public RemoteHyperManager(List<HyperDefinition<?>> hyperDefinitions) {
         this.hyperDefinitions = hyperDefinitions;
@@ -36,9 +33,10 @@ public class RemoteHyperManager extends FixedHyperManager {
     public Integer suggest() throws IOException {
         List<HyperDefinition<?>> toQuery = hyperDefinitions.stream().filter(hd -> !fixed.containsKey(hd.getName())).toList();
         if (toQuery.isEmpty()) {
+            this.suggested = new HashMap<>();
             return null;
         }
-        String jsonInputString = objectMapper.writeValueAsString(hyperDefinitions);
+        String jsonInputString = objectMapper.writeValueAsString(toQuery);
         RequestBody requestBody = RequestBody.create(
                 jsonInputString,
                 MediaType.get("application/json; charset=utf-8"));
@@ -50,11 +48,10 @@ public class RemoteHyperManager extends FixedHyperManager {
 
         Response response = okHttpClient.newCall(request).execute();
         String responseBody = response.body().string();
-        System.err.println(responseBody);
+        log.info("Response body from remote hyperparameter manager: \n{}", responseBody);
         SuggestResponse suggestResponse = objectMapper.readValue(responseBody, SuggestResponse.class);
 
-        Map<String, Object> hps = suggestResponse.getParameters();
-        this.suggested = hyperDefinitions.stream().collect(Collectors.toMap(HyperDefinition::getName, hd -> hps.get(hd.getName())));
+        this.suggested = suggestResponse.getParameters();
         return suggestResponse.getTrial_number();
     }
 

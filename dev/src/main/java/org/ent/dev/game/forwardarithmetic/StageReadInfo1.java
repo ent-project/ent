@@ -161,7 +161,7 @@ public class StageReadInfo1 {
         StageReadInfo1.registerHyperparameter(hyperCollector);
 
         RemoteHyperManager remoteHyperManager = new RemoteHyperManager(hyperCollector.getHyperDefinitions());
-        remoteHyperManager.fix(HYPER_SELECTION);
+        remoteHyperManager.fixJson(HYPER_SELECTION);
 
         for (int i = 0; i < 1; i++) {
             Integer trial = remoteHyperManager.suggest();

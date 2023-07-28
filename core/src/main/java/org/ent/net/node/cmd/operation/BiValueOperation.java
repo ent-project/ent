@@ -17,6 +17,7 @@ public abstract class BiValueOperation implements BiOperation {
 		}
 		Node node2 = handle2.getTarget(Purview.COMMAND);
 		node1.setValue(compute(node2.getValue(Purview.COMMAND)));
+		ent.event().transverValue(node2, node1);
 		return ExecutionResult.NORMAL;
 	}
 

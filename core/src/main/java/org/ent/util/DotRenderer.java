@@ -405,9 +405,9 @@ public class DotRenderer {
 
     private String getCommandFillColor(Command command) {
         if (command.getValue() == Commands.FINAL_SUCCESS.getValue()) {
-            return "palegreen";
+            return "\"#daffb5\"";
         } else if (command.getValue() == Commands.FINAL_FAILURE.getValue()) {
-            return "mistyrose2";
+            return "\"#ffcfb5\"";
         }
         return COLOR_NODE;
     }
@@ -435,6 +435,7 @@ public class DotRenderer {
 
     private static String escape(String shortName) {
         return shortName.replaceAll("<", "&lt;")
-                .replaceAll("[\\\\]", "\\\\\\\\");
+                .replaceAll("[\\\\]", "\\\\\\\\")
+                .replaceAll("[|]", "\\\\|");
     }
 }

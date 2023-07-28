@@ -80,4 +80,11 @@ public class MultiEntEventListener implements EntEventListener {
             eventListener.evalFloatOperation(node);
         }
     }
+
+    @Override
+    public void transverValue(Node nodeSource, Node nodeTarget) {
+        for (EntEventListener eventListener : eventListeners) {
+            eventListener.transverValue(nodeSource, nodeTarget);
+        }
+    }
 }

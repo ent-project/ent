@@ -52,4 +52,9 @@ public class NopEntEventListener implements EntEventListener {
     public void evalFloatOperation(Node node) {
         // do nothing
     }
+
+    @Override
+    public void transverValue(Node nodeSource, Node nodeTarget) {
+        // do nothing
+    }
 }

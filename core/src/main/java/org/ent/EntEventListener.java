@@ -28,4 +28,10 @@ public interface EntEventListener {
     void getArrowThroughPortal(Node node, ArrowDirection direction, Arrow portal);
 
     void evalFloatOperation(Node node);
+
+	/**
+	 * Value information is read from nodeSource and written to nodeTarget,
+	 * possibly involving some arithmetic or transformation.
+	 */
+    void transverValue(Node nodeSource, Node nodeTarget);
 }

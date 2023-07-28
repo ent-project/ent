@@ -14,6 +14,7 @@ public abstract class MonoValueOperation extends MonoNodeOperation {
             return ExecutionResult.ERROR;
         }
         int newValue = compute(node.getValue(Purview.COMMAND));
+        ent.event().transverValue(node, node);
         node.setValue(newValue);
         return ExecutionResult.NORMAL;
     }

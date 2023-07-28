@@ -2,14 +2,16 @@ package org.ent.dev.game.forwardarithmetic;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.LazyPortalArrow;
+import org.ent.NopEntEventListener;
 import org.ent.NopNetEventListener;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.randnet.ValueDrawing;
 import org.ent.dev.trim2.TrimmingHelper;
 import org.ent.dev.trim2.TrimmingListener;
-import org.ent.hyper.FixedHyperManager;
+import org.ent.hyper.CollectingHyperManager;
 import org.ent.hyper.HyperManager;
 import org.ent.hyper.IntHyperDefinition;
+import org.ent.hyper.RemoteHyperManager;
 import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
@@ -22,11 +24,12 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.time.Duration;
 
 public class StageReadInfo2b extends StageBase {
 
-    private static final boolean WEB_UI = true;
+    private static final boolean WEB_UI = false;
     public static final boolean REPLAY_HITS = false || WEB_UI;
 
     private static final Logger logStatic = LoggerFactory.getLogger(StageReadInfo2b.class);
@@ -50,11 +53,15 @@ public class StageReadInfo2b extends StageBase {
     public static IntHyperDefinition HYPER_NO_NODES = new IntHyperDefinition("no-nodes", 2, 100);
     public static IntHyperDefinition HYPER_ATTEMPTS_PER_UPSTREAM = new IntHyperDefinition("attempts-per-upstream", 1, 1000);
 
-    private int numTotal;
+    private int numTotalAttempts;
     private int numGetOperand1BeforeEval;
     private int numGetOperand2BeforeEval;
     private int numGetAnyOperandBeforeEval;
     private int numGetBothOperandsBeforeEval;
+    private int numTransferOperand1BeforeEval;
+    private int numTransferOperand2BeforeEval;
+    private int numTransferAnyOperandBeforeEval;
+    private int numTransferBothOperandsBeforeEval;
     private int numHit;
     private int numUpstream;
 
@@ -83,57 +90,93 @@ public class StageReadInfo2b extends StageBase {
         this.statFirstEvalFlowOnVerifier = new int[maxSteps];
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         if (WEB_UI) {
             WebUI.setUpJavalin();
         }
         UniformRandomProvider randomRun = RandomUtil.newRandom2(12345L);
 
-        FixedHyperManager hyperManager = new FixedHyperManager();
+        CollectingHyperManager collector = new CollectingHyperManager();
+        StageReadInfo2b.registerHyperparameter(collector);
+
+        RemoteHyperManager hyperManager = new RemoteHyperManager(collector.getHyperDefinitions());
         HyperManager hyperManagerThis = hyperManager.group(HYPER_GROUP_THIS);
         HyperManager hyperManagerStage1 = hyperManager.group(HYPER_GROUP_STAGE1);
 
-        hyperManagerStage1.fix(StageReadInfo1.HYPER_SELECTION);
-        hyperManagerThis.fix("""
-            {
-              'fraction_portals': 0.2,
-              'fraction_commands': 0.9,
-              'fraction_major_commands': 0.8,
-              'fraction_major_split': 0.5,
-              'fraction_set': 0.5
-            }
-                """);
-        hyperManagerThis.fix(HYPER_MAX_STEPS, 30);
-        hyperManagerThis.fix(HYPER_NO_NODES, 53);
-        hyperManagerThis.fix(HYPER_ATTEMPTS_PER_UPSTREAM, 100);
+        hyperManagerStage1.fixJson(StageReadInfo1.HYPER_SELECTION);
+//        hyperManagerThis.fixJson("""
+//            {
+////              'fraction_portals': 0.2,
+////              'fraction_commands': 0.9,
+////              'fraction_major_commands': 0.8,
+////              'fraction_major_split': 0.5,
+//              'fraction_set': 0.5
+//            }
+//                """);
+//        hyperManagerThis.fix(HYPER_MAX_STEPS, 30);
+//        hyperManagerThis.fix(HYPER_NO_NODES, 53);
+//        hyperManagerThis.fix(HYPER_ATTEMPTS_PER_UPSTREAM, 100);
 
-        int numTrials = 1;
+        hyperManager.fixLines("""
+//                get-value.attempts-per-upstream 92
+                get-value.fraction_commands 0.9995723510318749
+                get-value.fraction_major_commands 0.934629902602602
+                get-value.fraction_major_split 0.9418316246313359
+//                get-value.fraction_portals 0.440603894610061
+//                get-value.fraction_set 0.8602322484347303
+                get-value.max-steps 74
+//                get-value.no-nodes 96
+                """);
+
+        hyperManager.fixLines("""
+                get-value.attempts-per-upstream: 488
+                get-value.fraction_portals 0.5028503083404546
+                get-value.fraction_set 0.4814248236734852
+                get-value.no-nodes 96
+                """);
+        int numTrials = 100;
         for (int indexTrial = 0; indexTrial < numTrials; indexTrial++) {
+            Integer trialNumberRemote = hyperManager.suggest();
+
             StageReadInfo2b dev = new StageReadInfo2b(hyperManager, RandomUtil.newRandom2(randomRun.nextLong()));
-            dev.setEpochSize(10_000);
+            dev.setTrialMaxDuration(Duration.ofSeconds(10));
+//            dev.setTrialMaxEvaluations(5_000);
             dev.runTrial(indexTrial);
             int hits = dev.numHit;
             double hitsPerMinute = hits * 60_000.0 / dev.duration.toMillis();
             logStatic.info(" Hits per minute: " + hitsPerMinute);
+
+            hyperManager.complete(trialNumberRemote, hitsPerMinute);
         }
     }
 
     @Override
     protected void printRunInfo(Duration duration) {
         log.info("    get operand before eval:");
-        log.info("          o1: {}", Tools.rate(numGetOperand1BeforeEval, numTotal));
-        log.info("          o2: {}", Tools.rate(numGetOperand2BeforeEval, numTotal));
-        log.info("          any (o1 or o2): {}", Tools.rate(numGetAnyOperandBeforeEval, numTotal));
-        log.info("          both (o1 and o2): {}", Tools.rate(numGetBothOperandsBeforeEval, numTotal));
+        log.info("          o1: {}", Tools.rate(numGetOperand1BeforeEval, numUpstream));
+        log.info("          o2: {}", Tools.rate(numGetOperand2BeforeEval, numUpstream));
+        log.info("          any (o1 or o2): {}", Tools.rate(numGetAnyOperandBeforeEval, numUpstream));
+        log.info("          both (o1 and o2): {}", Tools.rate(numGetBothOperandsBeforeEval, numUpstream));
+        log.info("    transfer operand before eval:");
+        log.info("          o1: {}", Tools.rate(numTransferOperand1BeforeEval, numUpstream));
+        log.info("          o2: {}", Tools.rate(numTransferOperand2BeforeEval, numUpstream));
+        log.info("          any (o1 or o2): {}", Tools.rate(numTransferAnyOperandBeforeEval, numUpstream));
+        log.info("          both (o1 and o2): {}", Tools.rate(numTransferBothOperandsBeforeEval, numUpstream));
         log.info("TOTAL DURATION: {}", duration);
-        log.info(" hits: {}", Tools.rate(numHit, numUpstream));
+        log.info(" hits per upstream: {}", Tools.rate(numHit, numUpstream));
+        log.info(" hits per attempt: {}", Tools.rate(numHit, numTotalAttempts));
     }
 
     @Override
-    protected void next(int indexTrial, int indexEpoch) {
+    protected void nextEvaluation(int indexTrial, int indexEvaluation) {
         StageReadInfo1.Solution upstream = this.stageReadInfo1.getNextSolution();
 
         boolean foundSolution = false;
+//        boolean isTransferOperand1BeforeEval = false;
+//        boolean isTransferOperand2BeforeEval = false;
+//        boolean isGetOperand1BeforeEval = false;
+//        boolean isGetOperand2BeforeEval = false;
+
         for (int indexAttempt = 0; indexAttempt < attemptsPerUpstream; indexAttempt++) {
             long netSeed = this.randNetSeeds.nextLong(); // FIXME: consistent base seed for each next()?
             Net net = buildReadNet(netSeed);
@@ -141,8 +184,24 @@ public class StageReadInfo2b extends StageBase {
             ArithmeticForwardGame game = setUpGame(upstream, net);
             VerifierNetListener verifierNetListener = new VerifierNetListener(game);
             game.getVerifierNet().addEventListener(verifierNetListener);
+            ReadOperandsEntListener readOperandsListener = new ReadOperandsEntListener(game);
+            game.getEnt().addEventListener(readOperandsListener);
 
             game.execute();
+
+            if (readOperandsListener.numTransferOperand1BeforeEval > 0) {
+                numTransferOperand1BeforeEval++;
+            }
+            if (readOperandsListener.numTransferOperand2BeforeEval > 0) {
+                numTransferOperand2BeforeEval++;
+            }
+            if (readOperandsListener.numTransferOperand1BeforeEval > 0 || readOperandsListener.numTransferOperand2BeforeEval > 0) {
+                numTransferAnyOperandBeforeEval++;
+            }
+            if (readOperandsListener.numTransferOperand1BeforeEval > 0 && readOperandsListener.numTransferOperand2BeforeEval > 0) {
+                numTransferBothOperandsBeforeEval++;
+                foundSolution = true;
+            }
 
             if (verifierNetListener.numGetOperand1BeforeEval > 0) {
                 numGetOperand1BeforeEval++;
@@ -155,9 +214,11 @@ public class StageReadInfo2b extends StageBase {
             }
             if (verifierNetListener.numGetOperand1BeforeEval > 0 && verifierNetListener.numGetOperand2BeforeEval > 0) {
                 numGetBothOperandsBeforeEval++;
-                foundSolution = true;
+            }
+            numTotalAttempts++;
+            if (foundSolution) {
                 if (REPLAY_HITS) {
-                    String storyId = "game-%s-%s-%s".formatted(indexTrial, indexEpoch, indexAttempt);
+                    String storyId = "game-%s-%s-%s".formatted(indexTrial, indexEvaluation, indexAttempt);
                     WebUiStoryOutput.addStory(storyId, () -> {
                         replayWithDetails(upstream, netSeed);
                         log.info("replay done.");
@@ -167,7 +228,6 @@ public class StageReadInfo2b extends StageBase {
                 }
                 break;
             }
-            numTotal++;
         }
         if (foundSolution) {
             numHit++;
@@ -193,6 +253,8 @@ public class StageReadInfo2b extends StageBase {
         HashEntEventListener hashEntEventListener = new HashEntEventListener(game2.getEnt());
         hashEntEventListener.setOnFirstRepetition(r -> game2.stopExecution());
         game2.getEnt().addEventListener(hashEntEventListener);
+        ReadOperandsEntListener readOperandsListener = new ReadOperandsEntListener(game2);
+        game2.getEnt().addEventListener(readOperandsListener);
         game2.setVerbose(true);
 
         game2.execute();
@@ -285,4 +347,35 @@ public class StageReadInfo2b extends StageBase {
         }
     }
 
+    private class ReadOperandsEntListener extends NopEntEventListener {
+        private final ArithmeticForwardGame game;
+        private int numTransferOperand1BeforeEval;
+        private int numTransferOperand2BeforeEval;
+
+        private ReadOperandsEntListener(ArithmeticForwardGame game) {
+            this.game = game;
+        }
+
+        @Override
+        public void transverValue(Node nodeSource, Node nodeTarget) {
+            if (nodeTarget.getNet() == game.getVerifierNet()) {
+                return;
+            }
+            if (game.isVerifierExecuted()) {
+                return;
+            }
+            if (nodeSource == game.getOperand1Node()) {
+                numTransferOperand1BeforeEval++;
+                if (game.isVerbose()) {
+                    log.info("TransferOperand1");
+                }
+            }
+            if (nodeSource == game.getOperand2Node()) {
+                numTransferOperand2BeforeEval++;
+                if (game.isVerbose()) {
+                    log.info("TransferOperand2");
+                }
+            }
+        }
+    }
 }
