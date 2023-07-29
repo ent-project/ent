@@ -1,7 +1,8 @@
-package org.ent.dev.game.forwardarithmetic;
+package org.ent.dev.game.forwardarithmetic.readinfo;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.NopNetEventListener;
+import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
 import org.ent.dev.trim2.TrimmingHelper;
 import org.ent.dev.trim2.TrimmingListener;
 import org.ent.hyper.FixedHyperManager;

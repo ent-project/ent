@@ -1,4 +1,4 @@
-package org.ent.dev.game.forwardarithmetic;
+package org.ent.dev.game.forwardarithmetic.readinfo;
 
 import org.ent.Ent;
 import org.ent.EntHash;

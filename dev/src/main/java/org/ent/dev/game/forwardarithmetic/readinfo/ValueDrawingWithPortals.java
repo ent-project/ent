@@ -1,4 +1,4 @@
-package org.ent.dev.game.forwardarithmetic;
+package org.ent.dev.game.forwardarithmetic.readinfo;
 
 import org.ent.dev.randnet.PortalValue;
 import org.ent.dev.randnet.ValueDrawingHp;

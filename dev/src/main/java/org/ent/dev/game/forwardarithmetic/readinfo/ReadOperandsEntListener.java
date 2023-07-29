@@ -1,6 +1,8 @@
-package org.ent.dev.game.forwardarithmetic;
+package org.ent.dev.game.forwardarithmetic.readinfo;
 
 import org.ent.NopEntEventListener;
+import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
+import org.ent.dev.game.forwardarithmetic.Util;
 import org.ent.net.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

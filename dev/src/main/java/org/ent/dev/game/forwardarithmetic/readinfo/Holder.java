@@ -1,4 +1,4 @@
-package org.ent.dev.game.forwardarithmetic;
+package org.ent.dev.game.forwardarithmetic.readinfo;
 
 class Holder<T> {
     T item;

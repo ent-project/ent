@@ -1,7 +1,8 @@
-package org.ent.dev.game.forwardarithmetic;
+package org.ent.dev.game.forwardarithmetic.readinfo;
 
 import org.ent.LazyPortalArrow;
 import org.ent.NopEntEventListener;
+import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.run.StepResult;
