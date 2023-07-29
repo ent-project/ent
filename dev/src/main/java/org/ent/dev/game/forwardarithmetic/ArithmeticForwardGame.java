@@ -256,16 +256,20 @@ public class ArithmeticForwardGame {
             log.info("ent {}", formatter.format(ent));
             Logging.logDot(ent);
         }
-        for (int step = 0; step < maxSteps; step++) {
-            this.step = step;
+        while (step < maxSteps) {
             runner.step();
             if (verbose) {
                 dumpResults();
                 log.info("after step {}: {}", step, formatter.format(ent));
                 Logging.logDot(ent);
             }
+
+            step++;
+
             if (this.executionStopped) {
-                log.info("execution stopped after step {}", step);
+                if (verbose) {
+                    log.info("execution stopped before step {}", step);
+                }
                 break;
             }
         }

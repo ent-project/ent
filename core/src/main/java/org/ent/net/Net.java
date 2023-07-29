@@ -31,6 +31,15 @@ public class Net {
 
     private BiMap<Node, String> nodeNames;
     private final List<Node> nodes;
+    /**
+     * 'sparse' indicates that the list of nodes may contain null entries.
+     * A dense (non-sparse) net allows for more optimized algorithms.
+     * This flag is not maintained automatically, but needs to be
+     * set after an operation that leaves the net sparse (e.g. garbage collection).
+     * An algorithm can throw an error for sparse Nets, if it cannot
+     * handle them (fail fast).
+     */
+    private boolean sparse;
 
     private int currentIndex;
     private Node root;
@@ -95,6 +104,14 @@ public class Net {
 
     public List<Node> getNodes() {
         return nodes;
+    }
+
+    public boolean isSparse() {
+        return sparse;
+    }
+
+    public void setSparse(boolean sparse) {
+        this.sparse = sparse;
     }
 
     public void addNode(Node node) {

@@ -15,6 +15,9 @@ public class NetCopy2 {
     }
 
     public static Net createCopy(Net netOrig) {
+        if (netOrig.isSparse()) {
+            throw new IllegalArgumentException();
+        }
         Net netClone = new Net();
         for (Node nodeOrig : netOrig.getNodes()) {
             netClone.newNode(nodeOrig.getValue(Purview.DIRECT));

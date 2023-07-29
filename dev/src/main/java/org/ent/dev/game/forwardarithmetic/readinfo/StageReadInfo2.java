@@ -4,6 +4,7 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.LazyPortalArrow;
 import org.ent.NopNetEventListener;
 import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
+import org.ent.dev.game.forwardarithmetic.PortalMoveEntEventListener;
 import org.ent.dev.game.forwardarithmetic.ReadOperandsEntListener;
 import org.ent.dev.game.forwardarithmetic.StageBase;
 import org.ent.dev.randnet.RandomNetCreator;
@@ -68,9 +69,9 @@ public class StageReadInfo2 extends StageBase<StageReadInfo2.Solution> {
 
     private int[] statFirstEvalFlowOnVerifier;
 
-    public static IntHyperDefinition HYPER_MAX_STEPS = new IntHyperDefinition("max-steps", 3, 200);
-    public static IntHyperDefinition HYPER_NO_NODES = new IntHyperDefinition("no-nodes", 2, 400);
-    public static IntHyperDefinition HYPER_ATTEMPTS_PER_UPSTREAM = new IntHyperDefinition("attempts-per-upstream", 1, 1000);
+    public static final IntHyperDefinition HYPER_MAX_STEPS = new IntHyperDefinition("max-steps", 3, 200);
+    public static final IntHyperDefinition HYPER_NO_NODES = new IntHyperDefinition("no-nodes", 2, 400);
+    public static final IntHyperDefinition HYPER_ATTEMPTS_PER_UPSTREAM = new IntHyperDefinition("attempts-per-upstream", 1, 1000);
 
     private int numTotalAttempts;
     private int numGetOperand1BeforeEval;
@@ -275,15 +276,15 @@ public class StageReadInfo2 extends StageBase<StageReadInfo2.Solution> {
         return game;
     }
 
-    private static void initializeAnswer(ArithmeticForwardGame game, PortalMoveEntEventListener portalMoves) {
-        game.getAnswerNode().setValue(portalMoves.lastAnswerValue());
-    }
-
     private static void initializePortal(ArithmeticForwardGame game, PortalMoveEntEventListener.TargetTracker targetTracker, LazyPortalArrow verifierPortal) {
         Node target = targetTracker.lastTarget();
         if (target != null) {
             verifierPortal.setTarget(game.getVerifierNet().getNode(target.getIndex()), Purview.DIRECT);
         }
+    }
+
+    private static void initializeAnswer(ArithmeticForwardGame game, PortalMoveEntEventListener portalMoves) {
+        game.getAnswerNode().setValue(portalMoves.lastAnswerValue());
     }
 
     public Net buildReadNet(Long netSeed) {

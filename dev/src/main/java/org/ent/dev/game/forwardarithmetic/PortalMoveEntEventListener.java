@@ -1,8 +1,7 @@
-package org.ent.dev.game.forwardarithmetic.readinfo;
+package org.ent.dev.game.forwardarithmetic;
 
 import org.ent.LazyPortalArrow;
 import org.ent.NopEntEventListener;
-import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.run.StepResult;
@@ -21,15 +20,21 @@ public class PortalMoveEntEventListener extends NopEntEventListener {
 
     private final TargetTracker targetTracker1, targetTracker2;
     private final ArithmeticForwardGame game;
+    private boolean exitAfterFirstMove;
+
     private Integer firstTimePortalMoved;
     private Integer lastTimePortalMoved;
     private Integer lastAnswerValue;
     private Integer firstVerifierChange;
 
-    PortalMoveEntEventListener(ArithmeticForwardGame game) {
+    public PortalMoveEntEventListener(ArithmeticForwardGame game) {
         this.game = game;
         this.targetTracker1 = new TargetTracker(game.getVerifierPortal1());
         this.targetTracker2 = new TargetTracker(game.getVerifierPortal2());
+    }
+
+    public void setExitAfterFirstMove(boolean exitAfterFirstMove) {
+        this.exitAfterFirstMove = exitAfterFirstMove;
     }
 
     public TargetTracker targetTracker1() {
@@ -108,6 +113,9 @@ public class PortalMoveEntEventListener extends NopEntEventListener {
                     }
                     if (totalTargetChanges() == 0) {
                         firstTimePortalMoved = game.getStep();
+                        if (exitAfterFirstMove) {
+                            game.stopExecution();
+                        }
                     }
                     lastTimePortalMoved = game.getStep();
                     recordAnswerValue();

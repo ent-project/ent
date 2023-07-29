@@ -1,13 +1,15 @@
-package org.ent.dev.game.forwardarithmetic.readinfo;
+package org.ent.dev.game.forwardarithmetic.peek;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
-import org.ent.dev.game.forwardarithmetic.ReadOperandsEntListener;
+import org.ent.dev.game.forwardarithmetic.PortalMoveEntEventListener;
 import org.ent.dev.game.forwardarithmetic.StageBase;
 import org.ent.dev.randnet.PortalValue;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.randnet.ValueDrawing;
 import org.ent.dev.randnet.ValueDrawingHp;
+import org.ent.dev.trim2.TrimmingHelper;
+import org.ent.dev.trim2.TrimmingListener;
 import org.ent.hyper.CollectingHyperManager;
 import org.ent.hyper.DoubleHyperDefinition;
 import org.ent.hyper.HyperManager;
@@ -16,6 +18,8 @@ import org.ent.hyper.RemoteHyperManager;
 import org.ent.net.Net;
 import org.ent.net.node.cmd.operation.Operations;
 import org.ent.net.node.cmd.operation.TriOperation;
+import org.ent.net.util.NetCopy2;
+import org.ent.net.util.NetCopyPack;
 import org.ent.net.util.RandomUtil;
 import org.ent.util.Logging;
 import org.ent.util.Tools;
@@ -28,11 +32,9 @@ import java.io.IOException;
 import java.time.Duration;
 
 /**
- * Success is transfer of either operand.
- *
- * Implies portal move to reach the operand.
+ * Find portal moves and condense them to a single command
  */
-public class StageTransfer1 extends StageBase {
+public class StagePeek1 extends StageBase<StagePeek1.Solution> {
 
     private static final boolean WEB_UI = false;
     public static final boolean REPLAY_HITS = false || WEB_UI;
@@ -41,7 +43,7 @@ public class StageTransfer1 extends StageBase {
     public static final IntHyperDefinition HYPER_MAX_STEPS = new IntHyperDefinition("max-steps", 3, 800);
     public static final IntHyperDefinition HYPER_NO_NODES = new IntHyperDefinition("no-nodes", 2, 1000);
 
-    private static final Logger logStatic = LoggerFactory.getLogger(StageTransfer1.class);
+    private static final Logger logStatic = LoggerFactory.getLogger(StagePeek1.class);
 
     public final ValueDrawing drawing;
 
@@ -54,9 +56,9 @@ public class StageTransfer1 extends StageBase {
     private int numHit;
     private int numEvaluation;
 
-    public StageTransfer1(HyperManager hyperManager, UniformRandomProvider randMaster) {
+    public StagePeek1(HyperManager hyperManager, UniformRandomProvider randMaster) {
         super(randMaster);
-        drawing = new ValueDrawingTransfer1(hyperManager);
+        drawing = new ValueDrawingPeek1(hyperManager);
         this.maxSteps = hyperManager.get(HYPER_MAX_STEPS);
         this.numberOfNodes = hyperManager.get(HYPER_NO_NODES);
         this.randNetSeeds = RandomUtil.newRandom2(randMaster.nextLong());
@@ -70,20 +72,17 @@ public class StageTransfer1 extends StageBase {
         UniformRandomProvider randomRun = RandomUtil.newRandom2(12345L);
 
         CollectingHyperManager hyperCollector = new CollectingHyperManager();
-        StageTransfer1.registerHyperparameter(hyperCollector);
+        StagePeek1.registerHyperparameters(hyperCollector);
 
         RemoteHyperManager hyperManager = new RemoteHyperManager(hyperCollector.getHyperDefinitions());
-        hyperManager.fix(HYPER_FRAC_PORTALS, 0.4);
-        hyperManager.fix(ValueDrawingHp.FRAC_SET, 0.65);
-        hyperManager.fix(HYPER_NO_NODES, 400);
-        hyperManager.fix(HYPER_MAX_STEPS, 80);
+        fixHyperparameters(hyperManager);
 
-        for (int indexTrial = 0; indexTrial < 200; indexTrial++) {
+        for (int indexTrial = 0; indexTrial < 1; indexTrial++) {
             Integer trialNumberRemote = hyperManager.suggest();
 
-            StageTransfer1 dev = new StageTransfer1(hyperManager, RandomUtil.newRandom2(randomRun.nextLong()));
-//            dev.setTrialMaxEvaluations(800_000);
-            dev.setTrialMaxDuration(Duration.ofSeconds(10));
+            StagePeek1 dev = new StagePeek1(hyperManager, RandomUtil.newRandom2(randomRun.nextLong()));
+            dev.setTrialMaxEvaluations(200);
+//            dev.setTrialMaxDuration(Duration.ofSeconds(10));
 
             dev.runTrial(indexTrial);
             int hits = dev.numHit;
@@ -94,11 +93,16 @@ public class StageTransfer1 extends StageBase {
         }
     }
 
-    public static void registerHyperparameter(HyperManager hyperManager) {
+    public static void registerHyperparameters(HyperManager hyperManager) {
         hyperManager.get(HYPER_FRAC_PORTALS);
-        hyperManager.get(ValueDrawingHp.FRAC_SET);
         hyperManager.get(HYPER_MAX_STEPS);
         hyperManager.get(HYPER_NO_NODES);
+    }
+
+    public static void fixHyperparameters(HyperManager hyperManager) {
+        hyperManager.fix(HYPER_FRAC_PORTALS, 0.4);
+        hyperManager.fix(HYPER_NO_NODES, 400);
+        hyperManager.fix(HYPER_MAX_STEPS, 80);
     }
 
     @Override
@@ -116,26 +120,21 @@ public class StageTransfer1 extends StageBase {
 
         ArithmeticForwardGame game = new ArithmeticForwardGame(operand1, operand2, operation, buildNet(netSeed), maxSteps);
 
-        ReadOperandsEntListener transferListener = new ReadOperandsEntListener(game);
-        game.getEnt().addEventListener(transferListener);
-
-        // PortalMoveEntEventListener
+        PortalMoveEntEventListener portalMoveListener = new PortalMoveEntEventListener(game);
+        portalMoveListener.setExitAfterFirstMove(true);
+        game.getEnt().addEventListener(portalMoveListener);
 
         game.execute();
 
-        boolean hit = transferListener.operand1Data().numTransfer > 0
-                      || transferListener.operand2Data().numTransfer > 0;
-//                      || transferListener.operationData().numTransfer > 0;
+        boolean hit = portalMoveListener.totalTargetChanges() > 0;
         if (hit) {
-            log.info("#{} -  o1: {}, op: {}, o2: {}",
-                    this.indexEvaluation,
-                    transferListener.operand1Data().numTransfer,
-                    transferListener.operationData().numTransfer,
-                    transferListener.operand2Data().numTransfer);
+            Net solutionNet = concentrate(game, netSeed, portalMoveListener);
+            Solution solution = new Solution(solutionNet, game, portalMoveListener);
+            submitSolution(solution);
             if (REPLAY_HITS) {
                 String storyId = "game-%s-%s".formatted(indexTrial, indexEvaluation);
                 WebUiStoryOutput.addStory(storyId, () -> {
-                    replayWithDetails(game, netSeed);
+                    replayWithDetails(solution);
                     log.info("replay done.");
                 });
                 Logging.logHtml(() -> "<a href=\"/?story=%s\" target=\"_blank\">%s</a>".formatted(storyId, storyId));
@@ -145,13 +144,37 @@ public class StageTransfer1 extends StageBase {
         numEvaluation++;
     }
 
-    private void replayWithDetails(ArithmeticForwardGame game0, long netSeed) {
+    private Net concentrate(ArithmeticForwardGame game0, long netSeed, PortalMoveEntEventListener portalMoveListener) {
+        Net net = buildNet(netSeed);
         ArithmeticForwardGame game = new ArithmeticForwardGame(
                 game0.getOperand1(),
                 game0.getOperand2(),
                 game0.getOperation(),
-                buildNet(netSeed),
-                maxSteps);
+                net,
+                portalMoveListener.firstTimePortalMoved());
+        game.execute();
+
+        Net advancedBlueprint = NetCopy2.createCopy(net);
+
+        TrimmingListener trimmingListener = new TrimmingListener(net.getNodes().size());
+        net.addEventListener(trimmingListener);
+        game.setMaxSteps(game.getMaxSteps() + 1);
+        game.execute();
+
+        TrimmingHelper.trim(advancedBlueprint, trimmingListener);
+        return advancedBlueprint;
+    }
+
+    public void replayWithDetails(Solution solution) {
+        ArithmeticForwardGame game0 = solution.game();
+        Net net = new NetCopyPack(solution.net()).createPackedCopy();
+
+        ArithmeticForwardGame game = new ArithmeticForwardGame(
+                game0.getOperand1(),
+                game0.getOperand2(),
+                game0.getOperation(),
+                net,
+                1);
         game.setVerbose(true);
         game.execute();
     }
@@ -161,22 +184,25 @@ public class StageTransfer1 extends StageBase {
         return netCreator.drawNet();
     }
 
-    class ValueDrawingTransfer1 extends ValueDrawingHp {
+    class ValueDrawingPeek1 extends ValueDrawingHp {
 
-        public ValueDrawingTransfer1(HyperManager hyperManager) {
+        public ValueDrawingPeek1(HyperManager hyperManager) {
             super(hyperManager);
         }
 
         @Override
         protected DistributionNode initializeDistribution() {
             double fracPortal = hyperManager.get(HYPER_FRAC_PORTALS);
-            double fracSet = hyperManager.get(FRAC_SET);
-            log.info("got HPs: fracPortal={}, fracSet={}", fracPortal, fracSet);
+            log.info("got HPs: fracPortal={}", fracPortal);
             return new DistributionSplit(fracPortal)
-                    .first(new DistributionLeaf().add(new PortalValue(0, 1)))
-                    .rest(new DistributionSplit(fracSet)
-                            .first(new DistributionLeaf().add(Operations.SET_OPERATION))
-                            .rest(new DistributionLeaf().add(Operations.SET_VALUE_OPERATION)));
+                    .first(new DistributionLeaf().add(new PortalValue(0, 0)))
+                    .rest(new DistributionLeaf().add(Operations.SET_OPERATION));
         }
+    }
+
+    public record Solution(
+            Net net,
+            ArithmeticForwardGame game,
+            PortalMoveEntEventListener portalMoveEntEventListener) {
     }
 }

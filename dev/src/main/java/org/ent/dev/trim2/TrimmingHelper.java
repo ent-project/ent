@@ -16,5 +16,6 @@ public class TrimmingHelper {
             }
         }
         net.referentialGarbageCollection();
+        net.setSparse(true);
     }
 }
