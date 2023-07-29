@@ -10,11 +10,11 @@ if (storyId !== null) {
 
 let ws = new WebSocket(webSocketUrl);
 ws.onopen = () => {
-    id("disconnected").innerText = "connected"
+    id("connection-status").innerText = "connected"
 }
 ws.onmessage = msg => updateLogs(msg);
 ws.onclose = () => {
-    id("disconnected").innerText = "connection closed"
+    id("connection-status").innerText = "connection closed"
 }
 
 function updateLogs(msg) {

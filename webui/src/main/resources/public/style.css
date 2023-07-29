@@ -24,3 +24,12 @@ body {
     flex-shrink: 0;
     background-color: #ccc;
 }
+
+#footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+#connection-status {
+    color: gray;
+}
