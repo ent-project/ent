@@ -25,8 +25,8 @@ import org.slf4j.LoggerFactory;
 import java.util.function.Consumer;
 
 import static org.ent.util.NetBuilder.builder;
-import static org.ent.util.NetBuilder.ignored;
 import static org.ent.util.NetBuilder.node;
+import static org.ent.util.NetBuilder.unaryRight;
 import static org.ent.util.NetBuilder.value;
 
 public class ArithmeticForwardGame {
@@ -49,7 +49,7 @@ public class ArithmeticForwardGame {
     private final int operand2;
     private final TriOperation operation;
     private final Ent ent;
-    private final int maxSteps;
+    private int maxSteps;
 
     private final int expectedSolution;
 
@@ -65,6 +65,7 @@ public class ArithmeticForwardGame {
     private Node answerNode;
     private int verifierPortalCode1, verifierPortalCode2;
     private LazyPortalArrow verifierPortal1, verifierPortal2;
+    private PortalArrow answerPortal;
     private Node operationNode, operand1Node, operand2Node, verifierRoot;
     private Consumer<Net> postVerifierCreateHook;
 
@@ -93,12 +94,20 @@ public class ArithmeticForwardGame {
         return maxSteps;
     }
 
+    public void setMaxSteps(int maxSteps) {
+        this.maxSteps = maxSteps;
+    }
+
     public LazyPortalArrow getVerifierPortal1() {
         return verifierPortal1;
     }
 
     public LazyPortalArrow getVerifierPortal2() {
         return verifierPortal2;
+    }
+
+    public PortalArrow getAnswerPortal() {
+        return answerPortal;
     }
 
     public Node getVerifierNetOriginalRoot() {
@@ -164,6 +173,10 @@ public class ArithmeticForwardGame {
         return verifierNet;
     }
 
+    public Net getAnswerNet() {
+        return answerNet;
+    }
+
     public Node getAnswerNode() {
         return answerNode;
     }
@@ -206,7 +219,7 @@ public class ArithmeticForwardGame {
     private Net buildVerifier() {
         Node portalAnswer, answerCopy, solution;
         Net verifierNet = builder().net(verifierRoot = node(Commands.get(Operations.SET_VALUE_OPERATION, Accessors.RIGHT, Accessors.LEFT),
-                portalAnswer = node(ignored(), answerCopy = node()),
+                portalAnswer = unaryRight(answerCopy = node()),
                 operationNode = node(Commands.get(this.operation, Accessors.RIGHT, Accessors.LEFT_LEFT, Accessors.LEFT_RIGHT),
                         node(
                                 node(operand1Node = value(this.operand1), operand2Node = value(this.operand2)),
@@ -226,7 +239,8 @@ public class ArithmeticForwardGame {
         answerNet.setPermittedToWrite(true);
         answerNet.setName("answer");
         ent.addDomain(answerNet);
-        int answerPortalCode = ent.addPortal(new PortalArrow(answerNet));
+        answerPortal = new PortalArrow(answerNet);
+        int answerPortalCode = ent.addPortal(answerPortal);
         portalAnswer.setValue(answerPortalCode);
 
         if (postVerifierCreateHook != null) {

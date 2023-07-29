@@ -1,5 +1,6 @@
 package org.ent.util;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.ent.Ent;
 import org.ent.LazyPortalArrow;
 import org.ent.net.Arrow;
@@ -207,7 +208,7 @@ public class DotRenderer {
                     sb.append("[shape=Mrecord label=\"<l>|%s|<r>\"".formatted(escape(command.getShortName())));
                     String color = getCommandFillColor(command);
                     if (!COLOR_NODE.equals(color)) {
-                        sb.append(" color=%s".formatted(color));
+                        sb.append(" color=\"%s\"".formatted(color));
                     }
                     sb.append("]");
                 }
@@ -270,7 +271,17 @@ public class DotRenderer {
                                 table.renderTable(sb);
                             }
                         } else {
-                            sb.append("[shape=record][label=\"<l>|").append(hexString).append("|<r>\"]");
+                            if (isTarget(node)) {
+                                List<String> outlineColors = getOutlineColors(node);
+                                TableBuilder table = new TableBuilder();
+                                table.textCenter = hexString;
+                                table.fillColor = COLOR_NODE;
+                                table.rounded = false;
+                                table.outlineColors = outlineColors;
+                                table.renderTable(sb);
+                            } else {
+                                sb.append("[shape=record][label=\"<l>|").append(hexString).append("|<r>\"]");
+                            }
                         }
                     }
                 }
@@ -346,7 +357,11 @@ public class DotRenderer {
             if (cellpaddingCenter != null) {
                 sb.append(" cellpadding=\"%s\"".formatted(cellpaddingCenter));
             }
-            sb.append(">%s</td>".formatted(textCenter));
+            sb.append(">%s</td>".formatted(escapeHtml(textCenter)));
+        }
+
+        private static String escapeHtml(String text) {
+            return StringEscapeUtils.escapeHtml4(text);
         }
 
         private void renderSideCell(StringBuilder sb, String port, String text, String fillColorSide) {
@@ -405,9 +420,9 @@ public class DotRenderer {
 
     private String getCommandFillColor(Command command) {
         if (command.getValue() == Commands.FINAL_SUCCESS.getValue()) {
-            return "\"#daffb5\"";
+            return "#daffb5";
         } else if (command.getValue() == Commands.FINAL_FAILURE.getValue()) {
-            return "\"#ffcfb5\"";
+            return "#ffcfb5";
         }
         return COLOR_NODE;
     }

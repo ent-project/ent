@@ -7,15 +7,16 @@ import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.accessor.Accessors;
 import org.ent.net.node.cmd.operation.Operations;
 import org.ent.webui.WebUI;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.ent.util.NetBuilder.builder;
-import static org.ent.util.NetBuilder.ignored;
 import static org.ent.util.NetBuilder.node;
 import static org.ent.util.NetBuilder.unary;
+import static org.ent.util.NetBuilder.unaryRight;
 
 class ArithmeticForwardGameTest {
 
@@ -26,24 +27,33 @@ class ArithmeticForwardGameTest {
         Profile.setTest(true);
     }
 
-    @Test
-    void syntheticSolution() {
+    @BeforeAll
+    static void webUi() {
         if (WEB_UI) {
             WebUI.setUpJavalin();
         }
+    }
 
+    @AfterAll
+    static void webUiKeepAlive() {
+        if (WEB_UI) {
+            WebUI.loopForever();
+        }
+    }
+
+    @Test
+    void syntheticSolution() {
         Node verifierPortal1, verifierPortal2;
         Node operationCopy, operand1Copy, operand2Copy, operandsCopy, solutionTarget;
         Node operationCopyContinuation;
         Net net = builder().net(
                 // copy operation
                 node(Commands.get(Operations.SET_VALUE_OPERATION, Accessors.RIGHT, Accessors.LEFT_RIGHT),
-                        verifierPortal1 = node(
-                                ignored(),
+                        verifierPortal1 = unaryRight(
                                 operationCopy = unary(node(operandsCopy = node(operand1Copy = node(), operand2Copy = node()), solutionTarget = node()))),
                         // point second verifier portal deeper into the verifier
                         node(Commands.get(Operations.SET_OPERATION, Accessors.LEFT, Accessors.LEFT_RIGHT_LEFT),
-                                verifierPortal2 = node(ignored(), operandsCopy),
+                                verifierPortal2 = unaryRight(operandsCopy),
                                 // copy first operand
                                 node(Commands.get(Operations.SET_VALUE_OPERATION, Accessors.RIGHT_LEFT, Accessors.LEFT_LEFT_LEFT),
                                         verifierPortal2,
@@ -78,10 +88,6 @@ class ArithmeticForwardGameTest {
 
         assertThat(game.passedVerifierFinished()).isTrue();
         assertThat(game.passedVerifierFinishedSuccessfully()).isTrue();
-
-        if (WEB_UI) {
-            WebUI.loopForever();
-        }
     }
 
     @Test

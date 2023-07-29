@@ -23,6 +23,8 @@ ext {
     logbackVersion = '1.4.5'
     guavaVersion = '31.1-jre'
     apacheCommonsLangVersion = '3.12.0'
+    apacheCommonsTextVersion = '1.10.0'
+    apacheCommonsMathVersion = '3.6.1'
 }
 
 subprojects {

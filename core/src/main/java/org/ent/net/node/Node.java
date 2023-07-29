@@ -12,6 +12,7 @@ import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.veto.Veto;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Binary node.
@@ -35,6 +36,13 @@ public class Node {
 		this.hub = new Hub(this);
 		this.value = value;
 		initialize(leftChild, rightChild);
+	}
+
+	public Node(Net net, int value, Optional<Node> leftChild, Optional<Node> rightChild) {
+		this.net = net;
+		this.hub = new Hub(this);
+		this.value = value;
+		initialize(leftChild.orElse(this), rightChild.orElse(this));
 	}
 
 	public Node(Net net, Node leftChild, Node rightChild) {

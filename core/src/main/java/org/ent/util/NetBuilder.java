@@ -11,6 +11,8 @@ import org.ent.net.node.cmd.veto.BiCondition;
 import org.ent.net.node.cmd.veto.Veto;
 import org.ent.net.node.cmd.veto.Vetos;
 
+import java.util.Optional;
+
 public class NetBuilder {
 
     private final static ThreadLocal<Net> currentNet = new ThreadLocal<>();
@@ -91,6 +93,14 @@ public class NetBuilder {
 
     public static Node unary(Node child) {
         return currentNet.get().newUNode(child);
+    }
+
+    public static Node unaryRight(int value, Node child) {
+        return currentNet.get().newNode(value, Optional.empty(), Optional.of(child));
+    }
+
+    public static Node unaryRight(Node child) {
+        return unaryRight(0, child);
     }
 
     public static Node value(int v) {

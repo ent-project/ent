@@ -282,6 +282,15 @@ public class Net {
         return node;
     }
 
+    public Node newNode(int value, Optional<Node> leftChild, Optional<Node> rightChild) {
+        leftChild.ifPresent(this::validateBelongsToNet);
+        rightChild.ifPresent(this::validateBelongsToNet);
+        Node node = new Node(this, value, leftChild, rightChild);
+        addNodeInternal(node);
+        fireNewNodeCall(node);
+        return node;
+    }
+
     public Node newNode() {
         Node bNode = new Node(this);
         addNodeInternal(bNode);

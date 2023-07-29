@@ -62,7 +62,11 @@ public class StageReadInfo1 {
 
     public final ValueDrawing drawing;
 
-    public record Solution(ArithmeticForwardGame game, long netSeed, PortalMoveEntEventListener portalMoveEntEventListener) {}
+    public record Solution(
+            ArithmeticForwardGame game,
+            long netSeed,
+            PortalMoveEntEventListener portalMoveEntEventListener) {
+    }
 
     private final int maxSteps;
     private final int numberOfNodes;
@@ -190,7 +194,7 @@ public class StageReadInfo1 {
         if (TRACK_HASHES) {
             this.statFirstRepetitions = new int[maxSteps];
         }
-        this.statNumPortalMoved = new int[maxSteps*2];
+        this.statNumPortalMoved = new int[maxSteps * 2];
         this.statFirstPortalMoved = new int[maxSteps];
         this.statImportantMovesInterval = new int[maxSteps + 1];
     }
@@ -307,11 +311,11 @@ public class StageReadInfo1 {
             boolean isHit = TRACK_HASHES && hashEntEventListener.firstRepetition != null && hashEntEventListener.firstRepetition <= 3;
             if (isHit) {
                 String uuid = UUID.randomUUID().toString();
-                WebUiStoryOutput.addStory("game-"+uuid, () -> {
+                WebUiStoryOutput.addStory("game-" + uuid, () -> {
                     replayWithDetails(netSeed, operand1, operand2, operation);
                     log.info("replay done.");
                 });
-                WebUiStoryOutput.addStory("game-trimmed-"+uuid, () -> {
+                WebUiStoryOutput.addStory("game-trimmed-" + uuid, () -> {
                     replayTrimmedWithDetails(netSeed, operand1, operand2, operation);
                     log.info("replay done.");
                 });

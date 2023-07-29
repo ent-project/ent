@@ -73,21 +73,23 @@ class DotRendererTest {
         entTripleTargetVeto.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LEFT, Accessors.LEFT, Accessors.LEFT).getValue());
         Ent entTripleTargetPortal = entBase();
         entTripleTargetPortal.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.RIGHT, Accessors.RIGHT, Accessors.RIGHT).getValue());
-        Ent entTripleTargetNumber = entBase();
-        entTripleTargetNumber.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LEFT_LEFT, Accessors.LEFT_LEFT, Accessors.LEFT_LEFT).getValue());
+        Ent entTripleTargetLeafNumber = entBase();
+        entTripleTargetLeafNumber.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LEFT_LEFT, Accessors.LEFT_LEFT, Accessors.LEFT_LEFT).getValue());
+        Ent entTripleTargetInnerNumber = entBase();
+        entTripleTargetInnerNumber.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LEFT_RIGHT, Accessors.LEFT_RIGHT, Accessors.LEFT_RIGHT).getValue());
         Ent entTripleTargetDot = entBase();
-        entTripleTargetDot.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LEFT_RIGHT, Accessors.LEFT_RIGHT, Accessors.LEFT_RIGHT).getValue());
+        entTripleTargetDot.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LEFT_RIGHT_LEFT, Accessors.LEFT_RIGHT_LEFT, Accessors.LEFT_RIGHT_LEFT).getValue());
         return Stream.of(entBase(), ent2, ent3, entTripleTargetCommand, entTripleTargetVeto,
-                entTripleTargetPortal, entTripleTargetNumber, entTripleTargetDot);
+                entTripleTargetPortal, entTripleTargetLeafNumber, entTripleTargetInnerNumber, entTripleTargetDot);
     }
 
     private static Ent entBase() {
         Node portal, portalLeft;
         Ent ent = builder().ent(node(
-                node(Commands.get(Operations.EVAL_OPERATION, Accessors.RIGHT),
+                node(Commands.get(Operations.BITWISE_AND_OPERATION, Accessors.RIGHT, Accessors.LEFT_RIGHT, Accessors.FLOW),
                         node(Vetos.get(Conditions.GREATER_THAN_CONDITION, Accessors.RIGHT, Accessors.RIGHT_LEFT_RIGHT),
                                 value(54),
-                                ignored()),
+                                unary(0xa3, ignored())),
                         portal = unary(
                                 portalLeft = ignored()
                         )),
