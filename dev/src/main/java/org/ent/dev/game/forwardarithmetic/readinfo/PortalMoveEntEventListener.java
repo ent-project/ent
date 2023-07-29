@@ -6,6 +6,8 @@ import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.run.StepResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Record portal moves.
@@ -14,12 +16,15 @@ import org.ent.run.StepResult;
  * i.e. we do not want the verifier changed at this point.
  */
 public class PortalMoveEntEventListener extends NopEntEventListener {
+
+    private static final Logger log = LoggerFactory.getLogger(PortalMoveEntEventListener.class);
+
     private final TargetTracker targetTracker1, targetTracker2;
     private final ArithmeticForwardGame game;
     private Integer firstTimePortalMoved;
     private Integer lastTimePortalMoved;
     private Integer lastAnswerValue;
-    private Integer firstEvalFlowOnVerifier;
+    private Integer firstVerifierChange;
 
     PortalMoveEntEventListener(ArithmeticForwardGame game) {
         this.game = game;
@@ -50,14 +55,14 @@ public class PortalMoveEntEventListener extends NopEntEventListener {
     @Override
     public void afterCommandExecution(StepResult stepResult) {
         if (game.getVerifierNet() != null) {
-            if (firstEvalFlowOnVerifier == null) {
-                if (game.getVerifierNet().getRoot() != game.getVerifierNetOriginalRoot()) {
-                    firstEvalFlowOnVerifier = game.getStep();
+            if (firstVerifierChange == null) {
+                if (game.isVerifierChanged()) {
+                    firstVerifierChange = game.getStep();
                 }
             }
-            if (firstEvalFlowOnVerifier == null) {
-                recordPortal(targetTracker1);
-                recordPortal(targetTracker2);
+            if (firstVerifierChange == null) {
+                targetTracker1.recordPortal();
+                targetTracker2.recordPortal();
             }
         }
     }
@@ -66,41 +71,50 @@ public class PortalMoveEntEventListener extends NopEntEventListener {
         return targetTracker1.targetChanges + targetTracker2.targetChanges;
     }
 
-    private void recordPortal(TargetTracker tracker) {
-        if (tracker.verifierPortal.isInitialized()) {
-            Node target = tracker.verifierPortal.getTarget(Purview.DIRECT);
-
-            if (target == game.getVerifierNetOriginalRoot()) {
-                target = null;
-            }
-            boolean targetChanged = target != tracker.lastTarget;
-            if (targetChanged) {
-                if (totalTargetChanges() == 0) {
-                    firstTimePortalMoved = game.getStep();
-                }
-                lastTimePortalMoved = game.getStep();
-                recordAnswerValue();
-                tracker.targetChanges++;
-                tracker.lastTarget = target;
-            }
-        }
-    }
-
     private void recordAnswerValue() {
         lastAnswerValue = game.getAnswerNode().getValue(Purview.DIRECT);
     }
 
-    public static class TargetTracker {
+    public class TargetTracker {
         private final LazyPortalArrow verifierPortal;
         private Node lastTarget;
         private int targetChanges;
 
         TargetTracker(LazyPortalArrow verifierPortal) {
             this.verifierPortal = verifierPortal;
+            initialize();
+        }
+
+        private void initialize() {
+            if (verifierPortal.isInitialized()) {
+                lastTarget = verifierPortal.getTarget(Purview.DIRECT);
+            }
         }
 
         public Node lastTarget() {
             return lastTarget;
+        }
+
+        public void recordPortal() {
+            if (verifierPortal.isInitialized()) {
+                Node target = verifierPortal.getTarget(Purview.DIRECT);
+
+                if (target == game.getVerifierNetOriginalRoot()) {
+                    target = null;
+                }
+                if (target != lastTarget) {
+                    if (game.isVerbose()) {
+                        log.info("event: portal moved");
+                    }
+                    if (totalTargetChanges() == 0) {
+                        firstTimePortalMoved = game.getStep();
+                    }
+                    lastTimePortalMoved = game.getStep();
+                    recordAnswerValue();
+                    targetChanges++;
+                    lastTarget = target;
+                }
+            }
         }
     }
 }

@@ -301,7 +301,7 @@ public class ArithmeticForwardGame {
         return false;
     }
 
-    public boolean isVerifierExecuted() {
+    public boolean isVerifierChanged() {
         return verifierNet != null && verifierNet.getRoot() != verifierNetOriginalRoot;
     }
 }

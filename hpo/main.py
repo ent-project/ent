@@ -9,7 +9,7 @@ import optuna
 
 app = Flask(__name__)
 
-study = optuna.create_study(study_name="test-2023-07-28_transfer",
+study = optuna.create_study(study_name="test-2023-07-29_trans_nonodes",
                             # sampler=optuna.samplers.CmaEsSampler(),
                             storage="sqlite:///ent.db",
                             direction=optuna.study.StudyDirection.MAXIMIZE,

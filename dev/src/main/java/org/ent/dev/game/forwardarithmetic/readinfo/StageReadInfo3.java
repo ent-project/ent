@@ -2,6 +2,7 @@ package org.ent.dev.game.forwardarithmetic.readinfo;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
+import org.ent.dev.game.forwardarithmetic.ReadOperandsEntListener;
 import org.ent.dev.game.forwardarithmetic.StageBase;
 import org.ent.dev.game.forwardarithmetic.Util;
 import org.ent.dev.trim2.TrimmingHelper;

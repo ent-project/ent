@@ -4,6 +4,7 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.LazyPortalArrow;
 import org.ent.NopNetEventListener;
 import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
+import org.ent.dev.game.forwardarithmetic.ReadOperandsEntListener;
 import org.ent.dev.game.forwardarithmetic.StageBase;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.randnet.ValueDrawing;
@@ -27,6 +28,14 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.time.Duration;
 
+/**
+ * Transfers operand information from the verifier
+ * to a writable area.
+ *
+ * Based on the previous stage where portals are moved.
+ * Splice mode, i.e. a fresh second net is executed
+ * after the first has finished (keeping the portals intact).
+ */
 public class StageReadInfo2 extends StageBase<StageReadInfo2.Solution> {
 
     private static final boolean WEB_UI = false;
@@ -37,11 +46,11 @@ public class StageReadInfo2 extends StageBase<StageReadInfo2.Solution> {
     public static final String HYPER_GROUP_STAGE1 = "stage1";
     public static final String HYPER_GROUP_THIS = "get-value";
     public static final String HYPER_SELECTION = """
-            fraction_commands 0.9995723510318749
-            fraction_major_commands 0.934629902602602
-            fraction_major_split 0.9418316246313359
-            fraction_portals 0.5028503083404546
-            fraction_set 0.4814248236734852
+            fraction_commands 1.0
+            fraction_major_commands 1.0
+            fraction_major_split 1.0
+            fraction_portals 0.5
+            fraction_set 0.0
             no-nodes 250
             max-steps 74
             attempts-per-upstream 488
@@ -116,7 +125,7 @@ public class StageReadInfo2 extends StageBase<StageReadInfo2.Solution> {
         RemoteHyperManager hyperManager = new RemoteHyperManager(collector.getHyperDefinitions());
         hyperManager.group(HYPER_GROUP_STAGE1).fixJson(StageReadInfo1.HYPER_SELECTION);
         hyperManager.group(HYPER_GROUP_THIS).fixLines(HYPER_SELECTION);
-        int numTrials = 2;
+        int numTrials = 3;
         for (int indexTrial = 0; indexTrial < numTrials; indexTrial++) {
             Integer trialNumberRemote = hyperManager.suggest();
 
@@ -174,16 +183,16 @@ public class StageReadInfo2 extends StageBase<StageReadInfo2.Solution> {
 
             game.execute();
 
-            if (readOperandsListener.numTransferOperand1BeforeEval > 0) {
+            if (readOperandsListener.operand1Data().numTransfer > 0) {
                 numTransferOperand1BeforeEval++;
             }
-            if (readOperandsListener.numTransferOperand2BeforeEval > 0) {
+            if (readOperandsListener.operand2Data().numTransfer > 0) {
                 numTransferOperand2BeforeEval++;
             }
-            if (readOperandsListener.numTransferOperand1BeforeEval > 0 || readOperandsListener.numTransferOperand2BeforeEval > 0) {
+            if (readOperandsListener.operand1Data().numTransfer > 0 || readOperandsListener.operand2Data().numTransfer > 0) {
                 numTransferAnyOperandBeforeEval++;
             }
-            if (readOperandsListener.numTransferOperand1BeforeEval > 0 && readOperandsListener.numTransferOperand2BeforeEval > 0) {
+            if (readOperandsListener.operand1Data().numTransfer > 0 && readOperandsListener.operand2Data().numTransfer > 0) {
                 numTransferBothOperandsBeforeEval++;
                 foundSolution = true;
             }
@@ -206,6 +215,9 @@ public class StageReadInfo2 extends StageBase<StageReadInfo2.Solution> {
                 if (REPLAY_HITS) {
                     String storyId = "game-%s-%s-%s".formatted(indexTrial, indexEvaluation, indexAttempt);
                     WebUiStoryOutput.addStory(storyId, () -> {
+                        readOperandsListener.operand1Data().dump();
+                        readOperandsListener.operand2Data().dump();
+                        readOperandsListener.operationData().dump();
                         replayWithDetails(upstream, netSeed);
                         log.info("replay done.");
                     });
@@ -240,6 +252,8 @@ public class StageReadInfo2 extends StageBase<StageReadInfo2.Solution> {
         game2.getEnt().addEventListener(hashEntEventListener);
         ReadOperandsEntListener readOperandsListener = new ReadOperandsEntListener(game2);
         game2.getEnt().addEventListener(readOperandsListener);
+        PortalMoveEntEventListener portalMoveEntEventListener = new PortalMoveEntEventListener(game2);
+        game2.getEnt().addEventListener(portalMoveEntEventListener);
         game2.setVerbose(true);
 
         game2.execute();

@@ -27,7 +27,7 @@ public abstract class HyperManager {
 
     protected abstract <T> T doGet(QualifiedKey qualifiedKey);
 
-    public <T> void fixJson(HyperDefinition<T> hyperDefinition, T value) {
+    public <T> void fix(HyperDefinition<T> hyperDefinition, T value) {
         doFix(resolve(hyperDefinition.getName()), value);
     }
 

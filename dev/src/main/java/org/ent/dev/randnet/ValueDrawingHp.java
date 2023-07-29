@@ -65,6 +65,7 @@ public class ValueDrawingHp extends DefaultValueDrawing2 {
     }
 
     public static class DistributionLeaf implements DistributionNode {
+        public static final double DEFAULT_WEIGHT = 1.0;
         Map<ParameterizedValue, Double> leafGroup = new LinkedHashMap<>();
         double totalWeight;
 
@@ -74,6 +75,11 @@ public class ValueDrawingHp extends DefaultValueDrawing2 {
             return this;
         }
 
+        public DistributionLeaf add(ParameterizedValue value) {
+            return add(value, DEFAULT_WEIGHT);
+        }
+
+
         public DistributionLeaf add(MonoOperation operation, double groupWeight) {
             add(getCommandBase(operation), groupWeight);
             return this;
@@ -82,6 +88,10 @@ public class ValueDrawingHp extends DefaultValueDrawing2 {
         public DistributionLeaf add(BiOperation operation, double groupWeight) {
             add(getCommandBase(operation), groupWeight);
             return this;
+        }
+
+        public DistributionLeaf add(BiOperation operation) {
+            return add(operation, DEFAULT_WEIGHT);
         }
 
         public DistributionLeaf add(TriOperation operation, double groupWeight) {

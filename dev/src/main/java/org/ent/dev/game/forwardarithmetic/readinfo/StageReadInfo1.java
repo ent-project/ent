@@ -72,7 +72,7 @@ public class StageReadInfo1 {
     private final int maxSteps;
     private final int numberOfNodes;
 
-    private Integer numEpoch;
+    private Integer numEvaluation;
 
     private int numRuns;
     private final List<Solution> solutions = new ArrayList<>();
@@ -152,7 +152,7 @@ public class StageReadInfo1 {
             mainHpo();
         } else {
             StageReadInfo1 dev0 = null;//new StageReadInfo(30, 15, RandomUtil.newRandom2(12345L));
-            dev0.runBatch();
+            dev0.runTrial();
         }
         if (WEB_UI) {
             WebUI.loopForever();
@@ -172,9 +172,9 @@ public class StageReadInfo1 {
             Integer trial = remoteHyperManager.suggest();
 
             StageReadInfo1 dev = new StageReadInfo1(remoteHyperManager, RandomUtil.newRandom2(randomRun.nextLong()));
-            dev.setNumEpoch(500_000);
+            dev.setNumEvaluation(500_000);
 
-            dev.runBatch();
+            dev.runTrial();
 
             int hits = dev.numPortalMoved;
             double hitsPerMinute = hits * 60_000.0 / dev.duration.toMillis();
@@ -208,31 +208,31 @@ public class StageReadInfo1 {
         return numberOfNodes;
     }
 
-    public void setNumEpoch(Integer numEpoch) {
-        this.numEpoch = numEpoch;
+    public void setNumEvaluation(Integer numEvaluation) {
+        this.numEvaluation = numEvaluation;
     }
 
     public Solution getNextSolution() {
         while (solutions.size() <= nextSolutionIndex) {
-            next();
+            nextEvaluation();
         }
         Solution solution = solutions.get(nextSolutionIndex);
         nextSolutionIndex++;
         return solution;
     }
 
-    private void runBatch() {
+    private void runTrial() {
         long startTime = System.nanoTime();
 
-        int numEpochReal = numEpoch != null ? numEpoch : 5_000_000;
-        for (int i = 1; i <= numEpochReal; i++) {
+        int numEvaluationReal = numEvaluation != null ? numEvaluation : 5_000_000;
+        for (int i = 1; i <= numEvaluationReal; i++) {
             if (i % 20_000 == 0) {
                 log.info("= i={} =", i);
                 if (i % 100_000 == 0) {
                     printRunInfo(startTime);
                 }
             }
-            next();
+            nextEvaluation();
         }
         this.duration = Duration.ofNanos(System.nanoTime() - startTime);
         printRunInfo(startTime);
@@ -260,7 +260,7 @@ public class StageReadInfo1 {
         log.info("Portal moved: {} hits / min", Tools.getHitsPerMinute(numPortalMoved, duration));
     }
 
-    private void next() {
+    private void nextEvaluation() {
         int operand1 = ArithmeticForwardGame.drawOperand(randTargets);
         int operand2 = ArithmeticForwardGame.drawOperand(randTargets);
         TriOperation operation = ArithmeticForwardGame.drawOperation(randTargets);

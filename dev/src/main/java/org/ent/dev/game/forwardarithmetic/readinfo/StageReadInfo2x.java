@@ -93,7 +93,7 @@ public class StageReadInfo2x {
 
         FixedHyperManager hyperManager = new FixedHyperManager();
         hyperManager.fixJson(StageReadInfo1.HYPER_SELECTION);
-        hyperManager.fixJson(HYPER_MAX_COMBINATION_ATTEMPTS, 100);
+        hyperManager.fix(HYPER_MAX_COMBINATION_ATTEMPTS, 100);
 
         for (int i = 0; i < 1; i++) {
             StageReadInfo2x dev = new StageReadInfo2x(hyperManager, RandomUtil.newRandom2(randomRun.nextLong()));
