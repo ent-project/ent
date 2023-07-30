@@ -4,6 +4,7 @@ import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
+import org.ent.net.node.cmd.operation.TriValueOperation;
 import org.ent.net.node.cmd.veto.Veto;
 import org.ent.run.StepResult;
 
@@ -85,6 +86,13 @@ public class MultiEntEventListener implements EntEventListener {
     public void transverValue(Node nodeSource, Node nodeTarget) {
         for (EntEventListener eventListener : eventListeners) {
             eventListener.transverValue(nodeSource, nodeTarget);
+        }
+    }
+
+    @Override
+    public void triValueOperation(Node node1, Node node2, Node node3, TriValueOperation operation) {
+        for (EntEventListener eventListener : eventListeners) {
+            eventListener.triValueOperation(node1, node2, node3, operation);
         }
     }
 }

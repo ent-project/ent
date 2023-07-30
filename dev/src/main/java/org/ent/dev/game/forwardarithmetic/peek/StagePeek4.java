@@ -53,9 +53,7 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
     private final StagePeek3 stagePeek3;
     private final UniformRandomProvider randMixerSeeds;
 
-
     public StagePeek4(HyperManager hyperManager, UniformRandomProvider randMaster) {
-
         super(randMaster);
 
         this.maxSteps = hyperManager.get(HYPER_MAX_STEPS);
@@ -119,8 +117,7 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
         for (int indexAttempt = 0; indexAttempt < maxAttempts; indexAttempt++) {
             Net netAttempt = NetCopy2.createCopy(netStitched);
             long mixerSeed = randMixerSeeds.nextLong();
-            ArrowMixMutation mixMutation = new ArrowMixMutation(arrowMixStrength, netAttempt, RandomUtil.newRandom2(mixerSeed));
-            mixMutation.execute();
+            applyArrowMixMutation(netAttempt, mixerSeed);
             ArithmeticForwardGame game = new ArithmeticForwardGame(
                     game0.getOperand1(),
                     game0.getOperand2(),
@@ -145,6 +142,11 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
                 break;
             }
         }
+    }
+
+    public void applyArrowMixMutation(Net netAttempt, long mixerSeed) {
+        ArrowMixMutation mixMutation = new ArrowMixMutation(arrowMixStrength, netAttempt, RandomUtil.newRandom2(mixerSeed));
+        mixMutation.execute();
     }
 
     private record StitchContribution(StagePeek3.Fragment fragment, Net condensedNet) {
@@ -211,8 +213,7 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
         ArithmeticForwardGame game0 = solution.upstreamPeek3().upstreamPeek1().game();
 
         Net net = NetCopy2.createCopy(solution.net());
-        ArrowMixMutation mixMutation = new ArrowMixMutation(arrowMixStrength, net, RandomUtil.newRandom2(solution.mixerSeed));
-        mixMutation.execute();
+        applyArrowMixMutation(net, solution.mixerSeed);
 
         ArithmeticForwardGame game = new ArithmeticForwardGame(
                 game0.getOperand1(),

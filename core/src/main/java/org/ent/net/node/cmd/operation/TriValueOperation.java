@@ -15,6 +15,7 @@ public abstract class TriValueOperation extends TriNodeOperation {
         node1.setValue(compute(node2.getValue(Purview.COMMAND), node3.getValue(Purview.COMMAND)));
         ent.event().transverValue(node2, node1);
         ent.event().transverValue(node3, node1);
+        ent.event().triValueOperation(node1, node2, node3, this);
         return ExecutionResult.NORMAL;
     }
 

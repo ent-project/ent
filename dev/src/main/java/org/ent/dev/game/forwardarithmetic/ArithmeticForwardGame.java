@@ -34,13 +34,13 @@ public class ArithmeticForwardGame {
             Operations.PLUS_OPERATION,
             Operations.MINUS_OPERATION,
             Operations.MULTIPLY_OPERATION,
-            Operations.MODULO_OPERATION,
+//            Operations.MODULO_OPERATION,
             Operations.BITWISE_OR_OPERATION,
             Operations.BITWISE_AND_OPERATION,
             Operations.XOR_OPERATION,
-            Operations.ROTATE_RIGHT_OPERATION,
-            Operations.SHIFT_LEFT_OPERATION,
-            Operations.SHIFT_RIGHT_OPERATION
+//            Operations.ROTATE_RIGHT_OPERATION,
+//            Operations.SHIFT_LEFT_OPERATION,
+//            Operations.SHIFT_RIGHT_OPERATION
     };
 
     private static final Logger log = LoggerFactory.getLogger(ArithmeticForwardGame.class);
@@ -109,6 +109,10 @@ public class ArithmeticForwardGame {
 
     public TriOperation getOperation() {
         return operation;
+    }
+
+    public int getOperationNodeValue() {
+        return operationNodeValue;
     }
 
     public int getOpValue(OpTarget target) {
