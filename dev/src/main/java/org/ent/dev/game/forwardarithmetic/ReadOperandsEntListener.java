@@ -1,6 +1,7 @@
 package org.ent.dev.game.forwardarithmetic;
 
 import org.ent.NopEntEventListener;
+import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame.OpTarget;
 import org.ent.net.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,10 +10,6 @@ import java.util.EnumMap;
 
 public class ReadOperandsEntListener extends NopEntEventListener {
     private final Logger log = LoggerFactory.getLogger(getClass());
-
-    public enum TransferTarget {
-        OPERATION, OPERAND1, OPERAND2;
-    }
 
     public class TransferData {
         private final String name;
@@ -30,6 +27,7 @@ public class ReadOperandsEntListener extends NopEntEventListener {
                 firstTransfer = game.getStep();
             }
             lastTransfer = game.getStep();
+            afterTransferHook(this);
             if (game.isVerbose()) {
                 log.info("event: {}", name);
             }
@@ -42,17 +40,17 @@ public class ReadOperandsEntListener extends NopEntEventListener {
         }
     }
 
-    private final ArithmeticForwardGame game;
-    private final EnumMap<TransferTarget, TransferData> data = new EnumMap<>(TransferTarget.class);
-    private final TransferData operand1Data = new TransferData("TransferOperand1");
-    private final TransferData operand2Data = new TransferData("TransferOperand2");
-    private final TransferData operationData = new TransferData("TransferOperator");
+    protected final ArithmeticForwardGame game;
+    protected final EnumMap<OpTarget, TransferData> data = new EnumMap<>(OpTarget.class);
+    protected final TransferData operand1Data = new TransferData("TransferOperand1");
+    protected final TransferData operand2Data = new TransferData("TransferOperand2");
+    protected final TransferData operationData = new TransferData("TransferOperator");
 
     public ReadOperandsEntListener(ArithmeticForwardGame game) {
         this.game = game;
-        data.put(TransferTarget.OPERATION, operationData);
-        data.put(TransferTarget.OPERAND1, operand1Data);
-        data.put(TransferTarget.OPERAND2, operand2Data);
+        data.put(OpTarget.OPERATION, operationData);
+        data.put(OpTarget.OPERAND1, operand1Data);
+        data.put(OpTarget.OPERAND2, operand2Data);
     }
 
     public TransferData operand1Data() {
@@ -67,7 +65,7 @@ public class ReadOperandsEntListener extends NopEntEventListener {
         return operationData;
     }
 
-    public TransferData data(TransferTarget target) {
+    public TransferData data(OpTarget target) {
         return data.get(target);
     }
 
@@ -86,6 +84,10 @@ public class ReadOperandsEntListener extends NopEntEventListener {
         } else if (nodeSource == game.getOperationNode()) {
             operationData.recordTransfer();
         }
+    }
+
+    protected void afterTransferHook(TransferData data) {
+        // override
     }
 
     public Integer firstTransfer() {

@@ -5,6 +5,7 @@ import org.ent.hyper.CollectingHyperManager;
 import org.ent.hyper.HyperManager;
 import org.ent.hyper.RemoteHyperManager;
 import org.ent.net.util.RandomUtil;
+import org.ent.util.Tools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,7 +121,10 @@ public abstract class StageBase<S> {
         return currentDuration.compareTo(this.trialMaxDuration) <= 0;
     }
 
-    protected abstract void printRunInfo(Duration duration);
+    protected void printRunInfo(Duration duration) {
+        log.info("TOTAL DURATION: {}", duration);
+        log.info(" hits: {}", Tools.rate(numHit, numEvaluation));
+    }
 
     protected abstract void nextEvaluation();
 

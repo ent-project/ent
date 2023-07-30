@@ -153,7 +153,7 @@ public class StagePeek1 extends StageBase<StagePeek1.Solution> {
 
     public void replayWithDetails(Solution solution) {
         ArithmeticForwardGame game0 = solution.game();
-        Net net = new NetCopyPack(solution.net()).createPackedCopy();
+        Net net = new NetCopyPack(solution.net()).createCopy();
 
         ArithmeticForwardGame game = new ArithmeticForwardGame(
                 game0.getOperand1(),

@@ -142,7 +142,7 @@ public class StageReadInfo3 extends StageBase<StageReadInfo3.Solution> {
         Net advancedNetForTrimming = NetCopy2.createCopy(advancedBlueprint);
         TrimmingHelper.trim(advancedNetForTrimming, trimmingListener);
         // FIXME: maybe packing copy can be delayed
-        Net copy = new NetCopyPack(advancedNetForTrimming).createPackedCopy();
+        Net copy = new NetCopyPack(advancedNetForTrimming).createCopy();
         solution.net1 = copy;
         solution.steps1 = realSteps;
     }
@@ -173,7 +173,7 @@ public class StageReadInfo3 extends StageBase<StageReadInfo3.Solution> {
         Net advancedNetForTrimming = NetCopy2.createCopy(advancedBlueprint);
         TrimmingHelper.trim(advancedNetForTrimming, trimmingListener);
         // FIXME: maybe packing copy can be delayed
-        Net copy = new NetCopyPack(advancedNetForTrimming).createPackedCopy();
+        Net copy = new NetCopyPack(advancedNetForTrimming).createCopy();
         solution.net2 = copy;
         solution.steps2 = realSteps;
         solution.skippedInPhase2 = firstInterestingStep;

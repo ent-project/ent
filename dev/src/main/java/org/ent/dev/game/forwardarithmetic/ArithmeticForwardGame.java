@@ -47,6 +47,7 @@ public class ArithmeticForwardGame {
 
     private final int operand1;
     private final int operand2;
+    private final int operationNodeValue;
     private final TriOperation operation;
     private final Ent ent;
     private int maxSteps;
@@ -54,7 +55,22 @@ public class ArithmeticForwardGame {
     private final int expectedSolution;
 
     private boolean verbose;
+
     private boolean executionStopped;
+
+    /**
+     * "afterStep": trigger a hook/callback after the execution of the current step is completed.
+     * To do so, you can submit "afterStepInfo" during the step execution (typically
+     * from a listener).
+     *
+     * If "afterStepInfo" is present, afterStepHook will be called. Finally, the "afterStepInfo"
+     * is cleared and the game proceeds to the next execution step.
+     */
+    private Object afterStepInfo;
+    public interface AfterStepHook {
+        void afterStep(ArithmeticForwardGame game, Object afterStepInfo);
+    }
+    private AfterStepHook afterStepHook;
 
     private NetFormatter formatter;
 
@@ -69,10 +85,15 @@ public class ArithmeticForwardGame {
     private Node operationNode, operand1Node, operand2Node, verifierRoot;
     private Consumer<Net> postVerifierCreateHook;
 
+    public enum OpTarget {
+        OPERATION, OPERAND1, OPERAND2;
+    }
+
     public ArithmeticForwardGame(int operand1, int operand2, TriOperation operation, Net net, int maxSteps) {
         this.operand1 = operand1;
         this.operand2 = operand2;
         this.operation = operation;
+        this.operationNodeValue = Commands.get(this.operation, Accessors.RIGHT, Accessors.LEFT_LEFT, Accessors.LEFT_RIGHT).getValue();
         this.ent = buildEnt(net);
         this.maxSteps = maxSteps;
         this.expectedSolution = calculateExpectedSolution();
@@ -88,6 +109,22 @@ public class ArithmeticForwardGame {
 
     public TriOperation getOperation() {
         return operation;
+    }
+
+    public int getOpValue(OpTarget target) {
+        return switch (target) {
+            case OPERAND1 -> operand1;
+            case OPERAND2 -> operand2;
+            case OPERATION -> operationNodeValue;
+        };
+    }
+
+    public void setAfterStepHook(AfterStepHook afterStepHook) {
+        this.afterStepHook = afterStepHook;
+    }
+
+    public void submitAfterStepInfo(Object afterStepInfo) {
+        this.afterStepInfo = afterStepInfo;
     }
 
     public int getMaxSteps() {
@@ -262,6 +299,11 @@ public class ArithmeticForwardGame {
                 dumpResults();
                 log.info("after step {}: {}", step, formatter.format(ent));
                 Logging.logDot(ent);
+            }
+
+            if (afterStepInfo != null) {
+                afterStepHook.afterStep(this, afterStepInfo);
+                afterStepInfo = null;
             }
 
             step++;

@@ -259,7 +259,7 @@ public class StageReadInfo2x {
         Net advancedNetForTrimming = NetCopy2.createCopy(advancedBlueprint);
         TrimmingHelper.trim(advancedNetForTrimming, trimmingListener);
 
-        Net copy = new NetCopyPack(advancedNetForTrimming).createPackedCopy();
+        Net copy = new NetCopyPack(advancedNetForTrimming).createCopy();
 
         if (WEB_UI) {
             WebUiStoryOutput.startStory("game-" + uuid);

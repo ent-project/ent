@@ -2,8 +2,8 @@ package org.ent.dev.game.forwardarithmetic.peek;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
+import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame.OpTarget;
 import org.ent.dev.game.forwardarithmetic.ReadOperandsEntListener;
-import org.ent.dev.game.forwardarithmetic.ReadOperandsEntListener.TransferTarget;
 import org.ent.dev.game.forwardarithmetic.StageBase;
 import org.ent.dev.randnet.PortalValue;
 import org.ent.dev.randnet.RandomNetCreator;
@@ -20,12 +20,10 @@ import org.ent.net.node.cmd.operation.Operations;
 import org.ent.net.util.NetCopy2;
 import org.ent.net.util.NetCopyPack;
 import org.ent.net.util.RandomUtil;
-import org.ent.util.Tools;
 import org.ent.webui.WebUI;
 import org.ent.webui.WebUiStoryOutput;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,6 +69,10 @@ public class StagePeek3 extends StageBase<StagePeek3.Solution> {
                 RandomUtil.newRandom2(randMaster.nextLong()));
     }
 
+    public StagePeek2 stagePeek2() {
+        return stagePeek2;
+    }
+
     public static void main(String[] args) throws IOException {
         if (WEB_UI) {
             WebUI.setUpJavalin();
@@ -104,16 +106,10 @@ public class StagePeek3 extends StageBase<StagePeek3.Solution> {
     }
 
     @Override
-    protected void printRunInfo(Duration duration) {
-        log.info("TOTAL DURATION: {}", duration);
-        log.info(" hits: {}", Tools.rate(numHit, numEvaluation));
-    }
-
-    @Override
     protected void nextEvaluation() {
         StagePeek1.Solution upstream = getUpstream();
 
-        int[] numTransfer = new int[TransferTarget.values().length];
+        int[] numTransfer = new int[OpTarget.values().length];
 
         Solution solution = new Solution(upstream);
         int maxAttempts = 1000;
@@ -128,15 +124,15 @@ public class StagePeek3 extends StageBase<StagePeek3.Solution> {
 
             game.execute();
 
-            for (var target : TransferTarget.values()) {
+            for (var target : OpTarget.values()) {
                 if (numTransfer[target.ordinal()] == 0 && readOperandsListener.data(target).numTransfer > 0) {
                     numTransfer[target.ordinal()] += readOperandsListener.data(target).numTransfer;
                     solution.addFragment(new Fragment(game, netSeed, readOperandsListener, target));
                 }
             }
-            boolean hit = numTransfer[TransferTarget.OPERATION.ordinal()] > 0
-                          && numTransfer[TransferTarget.OPERAND1.ordinal()] > 0
-                          && numTransfer[TransferTarget.OPERAND2.ordinal()] > 0;
+            boolean hit = numTransfer[OpTarget.OPERATION.ordinal()] > 0
+                          && numTransfer[OpTarget.OPERAND1.ordinal()] > 0
+                          && numTransfer[OpTarget.OPERAND2.ordinal()] > 0;
             if (hit) {
                 submitSolution(solution);
                 if (REPLAY_HITS) {
@@ -159,15 +155,15 @@ public class StagePeek3 extends StageBase<StagePeek3.Solution> {
         return currentUpstream;
     }
 
-    private Net buildReadNet(Long netSeed) {
+    public Net buildReadNet(Long netSeed) {
         RandomNetCreator netCreator = new RandomNetCreator(numberOfNodes, RandomUtil.newRandom2(netSeed), drawing);
         return netCreator.drawNet();
     }
 
     private void replayWithDetails(Solution solution) {
         log.info("number of fragments: " + solution.fragments.size());
-        ArithmeticForwardGame game0 = solution.upstream.game();
-        Net netPortalMove = new NetCopyPack(solution.upstream.net()).createPackedCopy();
+        ArithmeticForwardGame game0 = solution.upstreamPeek1.game();
+        Net netPortalMove = new NetCopyPack(solution.upstreamPeek1.net()).createCopy();
 
         ArithmeticForwardGame game = new ArithmeticForwardGame(
                 game0.getOperand1(),
@@ -195,9 +191,9 @@ public class StagePeek3 extends StageBase<StagePeek3.Solution> {
     private Net concentrate(Solution solution, Fragment fragment) {
         Net net = buildReadNet(fragment.netSeed());
 
-        ArithmeticForwardGame game = stagePeek2.setUpGame(solution.upstream, net);
+        ArithmeticForwardGame game = stagePeek2.setUpGame(solution.upstreamPeek1, net);
         ReadOperandsEntListener readOperandsListener = fragment.readOperandsEntListener();
-        game.setMaxSteps(readOperandsListener.data(fragment.contributesToTarget).firstTransfer);
+        game.setMaxSteps(readOperandsListener.data(fragment.contributesToTarget()).firstTransfer);
 
         game.execute();
 
@@ -230,11 +226,19 @@ public class StagePeek3 extends StageBase<StagePeek3.Solution> {
     }
 
     public static class Solution {
-        final StagePeek1.Solution upstream;
+        final StagePeek1.Solution upstreamPeek1;
         final List<Fragment> fragments = new ArrayList<>();
 
-        public Solution(StagePeek1.Solution upstream) {
-            this.upstream = upstream;
+        public Solution(StagePeek1.Solution upstreamPeek1) {
+            this.upstreamPeek1 = upstreamPeek1;
+        }
+
+        public StagePeek1.Solution upstreamPeek1() {
+            return upstreamPeek1;
+        }
+
+        public List<Fragment> fragments() {
+            return fragments;
         }
 
         public void addFragment(Fragment fragment) {
@@ -245,7 +249,7 @@ public class StagePeek3 extends StageBase<StagePeek3.Solution> {
     public record Fragment(
             ArithmeticForwardGame game,
             long netSeed,
-            ReadOperandsEntListener readOperandsEntListener, TransferTarget contributesToTarget) {
+            ReadOperandsEntListener readOperandsEntListener, OpTarget contributesToTarget) {
     }
 
 }
