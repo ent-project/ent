@@ -5,6 +5,8 @@ import org.ent.NopEntEventListener;
 import org.ent.NopNetEventListener;
 import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
 import org.ent.dev.game.forwardarithmetic.StageBase;
+import org.ent.dev.trim2.TrimmingHelper;
+import org.ent.dev.trim2.TrimmingListener;
 import org.ent.dev.variation.ArrowMixMutation;
 import org.ent.hyper.DoubleHyperDefinition;
 import org.ent.hyper.HyperManager;
@@ -94,8 +96,8 @@ public class StagePeek5 extends StageBase<StagePeek5.Solution> {
         StagePeek4.Solution upstreamPeek4 = stagePeek4.getNextSolution();
         ArithmeticForwardGame game0 = upstreamPeek4.upstreamPeek3().upstreamPeek1().game();
 
-        // this destroys the unmixed net, but we have no use for it anyway
         Net netUpstream = upstreamPeek4.net();
+        // this destroys the unmixed net, but we have no use for it anyway
         stagePeek4.applyArrowMixMutation(netUpstream, upstreamPeek4.mixerSeed());
 
         for (int indexAttempt = 0; indexAttempt < maxAttempts; indexAttempt++) {
@@ -143,20 +145,45 @@ public class StagePeek5 extends StageBase<StagePeek5.Solution> {
     private void replayWithDetails(Solution solution) {
         ArithmeticForwardGame game0 = solution.upstreamPeek4().upstreamPeek3().upstreamPeek1().game();
 
+        TrimmingListener trimmingListener = null;
+        {
+            Net net = NetCopy2.createCopy(solution.upstreamPeek4().net());
+            ArrowMixMutation mixMutation = new ArrowMixMutation(arrowMixStrength, net, RandomUtil.newRandom2(solution.mixerSeed()));
+            mixMutation.execute();
+
+            ArithmeticForwardGame game = setUpGame(game0, net);
+            trimmingListener = new TrimmingListener(net.getNodes().size());
+            net.addEventListener(trimmingListener);
+
+            game.execute();
+        }
+
         Net net = NetCopy2.createCopy(solution.upstreamPeek4().net());
         ArrowMixMutation mixMutation = new ArrowMixMutation(arrowMixStrength, net, RandomUtil.newRandom2(solution.mixerSeed()));
         mixMutation.execute();
+        TrimmingHelper.trim(net, trimmingListener);
 
+        ArithmeticForwardGame game = setUpGame(game0, net);
+        game.setVerbose(true);
+
+        game.execute();
+        log.info("replay done.");
+    }
+
+    private ArithmeticForwardGame setUpGame(ArithmeticForwardGame game0, Net net) {
         ArithmeticForwardGame game = new ArithmeticForwardGame(
                 game0.getOperand1(),
                 game0.getOperand2(),
                 game0.getOperation(),
                 net,
-                60);
-        game.setVerbose(true);
-
-        game.execute();
-        log.info("replay done.");
+                100);
+        CheckTargetValueListener checkTargetValueListener = new CheckTargetValueListener(game);
+        game.initializeVerifier();
+        game.getVerifierNet().addEventListener(checkTargetValueListener);
+        game.getAnswerNet().addEventListener(checkTargetValueListener);
+        Peek5EntListener peek5EntListener = new Peek5EntListener(game);
+        game.getEnt().addEventListener(peek5EntListener);
+        return game;
     }
 
     private class CheckTargetValueListener extends NopNetEventListener {
@@ -201,23 +228,39 @@ public class StagePeek5 extends StageBase<StagePeek5.Solution> {
                 int match = 0;
                 boolean fullmatch = false;
                 if (op1 == game.getOperand1() && op2 == game.getOperand2()) {
+                    if (game.isVerbose()) {
+                        log.info("event: fullmatch");
+                    }
                     fullmatch = true;
                 }
                 if (op1 == game.getOperand2() && op2 == game.getOperand1()) {
+                    if (game.isVerbose()) {
+                        log.info("event: fullmatch (switched)");
+                    }
                     fullmatch = true;
                 }
 
                 if (op1 == game.getOperand1() || op1 == game.getOperand2()) {
+                    if (game.isVerbose()) {
+                        log.info("event: op1=={}", op1);
+                    }
                     match++;
                 }
                 if (op2 == game.getOperand1() || op2 == game.getOperand2()) {
+                    if (game.isVerbose()) {
+                        log.info("event: op2=={}", op1);
+                    }
                     match++;
                 }
                 if (match >= 2) {
-//                    log.info("# match: {}", match);
+                    if (game.isVerbose()) {
+                        log.info("event: # match: {}", match);
+                    }
                 }
                 if (fullmatch) {
-                    log.info("# MATCH: {}", match);
+                    if (game.isVerbose()) {
+                        log.info("event: # MATCH: {}", match);
+                    }
                     found2 = game.getStep();
                     game.stopExecution();
                 }
