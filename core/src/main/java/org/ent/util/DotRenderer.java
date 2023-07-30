@@ -154,7 +154,7 @@ public class DotRenderer {
             String nodeName = renderNode(net, nodePrefix, node);
             for (Arrow arrow : node.getArrows()) {
                 Node child = arrow.getTarget(Purview.DIRECT);
-                if (node == child) {
+                if (node == child && arrow != targetArrow) {
                     continue;
                 }
                 sb.append(" \"").append(nodeName).append("\":");

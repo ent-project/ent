@@ -103,6 +103,10 @@ public class NetBuilder {
         return unaryRight(0, child);
     }
 
+    public static Node unaryRight(Command c, Node child) {
+        return unaryRight(c.getValue(), child);
+    }
+
     public static Node value(int v) {
         return currentNet.get().newNode(v);
     }

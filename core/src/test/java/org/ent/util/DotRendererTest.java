@@ -25,11 +25,12 @@ import static org.ent.util.NetBuilder.builder;
 import static org.ent.util.NetBuilder.ignored;
 import static org.ent.util.NetBuilder.node;
 import static org.ent.util.NetBuilder.unary;
+import static org.ent.util.NetBuilder.unaryRight;
 import static org.ent.util.NetBuilder.value;
 
 class DotRendererTest {
 
-    private static final boolean WEB_UI = false;
+    private static final boolean WEB_UI = true;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -102,5 +103,21 @@ class DotRendererTest {
         portal.setValue(portalCode1 | (portalCode2 << 16));
         portalLeft.setValue(portalCode1);
         return ent;
+    }
+
+    @ParameterizedTest
+    @MethodSource("renderSpecialCases")
+    void renderSpecialCases(Ent entInput, TestInfo info) {
+        String rendered = new DotRenderer(entInput).render();
+
+        log.info("{}:", info.getDisplayName());
+        Logging.dotLogger.info(rendered);
+        log.info(rendered);
+    }
+
+    private static Stream<Ent> renderSpecialCases() {
+        Ent targetArrowToSelf = builder().ent(unaryRight(Commands.get(Operations.SET_OPERATION, Accessors.DIRECT, Accessors.DIRECT),
+                ignored()));
+        return Stream.of(targetArrowToSelf);
     }
 }
