@@ -5,8 +5,14 @@ import org.ent.net.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.EnumMap;
+
 public class ReadOperandsEntListener extends NopEntEventListener {
     private final Logger log = LoggerFactory.getLogger(getClass());
+
+    public enum TransferTarget {
+        OPERATION, OPERAND1, OPERAND2;
+    }
 
     public class TransferData {
         private final String name;
@@ -37,12 +43,16 @@ public class ReadOperandsEntListener extends NopEntEventListener {
     }
 
     private final ArithmeticForwardGame game;
-    private TransferData operand1Data = new TransferData("TransferOperand1");
-    private TransferData operand2Data = new TransferData("TransferOperand2");
-    private TransferData operationData = new TransferData("TransferOperator");
+    private final EnumMap<TransferTarget, TransferData> data = new EnumMap<>(TransferTarget.class);
+    private final TransferData operand1Data = new TransferData("TransferOperand1");
+    private final TransferData operand2Data = new TransferData("TransferOperand2");
+    private final TransferData operationData = new TransferData("TransferOperator");
 
     public ReadOperandsEntListener(ArithmeticForwardGame game) {
         this.game = game;
+        data.put(TransferTarget.OPERATION, operationData);
+        data.put(TransferTarget.OPERAND1, operand1Data);
+        data.put(TransferTarget.OPERAND2, operand2Data);
     }
 
     public TransferData operand1Data() {
@@ -55,6 +65,10 @@ public class ReadOperandsEntListener extends NopEntEventListener {
 
     public TransferData operationData() {
         return operationData;
+    }
+
+    public TransferData data(TransferTarget target) {
+        return data.get(target);
     }
 
     @Override
