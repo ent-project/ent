@@ -40,8 +40,6 @@ public class StagePeek3 extends StageBase<StagePeek3.Solution> {
     private StagePeek1.Solution currentUpstream;
     private int currentUpstreamUsages;
 
-    private int numEvaluation;
-
     public StagePeek3(HyperManager hyperManager, UniformRandomProvider randMaster) {
         super(randMaster);
 
@@ -57,10 +55,10 @@ public class StagePeek3 extends StageBase<StagePeek3.Solution> {
     }
 
     public static void main(String[] args) throws IOException {
-        new StagePeek3Factory().main(1);
+        new Factory().main(1);
     }
 
-    public static class StagePeek3Factory extends StageBaseFactory<StagePeek3> {
+    public static class Factory extends StageFactory<StagePeek3> {
         @Override
         public StagePeek3 createStage(RemoteHyperManager hyperManager) {
             StagePeek3 dev = new StagePeek3(hyperManager, RandomUtil.newRandom2(randomTrials.nextLong()));
@@ -70,7 +68,7 @@ public class StagePeek3 extends StageBase<StagePeek3.Solution> {
 
         @Override
         public void registerHyperparameters(HyperManager hyperCollector) {
-            new StagePeek2.StagePeek2Factory().registerHyperparameters(hyperCollector.group(HYPER_GROUP_STAGE2));
+            new StagePeek2.Factory().registerHyperparameters(hyperCollector.group(HYPER_GROUP_STAGE2));
             hyperCollector.get(HYPER_FRAC_PORTALS);
             hyperCollector.get(HYPER_MAX_STEPS);
             hyperCollector.get(HYPER_NO_NODES);
@@ -78,7 +76,7 @@ public class StagePeek3 extends StageBase<StagePeek3.Solution> {
 
         @Override
         public void fixHyperparameters(HyperManager hyperManager) {
-            new StagePeek2.StagePeek2Factory().fixHyperparameters(hyperManager.group(HYPER_GROUP_STAGE2));
+            new StagePeek2.Factory().fixHyperparameters(hyperManager.group(HYPER_GROUP_STAGE2));
             hyperManager.fix(HYPER_FRAC_PORTALS, 0.43);
             hyperManager.fix(HYPER_NO_NODES, 50);
             hyperManager.fix(HYPER_MAX_STEPS, 100);
@@ -111,7 +109,6 @@ public class StagePeek3 extends StageBase<StagePeek3.Solution> {
         if (hit) {
             numHit++;
         }
-        numEvaluation++;
     }
 
     private StagePeek1.Solution getUpstream() {

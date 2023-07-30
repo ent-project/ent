@@ -29,8 +29,9 @@ public abstract class StageBase<S> {
     private int nextSolutionIndex;
 
     protected int numHit;
+    protected int numEvaluation; // kind of the same as indexEvaluation, but explicitly keeping track of the total number
 
-    public static abstract class StageBaseFactory<SB extends StageBase<?>> {
+    public static abstract class StageFactory<SB extends StageBase<?>> {
         private final Logger log = LoggerFactory.getLogger(getClass());
 
         protected final UniformRandomProvider randomTrials = RandomUtil.newRandom2(12345L);
@@ -52,7 +53,7 @@ public abstract class StageBase<S> {
                 dev.runTrial(indexTrial);
                 int hits = dev.numHit();
                 double hitsPerMinute = hits * 60_000.0 / dev.duration().toMillis();
-                log.info(" Hits per minute: " + hitsPerMinute);
+                log.info(" Hits per minute: {}", String.format("%.1f", hitsPerMinute));
 
                 hyperManager.complete(trialNumberRemote, hitsPerMinute);
             }
@@ -98,6 +99,7 @@ public abstract class StageBase<S> {
             }
             nextEvaluation();
             indexEvaluation++;
+            numEvaluation++;
         }
         this.duration = Duration.ofNanos(System.nanoTime() - startTime);
         printRunInfo(duration);

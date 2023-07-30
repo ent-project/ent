@@ -56,8 +56,6 @@ public class StagePeek2 extends StageBase<StagePeek1.Solution> {
     private final StagePeek1 stagePeek1;
     private final UniformRandomProvider randNetSeeds;
 
-    private int numEvaluation;
-
     public StagePeek2(HyperManager hyperManager, UniformRandomProvider randMaster) {
         super(randMaster);
 
@@ -76,10 +74,10 @@ public class StagePeek2 extends StageBase<StagePeek1.Solution> {
         if (WEB_UI) {
             WebUI.setUpJavalin();
         }
-        new StagePeek2Factory().main(1);
+        new Factory().main(1);
     }
 
-    public static class StagePeek2Factory extends StageBaseFactory<StagePeek2> {
+    public static class Factory extends StageFactory<StagePeek2> {
         @Override
         public StagePeek2 createStage(RemoteHyperManager hyperManager) {
             StagePeek2 dev = new StagePeek2(hyperManager, RandomUtil.newRandom2(randomTrials.nextLong()));
@@ -89,7 +87,7 @@ public class StagePeek2 extends StageBase<StagePeek1.Solution> {
 
         @Override
         public void registerHyperparameters(HyperManager hyperCollector) {
-            StagePeek1.registerHyperparameters(hyperCollector.group(HYPER_GROUP_STAGE1));
+            new StagePeek1.Factory().registerHyperparameters(hyperCollector.group(HYPER_GROUP_STAGE1));
             hyperCollector.get(HYPER_FRAC_PORTALS);
             hyperCollector.get(HYPER_MAX_STEPS);
             hyperCollector.get(HYPER_NO_NODES);
@@ -98,7 +96,7 @@ public class StagePeek2 extends StageBase<StagePeek1.Solution> {
 
         @Override
         public void fixHyperparameters(HyperManager hyperManager) {
-            StagePeek1.fixHyperparameters(hyperManager.group(HYPER_GROUP_STAGE1));
+            new StagePeek1.Factory().fixHyperparameters(hyperManager.group(HYPER_GROUP_STAGE1));
             hyperManager.fix(HYPER_FRAC_PORTALS, 0.42);
             hyperManager.fix(HYPER_NO_NODES, 50);
             hyperManager.fix(HYPER_MAX_STEPS, 100);
@@ -149,7 +147,6 @@ public class StagePeek2 extends StageBase<StagePeek1.Solution> {
             }
             numHit++;
         }
-        numEvaluation++;
     }
 
     private Net buildReadNet(Long netSeed) {

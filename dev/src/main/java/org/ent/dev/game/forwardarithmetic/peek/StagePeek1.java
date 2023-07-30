@@ -10,7 +10,6 @@ import org.ent.dev.randnet.ValueDrawing;
 import org.ent.dev.randnet.ValueDrawingHp;
 import org.ent.dev.trim2.TrimmingHelper;
 import org.ent.dev.trim2.TrimmingListener;
-import org.ent.hyper.CollectingHyperManager;
 import org.ent.hyper.DoubleHyperDefinition;
 import org.ent.hyper.HyperManager;
 import org.ent.hyper.IntHyperDefinition;
@@ -53,9 +52,6 @@ public class StagePeek1 extends StageBase<StagePeek1.Solution> {
     private final UniformRandomProvider randNetSeeds;
     private final UniformRandomProvider randTargets;
 
-    private int numHit;
-    private int numEvaluation;
-
     public StagePeek1(HyperManager hyperManager, UniformRandomProvider randMaster) {
         super(randMaster);
         drawing = new ValueDrawingPeek1(hyperManager);
@@ -69,40 +65,31 @@ public class StagePeek1 extends StageBase<StagePeek1.Solution> {
         if (WEB_UI) {
             WebUI.setUpJavalin();
         }
-        UniformRandomProvider randomRun = RandomUtil.newRandom2(12345L);
+        new Factory().main(1);
+    }
 
-        CollectingHyperManager hyperCollector = new CollectingHyperManager();
-        StagePeek1.registerHyperparameters(hyperCollector);
-
-        RemoteHyperManager hyperManager = new RemoteHyperManager(hyperCollector.getHyperDefinitions());
-        fixHyperparameters(hyperManager);
-
-        for (int indexTrial = 0; indexTrial < 1; indexTrial++) {
-            Integer trialNumberRemote = hyperManager.suggest();
-
-            StagePeek1 dev = new StagePeek1(hyperManager, RandomUtil.newRandom2(randomRun.nextLong()));
+    public static class Factory extends StageFactory<StagePeek1> {
+        @Override
+        public StagePeek1 createStage(RemoteHyperManager hyperManager) {
+            StagePeek1 dev = new StagePeek1(hyperManager, RandomUtil.newRandom2(randomTrials.nextLong()));
             dev.setTrialMaxEvaluations(200);
 //            dev.setTrialMaxDuration(Duration.ofSeconds(10));
-
-            dev.runTrial(indexTrial);
-            int hits = dev.numHit;
-            double hitsPerMinute = hits * 60_000.0 / dev.duration.toMillis();
-            logStatic.info(" Hits per minute: " + hitsPerMinute);
-
-            hyperManager.complete(trialNumberRemote, hitsPerMinute);
+            return dev;
         }
-    }
 
-    public static void registerHyperparameters(HyperManager hyperManager) {
-        hyperManager.get(HYPER_FRAC_PORTALS);
-        hyperManager.get(HYPER_MAX_STEPS);
-        hyperManager.get(HYPER_NO_NODES);
-    }
+        @Override
+        public void registerHyperparameters(HyperManager hyperCollector) {
+            hyperCollector.get(HYPER_FRAC_PORTALS);
+            hyperCollector.get(HYPER_MAX_STEPS);
+            hyperCollector.get(HYPER_NO_NODES);
+        }
 
-    public static void fixHyperparameters(HyperManager hyperManager) {
-        hyperManager.fix(HYPER_FRAC_PORTALS, 0.4);
-        hyperManager.fix(HYPER_NO_NODES, 400);
-        hyperManager.fix(HYPER_MAX_STEPS, 80);
+        @Override
+        public void fixHyperparameters(HyperManager hyperManager) {
+            hyperManager.fix(HYPER_FRAC_PORTALS, 0.4);
+            hyperManager.fix(HYPER_NO_NODES, 400);
+            hyperManager.fix(HYPER_MAX_STEPS, 80);
+        }
     }
 
     @Override
@@ -141,7 +128,6 @@ public class StagePeek1 extends StageBase<StagePeek1.Solution> {
             }
             numHit++;
         }
-        numEvaluation++;
     }
 
     private Net concentrate(ArithmeticForwardGame game0, long netSeed, PortalMoveEntEventListener portalMoveListener) {
