@@ -22,10 +22,10 @@ public abstract class HyperManager {
             .build();
 
     public <T> T get(HyperDefinition<T> hyperDefinition) {
-        return doGet(resolve(hyperDefinition.getName()));
+        return doGet(hyperDefinition.cloneWithName(resolve(hyperDefinition.getName()).get()));
     }
 
-    protected abstract <T> T doGet(QualifiedKey qualifiedKey);
+    protected abstract <T> T doGet(HyperDefinition<T> hyperDefinitionResolved);
 
     public <T> void fix(HyperDefinition<T> hyperDefinition, T value) {
         doFix(resolve(hyperDefinition.getName()), value);
@@ -68,11 +68,6 @@ public abstract class HyperManager {
 
     protected abstract void doFix(QualifiedKey qualifiedKey, Object value);
 
-    protected QualifiedKey resolve(String simpleKey) {
-        // to be overridden
-        return new QualifiedKey(simpleKey);
-    }
-
     /**
      * Move to a subdirectory. Creates another view of the same HyperMangager
      * that interprets all property names as relative to the given subdirectory.
@@ -80,6 +75,11 @@ public abstract class HyperManager {
      */
     public HyperManager group(String group) {
         return new SubHyperManager(this, group);
+    }
+
+    protected QualifiedKey resolve(String simpleKey) {
+        // to be overridden
+        return new QualifiedKey(simpleKey);
     }
 
 }

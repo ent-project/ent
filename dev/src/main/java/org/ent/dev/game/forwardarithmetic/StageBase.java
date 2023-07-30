@@ -1,9 +1,14 @@
 package org.ent.dev.game.forwardarithmetic;
 
 import org.apache.commons.rng.UniformRandomProvider;
+import org.ent.hyper.CollectingHyperManager;
+import org.ent.hyper.HyperManager;
+import org.ent.hyper.RemoteHyperManager;
+import org.ent.net.util.RandomUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +28,43 @@ public abstract class StageBase<S> {
     private final List<S> solutions = new ArrayList<>();
     private int nextSolutionIndex;
 
+    protected int numHit;
+
+    public static abstract class StageBaseFactory<SB extends StageBase<?>> {
+        private final Logger log = LoggerFactory.getLogger(getClass());
+
+        protected final UniformRandomProvider randomTrials = RandomUtil.newRandom2(12345L);
+
+        public void main(int numTrials) throws IOException {
+            CollectingHyperManager hyperCollector = new CollectingHyperManager();
+            registerHyperparameters(hyperCollector);
+            RemoteHyperManager hyperManager = new RemoteHyperManager(hyperCollector.getHyperDefinitions());
+            fixHyperparameters(hyperManager);
+            runStudy(hyperManager, numTrials);
+        }
+
+        public void runStudy(RemoteHyperManager hyperManager, int numTrials) throws IOException {
+            for (int indexTrial = 0; indexTrial < numTrials; indexTrial++) {
+                Integer trialNumberRemote = hyperManager.suggest();
+
+                StageBase dev = createStage(hyperManager);
+
+                dev.runTrial(indexTrial);
+                int hits = dev.numHit();
+                double hitsPerMinute = hits * 60_000.0 / dev.duration().toMillis();
+                log.info(" Hits per minute: " + hitsPerMinute);
+
+                hyperManager.complete(trialNumberRemote, hitsPerMinute);
+            }
+        }
+
+        public abstract SB createStage(RemoteHyperManager hyperManager);
+
+        public abstract void registerHyperparameters(HyperManager hyperCollector);
+
+        public abstract void fixHyperparameters(HyperManager hyperManager);
+    }
+
     public StageBase(UniformRandomProvider randMaster) {
         this.randMaster = randMaster;
     }
@@ -35,7 +77,15 @@ public abstract class StageBase<S> {
         this.trialMaxDuration = trialMaxDuration;
     }
 
-    protected void runTrial(int indexTrial) {
+    public Duration duration() {
+        return duration;
+    }
+
+    public int numHit() {
+        return numHit;
+    }
+
+    public void runTrial(int indexTrial) {
         this.indexTrial = indexTrial;
         long startTime = System.nanoTime();
         indexEvaluation = 1;

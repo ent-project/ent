@@ -10,7 +10,6 @@ import org.ent.dev.randnet.PortalValue;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.randnet.ValueDrawing;
 import org.ent.dev.randnet.ValueDrawingHp;
-import org.ent.hyper.CollectingHyperManager;
 import org.ent.hyper.DoubleHyperDefinition;
 import org.ent.hyper.HyperManager;
 import org.ent.hyper.IntHyperDefinition;
@@ -52,21 +51,12 @@ public class StagePeek2 extends StageBase<StagePeek1.Solution> {
     private final int maxSteps;
     private final int attemptsPerUpstream;
 
-    public final ValueDrawing drawing;
+    private final ValueDrawing drawing;
 
     private final StagePeek1 stagePeek1;
     private final UniformRandomProvider randNetSeeds;
 
-    private int numHit;
     private int numEvaluation;
-
-    public static void registerHyperparameters(HyperManager hyperCollector) {
-        StagePeek1.registerHyperparameters(hyperCollector.group(HYPER_GROUP_STAGE1));
-        hyperCollector.get(HYPER_FRAC_PORTALS);
-        hyperCollector.get(HYPER_MAX_STEPS);
-        hyperCollector.get(HYPER_NO_NODES);
-        hyperCollector.get(HYPER_ATTEMPTS_PER_UPSTREAM);
-    }
 
     public StagePeek2(HyperManager hyperManager, UniformRandomProvider randMaster) {
         super(randMaster);
@@ -77,7 +67,6 @@ public class StagePeek2 extends StageBase<StagePeek1.Solution> {
         this.attemptsPerUpstream = hyperManager.get(HYPER_ATTEMPTS_PER_UPSTREAM);
 
         this.randNetSeeds = RandomUtil.newRandom2(randMaster.nextLong());
-
         this.stagePeek1 = new StagePeek1(
                 hyperManager.group(HYPER_GROUP_STAGE1),
                 RandomUtil.newRandom2(randMaster.nextLong()));
@@ -87,30 +76,33 @@ public class StagePeek2 extends StageBase<StagePeek1.Solution> {
         if (WEB_UI) {
             WebUI.setUpJavalin();
         }
-        UniformRandomProvider randomRun = RandomUtil.newRandom2(12345L);
-        CollectingHyperManager hyperCollector = new CollectingHyperManager();
-        StagePeek2.registerHyperparameters(hyperCollector);
+        new StagePeek2Factory().main(1);
+    }
 
-        RemoteHyperManager hyperManager = new RemoteHyperManager(hyperCollector.getHyperDefinitions());
-        StagePeek1.fixHyperparameters(hyperManager.group(HYPER_GROUP_STAGE1));
-
-        hyperManager.fix(HYPER_FRAC_PORTALS, 0.4);
-        hyperManager.fix(HYPER_NO_NODES, 50);
-        hyperManager.fix(HYPER_MAX_STEPS, 100);
-        hyperManager.fix(HYPER_ATTEMPTS_PER_UPSTREAM, 20);
-
-        for (int indexTrial = 0; indexTrial < 1; indexTrial++) {
-            Integer trialNumberRemote = hyperManager.suggest();
-
-            StagePeek2 dev = new StagePeek2(hyperManager, RandomUtil.newRandom2(randomRun.nextLong()));
+    public static class StagePeek2Factory extends StageBaseFactory<StagePeek2> {
+        @Override
+        public StagePeek2 createStage(RemoteHyperManager hyperManager) {
+            StagePeek2 dev = new StagePeek2(hyperManager, RandomUtil.newRandom2(randomTrials.nextLong()));
             dev.setTrialMaxEvaluations(2000);
+            return dev;
+        }
 
-            dev.runTrial(indexTrial);
-            int hits = dev.numHit;
-            double hitsPerMinute = hits * 60_000.0 / dev.duration.toMillis();
-            logStatic.info(" Hits per minute: " + hitsPerMinute);
+        @Override
+        public void registerHyperparameters(HyperManager hyperCollector) {
+            StagePeek1.registerHyperparameters(hyperCollector.group(HYPER_GROUP_STAGE1));
+            hyperCollector.get(HYPER_FRAC_PORTALS);
+            hyperCollector.get(HYPER_MAX_STEPS);
+            hyperCollector.get(HYPER_NO_NODES);
+            hyperCollector.get(HYPER_ATTEMPTS_PER_UPSTREAM);
+        }
 
-            hyperManager.complete(trialNumberRemote, hitsPerMinute);
+        @Override
+        public void fixHyperparameters(HyperManager hyperManager) {
+            StagePeek1.fixHyperparameters(hyperManager.group(HYPER_GROUP_STAGE1));
+            hyperManager.fix(HYPER_FRAC_PORTALS, 0.42);
+            hyperManager.fix(HYPER_NO_NODES, 50);
+            hyperManager.fix(HYPER_MAX_STEPS, 100);
+            hyperManager.fix(HYPER_ATTEMPTS_PER_UPSTREAM, 20);
         }
     }
 
@@ -165,7 +157,7 @@ public class StagePeek2 extends StageBase<StagePeek1.Solution> {
         return netCreator.drawNet();
     }
 
-    private ArithmeticForwardGame setUpGame(StagePeek1.Solution upstream, Net net) {
+    public ArithmeticForwardGame setUpGame(StagePeek1.Solution upstream, Net net) {
         ArithmeticForwardGame game0 = upstream.game();
         PortalMoveEntEventListener portalMoves = upstream.portalMoveEntEventListener();
         ArithmeticForwardGame game = new ArithmeticForwardGame(
@@ -193,7 +185,7 @@ public class StagePeek2 extends StageBase<StagePeek1.Solution> {
     }
 
 
-    class ValueDrawingPeek2 extends ValueDrawingHp {
+    private class ValueDrawingPeek2 extends ValueDrawingHp {
 
         public ValueDrawingPeek2(HyperManager hyperManager) {
             super(hyperManager);
@@ -203,8 +195,9 @@ public class StagePeek2 extends StageBase<StagePeek1.Solution> {
         protected DistributionNode initializeDistribution() {
             double fracPortal = hyperManager.get(HYPER_FRAC_PORTALS);
             log.info("got HPs: fracPortal={}", fracPortal);
+            PortalValue portal0 = new PortalValue(0, 0);
             return new DistributionSplit(fracPortal)
-                    .first(new DistributionLeaf().add(new PortalValue(0, 0)))
+                    .first(new DistributionLeaf().add(portal0))
                     .rest(new DistributionLeaf().add(Operations.SET_VALUE_OPERATION));
         }
     }

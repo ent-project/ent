@@ -14,12 +14,13 @@ public class FixedHyperManager extends HyperManager {
     }
 
     @Override
-    public <T> T doGet(QualifiedKey qualifiedKey) {
+    public <T> T doGet(HyperDefinition<T> hyperDefinitionResolved) {
+        String resolvedName = hyperDefinitionResolved.getName();
         @SuppressWarnings("unchecked")
-        T result = (T) fixed.get(qualifiedKey.get());
+        T result = (T) fixed.get(resolvedName);
         if (result == null) {
-            throw new IllegalStateException("Could not find requested hyperparameter '" + qualifiedKey.get()
-                    + "', must be set beforehand");
+            throw new IllegalStateException("Could not find requested hyperparameter '" + resolvedName
+                                            + "', must be set beforehand");
         }
         return result;
     }

@@ -15,21 +15,17 @@ public class SubHyperManager extends HyperManager {
 
     @Override
     protected QualifiedKey resolve(String simpleKey) {
-        return new QualifiedKey(group + "." + simpleKey);
+        QualifiedKey resolved = delegate.resolve(simpleKey);
+        return new QualifiedKey(group + "." + resolved.get());
     }
 
     @Override
-    protected <T> T doGet(QualifiedKey qualifiedKey) {
-        return delegate.doGet(qualifiedKey);
+    protected <T> T doGet(HyperDefinition<T> hyperDefinitionResolved) {
+        return delegate.doGet(hyperDefinitionResolved);
     }
 
     @Override
     protected void doFix(QualifiedKey qualifiedKey, Object value) {
         delegate.doFix(qualifiedKey, value);
-    }
-
-    @Override
-    public <T> T get(HyperDefinition<T> hyperDefinition) {
-        return delegate.get(hyperDefinition.cloneWithName(resolve(hyperDefinition.getName()).get()));
     }
 }

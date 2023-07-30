@@ -8,14 +8,9 @@ public class CollectingHyperManager extends HyperManager {
     private final List<HyperDefinition<?>> hyperDefinitions = new ArrayList<>();
 
     @Override
-    public <T> T get(HyperDefinition<T> hyperDefinition) {
-        hyperDefinitions.add(hyperDefinition.cloneWithName(resolve(hyperDefinition.getName()).get()));
+    protected <T> T doGet(HyperDefinition<T> hyperDefinitionResolved) {
+        hyperDefinitions.add(hyperDefinitionResolved);
         return null;
-    }
-
-    @Override
-    protected <T> T doGet(QualifiedKey qualifiedKey) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

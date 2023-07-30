@@ -78,14 +78,14 @@ public class RemoteHyperManager extends FixedHyperManager {
     }
 
     @Override
-    public <T> T doGet(QualifiedKey qualifiedKey) {
+    public <T> T doGet(HyperDefinition<T> hyperDefinitionResolved) {
         Object result;
-        String propertyName = qualifiedKey.get();
-        Object fixedProp = this.fixed.get(propertyName);
+        String resolvedName = hyperDefinitionResolved.getName();
+        Object fixedProp = this.fixed.get(resolvedName);
         if (fixedProp != null) {
             result = fixedProp;
         } else {
-            result = suggested.get(propertyName);
+            result = suggested.get(resolvedName);
         }
         @SuppressWarnings("unchecked")
         T castedResult = (T) result;
