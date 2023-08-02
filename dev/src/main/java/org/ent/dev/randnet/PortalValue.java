@@ -9,14 +9,21 @@ public class PortalValue implements ParameterizedValue {
         this.value = value;
     }
 
-    public PortalValue(int left, int right) {
-        if (left < 0) {
-            throw new IllegalArgumentException();
+    public PortalValue(Integer left, Integer right) {
+        int value = 0;
+        if (left != null) {
+            if (left < 0) {
+                throw new IllegalArgumentException();
+            }
+            value = left ^ 0xFFFF;
         }
-        if (right < 0) {
-            throw new IllegalArgumentException();
+        if (right != null) {
+            if (right < 0) {
+                throw new IllegalArgumentException();
+            }
+            value |= ((right ^ 0xFFFF) << 16);
         }
-        this.value = ((right ^ 0xFFFF) << 16) | (left ^ 0xFFFF);
+        this.value = value;
     }
 
     @Override

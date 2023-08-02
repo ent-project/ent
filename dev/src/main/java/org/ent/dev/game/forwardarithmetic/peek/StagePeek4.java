@@ -21,7 +21,6 @@ import org.ent.net.util.NetUtils;
 import org.ent.net.util.RandomUtil;
 import org.ent.webui.WebUI;
 import org.ent.webui.WebUiStoryOutput;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.EnumMap;
@@ -79,7 +78,7 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
     static class Factory extends StageFactory<StagePeek4> {
 
         @Override
-        public StagePeek4 createStage(RemoteHyperManager hyperManager) {
+        public StagePeek4 createStage(RemoteHyperManager hyperManager, int indexTrial) {
             StagePeek4 dev = new StagePeek4(hyperManager, RandomUtil.newRandom2(randomTrials.nextLong()));
             dev.setTrialMaxEvaluations(50);
 //            dev.setTrialMaxDuration(Duration.ofSeconds(18));
@@ -112,10 +111,10 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
         StagePeek3.Solution upstreamPeek3 = stagePeek3.getNextSolution();
         ArithmeticForwardGame game0 = upstreamPeek3.upstreamPeek1().game();
 
-        Net netStitched = stitchTogether(upstreamPeek3);
+        StitchResult stitched = stitchTogether(upstreamPeek3);
 
         for (int indexAttempt = 0; indexAttempt < maxAttempts; indexAttempt++) {
-            Net netAttempt = NetCopy2.createCopy(netStitched);
+            Net netAttempt = NetCopy2.createCopy(stitched.net());
             long mixerSeed = randMixerSeeds.nextLong();
             applyArrowMixMutation(netAttempt, mixerSeed);
             ArithmeticForwardGame game = new ArithmeticForwardGame(
@@ -132,7 +131,12 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
 
             boolean hit = readOperandsListener.allFound != null;
             if (hit) {
-                Solution solution = new Solution(netStitched, mixerSeed, upstreamPeek3, readOperandsListener);
+                Solution solution = new Solution(
+                        stitched.net(),
+                        stitched.nextOrigin(),
+                        mixerSeed,
+                        upstreamPeek3,
+                        readOperandsListener);
                 submitSolution(solution);
                 if (REPLAY_HITS) {
                     WebUiStoryOutput.addStoryWithAnnouncement("StagePeek4-%s-%s".formatted(indexTrial, indexEvaluation),
@@ -149,11 +153,13 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
         mixMutation.execute();
     }
 
+    record StitchResult(Net net, Node nextOrigin) {
+
+    }
     private record StitchContribution(StagePeek3.Fragment fragment, Net condensedNet) {
     }
 
-    @NotNull
-    private Net stitchTogether(StagePeek3.Solution upstreamPeek3) {
+    private StitchResult stitchTogether(StagePeek3.Solution upstreamPeek3) {
         StitchContribution[] contributions = new StitchContribution[upstreamPeek3.fragments().size()];
         for (int i = 0; i < upstreamPeek3.fragments().size(); i++) {
             StagePeek3.Fragment fragment = upstreamPeek3.fragments().get(i);
@@ -168,8 +174,7 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
             stitchOrigin = stitchOrigin.getRightChild(Purview.DIRECT);
         }
 
-        for (int c = 0; c < contributions.length; c++) {
-            StitchContribution contribution = contributions[c];
+        for (StitchContribution contribution : contributions) {
             NetCopyPack copy = new NetCopyPack(contribution.condensedNet);
             copy.copyIntoExistingNet(net);
 
@@ -178,15 +183,13 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
             stitchOrigin.setRightChild(stitchTarget, Purview.DIRECT);
 
             // determine stitch origin for the next iteration
-            if (c < contributions.length - 1) { // unless it is the last iteration in the loop
-                stitchOrigin = stitchTarget;
-                int numDescent = looseStitching ? fragmentContext : fragmentContext - 1;
-                for (int i = 0; i < numDescent; i++) {
-                    stitchOrigin = stitchOrigin.getRightChild(Purview.DIRECT);
-                }
+            stitchOrigin = stitchTarget;
+            int numDescent = looseStitching ? fragmentContext : fragmentContext - 1;
+            for (int i = 0; i < numDescent; i++) {
+                stitchOrigin = stitchOrigin.getRightChild(Purview.DIRECT);
             }
         }
-        return net;
+        return new StitchResult(net, stitchOrigin);
     }
 
     private Net concentrate(StagePeek3.Solution solution, StagePeek3.Fragment fragment) {
@@ -267,6 +270,7 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
 
     public record Solution(
             Net net,
+            Node nextStitchOrigin,
             long mixerSeed,
             StagePeek3.Solution upstreamPeek3,
             Peek4ReadOperandsEntListener readOperandsListener) {

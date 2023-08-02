@@ -33,7 +33,7 @@ public abstract class StageBase<S> {
     protected int numEvaluation; // kind of the same as indexEvaluation, but explicitly keeping track of the total number
 
     public static abstract class StageFactory<SB extends StageBase<?>> {
-        private final Logger log = LoggerFactory.getLogger(getClass());
+        protected final Logger log = LoggerFactory.getLogger(getClass());
 
         protected final UniformRandomProvider randomTrials = RandomUtil.newRandom2(12345L);
 
@@ -49,7 +49,7 @@ public abstract class StageBase<S> {
             for (int indexTrial = 0; indexTrial < numTrials; indexTrial++) {
                 Integer trialNumberRemote = hyperManager.suggest();
 
-                StageBase dev = createStage(hyperManager);
+                StageBase dev = createStage(hyperManager, indexTrial);
 
                 dev.runTrial(indexTrial);
                 int hits = dev.numHit();
@@ -60,7 +60,7 @@ public abstract class StageBase<S> {
             }
         }
 
-        public abstract SB createStage(RemoteHyperManager hyperManager);
+        public abstract SB createStage(RemoteHyperManager hyperManager, int indexTrial);
 
         public abstract void registerHyperparameters(HyperManager hyperCollector);
 
@@ -122,7 +122,7 @@ public abstract class StageBase<S> {
     }
 
     protected void printRunInfo(Duration duration) {
-        log.info("TOTAL DURATION: {}", duration);
+        log.info("#{} TOTAL DURATION: {}", indexTrial, duration);
         log.info(" hits: {}", Tools.rate(numHit, numEvaluation));
     }
 

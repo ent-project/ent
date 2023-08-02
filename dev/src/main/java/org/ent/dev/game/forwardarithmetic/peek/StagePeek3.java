@@ -82,7 +82,7 @@ public class StagePeek3 extends StageBase<StagePeek3.Solution> {
 
     public static class Factory extends StageFactory<StagePeek3> {
         @Override
-        public StagePeek3 createStage(RemoteHyperManager hyperManager) {
+        public StagePeek3 createStage(RemoteHyperManager hyperManager, int indexTrial) {
             StagePeek3 dev = new StagePeek3(hyperManager, RandomUtil.newRandom2(randomTrials.nextLong()));
             dev.setTrialMaxEvaluations(50);
             return dev;
@@ -150,6 +150,14 @@ public class StagePeek3 extends StageBase<StagePeek3.Solution> {
             currentUpstreamUsages++;
         } else {
             currentUpstream = stagePeek2.getNextSolution();
+//            log.info("get next from stage 2");
+//            PortalMoveEntEventListener pm = currentUpstream.portalMoveEntEventListener();
+//            var t1 = pm.targetTracker1().lastTarget();
+//            var t2 = pm.targetTracker2().lastTarget();
+//            NetFormatter formatter = new NetFormatter();
+//            String s = formatter.format(currentUpstream.net());
+//            log.info("t1: {}, t2 : {}, net: {}", t1, t2, s);
+//            Logging.logDot(new Ent(currentUpstream.net()));
             currentUpstreamUsages = 0;
         }
         return currentUpstream;

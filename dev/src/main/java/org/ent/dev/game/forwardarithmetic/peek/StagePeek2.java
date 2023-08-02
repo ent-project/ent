@@ -79,7 +79,7 @@ public class StagePeek2 extends StageBase<StagePeek1.Solution> {
 
     public static class Factory extends StageFactory<StagePeek2> {
         @Override
-        public StagePeek2 createStage(RemoteHyperManager hyperManager) {
+        public StagePeek2 createStage(RemoteHyperManager hyperManager, int indexTrial) {
             StagePeek2 dev = new StagePeek2(hyperManager, RandomUtil.newRandom2(randomTrials.nextLong()));
             dev.setTrialMaxEvaluations(2000);
             return dev;
