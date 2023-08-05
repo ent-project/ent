@@ -30,6 +30,12 @@ public class NetCopy2 {
                 nodeClone.setChild(direction, netClone.getNode(targetOrig.getIndex()), Purview.DIRECT);
             }
         }
+        if (netOrig.getAnnotations() != null) {
+            for (Node nodeOrig : netOrig.getAnnotations().keySet()) {
+                Node nodeClone = netClone.getNode(nodeOrig.getIndex());
+                netClone.setAnnotation(nodeClone, netOrig.getAnnotation(nodeOrig));
+            }
+        }
         return netClone;
     }
 }

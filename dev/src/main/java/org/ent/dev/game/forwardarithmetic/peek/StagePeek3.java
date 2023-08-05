@@ -168,7 +168,7 @@ public class StagePeek3 extends StageBase<StagePeek3.Solution> {
         return netCreator.drawNet();
     }
 
-    private void replayWithDetails(Solution solution) {
+    public void replayWithDetails(Solution solution) {
         log.info("number of fragments: " + solution.fragments.size());
         ArithmeticForwardGame game0 = solution.upstreamPeek1.game();
         Net netPortalMove = new NetCopyPack(solution.upstreamPeek1.net()).createCopy();

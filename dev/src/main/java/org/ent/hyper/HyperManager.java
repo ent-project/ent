@@ -28,7 +28,7 @@ public abstract class HyperManager {
     protected abstract <T> T doGet(HyperDefinition<T> hyperDefinitionResolved);
 
     public <T> void fix(HyperDefinition<T> hyperDefinition, T value) {
-        doFix(resolve(hyperDefinition.getName()), value);
+        doFix(resolve(hyperDefinition.getName()), value, false);
     }
 
     public void fixJson(String hyperSelectionJson) {
@@ -38,7 +38,7 @@ public abstract class HyperManager {
             Map<String, Object> map = objectMapper.readValue(hyperSelectionJson, typeRef);
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 QualifiedKey qualifiedKey = resolve(entry.getKey());
-                doFix(qualifiedKey, entry.getValue());
+                doFix(qualifiedKey, entry.getValue(), false);
             }
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException(e);
@@ -46,6 +46,14 @@ public abstract class HyperManager {
     }
 
     public void fixLines(String linesData) {
+        fixLines(linesData, false);
+    }
+
+    public void overrideLines(String linesData) {
+        fixLines(linesData, true);
+    }
+
+    private void fixLines(String linesData, boolean override) {
         linesData.lines()
                 .map(String::strip)
                 .filter(s -> !s.isEmpty())
@@ -59,19 +67,28 @@ public abstract class HyperManager {
                     QualifiedKey qualifiedKey = resolve(s[0]);
                     try {
                         Object value = objectMapper.readValue(s[1], Object.class);
-                        doFix(qualifiedKey, value);
+                        doFix(qualifiedKey, value, override);
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
                 });
     }
 
-    protected abstract void doFix(QualifiedKey qualifiedKey, Object value);
+    /**
+     * Provide/fix a value for a hyperparameter that will be returned for subsequent queries.
+     *
+     * @param override if true, replaces a value that has already been fixed before, will throw an exception in case it
+     *                is not already present
+     *                 if false, validates that it has not already been fixed before
+     */
+    protected abstract void doFix(QualifiedKey qualifiedKey, Object value, boolean override);
 
     /**
-     * Move to a subdirectory. Creates another view of the same HyperMangager
+     * Move to a subdirectory. Creates another view of the same HyperManager
      * that interprets all property names as relative to the given subdirectory.
-     * This allows to use the same property names in different contexts.
+     * This allows to use the same HyperDefinition instances in different contexts.
+     * (E.g. 2 instances of the same random generator class are used in a process, but with
+     * different set of hyperparameters.)
      */
     public HyperManager group(String group) {
         return new SubHyperManager(this, group);
@@ -81,5 +98,4 @@ public abstract class HyperManager {
         // to be overridden
         return new QualifiedKey(simpleKey);
     }
-
 }

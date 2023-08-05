@@ -16,14 +16,31 @@ public class ArrowMixMutation {
 
     private final UniformRandomProvider rand;
 
+    private Range sourceRange, destinationRange;
+
+    public record Range(int minIncluive, int maxExclusive) {
+        public int size() {
+            return maxExclusive - minIncluive;
+        }
+    }
+
     public ArrowMixMutation(double frequencyFactor, Net net, UniformRandomProvider rand) {
         this.frequencyFactor = frequencyFactor;
         this.net = net;
         this.rand = rand;
+        this.sourceRange = this.destinationRange = new Range(0, net.getNodes().size());
+    }
+
+    public void setSourceRange(int minIncluive, int maxExclusive) {
+        this.sourceRange = new Range(minIncluive, maxExclusive);
+    }
+
+    public void setDestinationRange(int minIncluive, int maxExclusive) {
+        this.destinationRange = new Range(minIncluive, maxExclusive);
     }
 
     public void execute() {
-        int num = (int) (net.getNodes().size() * frequencyFactor);
+        int num = (int) (sourceRange.size() * frequencyFactor);
         int noMutations = ModifiedPoisson.getModifiedPoisson(num).drawModifiedPoisson(rand);
         for (int i = 0; i < noMutations; i++) {
             rewireOneArrowRandomly();
@@ -31,10 +48,10 @@ public class ArrowMixMutation {
     }
 
     private void rewireOneArrowRandomly() {
-        int i = rand.nextInt(net.getNodes().size());
-        Node node = net.getNodesAsList().get(i);
+        int indexSource = rand.nextInt(sourceRange.minIncluive, sourceRange.maxExclusive);
+        Node node = net.getNodesAsList().get(indexSource);
         Arrow arrow = node.getArrow(rand.nextBoolean() ? ArrowDirection.LEFT : ArrowDirection.RIGHT);
-        int indexTarget = rand.nextInt(net.getNodes().size());
+        int indexTarget = rand.nextInt(destinationRange.minIncluive, destinationRange.maxExclusive);
         Node nodeTarget = net.getNodesAsList().get(indexTarget);
         arrow.setTarget(nodeTarget, Purview.DIRECT);
     }

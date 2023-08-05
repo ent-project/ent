@@ -8,9 +8,20 @@ public class FixedHyperManager extends HyperManager {
     protected final Map<String, Object> fixed = new HashMap<>();
 
     @Override
-    public void doFix(QualifiedKey qualifiedKey, Object value) {
-        log.info("setting hyperparameter '{}'={}", qualifiedKey.get(), value);
-        fixed.put(qualifiedKey.get(), value);
+    public void doFix(QualifiedKey qualifiedKey, Object value, boolean override) {
+        String key = qualifiedKey.get();
+        log.info("setting hyperparameter '{}'={}", key, value);
+        if (override) {
+            if (!fixed.containsKey(key)) {
+                throw new IllegalStateException(
+                        "Trying to override key '%s' with value %s, but was not set before".formatted(key, value));
+            }
+        } else {
+            if (fixed.containsKey(key)) {
+                throw new IllegalStateException("Key '%s' is already set".formatted(key));
+            }
+        }
+        fixed.put(key, value);
     }
 
     @Override

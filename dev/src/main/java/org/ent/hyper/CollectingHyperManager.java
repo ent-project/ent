@@ -14,7 +14,7 @@ public class CollectingHyperManager extends HyperManager {
     }
 
     @Override
-    protected void doFix(QualifiedKey qualifiedKey, Object value) {
+    protected void doFix(QualifiedKey qualifiedKey, Object value, boolean override) {
         throw new UnsupportedOperationException();
     }
 

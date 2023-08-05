@@ -25,7 +25,7 @@ public class SubHyperManager extends HyperManager {
     }
 
     @Override
-    protected void doFix(QualifiedKey qualifiedKey, Object value) {
-        delegate.doFix(qualifiedKey, value);
+    protected void doFix(QualifiedKey qualifiedKey, Object value, boolean override) {
+        delegate.doFix(qualifiedKey, value, override);
     }
 }

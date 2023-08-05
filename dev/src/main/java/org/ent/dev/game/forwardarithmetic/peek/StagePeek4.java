@@ -19,10 +19,12 @@ import org.ent.net.util.NetCopy2;
 import org.ent.net.util.NetCopyPack;
 import org.ent.net.util.NetUtils;
 import org.ent.net.util.RandomUtil;
+import org.ent.util.Logging;
 import org.ent.webui.WebUI;
 import org.ent.webui.WebUiStoryOutput;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.EnumMap;
 import java.util.Set;
 
@@ -34,6 +36,7 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
 
     private static final boolean WEB_UI = false;
     public static final boolean REPLAY_HITS = false || WEB_UI;
+    private static final boolean ANNOTATIONS = true;
 
     public static final IntHyperDefinition HYPER_MAX_STEPS = new IntHyperDefinition("max-steps", 3, 200);
     public static final IntHyperDefinition HYPER_MAX_ATTEMPTS = new IntHyperDefinition("max-attempts", 1, 400);
@@ -48,6 +51,8 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
     private final int fragmentContext;
     private final boolean looseStitching;
     private final double arrowMixStrength;
+
+    private boolean finalStep;
 
     private final StagePeek3 stagePeek3;
     private final UniformRandomProvider randMixerSeeds;
@@ -80,8 +85,9 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
         @Override
         public StagePeek4 createStage(RemoteHyperManager hyperManager, int indexTrial) {
             StagePeek4 dev = new StagePeek4(hyperManager, RandomUtil.newRandom2(randomTrials.nextLong()));
-            dev.setTrialMaxEvaluations(50);
-//            dev.setTrialMaxDuration(Duration.ofSeconds(18));
+//            dev.setFinalStep(true);
+//            dev.setTrialMaxEvaluations(50);
+            dev.setTrialMaxDuration(Duration.ofSeconds(12));
             return dev;
         }
 
@@ -104,6 +110,15 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
             hyperManager.fix(HYPER_MAX_ATTEMPTS, 130);
             hyperManager.fix(HYPER_ARROW_MIX_STRENGTH, 0.45);
         }
+    }
+
+    public void setFinalStep(boolean finalStep) {
+        this.finalStep = finalStep;
+    }
+
+
+    public StagePeek3 stagePeek3() {
+        return stagePeek3;
     }
 
     @Override
@@ -139,7 +154,7 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
                         readOperandsListener);
                 submitSolution(solution);
                 if (REPLAY_HITS) {
-                    WebUiStoryOutput.addStoryWithAnnouncement("StagePeek4-%s-%s".formatted(indexTrial, indexEvaluation),
+                    WebUiStoryOutput.addStoryWithAnnouncement("StagePeek4-%s".formatted(getStoryId()),
                             () -> replayWithDetails(solution));
                 }
                 numHit++;
@@ -156,6 +171,7 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
     record StitchResult(Net net, Node nextOrigin) {
 
     }
+
     private record StitchContribution(StagePeek3.Fragment fragment, Net condensedNet) {
     }
 
@@ -173,8 +189,12 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
         if (looseStitching) {
             stitchOrigin = stitchOrigin.getRightChild(Purview.DIRECT);
         }
+        if (ANNOTATIONS) {
+            net.setAnnotation(stitchOrigin, "stitch-origin-0");
+        }
 
-        for (StitchContribution contribution : contributions) {
+        for (int indexContribution = 0; indexContribution < contributions.length; indexContribution++) {
+            StitchContribution contribution = contributions[indexContribution];
             NetCopyPack copy = new NetCopyPack(contribution.condensedNet);
             copy.copyIntoExistingNet(net);
 
@@ -187,6 +207,9 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
             int numDescent = looseStitching ? fragmentContext : fragmentContext - 1;
             for (int i = 0; i < numDescent; i++) {
                 stitchOrigin = stitchOrigin.getRightChild(Purview.DIRECT);
+            }
+            if (ANNOTATIONS) {
+                net.setAnnotation(stitchOrigin, "stitch-origin-" + (indexContribution + 1));
             }
         }
         return new StitchResult(net, stitchOrigin);
@@ -212,7 +235,7 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
         return advancedNet;
     }
 
-    private void replayWithDetails(Solution solution) {
+    public void replayWithDetails(Solution solution) {
         ArithmeticForwardGame game0 = solution.upstreamPeek3().upstreamPeek1().game();
 
         Net net = NetCopy2.createCopy(solution.net());
@@ -224,14 +247,30 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
                 game0.getOperation(),
                 net,
                 solution.readOperandsListener().allFound + 1);
+        Peek4ReadOperandsEntListener readOperandsListener = new Peek4ReadOperandsEntListener(game);
+        game.getEnt().addEventListener(readOperandsListener);
+        game.setAfterStepHook(readOperandsListener);
         game.setVerbose(true);
 
         game.execute();
     }
 
-    private class Peek4ReadOperandsEntListener extends ReadOperandsEntListener implements ArithmeticForwardGame.AfterStepHook {
+    public void replayUnmixed(Solution solution) {
+        log.info("=== Output of stitched nets, unmixed! ===");
+        Net netStitched = solution.recreateStitchUnmixed();
+        ArithmeticForwardGame game0 = solution.upstreamPeek3().upstreamPeek1().game();
+        ArithmeticForwardGame game = new ArithmeticForwardGame(
+                game0.getOperand1(),
+                game0.getOperand2(),
+                game0.getOperation(),
+                netStitched,
+                0);
+        Logging.logDot(game.getEnt());
+    }
 
-        Integer allFound;
+    public class Peek4ReadOperandsEntListener extends ReadOperandsEntListener implements ArithmeticForwardGame.AfterStepHook {
+
+        public Integer allFound;
 
         public Peek4ReadOperandsEntListener(ArithmeticForwardGame game) {
             super(game);
@@ -244,8 +283,23 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
             }
         }
 
+        @Override
         public void afterStep(ArithmeticForwardGame game, Object ignored) {
-            Set<Node> nodes = NetUtils.collectReachable(game.getEnt().getNet().getRoot());
+            if (foundAll()) {
+                allFound = game.getStep();
+                if (game.isVerbose()) {
+                    log.info("event: found all in step {}; stopping execution", allFound);
+                }
+                game.stopExecution();
+            }
+        }
+
+        public boolean foundAll() {
+            Node root = game.getEnt().getNet().getRoot();
+            if (finalStep) {
+                root = root.getRightChild(Purview.DIRECT);
+            }
+            Set<Node> nodes = NetUtils.collectReachable(root);
             nodes.add(game.getAnswerNode());
             EnumMap<OpTarget, Node> found = new EnumMap<>(OpTarget.class);
             int numFound = 0;
@@ -260,20 +314,67 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
                     }
                 }
                 if (numFound >= OpTarget.values().length) {
-                    allFound = game.getStep();
-                    game.stopExecution();
-                    break;
+                    return true;
                 }
             }
+            return false;
         }
     }
 
-    public record Solution(
-            Net net,
-            Node nextStitchOrigin,
-            long mixerSeed,
-            StagePeek3.Solution upstreamPeek3,
-            Peek4ReadOperandsEntListener readOperandsListener) {
+    public class Solution {
+        private final Net net;
+        private final Node nextStitchOrigin;
+        private final long mixerSeed;
+        private final StagePeek3.Solution upstreamPeek3;
+        private final Peek4ReadOperandsEntListener readOperandsListener;
+
+        private boolean mixIsApplied;
+
+        public Solution(
+                Net net,
+                Node nextStitchOrigin,
+                long mixerSeed,
+                StagePeek3.Solution upstreamPeek3,
+                Peek4ReadOperandsEntListener readOperandsListener) {
+            this.net = net;
+            this.nextStitchOrigin = nextStitchOrigin;
+            this.mixerSeed = mixerSeed;
+            this.upstreamPeek3 = upstreamPeek3;
+            this.readOperandsListener = readOperandsListener;
+        }
+
+        public Net net() {
+            return net;
+        }
+
+        public Node nextStitchOrigin() {
+            return nextStitchOrigin;
+        }
+
+        public long mixerSeed() {
+            return mixerSeed;
+        }
+
+        public StagePeek3.Solution upstreamPeek3() {
+            return upstreamPeek3;
+        }
+
+        public Peek4ReadOperandsEntListener readOperandsListener() {
+            return readOperandsListener;
+        }
+
+        public void applyMix() {
+            if (mixIsApplied) {
+                return;
+            }
+            applyArrowMixMutation(net, mixerSeed);
+            mixIsApplied = true;
+        }
+
+        public Net recreateStitchUnmixed() {
+            StitchResult stitched = stitchTogether(upstreamPeek3);
+            return stitched.net();
+        }
     }
 
 }

@@ -287,8 +287,16 @@ public class DotRenderer {
                 }
             }
         }
+        String xlabel = "";
         if (node == net.getRoot()) {
-            sb.append("[xlabel=\"⤷\"]");
+            xlabel = "⤷";
+        }
+        String annotation = net.getAnnotation(node);
+        if (annotation != null) {
+            xlabel += annotation;
+        }
+        if (!xlabel.isEmpty()) {
+            sb.append("[xlabel=\"%s\"]".formatted(escape(xlabel)));
         }
         sb.append(";\n");
         return nodeName;

@@ -36,7 +36,7 @@ public class ArithmeticForwardGame {
             Operations.MULTIPLY_OPERATION,
 //            Operations.MODULO_OPERATION,
             Operations.BITWISE_OR_OPERATION,
-            Operations.BITWISE_AND_OPERATION,
+//            Operations.BITWISE_AND_OPERATION, // result is 0 too often
             Operations.XOR_OPERATION,
 //            Operations.ROTATE_RIGHT_OPERATION,
 //            Operations.SHIFT_LEFT_OPERATION,

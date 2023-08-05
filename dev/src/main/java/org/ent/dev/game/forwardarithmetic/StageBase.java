@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public abstract class StageBase<S> {
 
@@ -133,12 +134,21 @@ public abstract class StageBase<S> {
             nextEvaluation();
         }
         S solution = solutions.get(nextSolutionIndex);
+        solutions.set(nextSolutionIndex, null);
         nextSolutionIndex++;
         return solution;
     }
 
     protected void submitSolution(S solution) {
         solutions.add(solution);
+    }
+
+    protected String getStoryId() {
+        if (indexTrial != null) {
+            return "%s-%s".formatted(indexTrial, indexEvaluation);
+        } else {
+            return UUID.randomUUID().toString();
+        }
     }
 
 }

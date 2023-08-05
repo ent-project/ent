@@ -28,9 +28,29 @@ public class WebUI {
 
     private static final Logger log = LoggerFactory.getLogger(WebUI.class);
 
+    private static class Story {
+        final Runnable runnable;
+        boolean executed;
+
+        private Story(Runnable runnable) {
+            this.runnable = runnable;
+        }
+
+        public void run() {
+            runnable.run();
+        }
+
+        public boolean isExecuted() {
+            return executed;
+        }
+
+        public void setExecuted(boolean executed) {
+            this.executed = executed;
+        }
+    }
     private static final Multimap<String, WsConnectContext> sessionsByStory = ArrayListMultimap.create();
     private static final Map<String, Queue<Object>> buffersByStory = new HashMap<>();
-    private static final Map<String, Runnable> storyHooks = new HashMap<>();
+    private static final Map<String, Story> storyHooks = new HashMap<>();
 
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(3);
 
@@ -67,15 +87,18 @@ public class WebUI {
                     }
                 }
                 if (!STORY_ID_MAIN.equals(storyId)) {
-                    Runnable runnable = storyHooks.get(storyId);
-                    if (runnable != null) {
-                        String storyIdFinal = storyId;
-                        EXECUTOR_SERVICE.submit(() -> {
-                            WebUiStoryOutput.startStory(storyIdFinal);
-                            runnable.run();
-                            WebUiStoryOutput.endStory();
-                        });
-                    } else {
+                    Story story = storyHooks.get(storyId);
+                    if (story != null) {
+                        if (!story.isExecuted()) {
+                            String storyIdFinal = storyId;
+                            story.setExecuted(true);
+                            EXECUTOR_SERVICE.submit(() -> {
+                                WebUiStoryOutput.startStory(storyIdFinal);
+                                story.run();
+                                WebUiStoryOutput.endStory();
+                            });
+                        }
+                    } else if (buffer == null) {
                         WebUiStoryOutput.startStory(storyId);
                         log.warn("No content found.");
                         WebUiStoryOutput.endStory();
@@ -154,6 +177,6 @@ public class WebUI {
     }
 
     public static void addStoryHook(String storyId, Runnable runnable) {
-        storyHooks.put(storyId, runnable);
+        storyHooks.put(storyId, new Story(runnable));
     }
 }

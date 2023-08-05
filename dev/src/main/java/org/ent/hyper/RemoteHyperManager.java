@@ -92,6 +92,14 @@ public class RemoteHyperManager extends FixedHyperManager {
         return castedResult;
     }
 
+    @Override
+    public void doFix(QualifiedKey qualifiedKey, Object value, boolean override) {
+        if (hyperDefinitions.stream().noneMatch(hd -> qualifiedKey.get().equals(hd.getName()))) {
+            throw new IllegalArgumentException("trying to fix '%s', but is not registered as hyperparameter".formatted(qualifiedKey.get()));
+        }
+        super.doFix(qualifiedKey, value, override);
+    }
+
     public static class SuggestResponse {
         public int trial_number;
         public Map<String, Object> parameters;

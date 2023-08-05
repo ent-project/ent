@@ -1,7 +1,6 @@
 package org.ent.dev.game.forwardarithmetic.peek;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.ent.NopEntEventListener;
 import org.ent.NopNetEventListener;
 import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
 import org.ent.dev.game.forwardarithmetic.StageBase;
@@ -19,9 +18,7 @@ import org.ent.hyper.RemoteHyperManager;
 import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
-import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.operation.Operations;
-import org.ent.net.node.cmd.operation.TriValueOperation;
 import org.ent.net.util.NetCopy2;
 import org.ent.net.util.RandomUtil;
 import org.ent.webui.WebUI;
@@ -34,7 +31,7 @@ import java.util.List;
 
 public class StagePeek5 extends StageBase<StagePeek5.Solution> {
 
-    private static final boolean WEB_UI = true;
+    private static final boolean WEB_UI = false;
     public static final boolean REPLAY_HITS = false || WEB_UI;
 
     public static final IntHyperDefinition HYPER_MAX_ATTEMPTS = new IntHyperDefinition("max-attempts", 1, 400);
@@ -89,11 +86,11 @@ public class StagePeek5 extends StageBase<StagePeek5.Solution> {
         @Override
         public StagePeek5 createStage(RemoteHyperManager hyperManager, int indexTrial) {
             long masterSeed = randomTrials.nextLong();
-            masterSeed = -6220383428633220558L;
+//            masterSeed = -6220383428633220558L;
             log.info("using master seed {} for trial {}", masterSeed, indexTrial);
             StagePeek5 dev = new StagePeek5(hyperManager, RandomUtil.newRandom2(masterSeed));
 //            dev.setTrialMaxEvaluations(2000);
-            dev.setTrialMaxDuration(Duration.ofSeconds(18));
+            dev.setTrialMaxDuration(Duration.ofSeconds(40));
             return dev;
         }
 
@@ -135,19 +132,36 @@ public class StagePeek5 extends StageBase<StagePeek5.Solution> {
 //                    stage5.fraction_portals 0.5644728778122936
 //                    stage5.fraction_set 0.4709540476189268
 //                    """);
-            hyperManager.fixJson("""
-                    {
-                        "arrow-mix-strength": 0.1308022805601076,
-                        "max-attempts": 76,
-                        "max-steps": 27,
-                        "no-nodes-add-on": 38,
-                        "stage5.fraction_commands": 0.3465275881318059,
-                        "stage5.fraction_major_commands": 0.6623882959056865,
-                        "stage5.fraction_major_split": 0.8116991409113717,
-                        "stage5.fraction_portals": 0.5413408564281402,
-                        "stage5.fraction_set": 0.3827882092985384
-                      }
-                    
+//            hyperManager.fixJson("""
+//                    {
+//                        "arrow-mix-strength": 0.1308022805601076,
+//                        "max-attempts": 76,
+//                        "max-steps": 27,
+//                        "no-nodes-add-on": 38,
+//                        "stage5.fraction_commands": 0.3465275881318059,
+//                        "stage5.fraction_major_commands": 0.6623882959056865,
+//                        "stage5.fraction_major_split": 0.8116991409113717,
+//                        "stage5.fraction_portals": 0.5413408564281402,
+//                        "stage5.fraction_set": 0.3827882092985384
+//                      }
+//
+//                    """);
+            hyperManager.fixLines("""
+                arrow-mix-strength 0.2657429460025833
+                max-attempts 374
+                max-steps 51
+                no-nodes-add-on 0
+                stage5.fraction_commands 0.45450798283473615
+                stage5.fraction_major_commands 0.9429998098553173
+                stage5.fraction_major_split 0.6978761172041702
+                stage5.fraction_portals 0.9741148469006533
+                stage5.fraction_set 0.4577902518296427                    
+                    """);
+            hyperManager.overrideLines("""
+                stage4.arrow-mix-strength 0.9675791178324734
+                stage4.fragment-context 2
+                stage4.max-attempts 228
+                stage4.max-steps 182
                     """);
         }
     }
@@ -161,26 +175,29 @@ public class StagePeek5 extends StageBase<StagePeek5.Solution> {
     @Override
     protected void nextEvaluation() {
         StagePeek4.Solution upstreamPeek4 = stagePeek4.getNextSolution();
-        Net netUpstream = upstreamPeek4.net();
-        // this destroys the unmixed net, but we have no use for it anyway
-        stagePeek4.applyArrowMixMutation(netUpstream, upstreamPeek4.mixerSeed());
+        upstreamPeek4.applyMix();
 
         for (int indexAttempt = 0; indexAttempt < maxAttempts; indexAttempt++) {
+            boolean interesting = false;// indexEvaluation == 2630 && indexAttempt ==54;
+
             long netAddOnSeed = randNetSeeds.nextLong();
             long mixerSeed = randMixerSeeds.nextLong();
 
             SetupResult setup = setUpGame(upstreamPeek4, netAddOnSeed, mixerSeed);
 
+            if (interesting) {
+                setup.game().setVerbose(true);
+            }
             setup.game().execute();
 
-            boolean hit = setup.checkTargetValueListener().found != null;
-            hit |= setup.peek5EntListener().found2 != null;
+//            boolean hit = setup.checkTargetValueListener().found != null;
+            boolean hit = setup.operationExecutionEntListener().found != null;
             if (hit) {
-                if (setup.peek5EntListener().found2 != null) {
+//                if (setup.peek5EntListener().found2 != null) {
                     log.info("#{}-{} - hit!", indexEvaluation, indexAttempt);
-                } else {
-                    log.info("#{}-{} - HIT!", indexEvaluation, indexAttempt);
-                }
+//                } else {
+//                    log.info("#{}-{} - HIT!", indexEvaluation, indexAttempt);
+//                }
                 // FIXME: verify with different op-values
                 Solution solution = new Solution(
                         upstreamPeek4,
@@ -198,7 +215,7 @@ public class StagePeek5 extends StageBase<StagePeek5.Solution> {
         }
     }
 
-    private record SetupResult(ArithmeticForwardGame game, CheckTargetValueListener checkTargetValueListener, Peek5EntListener peek5EntListener) {
+    private record SetupResult(ArithmeticForwardGame game, CheckTargetValueListener checkTargetValueListener, OperationExecutionEntListener operationExecutionEntListener) {
     }
 
     @NotNull
@@ -222,9 +239,9 @@ public class StagePeek5 extends StageBase<StagePeek5.Solution> {
         game.initializeVerifier();
         game.getVerifierNet().addEventListener(checkTargetValueListener);
         game.getAnswerNet().addEventListener(checkTargetValueListener);
-        Peek5EntListener peek5EntListener = new Peek5EntListener(game);
-        game.getEnt().addEventListener(peek5EntListener);
-        SetupResult result = new SetupResult(game, checkTargetValueListener, peek5EntListener);
+        OperationExecutionEntListener operationExecutionEntListener = new OperationExecutionEntListener(game);
+        game.getEnt().addEventListener(operationExecutionEntListener);
+        SetupResult result = new SetupResult(game, checkTargetValueListener, operationExecutionEntListener);
         return result;
     }
 
@@ -242,32 +259,35 @@ public class StagePeek5 extends StageBase<StagePeek5.Solution> {
     }
 
     private void replayWithDetails(Solution solution) {
-        ArithmeticForwardGame game0 = solution.upstreamPeek4().upstreamPeek3().upstreamPeek1().game();
 
-        TrimmingListener trimmingListener = null;
+        TrimmingListener trimmingListener;
         {
-            Net net = NetCopy2.createCopy(solution.upstreamPeek4().net());
-            buildAndAttachAddOn(solution.upstreamPeek4(), net, solution.netAddOnSeed());
-            ArrowMixMutation mixMutation = new ArrowMixMutation(arrowMixStrength, net, RandomUtil.newRandom2(solution.mixerSeed()));
-            mixMutation.execute();
+            SetupResult setup = setUpGame(solution.upstreamPeek4(), solution.netAddOnSeed(), solution.mixerSeed());
 
-            ArithmeticForwardGame game = setUpGame(game0, net);
+//            Net net = NetCopy2.createCopy(solution.upstreamPeek4().net());
+//            buildAndAttachAddOn(solution.upstreamPeek4(), net, solution.netAddOnSeed());
+//            ArrowMixMutation mixMutation = new ArrowMixMutation(arrowMixStrength, net, RandomUtil.newRandom2(solution.mixerSeed()));
+//            mixMutation.execute();
+//            ArithmeticForwardGame game = setUpGame(game0, net);
+            Net net = setup.game().getEnt().getNet();
             trimmingListener = new TrimmingListener(net.getNodes().size());
             net.addEventListener(trimmingListener);
 
-            game.execute();
+            setup.game().execute();
         }
 
-        Net net = NetCopy2.createCopy(solution.upstreamPeek4().net());
-        buildAndAttachAddOn(solution.upstreamPeek4(), net, solution.netAddOnSeed());
-        ArrowMixMutation mixMutation = new ArrowMixMutation(arrowMixStrength, net, RandomUtil.newRandom2(solution.mixerSeed()));
-        mixMutation.execute();
+        SetupResult setup = setUpGame(solution.upstreamPeek4(), solution.netAddOnSeed(), solution.mixerSeed());
+        Net net = setup.game().getEnt().getNet();
+//        Net net = NetCopy2.createCopy(solution.upstreamPeek4().net());
+//        buildAndAttachAddOn(solution.upstreamPeek4(), net, solution.netAddOnSeed());
+//        ArrowMixMutation mixMutation = new ArrowMixMutation(arrowMixStrength, net, RandomUtil.newRandom2(solution.mixerSeed()));
+//        mixMutation.execute();
         TrimmingHelper.trim(net, trimmingListener);
 
-        ArithmeticForwardGame game = setUpGame(game0, net);
-        game.setVerbose(true);
+//        ArithmeticForwardGame game = setUpGame(game0, net);
+        setup.game().setVerbose(true);
 
-        game.execute();
+        setup.game().execute();
         log.info("replay done.");
     }
 
@@ -282,8 +302,8 @@ public class StagePeek5 extends StageBase<StagePeek5.Solution> {
         game.initializeVerifier();
         game.getVerifierNet().addEventListener(checkTargetValueListener);
         game.getAnswerNet().addEventListener(checkTargetValueListener);
-        Peek5EntListener peek5EntListener = new Peek5EntListener(game);
-        game.getEnt().addEventListener(peek5EntListener);
+        OperationExecutionEntListener operationExecutionEntListener = new OperationExecutionEntListener(game);
+        game.getEnt().addEventListener(operationExecutionEntListener);
         return game;
     }
 
@@ -300,71 +320,6 @@ public class StagePeek5 extends StageBase<StagePeek5.Solution> {
             if (newValue == game.getExpectedSolution()) {
                 found = game.getStep();
                 game.stopExecution();
-            }
-        }
-    }
-
-    private class Peek5EntListener extends NopEntEventListener {
-        protected final ArithmeticForwardGame game;
-        Integer found;
-        Integer found2;
-
-        private Peek5EntListener(ArithmeticForwardGame game) {
-            this.game = game;
-        }
-
-        @Override
-        public void beforeCommandExecution(Node executionPointer, Command command) {
-            if (command != null && command.getValue() == game.getOperationNodeValue()) {
-                found = game.getStep();
-
-            }
-        }
-
-        @Override
-        public void triValueOperation(Node nodeTarget, Node nodeOperand1, Node nodeOperand2, TriValueOperation operation) {
-            if (operation == game.getOperation()) {
-                int op1 = nodeOperand1.getValue(Purview.DIRECT);
-                int op2 = nodeOperand2.getValue(Purview.DIRECT);
-                int match = 0;
-                boolean fullmatch = false;
-                if (op1 == game.getOperand1() && op2 == game.getOperand2()) {
-                    if (game.isVerbose()) {
-                        log.info("event: fullmatch");
-                    }
-                    fullmatch = true;
-                }
-                if (op1 == game.getOperand2() && op2 == game.getOperand1()) {
-                    if (game.isVerbose()) {
-                        log.info("event: fullmatch (switched)");
-                    }
-                    fullmatch = true;
-                }
-
-                if (op1 == game.getOperand1() || op1 == game.getOperand2()) {
-                    if (game.isVerbose()) {
-                        log.info("event: op1=={}", op1);
-                    }
-                    match++;
-                }
-                if (op2 == game.getOperand1() || op2 == game.getOperand2()) {
-                    if (game.isVerbose()) {
-                        log.info("event: op2=={}", op1);
-                    }
-                    match++;
-                }
-                if (match >= 2) {
-                    if (game.isVerbose()) {
-                        log.info("event: # match: {}", match);
-                    }
-                }
-                if (fullmatch) {
-                    if (game.isVerbose()) {
-                        log.info("event: # MATCH: {}", match);
-                    }
-                    found2 = game.getStep();
-                    game.stopExecution();
-                }
             }
         }
     }

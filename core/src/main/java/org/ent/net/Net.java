@@ -29,8 +29,20 @@ public class Net {
     private int netIndex;
     private String name;
 
-    private BiMap<Node, String> nodeNames;
     private final List<Node> nodes;
+    /**
+     * Node names used for serialization and debugging. Saved here for consistency in
+     * different output contexts.
+     *
+     * Usually not set in computations where performance is of concern.
+     */
+    private BiMap<Node, String> nodeNames;
+    /**
+     * Annotations/labels that can be used for output and debugging.
+     *
+     * Usually not set in computations where performance is of concern.
+     */
+    private Map<Node, String> nodeAnnotations;
     /**
      * 'sparse' indicates that the list of nodes may contain null entries.
      * A dense (non-sparse) net allows for more optimized algorithms.
@@ -421,6 +433,33 @@ public class Net {
             return null;
         }
         return nodeNames.inverse().get(name);
+    }
+
+    public void setAnnotation(Node node, String annotation) {
+        validateBelongsToNet(node);
+        if (nodeAnnotations == null) {
+            nodeAnnotations = new HashMap<>();
+        }
+        nodeAnnotations.put(node, annotation);
+    }
+
+    public void appendAnnotation(Node node, String annotation) {
+        validateBelongsToNet(node);
+        if (nodeAnnotations == null) {
+            nodeAnnotations = new HashMap<>();
+        }
+        nodeAnnotations.merge(node, annotation, (current, ann) -> current+ "|" + ann);
+    }
+
+    public String getAnnotation(Node node) {
+        if (nodeAnnotations == null) {
+            return null;
+        }
+        return nodeAnnotations.get(node);
+    }
+
+    public Map<Node, String> getAnnotations() {
+        return nodeAnnotations;
     }
 
     public List<Node> getNodesAsList() {
