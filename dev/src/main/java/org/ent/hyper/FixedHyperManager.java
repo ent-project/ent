@@ -16,12 +16,17 @@ public class FixedHyperManager extends HyperManager {
                 throw new IllegalStateException(
                         "Trying to override key '%s' with value %s, but was not set before".formatted(key, value));
             }
+            if (value == null) {
+                fixed.remove(key);
+            } else {
+                fixed.put(key, value);
+            }
         } else {
             if (fixed.containsKey(key)) {
                 throw new IllegalStateException("Key '%s' is already set".formatted(key));
             }
+            fixed.put(key, value);
         }
-        fixed.put(key, value);
     }
 
     @Override

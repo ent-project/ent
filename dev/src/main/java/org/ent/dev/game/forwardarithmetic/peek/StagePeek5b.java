@@ -20,7 +20,6 @@ import org.ent.net.util.NetCopy2;
 import org.ent.net.util.RandomUtil;
 import org.ent.webui.WebUI;
 import org.ent.webui.WebUiStoryOutput;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -32,11 +31,12 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
     public static final boolean REPLAY_HITS = false || WEB_UI;
     private static final boolean ANNOTATIONS = true;
 
-    public static final IntHyperDefinition HYPER_MAX_ATTEMPTS = new IntHyperDefinition("max-attempts", 1, 400);
+    public static final IntHyperDefinition HYPER_MAX_ATTEMPTS = new IntHyperDefinition("max-attempts", 1, 2000);
     public static final IntHyperDefinition HYPER_MAX_STEPS = new IntHyperDefinition("max-steps", 3, 200);
     public static final DoubleHyperDefinition HYPER_FRAC_PORTALS = new DoubleHyperDefinition("fraction_portals", 0.0, 1.0);
     public static final IntHyperDefinition HYPER_NO_NODES_ADD_ON = new IntHyperDefinition("no-nodes-add-on", 0, 100);
     public static final DoubleHyperDefinition HYPER_ARROW_MIX_STRENGTH = new DoubleHyperDefinition("arrow-mix-strength", 0.0, 1.0);
+    public static final DoubleHyperDefinition HYPER_ARROW_MIX_STRENGTH2 = new DoubleHyperDefinition("arrow-mix-strength2", 0.0, 1.0);
 
     public static final String HYPER_GROUP_STAGE4 = "stage4";
     public static final String HYPER_GROUP_STAGE5B_DRAWING = "stage5b-drawing";
@@ -45,6 +45,7 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
     private final int maxSteps;
     private final int numberOfNodesAddOn;
     private final double arrowMixStrength;
+    private final double arrowMixStrength2;
 
     private final UniformRandomProvider randNetSeeds;
     private final UniformRandomProvider randMixerSeeds;
@@ -62,6 +63,7 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
         this.maxSteps = hyperManager.get(HYPER_MAX_STEPS);
         this.numberOfNodesAddOn = hyperManager.get(HYPER_NO_NODES_ADD_ON);
         this.arrowMixStrength = hyperManager.get(HYPER_ARROW_MIX_STRENGTH);
+        this.arrowMixStrength2 = hyperManager.get(HYPER_ARROW_MIX_STRENGTH2);
 
         this.randNetSeeds = RandomUtil.newRandom2(randMaster.nextLong());
         this.randMixerSeeds = RandomUtil.newRandom2(randMaster.nextLong());
@@ -76,16 +78,24 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
         if (WEB_UI) {
             WebUI.setUpJavalin();
         }
-        new StagePeek5b.Factory().main(1);
+        new StagePeek5b.Factory().main(5);
     }
 
     static class Factory extends StageFactory<StagePeek5b> {
 
+
+        @Override
+        protected String getStudyName() {
+            return super.getStudyName()+"_2";
+        }
+
         @Override
         public StagePeek5b createStage(RemoteHyperManager hyperManager, int indexTrial) {
-            StagePeek5b dev = new StagePeek5b(hyperManager, RandomUtil.newRandom2(randomTrials.nextLong()));
+            long masterSeed = randomTrials.nextLong();
+            log.info("using master seed {} for trial {}", masterSeed, indexTrial);
+            StagePeek5b dev = new StagePeek5b(hyperManager, RandomUtil.newRandom2(masterSeed));
 //            dev.setTrialMaxEvaluations(100);
-            dev.setTrialMaxDuration(Duration.ofSeconds(40));
+            dev.setTrialMaxDuration(Duration.ofSeconds(30));
             return dev;
         }
 
@@ -97,6 +107,7 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
             hyperCollector.get(HYPER_MAX_STEPS);
             hyperCollector.get(HYPER_NO_NODES_ADD_ON);
             hyperCollector.get(HYPER_ARROW_MIX_STRENGTH);
+            hyperCollector.get(HYPER_ARROW_MIX_STRENGTH2);
         }
 
         @Override
@@ -105,19 +116,42 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
             hyperManager.group(HYPER_GROUP_STAGE4).overrideLines("""
                 fragment-context 2
                     """);
-            hyperManager.group(HYPER_GROUP_STAGE5B_DRAWING).fixLines("""
-                    fraction_commands 0.27390593155980114
-                    fraction_major_commands 0.7750135486307677
-                    fraction_major_split 0.8100149043972289
-                    fraction_portals 0.1
-                    fraction_set 0.4709540476189268
+//            hyperManager.group(HYPER_GROUP_STAGE5B_DRAWING).fixLines("""
+//                    fraction_commands 0.27390593155980114
+//                    fraction_major_commands 0.7750135486307677
+//                    fraction_major_split 0.8100149043972289
+//                    fraction_portals 0.3
+//                    fraction_set 0.4709540476189268
+//                    """);
+//            hyperManager.fix(HYPER_MAX_ATTEMPTS, 300);
+//            hyperManager.fix(HYPER_MAX_STEPS, 30);
+//            hyperManager.fix(HYPER_NO_NODES_ADD_ON, 40);
+//            hyperManager.fix(HYPER_ARROW_MIX_STRENGTH, 0.9);
+
+            hyperManager.group(HYPER_GROUP_STAGE4).clear(StagePeek4.HYPER_FRAGMENT_CONTEXT);
+            hyperManager.group(HYPER_GROUP_STAGE4).clear(StagePeek4.HYPER_MAX_ATTEMPTS);
+            hyperManager.group(HYPER_GROUP_STAGE4).clear(StagePeek4.HYPER_ARROW_MIX_STRENGTH);
+
+            hyperManager.fixLines("""
+                    arrow-mix-strength 0.5895591246727114
+                    max-attempts 385
+                    max-steps 12
+                    no-nodes-add-on 28
+                    stage4.arrow-mix-strength 0.9243883842949241
+                    stage4.fragment-context 1
+                    stage4.max-attempts 55
+                    stage5b-drawing.fraction_commands 0.6127454263266574
+                    stage5b-drawing.fraction_major_commands 0.03186006057262768
+                    stage5b-drawing.fraction_major_split 0.511007022322576
+                    stage5b-drawing.fraction_portals 0.42748436419696856
+                    stage5b-drawing.fraction_set 0.5607673547553892
                     """);
-            hyperManager.fix(HYPER_MAX_ATTEMPTS, 300);
-            hyperManager.fix(HYPER_MAX_STEPS, 30);
-            hyperManager.fix(HYPER_NO_NODES_ADD_ON, 40);
+//            hyperManager.fix(HYPER_ARROW_MIX_STRENGTH2, 0.1);
+            hyperManager.clear(HYPER_ARROW_MIX_STRENGTH);
+            hyperManager.clear(HYPER_MAX_ATTEMPTS);
+            hyperManager.fix(HYPER_ARROW_MIX_STRENGTH2, 0.15);
             hyperManager.fix(HYPER_ARROW_MIX_STRENGTH, 0.9);
-
-
+            hyperManager.fix(HYPER_MAX_ATTEMPTS, 230);
         }
     }
 
@@ -168,8 +202,21 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
         game.execute();
     }
 
-    @NotNull
-    private ArithmeticForwardGame setUpGame(StagePeek4.Solution upstreamPeek4, long netAddOnSeed, long mixerSeed) {
+    public ArithmeticForwardGame setUpGame(StagePeek4.Solution upstreamPeek4, long netAddOnSeed, long mixerSeed) {
+        Net net = setUpNet(upstreamPeek4, netAddOnSeed, mixerSeed);
+
+        int realMaxSteps = upstreamPeek4.readOperandsListener().allFound + 1 + maxSteps;
+        ArithmeticForwardGame game0 = upstreamPeek4.upstreamPeek3().upstreamPeek1().game();
+
+        return new ArithmeticForwardGame(
+                game0.getOperand1(),
+                game0.getOperand2(),
+                game0.getOperation(),
+                net,
+                realMaxSteps);
+    }
+
+    public Net setUpNet(StagePeek4.Solution upstreamPeek4, long netAddOnSeed, long mixerSeed) {
         Net net = NetCopy2.createCopy(upstreamPeek4.net());
         int previousSize = net.getNodes().size();
 
@@ -194,16 +241,9 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
         mixMutation.setDestinationRange(0, previousSize);
         mixMutation.execute();
 
-
-        int realMaxSteps = upstreamPeek4.readOperandsListener().allFound + 1 + maxSteps;
-        ArithmeticForwardGame game0 = upstreamPeek4.upstreamPeek3().upstreamPeek1().game();
-
-        return new ArithmeticForwardGame(
-                game0.getOperand1(),
-                game0.getOperand2(),
-                game0.getOperation(),
-                net,
-                realMaxSteps);
+        ArrowMixMutation mixMutation2 = new ArrowMixMutation(arrowMixStrength2, net, RandomUtil.newRandom2(mixerSeed + 5));
+        mixMutation2.execute();
+        return net;
     }
 
     public record Solution(StagePeek4.Solution upstreamPeek4, long netAddOnSeed,

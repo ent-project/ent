@@ -1,5 +1,6 @@
 from flask import Flask, request
 import optuna
+from datetime import datetime
 
 # curl localhost:5005/suggest
 # curl -X POST http://localhost:5005/complete -H 'Content-Type: application/json' -d '{"trial_number":0, "value": 5}'
@@ -9,15 +10,32 @@ import optuna
 
 app = Flask(__name__)
 
-study = optuna.create_study(study_name="test-2023-08-02",
-                            # sampler=optuna.samplers.CmaEsSampler(),
-                            storage="sqlite:///ent.db",
-                            direction=optuna.study.StudyDirection.MAXIMIZE,
-                            load_if_exists=True)
+study: optuna.Study = None
+
+@app.route('/study', methods=['POST'])
+def create_study():
+    global study
+    data = request.get_json()
+    name = data['name']
+    do_create_study(name)
+    return 'OK'
+
+
+def do_create_study(name):
+    global study
+    study = optuna.create_study(study_name=name,
+                                # sampler=optuna.samplers.CmaEsSampler(),
+                                storage="sqlite:///ent.db",
+                                direction=optuna.study.StudyDirection.MAXIMIZE,
+                                load_if_exists=True)
 
 
 @app.route('/suggest', methods=['POST'])
 def suggest():
+    global study
+    if study is None:
+        do_create_study(datetime.now().strftime('study-%Y-%m-%d'))
+
     trial = study.ask()
     data = request.get_json()
     params = {}
@@ -50,6 +68,12 @@ def results():
     print(result)
     return "<p>" + result + "</p>"
 
+@app.route('/initialize', methods=['POST'])
+def initialize():
+    data = request.get_json()
+    print("initializing parameters to be used in the next trial: {}".format(data))
+    study.enqueue_trial(data)
+    return 'OK'
 
 def trials():
     n_trials = 30
@@ -65,8 +89,5 @@ def trials():
 
 
 if __name__ == "__main__":
-
-    # # initial configuration
-    # study.enqueue_trial({"x": 0.01})
     app.run(host='0.0.0.0', port=5005, debug=True)
 

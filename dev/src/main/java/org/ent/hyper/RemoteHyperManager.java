@@ -31,7 +31,7 @@ public class RemoteHyperManager extends FixedHyperManager {
     }
 
     public Integer suggest() throws IOException {
-        List<HyperDefinition<?>> toQuery = hyperDefinitions.stream().filter(hd -> !fixed.containsKey(hd.getName())).toList();
+        List<HyperDefinition<?>> toQuery = getHyperDefinitionsToFetchRemotely();
         if (toQuery.isEmpty()) {
             this.suggested = new HashMap<>();
             return null;
@@ -55,12 +55,19 @@ public class RemoteHyperManager extends FixedHyperManager {
         return suggestResponse.getTrial_number();
     }
 
+    public boolean requiresRemoteCall() {
+        return !getHyperDefinitionsToFetchRemotely().isEmpty();
+    }
+
+    private List<HyperDefinition<?>> getHyperDefinitionsToFetchRemotely() {
+        return hyperDefinitions.stream().filter(hd -> !fixed.containsKey(hd.getName())).toList();
+    }
+
     public void complete(Integer trialNumber, double value) throws IOException {
         if (trialNumber == null) {
             return;
         }
         CompleteRequest completeRequest = new CompleteRequest(trialNumber, value);
-        ObjectMapper objectMapper = new ObjectMapper();
         String completeRequestJson = objectMapper.writeValueAsString(completeRequest);
 
         RequestBody requestBody = RequestBody.create(
@@ -74,6 +81,25 @@ public class RemoteHyperManager extends FixedHyperManager {
 
         try (Response response = okHttpClient.newCall(request).execute()) {
             System.err.println("complete response: " + response);
+        }
+    }
+
+    public void startStudy(String studyName) throws IOException {
+        log.info("starting study '{}'", studyName);
+        CreateStudyRequest createStudyRequest = new CreateStudyRequest(studyName);
+        String createStudyRequestJson = objectMapper.writeValueAsString(createStudyRequest);
+
+        RequestBody requestBody = RequestBody.create(
+                createStudyRequestJson,
+                MediaType.get("application/json; charset=utf-8"));
+
+        Request request = new Request.Builder()
+                .url("http://localhost:5005/study")
+                .post(requestBody)
+                .build();
+
+        try (Response response = okHttpClient.newCall(request).execute()) {
+            log.trace("start study response: {}", response);
         }
     }
 
@@ -98,6 +124,9 @@ public class RemoteHyperManager extends FixedHyperManager {
             throw new IllegalArgumentException("trying to fix '%s', but is not registered as hyperparameter".formatted(qualifiedKey.get()));
         }
         super.doFix(qualifiedKey, value, override);
+    }
+
+    record CreateStudyRequest(String name) {
     }
 
     public static class SuggestResponse {

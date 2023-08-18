@@ -83,6 +83,10 @@ public abstract class HyperManager {
      */
     protected abstract void doFix(QualifiedKey qualifiedKey, Object value, boolean override);
 
+    public <T> void clear(HyperDefinition<T> hyperDefinition) {
+        doFix(resolve(hyperDefinition.getName()), null, true);
+    }
+
     /**
      * Move to a subdirectory. Creates another view of the same HyperManager
      * that interprets all property names as relative to the given subdirectory.
@@ -96,6 +100,6 @@ public abstract class HyperManager {
 
     protected QualifiedKey resolve(String simpleKey) {
         // to be overridden
-        return new QualifiedKey(simpleKey);
+        return new QualifiedKey("", simpleKey);
     }
 }

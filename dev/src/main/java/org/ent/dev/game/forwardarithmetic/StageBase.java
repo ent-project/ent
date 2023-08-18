@@ -10,7 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -43,14 +47,31 @@ public abstract class StageBase<S> {
             registerHyperparameters(hyperCollector);
             RemoteHyperManager hyperManager = new RemoteHyperManager(hyperCollector.getHyperDefinitions());
             fixHyperparameters(hyperManager);
+            if (hyperManager.requiresRemoteCall()) {
+                hyperManager.startStudy(getStudyName());
+            }
             runStudy(hyperManager, numTrials);
         }
+
+        protected String getStudyName() {
+            String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            return "study-%s-%s".formatted(getStageClass().getSimpleName(), date);
+        }
+
+        private Class<SB> getStageClass() {
+            Type superclass = getClass().getGenericSuperclass();
+            ParameterizedType parameterized = (ParameterizedType) superclass;
+            @SuppressWarnings("unchecked")
+            Class<SB> result = (Class<SB>) parameterized.getActualTypeArguments()[0];
+            return result;
+        }
+
 
         public void runStudy(RemoteHyperManager hyperManager, int numTrials) throws IOException {
             for (int indexTrial = 0; indexTrial < numTrials; indexTrial++) {
                 Integer trialNumberRemote = hyperManager.suggest();
 
-                StageBase dev = createStage(hyperManager, indexTrial);
+                SB dev = createStage(hyperManager, indexTrial);
 
                 dev.runTrial(indexTrial);
                 int hits = dev.numHit();

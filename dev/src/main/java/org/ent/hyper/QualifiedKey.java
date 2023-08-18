@@ -1,13 +1,27 @@
 package org.ent.hyper;
 
 public class QualifiedKey {
-    private final String qualified;
+    public final String path;
+    public final String simpleKey;
 
-    public QualifiedKey(String qualified) {
-        this.qualified = qualified;
+    public QualifiedKey(String path, String simpleKey) {
+        this.path = path;
+        this.simpleKey = simpleKey;
+    }
+
+    public String extendPath(String group) {
+        if (path.isEmpty()) {
+            return group;
+        } else {
+            return path + "." + group;
+        }
     }
 
     public String get() {
-        return qualified;
+        if (path.isEmpty()) {
+            return simpleKey;
+        } else {
+            return path + "." + simpleKey;
+        }
     }
 }

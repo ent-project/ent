@@ -16,7 +16,7 @@ public class SubHyperManager extends HyperManager {
     @Override
     protected QualifiedKey resolve(String simpleKey) {
         QualifiedKey resolved = delegate.resolve(simpleKey);
-        return new QualifiedKey(group + "." + resolved.get());
+        return new QualifiedKey(resolved.extendPath(group), resolved.simpleKey);
     }
 
     @Override
