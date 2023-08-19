@@ -3,11 +3,8 @@ package org.ent.dev.game.forwardarithmetic.peek;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
 import org.ent.dev.game.forwardarithmetic.StageBase;
-import org.ent.dev.game.forwardarithmetic.readinfo.ValueDrawingWithPortals;
-import org.ent.dev.randnet.PortalValue;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.randnet.ValueDrawing;
-import org.ent.dev.randnet.ValueDrawingHp;
 import org.ent.dev.variation.ArrowMixMutation;
 import org.ent.hyper.DoubleHyperDefinition;
 import org.ent.hyper.HyperManager;
@@ -16,9 +13,7 @@ import org.ent.hyper.RemoteHyperManager;
 import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
-import org.ent.net.node.cmd.operation.Operations;
 import org.ent.net.node.cmd.operation.TriOperation;
-import org.ent.net.node.cmd.veto.Conditions;
 import org.ent.net.util.NetCopy2;
 import org.ent.net.util.RandomUtil;
 import org.ent.webui.WebUI;
@@ -37,7 +32,6 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
 
     public static final IntHyperDefinition HYPER_MAX_ATTEMPTS = new IntHyperDefinition("max-attempts", 1, 2000);
     public static final IntHyperDefinition HYPER_MAX_STEPS = new IntHyperDefinition("max-steps", 3, 200);
-    public static final DoubleHyperDefinition HYPER_FRAC_PORTALS = new DoubleHyperDefinition("fraction_portals", 0.0, 1.0);
     public static final IntHyperDefinition HYPER_NO_NODES_ADD_ON = new IntHyperDefinition("no-nodes-add-on", 1, 100);
     public static final DoubleHyperDefinition HYPER_ARROW_MIX_STRENGTH_TARGET = new DoubleHyperDefinition("arrow-mix-strength-target", 0.0, 1.0);
     public static final DoubleHyperDefinition HYPER_ARROW_MIX_STRENGTH = new DoubleHyperDefinition("arrow-mix-strength", 0.0, 1.0);
@@ -66,7 +60,7 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
     public StagePeek5b(HyperManager hyperManager, UniformRandomProvider randMaster) {
         super(randMaster);
 
-        this.drawing = new ValueDrawingPeek5b2(hyperManager.group(HYPER_GROUP_STAGE5B_DRAWING));
+        this.drawing = new ValueDrawingWithPortalAndEvalFlow(hyperManager.group(HYPER_GROUP_STAGE5B_DRAWING));
 
         this.maxAttempts = hyperManager.get(HYPER_MAX_ATTEMPTS);
         this.maxSteps = hyperManager.get(HYPER_MAX_STEPS);
@@ -112,7 +106,7 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
         @Override
         public void registerHyperparameters(HyperManager hyperCollector) {
             new StagePeek4.Factory().registerHyperparameters(hyperCollector.group(HYPER_GROUP_STAGE4));
-            ValueDrawingPeek5b2.registerHyperparameters(hyperCollector.group(HYPER_GROUP_STAGE5B_DRAWING));
+            ValueDrawingWithPortalAndEvalFlow.registerHyperparameters(hyperCollector.group(HYPER_GROUP_STAGE5B_DRAWING));
             hyperCollector.get(HYPER_MAX_ATTEMPTS);
             hyperCollector.get(HYPER_MAX_STEPS);
             hyperCollector.get(HYPER_NO_NODES_ADD_ON);
@@ -182,7 +176,7 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
                     //                            stage5b-drawing.fraction_portals 0.12007412696589982
                     //                            stage5b-drawing.fraction_set 0.5736090916799118
                                         """);
-            hyperManager.group(HYPER_GROUP_STAGE5B_DRAWING).fix(ValueDrawingPeek5b2.FRAC_EVAL_FLOW, 0.0);
+            hyperManager.group(HYPER_GROUP_STAGE5B_DRAWING).fix(ValueDrawingWithPortalAndEvalFlow.FRAC_EVAL_FLOW, 0.0);
 
 
             hyperManager.fixLines("""
@@ -218,26 +212,27 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
 
             boolean hit = false;
             boolean maybeHit = operationListener.found != null;
+            Solution solution = null;
             if (maybeHit) {
-                Solution solution = new Solution(upstreamPeek4, netAddOnSeed, mixerSeed, operationListener);
-                if (doubleCheck(solution)) {
+                solution = new Solution(upstreamPeek4, netAddOnSeed, mixerSeed, operationListener);
+                if (verify(solution)) {
                     hit = true;
                 } else {
                     numDoubleCheckFailed++;
                 }
             }
             if (hit) {
-                Solution solution = new Solution(upstreamPeek4, netAddOnSeed, mixerSeed, operationListener);
                 submitSolution(solution);
                 if (REPLAY_HITS) {
+                    Solution solution_final = solution;
                     WebUiStoryOutput.addStoryWithAnnouncement("StagePeek3-%s-%s".formatted(indexTrial, indexEvaluation),
-                            () -> stagePeek4.stagePeek3().replayWithDetails(solution.upstreamPeek4().upstreamPeek3()));
+                            () -> stagePeek4.stagePeek3().replayWithDetails(solution_final.upstreamPeek4().upstreamPeek3()));
                     WebUiStoryOutput.addStoryWithAnnouncement("StagePeek4-%s-%s-unmixed".formatted(indexTrial, indexEvaluation),
-                            () -> stagePeek4.replayUnmixed(solution.upstreamPeek4()));
+                            () -> stagePeek4.replayUnmixed(solution_final.upstreamPeek4()));
                     WebUiStoryOutput.addStoryWithAnnouncement("StagePeek4-%s-%s".formatted(indexTrial, indexEvaluation),
-                            () -> stagePeek4.replayWithDetails(solution.upstreamPeek4()));
+                            () -> stagePeek4.replayWithDetails(solution_final.upstreamPeek4()));
                     WebUiStoryOutput.addStoryWithAnnouncement("StagePeek5b-%s-%s-%s".formatted(indexTrial, indexEvaluation, indexAttempt),
-                            () -> replayWithDetails(solution));
+                            () -> replayWithDetails(solution_final));
                 }
                 numHit++;
                 break;
@@ -245,7 +240,16 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
         }
     }
 
-    private boolean doubleCheck(Solution solution) {
+    private boolean verify(Solution solution) {
+        for (int i = 0; i < 10; i++) {
+            if (!verifySingle(solution)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean verifySingle(Solution solution) {
         int operand1 = ArithmeticForwardGame.drawOperand(randTargets);
         int operand2 = ArithmeticForwardGame.drawOperand(randTargets);
         ArithmeticForwardGame game0 = solution.upstreamPeek4().upstreamPeek3().upstreamPeek1().game();
@@ -351,99 +355,6 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
 
     public record Solution(StagePeek4.Solution upstreamPeek4, long netAddOnSeed,
                            long mixerSeed, OperationExecutionEntListener operationListener) {
-    }
-
-    private class ValueDrawingPeek5b2 extends ValueDrawingWithPortals {
-        public static DoubleHyperDefinition FRAC_EVAL_FLOW = new DoubleHyperDefinition("fraction_eval_flow", 0.0, 1.0);
-
-        public ValueDrawingPeek5b2(HyperManager hyperManager) {
-            super(hyperManager);
-        }
-
-        public static void registerHyperparameters(HyperManager hyperManager) {
-            ValueDrawingWithPortals.registerHyperparameter(hyperManager);
-            hyperManager.get(FRAC_EVAL_FLOW);
-        }
-
-        @Override
-        protected DistributionSplit defaultDistribution() {
-            double fracCommands = hyperManager.get(FRAC_COMMANDS);
-            double fracMajorCommands = hyperManager.get(FRAC_MAJOR_COMMANDS);
-            double fracMajorSplit = hyperManager.get(FRAC_MAJOR_SPLIT);
-            double fracSet = hyperManager.get(FRAC_SET);
-            double fracEvalFlow = hyperManager.get(FRAC_EVAL_FLOW);
-            log.info("got HPs: fracCommands={}, fracMajorCommands={}, fracMajorSplit={}, fracSet={}, fracEvalFlow={}", fracCommands, fracMajorCommands, fracMajorSplit, fracSet, fracEvalFlow);
-
-            return new DistributionSplit(fracCommands)
-                    // commands
-                    .first(new DistributionSplit(fracMajorCommands)
-                            // major commands
-                            .first(new DistributionSplit(fracMajorSplit)
-                                    // top 2 commands
-                                    .first(new DistributionSplit(fracSet)
-                                            .first(new DistributionLeaf().add(Operations.SET_OPERATION, WEIGHT1))
-                                            .rest(new DistributionLeaf().add(Operations.SET_VALUE_OPERATION, WEIGHT1))
-                                    )
-                                    // other major commands
-                                    .rest(new DistributionSplit(fracEvalFlow)
-                                            // eval_flow
-                                            .first(new DistributionLeaf()
-                                                    .add(Operations.EVAL_FLOW_OPERATION, WEIGHT2)
-                                            )
-                                            // remaining major commands
-                                            .rest(new DistributionLeaf()
-                                                    .add(Operations.ANCESTOR_EXCHANGE_OPERATION, WEIGHT1)
-                                                    .add(Operations.DUP_OPERATION, WEIGHT1)
-                                                    .add(Operations.EVAL_OPERATION, WEIGHT2)
-                                            )))
-                            // minor commands
-                            .rest(new DistributionLeaf()
-                                    .add(Operations.NEG_OPERATION, WEIGHT3)
-                                    .add(Operations.INC_OPERATION, WEIGHT2)
-                                    .add(Operations.DEC_OPERATION, WEIGHT2)
-                                    .add(Operations.PLUS_OPERATION, WEIGHT2)
-                                    .add(Operations.MINUS_OPERATION, WEIGHT3)
-                                    .add(Operations.MULTIPLY_OPERATION, WEIGHT2)
-                                    .add(Operations.MODULO_OPERATION, WEIGHT2)
-                                    .add(Operations.XOR_OPERATION, WEIGHT2)
-                                    .add(Operations.BITWISE_AND_OPERATION, WEIGHT2)
-                                    .add(Operations.BITWISE_OR_OPERATION, WEIGHT2)
-                                    .add(Operations.ROTATE_RIGHT_OPERATION, WEIGHT3)
-                                    .add(Operations.SHIFT_LEFT_OPERATION, WEIGHT3)
-                                    .add(Operations.SHIFT_RIGHT_OPERATION, WEIGHT3)))
-                    // conditions
-                    .rest(new DistributionLeaf()
-                            .add(Conditions.IDENTICAL_CONDITION, false, WEIGHT3)
-                            .add(Conditions.IDENTICAL_CONDITION, true, WEIGHT3)
-                            .add(Conditions.SAME_VALUE_CONDITION, false, WEIGHT3)
-                            .add(Conditions.SAME_VALUE_CONDITION, true, WEIGHT3)
-                            .add(Conditions.GREATER_THAN_CONDITION, false, WEIGHT3)
-                            .add(Conditions.GREATER_THAN_CONDITION, true, WEIGHT3));
-        }
-    }
-
-    private class ValueDrawingPeek5b extends ValueDrawingHp {
-
-        public static void registerHyperparameters(HyperManager hyperManager) {
-            hyperManager.get(HYPER_FRAC_PORTALS);
-            ValueDrawingHp.registerHyperparameter(hyperManager);
-        }
-
-        public ValueDrawingPeek5b(HyperManager hyperManager) {
-            super(hyperManager);
-        }
-
-        @Override
-        protected DistributionNode initializeDistribution() {
-            double fracPortal = hyperManager.get(HYPER_FRAC_PORTALS);
-            log.info("got HPs: fracPortal={}", fracPortal);
-            return new DistributionSplit(fracPortal)
-                    .first(new DistributionLeaf()
-                            .add(new PortalValue(0, 1))
-                            .add(new PortalValue(0, null))
-                            .add(new PortalValue(null, 1)))
-                    .rest(new DistributionLeaf().add(Operations.SET_VALUE_OPERATION));
-        }
     }
 
 }

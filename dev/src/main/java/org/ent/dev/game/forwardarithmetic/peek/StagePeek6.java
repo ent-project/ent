@@ -28,7 +28,7 @@ import java.util.List;
 
 public class StagePeek6 extends StageBase<StagePeek6.Solution> {
 
-    private static final boolean WEB_UI = true;
+    private static final boolean WEB_UI = false;
     public static final boolean REPLAY_HITS = false || WEB_UI;
     private static final boolean ANNOTATIONS = false || WEB_UI;
 
@@ -163,7 +163,6 @@ public class StagePeek6 extends StageBase<StagePeek6.Solution> {
                             () -> stagePeek5b.replayWithDetails(solution.upstreamPeek5b()));
                     WebUiStoryOutput.addStoryWithAnnouncement("StagePeek6-%s-%s-%s".formatted(indexTrial, indexEvaluation, indexAttempt),
                             () -> replayWithDetails(solution));
-
                 }
                 numHit++;
                 break;
@@ -284,10 +283,11 @@ public class StagePeek6 extends StageBase<StagePeek6.Solution> {
         }
     }
 
-    private static class RightAnswerListener extends NopNetEventListener {
+    public static class RightAnswerListener extends NopNetEventListener {
 
         private final ArithmeticForwardGame game;
-        private Integer foundStep;
+        public Integer foundStep;
+        public Node foundTarget;
 
         public RightAnswerListener(ArithmeticForwardGame game) {
             this.game = game;
@@ -297,6 +297,7 @@ public class StagePeek6 extends StageBase<StagePeek6.Solution> {
         public void setValue(Node node, int previousValue, int newValue) {
             if (newValue == game.getExpectedSolution()) {
                 foundStep = game.getStep();
+                foundTarget = node;
                 game.stopExecution();
             }
         }
