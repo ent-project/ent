@@ -28,7 +28,7 @@ public class WebUI {
 
     private static final Logger log = LoggerFactory.getLogger(WebUI.class);
 
-    private static class Story {
+    public static class Story {
         final Runnable runnable;
         boolean executed;
 
@@ -176,7 +176,9 @@ public class WebUI {
         );
     }
 
-    public static void addStoryHook(String storyId, Runnable runnable) {
-        storyHooks.put(storyId, new Story(runnable));
+    public static Story addStoryHook(String storyId, Runnable runnable) {
+        Story story = new Story(runnable);
+        storyHooks.put(storyId, story);
+        return story;
     }
 }

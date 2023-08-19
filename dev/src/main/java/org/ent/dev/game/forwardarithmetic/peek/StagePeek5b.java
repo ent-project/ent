@@ -3,6 +3,7 @@ package org.ent.dev.game.forwardarithmetic.peek;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
 import org.ent.dev.game.forwardarithmetic.StageBase;
+import org.ent.dev.game.forwardarithmetic.readinfo.ValueDrawingWithPortals;
 import org.ent.dev.randnet.PortalValue;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.randnet.ValueDrawing;
@@ -16,6 +17,8 @@ import org.ent.net.Net;
 import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.operation.Operations;
+import org.ent.net.node.cmd.operation.TriOperation;
+import org.ent.net.node.cmd.veto.Conditions;
 import org.ent.net.util.NetCopy2;
 import org.ent.net.util.RandomUtil;
 import org.ent.webui.WebUI;
@@ -52,15 +55,18 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
 
     private final UniformRandomProvider randNetSeeds;
     private final UniformRandomProvider randMixerSeeds;
+    private final UniformRandomProvider randTargets;
 
     private final ValueDrawing drawing;
 
     private final StagePeek4 stagePeek4;
 
+    private int numDoubleCheckFailed;
+
     public StagePeek5b(HyperManager hyperManager, UniformRandomProvider randMaster) {
         super(randMaster);
 
-        this.drawing = new ValueDrawingPeek5b(hyperManager.group(HYPER_GROUP_STAGE5B_DRAWING));
+        this.drawing = new ValueDrawingPeek5b2(hyperManager.group(HYPER_GROUP_STAGE5B_DRAWING));
 
         this.maxAttempts = hyperManager.get(HYPER_MAX_ATTEMPTS);
         this.maxSteps = hyperManager.get(HYPER_MAX_STEPS);
@@ -71,6 +77,7 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
 
         this.randNetSeeds = RandomUtil.newRandom2(randMaster.nextLong());
         this.randMixerSeeds = RandomUtil.newRandom2(randMaster.nextLong());
+        this.randTargets = RandomUtil.newRandom2(randMaster.nextLong());
 
         this.stagePeek4 = new StagePeek4(
                 hyperManager.group(HYPER_GROUP_STAGE4),
@@ -82,31 +89,30 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
         if (WEB_UI) {
             WebUI.setUpJavalin();
         }
-        new StagePeek5b.Factory().main(5);
+        new StagePeek5b.Factory().main(10);
     }
 
     static class Factory extends StageFactory<StagePeek5b> {
 
         @Override
         protected String getStudyName() {
-            return super.getStudyName()+"_2";
+            return super.getStudyName() + "_no_evalflow2";
         }
 
         @Override
         public StagePeek5b createStage(RemoteHyperManager hyperManager, int indexTrial) {
             long masterSeed = randomTrials.nextLong();
-//            masterSeed = 4437849118850236558L;
             log.info("using master seed {} for trial {}", masterSeed, indexTrial);
             StagePeek5b dev = new StagePeek5b(hyperManager, RandomUtil.newRandom2(masterSeed));
-//            dev.setTrialMaxEvaluations(100);
-            dev.setTrialMaxDuration(Duration.ofSeconds(30));
+//            dev.setTrialMaxEvaluations(5);
+            dev.setTrialMaxDuration(Duration.ofSeconds(12));
             return dev;
         }
 
         @Override
         public void registerHyperparameters(HyperManager hyperCollector) {
             new StagePeek4.Factory().registerHyperparameters(hyperCollector.group(HYPER_GROUP_STAGE4));
-            ValueDrawingPeek5b.registerHyperparameters(hyperCollector.group(HYPER_GROUP_STAGE5B_DRAWING));
+            ValueDrawingPeek5b2.registerHyperparameters(hyperCollector.group(HYPER_GROUP_STAGE5B_DRAWING));
             hyperCollector.get(HYPER_MAX_ATTEMPTS);
             hyperCollector.get(HYPER_MAX_STEPS);
             hyperCollector.get(HYPER_NO_NODES_ADD_ON);
@@ -119,8 +125,8 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
         public void fixHyperparameters(HyperManager hyperManager) {
             new StagePeek4.Factory().fixHyperparameters(hyperManager.group(HYPER_GROUP_STAGE4));
             hyperManager.group(HYPER_GROUP_STAGE4).overrideLines("""
-                fragment-context 2
-                    """);
+                    fragment-context 2
+                        """);
 //            hyperManager.group(HYPER_GROUP_STAGE5B_DRAWING).fixLines("""
 //                    fraction_commands 0.27390593155980114
 //                    fraction_major_commands 0.7750135486307677
@@ -138,19 +144,19 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
             hyperManager.group(HYPER_GROUP_STAGE4).clear(StagePeek4.HYPER_ARROW_MIX_STRENGTH);
 
             hyperManager.fixLines("""
-                    arrow-mix-strength 0.5895591246727114
-                    max-attempts 385
-//                    max-steps 12
-//                    no-nodes-add-on 28
-                    stage4.arrow-mix-strength 0.9243883842949241
-                    stage4.fragment-context 1
-                    stage4.max-attempts 55
-//                    stage5b-drawing.fraction_commands 0.6127454263266574
-//                    stage5b-drawing.fraction_major_commands 0.03186006057262768
-//                    stage5b-drawing.fraction_major_split 0.511007022322576
-//                    stage5b-drawing.fraction_portals 0.42748436419696856
-//                    stage5b-drawing.fraction_set 0.5607673547553892
-                    """);
+                                        arrow-mix-strength 0.5895591246727114
+                                        max-attempts 385
+                    //                    max-steps 12
+                    //                    no-nodes-add-on 28
+                                        stage4.arrow-mix-strength 0.9243883842949241
+                                        stage4.fragment-context 1
+                                        stage4.max-attempts 55
+                    //                    stage5b-drawing.fraction_commands 0.6127454263266574
+                    //                    stage5b-drawing.fraction_major_commands 0.03186006057262768
+                    //                    stage5b-drawing.fraction_major_split 0.511007022322576
+                    //                    stage5b-drawing.fraction_portals 0.42748436419696856
+                    //                    stage5b-drawing.fraction_set 0.5607673547553892
+                                        """);
 //            hyperManager.fix(HYPER_ARROW_MIX_STRENGTH2, 0.1);
             hyperManager.clear(HYPER_ARROW_MIX_STRENGTH);
             hyperManager.clear(HYPER_MAX_ATTEMPTS);
@@ -165,18 +171,34 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
             hyperManager.group(HYPER_GROUP_STAGE4).override(StagePeek4.HYPER_LOOSE_STITCHING, 1);
 
             hyperManager.fixLines("""
-                arrow-mix-strength 0.15502819836639187
-                arrow-mix-strength-target 0.9576915738511704
-                arrow-mix-strength2 0.20920002955720085
-                max-steps 49
-                no-nodes-add-on 13
-                stage5b-drawing.fraction_commands 0.320766197908282
-                stage5b-drawing.fraction_major_commands 0.8308019880776694
-                stage5b-drawing.fraction_major_split 0.6954265118753846
-                stage5b-drawing.fraction_portals 0.12007412696589982
-                stage5b-drawing.fraction_set 0.5736090916799118
-        """);
+                                                arrow-mix-strength 0.15502819836639187
+                                                arrow-mix-strength-target 0.9576915738511704
+                                                arrow-mix-strength2 0.20920002955720085
+                                                max-steps 49
+                                                no-nodes-add-on 13
+                    //                            stage5b-drawing.fraction_commands 0.320766197908282
+                    //                            stage5b-drawing.fraction_major_commands 0.8308019880776694
+                    //                            stage5b-drawing.fraction_major_split 0.6954265118753846
+                    //                            stage5b-drawing.fraction_portals 0.12007412696589982
+                    //                            stage5b-drawing.fraction_set 0.5736090916799118
+                                        """);
+            hyperManager.group(HYPER_GROUP_STAGE5B_DRAWING).fix(ValueDrawingPeek5b2.FRAC_EVAL_FLOW, 0.0);
+
+
+            hyperManager.fixLines("""
+                    stage5b-drawing.fraction_commands 0.5820685541375051
+                    stage5b-drawing.fraction_major_commands 0.42328739486591704
+                    stage5b-drawing.fraction_major_split 0.15312902067600329
+                    stage5b-drawing.fraction_portals 0.25005891352994464
+                    stage5b-drawing.fraction_set 0.08918501613305074
+                    """);
         }
+    }
+
+    @Override
+    protected void printRunInfo(Duration duration) {
+        log.info("potential hit, bit double check failed: {}", numDoubleCheckFailed);
+        super.printRunInfo(duration);
     }
 
     @Override
@@ -194,7 +216,16 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
 
             game.execute();
 
-            boolean hit = operationListener.found != null;
+            boolean hit = false;
+            boolean maybeHit = operationListener.found != null;
+            if (maybeHit) {
+                Solution solution = new Solution(upstreamPeek4, netAddOnSeed, mixerSeed, operationListener);
+                if (doubleCheck(solution)) {
+                    hit = true;
+                } else {
+                    numDoubleCheckFailed++;
+                }
+            }
             if (hit) {
                 Solution solution = new Solution(upstreamPeek4, netAddOnSeed, mixerSeed, operationListener);
                 submitSolution(solution);
@@ -214,8 +245,27 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
         }
     }
 
-    public void replayWithDetails(Solution solution) {
+    private boolean doubleCheck(Solution solution) {
+        int operand1 = ArithmeticForwardGame.drawOperand(randTargets);
+        int operand2 = ArithmeticForwardGame.drawOperand(randTargets);
+        ArithmeticForwardGame game0 = solution.upstreamPeek4().upstreamPeek3().upstreamPeek1().game();
+        TriOperation operation;
+        do {
+            operation = ArithmeticForwardGame.drawOperation(randTargets);
+        } while (operation == game0.getOperation());
 
+        ArithmeticForwardGame game = setUpGame(
+                solution.upstreamPeek4(), solution.netAddOnSeed(), solution.mixerSeed(),
+                operand1, operand2, operation);
+
+        OperationExecutionEntListener operationListener = new OperationExecutionEntListener(game);
+        game.getEnt().addEventListener(operationListener);
+
+        game.execute();
+        return operationListener.found != null;
+    }
+
+    public void replayWithDetails(Solution solution) {
         ArithmeticForwardGame game = setUpGame(solution.upstreamPeek4(), solution.netAddOnSeed(), solution.mixerSeed());
         game.setMaxSteps(solution.operationListener().found + 1);
         OperationExecutionEntListener operationListener = new OperationExecutionEntListener(game);
@@ -227,15 +277,19 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
     }
 
     public ArithmeticForwardGame setUpGame(StagePeek4.Solution upstreamPeek4, long netAddOnSeed, long mixerSeed) {
+        ArithmeticForwardGame game0 = upstreamPeek4.upstreamPeek3().upstreamPeek1().game();
+        return setUpGame(upstreamPeek4, netAddOnSeed, mixerSeed,
+                game0.getOperand1(), game0.getOperand2(), game0.getOperation());
+    }
+
+    public ArithmeticForwardGame setUpGame(StagePeek4.Solution upstreamPeek4, long netAddOnSeed, long mixerSeed, int operand1, int operand2, TriOperation operation) {
         Net net = setUpNet(upstreamPeek4, netAddOnSeed, mixerSeed);
 
         int realMaxSteps = upstreamPeek4.readOperandsListener().allFoundStep + 1 + maxSteps;
-        ArithmeticForwardGame game0 = upstreamPeek4.upstreamPeek3().upstreamPeek1().game();
-
         return new ArithmeticForwardGame(
-                game0.getOperand1(),
-                game0.getOperand2(),
-                game0.getOperation(),
+                operand1,
+                operand2,
+                operation,
                 net,
                 realMaxSteps);
     }
@@ -272,7 +326,7 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
                     }
                 }
             }
-            ArrowMixMutation mixMutationTarget = new ArrowMixMutation(arrowMixStrengthTarget, net, RandomUtil.newRandom2(mixerSeed+9)) {
+            ArrowMixMutation mixMutationTarget = new ArrowMixMutation(arrowMixStrengthTarget, net, RandomUtil.newRandom2(mixerSeed + 9)) {
                 @Override
                 protected int resolveDestination(int index) {
                     return targets.get(index);
@@ -297,6 +351,75 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
 
     public record Solution(StagePeek4.Solution upstreamPeek4, long netAddOnSeed,
                            long mixerSeed, OperationExecutionEntListener operationListener) {
+    }
+
+    private class ValueDrawingPeek5b2 extends ValueDrawingWithPortals {
+        public static DoubleHyperDefinition FRAC_EVAL_FLOW = new DoubleHyperDefinition("fraction_eval_flow", 0.0, 1.0);
+
+        public ValueDrawingPeek5b2(HyperManager hyperManager) {
+            super(hyperManager);
+        }
+
+        public static void registerHyperparameters(HyperManager hyperManager) {
+            ValueDrawingWithPortals.registerHyperparameter(hyperManager);
+            hyperManager.get(FRAC_EVAL_FLOW);
+        }
+
+        @Override
+        protected DistributionSplit defaultDistribution() {
+            double fracCommands = hyperManager.get(FRAC_COMMANDS);
+            double fracMajorCommands = hyperManager.get(FRAC_MAJOR_COMMANDS);
+            double fracMajorSplit = hyperManager.get(FRAC_MAJOR_SPLIT);
+            double fracSet = hyperManager.get(FRAC_SET);
+            double fracEvalFlow = hyperManager.get(FRAC_EVAL_FLOW);
+            log.info("got HPs: fracCommands={}, fracMajorCommands={}, fracMajorSplit={}, fracSet={}, fracEvalFlow={}", fracCommands, fracMajorCommands, fracMajorSplit, fracSet, fracEvalFlow);
+
+            return new DistributionSplit(fracCommands)
+                    // commands
+                    .first(new DistributionSplit(fracMajorCommands)
+                            // major commands
+                            .first(new DistributionSplit(fracMajorSplit)
+                                    // top 2 commands
+                                    .first(new DistributionSplit(fracSet)
+                                            .first(new DistributionLeaf().add(Operations.SET_OPERATION, WEIGHT1))
+                                            .rest(new DistributionLeaf().add(Operations.SET_VALUE_OPERATION, WEIGHT1))
+                                    )
+                                    // other major commands
+                                    .rest(new DistributionSplit(fracEvalFlow)
+                                            // eval_flow
+                                            .first(new DistributionLeaf()
+                                                    .add(Operations.EVAL_FLOW_OPERATION, WEIGHT2)
+                                            )
+                                            // remaining major commands
+                                            .rest(new DistributionLeaf()
+                                                    .add(Operations.ANCESTOR_EXCHANGE_OPERATION, WEIGHT1)
+                                                    .add(Operations.DUP_OPERATION, WEIGHT1)
+                                                    .add(Operations.EVAL_OPERATION, WEIGHT2)
+                                            )))
+                            // minor commands
+                            .rest(new DistributionLeaf()
+                                    .add(Operations.NEG_OPERATION, WEIGHT3)
+                                    .add(Operations.INC_OPERATION, WEIGHT2)
+                                    .add(Operations.DEC_OPERATION, WEIGHT2)
+                                    .add(Operations.PLUS_OPERATION, WEIGHT2)
+                                    .add(Operations.MINUS_OPERATION, WEIGHT3)
+                                    .add(Operations.MULTIPLY_OPERATION, WEIGHT2)
+                                    .add(Operations.MODULO_OPERATION, WEIGHT2)
+                                    .add(Operations.XOR_OPERATION, WEIGHT2)
+                                    .add(Operations.BITWISE_AND_OPERATION, WEIGHT2)
+                                    .add(Operations.BITWISE_OR_OPERATION, WEIGHT2)
+                                    .add(Operations.ROTATE_RIGHT_OPERATION, WEIGHT3)
+                                    .add(Operations.SHIFT_LEFT_OPERATION, WEIGHT3)
+                                    .add(Operations.SHIFT_RIGHT_OPERATION, WEIGHT3)))
+                    // conditions
+                    .rest(new DistributionLeaf()
+                            .add(Conditions.IDENTICAL_CONDITION, false, WEIGHT3)
+                            .add(Conditions.IDENTICAL_CONDITION, true, WEIGHT3)
+                            .add(Conditions.SAME_VALUE_CONDITION, false, WEIGHT3)
+                            .add(Conditions.SAME_VALUE_CONDITION, true, WEIGHT3)
+                            .add(Conditions.GREATER_THAN_CONDITION, false, WEIGHT3)
+                            .add(Conditions.GREATER_THAN_CONDITION, true, WEIGHT3));
+        }
     }
 
     private class ValueDrawingPeek5b extends ValueDrawingHp {

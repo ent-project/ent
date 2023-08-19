@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import java.util.function.Supplier;
+
 public class WebUiStoryOutput {
     public static final String MDC_KEY_STORY = "story";
 
@@ -25,5 +27,19 @@ public class WebUiStoryOutput {
 
     public static void endStory() {
         MDC.remove(MDC_KEY_STORY);
+    }
+
+    public static <T> T runStoryWithAnnouncement(String storyId, Supplier<T> run) {
+        htmlLogger.info("<a href=\"/?story=%s\" target=\"_blank\">%s</a>".formatted(storyId, storyId));
+        return runStory(storyId, run);
+    }
+
+    public static <T> T runStory(String storyId, Supplier<T> run) {
+        WebUI.Story story = WebUI.addStoryHook(storyId, () -> {});
+        startStory(storyId);
+        T result = run.get();
+        story.setExecuted(true);
+        endStory();
+        return result;
     }
 }

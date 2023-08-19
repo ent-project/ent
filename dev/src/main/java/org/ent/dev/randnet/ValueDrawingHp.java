@@ -133,6 +133,10 @@ public class ValueDrawingHp extends DefaultValueDrawing2 {
     }
 
     protected DistributionNode initializeDistribution() {
+        return defaultDistribution();
+    }
+
+    protected DistributionSplit defaultDistribution() {
         double fracCommands = hyperManager.get(FRAC_COMMANDS);
         double fracMajorCommands = hyperManager.get(FRAC_MAJOR_COMMANDS);
         double fracMajorSplit = hyperManager.get(FRAC_MAJOR_SPLIT);
