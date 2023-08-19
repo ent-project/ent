@@ -14,6 +14,7 @@ public class OperationExecutionEntListener extends NopEntEventListener {
     protected final ArithmeticForwardGame game;
     public Integer found;
     public Node rootWhenFound;
+    public Node targetWhenFound;
 
     OperationExecutionEntListener(ArithmeticForwardGame game) {
         this.game = game;
@@ -40,6 +41,7 @@ public class OperationExecutionEntListener extends NopEntEventListener {
             if (fullmatch) {
                 found = game.getStep();
                 rootWhenFound = game.getEnt().getNet().getRoot();
+                targetWhenFound = nodeTarget;
                 game.stopExecution();
             }
         }

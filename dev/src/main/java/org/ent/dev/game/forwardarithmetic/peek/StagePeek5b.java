@@ -28,9 +28,9 @@ import java.util.List;
 
 public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
 
-    private static final boolean WEB_UI = true;
+    private static final boolean WEB_UI = false;
     public static final boolean REPLAY_HITS = false || WEB_UI;
-    private static final boolean ANNOTATIONS = false || WEB_UI;
+    private static final boolean ANNOTATIONS = true || WEB_UI;
 
     public static final IntHyperDefinition HYPER_MAX_ATTEMPTS = new IntHyperDefinition("max-attempts", 1, 2000);
     public static final IntHyperDefinition HYPER_MAX_STEPS = new IntHyperDefinition("max-steps", 3, 200);
@@ -214,7 +214,7 @@ public class StagePeek5b extends StageBase<StagePeek5b.Solution> {
         }
     }
 
-    private void replayWithDetails(Solution solution) {
+    public void replayWithDetails(Solution solution) {
 
         ArithmeticForwardGame game = setUpGame(solution.upstreamPeek4(), solution.netAddOnSeed(), solution.mixerSeed());
         game.setMaxSteps(solution.operationListener().found + 1);
