@@ -26,6 +26,7 @@ import org.ent.webui.WebUiStoryOutput;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.EnumMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -144,7 +145,7 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
 
             game.execute();
 
-            boolean hit = readOperandsListener.allFound != null;
+            boolean hit = readOperandsListener.allFoundStep != null;
             if (hit) {
                 Solution solution = new Solution(
                         stitched.net(),
@@ -246,7 +247,7 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
                 game0.getOperand2(),
                 game0.getOperation(),
                 net,
-                solution.readOperandsListener().allFound + 1);
+                solution.readOperandsListener().allFoundStep + 1);
         Peek4ReadOperandsEntListener readOperandsListener = new Peek4ReadOperandsEntListener(game);
         game.getEnt().addEventListener(readOperandsListener);
         game.setAfterStepHook(readOperandsListener);
@@ -270,7 +271,8 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
 
     public class Peek4ReadOperandsEntListener extends ReadOperandsEntListener implements ArithmeticForwardGame.AfterStepHook {
 
-        public Integer allFound;
+        public Integer allFoundStep;
+        public Map<OpTarget, Node> allFoundTargets;
 
         public Peek4ReadOperandsEntListener(ArithmeticForwardGame game) {
             super(game);
@@ -285,16 +287,18 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
 
         @Override
         public void afterStep(ArithmeticForwardGame game, Object ignored) {
-            if (foundAll()) {
-                allFound = game.getStep();
+            Map<OpTarget, Node> found = foundAll();
+            if (found != null) {
+                allFoundTargets = found;
+                allFoundStep = game.getStep();
                 if (game.isVerbose()) {
-                    log.info("event: found all in step {}; stopping execution", allFound);
+                    log.info("event: found all in step {}; stopping execution", allFoundStep);
                 }
                 game.stopExecution();
             }
         }
 
-        public boolean foundAll() {
+        private Map<OpTarget, Node> foundAll() {
             Node root = game.getEnt().getNet().getRoot();
             if (finalStep) {
                 root = root.getRightChild(Purview.DIRECT);
@@ -314,10 +318,10 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
                     }
                 }
                 if (numFound >= OpTarget.values().length) {
-                    return true;
+                    return found;
                 }
             }
-            return false;
+            return null;
         }
     }
 

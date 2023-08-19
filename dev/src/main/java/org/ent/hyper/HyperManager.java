@@ -31,6 +31,10 @@ public abstract class HyperManager {
         doFix(resolve(hyperDefinition.getName()), value, false);
     }
 
+    public <T> void override(HyperDefinition<T> hyperDefinition, T value) {
+        doFix(resolve(hyperDefinition.getName()), value, true);
+    }
+
     public void fixJson(String hyperSelectionJson) {
         TypeReference<Map<String, Object>> typeRef = new TypeReference<>() {
         };

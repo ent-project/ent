@@ -39,6 +39,10 @@ public class ArrowMixMutation {
         this.destinationRange = new Range(minIncluive, maxExclusive);
     }
 
+    protected int resolveDestination(int index) {
+        return index;
+    }
+
     public void execute() {
         int num = (int) (sourceRange.size() * frequencyFactor);
         int noMutations = ModifiedPoisson.getModifiedPoisson(num).drawModifiedPoisson(rand);
@@ -52,7 +56,8 @@ public class ArrowMixMutation {
         Node node = net.getNodesAsList().get(indexSource);
         Arrow arrow = node.getArrow(rand.nextBoolean() ? ArrowDirection.LEFT : ArrowDirection.RIGHT);
         int indexTarget = rand.nextInt(destinationRange.minIncluive, destinationRange.maxExclusive);
-        Node nodeTarget = net.getNodesAsList().get(indexTarget);
+        int indexTargetResolved = resolveDestination(indexTarget);
+        Node nodeTarget = net.getNodesAsList().get(indexTargetResolved);
         arrow.setTarget(nodeTarget, Purview.DIRECT);
     }
 }

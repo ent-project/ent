@@ -28,6 +28,7 @@ public class Net {
 
     private int netIndex;
     private String name;
+    private boolean coreNet;
 
     private final List<Node> nodes;
     /**
@@ -93,6 +94,14 @@ public class Net {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setCoreNet(boolean coreNet) {
+        this.coreNet = coreNet;
+    }
+
+    public boolean isCoreNet() {
+        return coreNet;
     }
 
     public Net addEventListener(NetEventListener netEventListener) {

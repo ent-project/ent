@@ -20,7 +20,7 @@ public class Ent {
     EntEventListener eventListener = new NopEntEventListener();
 
     public Ent(Net net) {
-        this.net = net;
+        setNet(net);
     }
 
     public Net getNet() {
@@ -29,6 +29,7 @@ public class Ent {
 
     public void setNet(Net net) {
         this.net = net;
+        this.net.setCoreNet(true);
     }
 
     public List<Net> getDomains() {
@@ -61,6 +62,9 @@ public class Ent {
     }
 
     public void addDomain(Net net) {
+        if (net.isCoreNet()) {
+            throw new IllegalArgumentException();
+        }
         domains.add(net);
     }
 
