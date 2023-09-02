@@ -3,7 +3,7 @@ package org.ent.dev.game.forwardarithmetic.peek;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.NopEntEventListener;
 import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
-import org.ent.dev.game.forwardarithmetic.StageBase;
+import org.ent.dev.game.Study;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.randnet.ValueDrawing;
 import org.ent.dev.trim2.TrimmingHelper;
@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 
-public class StagePeek7 extends StageBase<StagePeek7.Solution> {
+public class StagePeek7 extends Study<StagePeek7.Solution> {
 
     private static final boolean WEB_UI = true;
     public static final boolean REPLAY_HITS = false || WEB_UI;
@@ -87,10 +87,10 @@ public class StagePeek7 extends StageBase<StagePeek7.Solution> {
         if (WEB_UI) {
             WebUI.setUpJavalin();
         }
-        new StagePeek7.Factory().main(1000);
+        new StagePeek7.Factory().start(1000);
     }
 
-    static class Factory extends StageFactory<StagePeek7> {
+    static class Factory extends StudyFactory<StagePeek7> {
         @Override
         protected String getStudyName() {
             return super.getStudyName() + "_2";

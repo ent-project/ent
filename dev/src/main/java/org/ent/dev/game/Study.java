@@ -1,4 +1,4 @@
-package org.ent.dev.game.forwardarithmetic;
+package org.ent.dev.game;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.hyper.CollectingHyperManager;
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public abstract class StageBase<S> {
+public abstract class Study<S> {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -37,12 +37,12 @@ public abstract class StageBase<S> {
     protected int numHit;
     protected int numEvaluation; // kind of the same as indexEvaluation, but explicitly keeping track of the total number
 
-    public static abstract class StageFactory<SB extends StageBase<?>> {
+    public static abstract class StudyFactory<SB extends Study<?>> {
         protected final Logger log = LoggerFactory.getLogger(getClass());
 
         protected final UniformRandomProvider randomTrials = RandomUtil.newRandom2(12345L);
 
-        public void main(int numTrials) throws IOException {
+        public void start(int numTrials) throws IOException {
             CollectingHyperManager hyperCollector = new CollectingHyperManager();
             registerHyperparameters(hyperCollector);
             RemoteHyperManager hyperManager = new RemoteHyperManager(hyperCollector.getHyperDefinitions());
@@ -89,7 +89,7 @@ public abstract class StageBase<S> {
         public abstract void fixHyperparameters(HyperManager hyperManager);
     }
 
-    public StageBase(UniformRandomProvider randMaster) {
+    public Study(UniformRandomProvider randMaster) {
         this.randMaster = randMaster;
     }
 

@@ -5,7 +5,7 @@ import org.ent.LazyPortalArrow;
 import org.ent.NopNetEventListener;
 import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
 import org.ent.dev.game.forwardarithmetic.PortalMoveEntEventListener;
-import org.ent.dev.game.forwardarithmetic.StageBase;
+import org.ent.dev.game.Study;
 import org.ent.dev.randnet.PortalValue;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.randnet.ValueDrawing;
@@ -33,7 +33,7 @@ import java.time.Duration;
  * Verify, that the upstream solution has a viable follow-up.
  * (Portal 1 has moved to a place where operand-nodes are accessible.)
  */
-public class StagePeek2 extends StageBase<StagePeek1.Solution> {
+public class StagePeek2 extends Study<StagePeek1.Solution> {
 
     private static final boolean WEB_UI = false;
     public static final boolean REPLAY_HITS = false || WEB_UI;
@@ -74,10 +74,10 @@ public class StagePeek2 extends StageBase<StagePeek1.Solution> {
         if (WEB_UI) {
             WebUI.setUpJavalin();
         }
-        new Factory().main(1);
+        new Factory().start(1);
     }
 
-    public static class Factory extends StageFactory<StagePeek2> {
+    public static class Factory extends StudyFactory<StagePeek2> {
         @Override
         public StagePeek2 createStage(RemoteHyperManager hyperManager, int indexTrial) {
             StagePeek2 dev = new StagePeek2(hyperManager, RandomUtil.newRandom2(randomTrials.nextLong()));

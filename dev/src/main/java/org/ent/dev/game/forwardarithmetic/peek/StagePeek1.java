@@ -3,7 +3,7 @@ package org.ent.dev.game.forwardarithmetic.peek;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
 import org.ent.dev.game.forwardarithmetic.PortalMoveEntEventListener;
-import org.ent.dev.game.forwardarithmetic.StageBase;
+import org.ent.dev.game.Study;
 import org.ent.dev.randnet.PortalValue;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.randnet.ValueDrawing;
@@ -33,7 +33,7 @@ import java.time.Duration;
 /**
  * Find portal moves and condense them to a single command
  */
-public class StagePeek1 extends StageBase<StagePeek1.Solution> {
+public class StagePeek1 extends Study<StagePeek1.Solution> {
 
     private static final boolean WEB_UI = false;
     public static final boolean REPLAY_HITS = false || WEB_UI;
@@ -65,10 +65,10 @@ public class StagePeek1 extends StageBase<StagePeek1.Solution> {
         if (WEB_UI) {
             WebUI.setUpJavalin();
         }
-        new Factory().main(1);
+        new Factory().start(1);
     }
 
-    public static class Factory extends StageFactory<StagePeek1> {
+    public static class Factory extends StudyFactory<StagePeek1> {
         @Override
         public StagePeek1 createStage(RemoteHyperManager hyperManager, int indexTrial) {
             StagePeek1 dev = new StagePeek1(hyperManager, RandomUtil.newRandom2(randomTrials.nextLong()));

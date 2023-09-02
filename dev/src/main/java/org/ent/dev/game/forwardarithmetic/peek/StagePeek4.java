@@ -4,7 +4,7 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
 import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame.OpTarget;
 import org.ent.dev.game.forwardarithmetic.ReadOperandsEntListener;
-import org.ent.dev.game.forwardarithmetic.StageBase;
+import org.ent.dev.game.Study;
 import org.ent.dev.trim2.TrimmingHelper;
 import org.ent.dev.trim2.TrimmingListener;
 import org.ent.dev.variation.ArrowMixMutation;
@@ -33,7 +33,7 @@ import java.util.Set;
  * Stitch the fragments together, such that after execution, all op-values (operation, operator1, operator2)
  * are present in the Net (or the answer domain).
  */
-public class StagePeek4 extends StageBase<StagePeek4.Solution> {
+public class StagePeek4 extends Study<StagePeek4.Solution> {
 
     private static final boolean WEB_UI = false;
     public static final boolean REPLAY_HITS = false || WEB_UI;
@@ -78,10 +78,10 @@ public class StagePeek4 extends StageBase<StagePeek4.Solution> {
         if (WEB_UI) {
             WebUI.setUpJavalin();
         }
-        new StagePeek4.Factory().main(1);
+        new StagePeek4.Factory().start(1);
     }
 
-    static class Factory extends StageFactory<StagePeek4> {
+    static class Factory extends StudyFactory<StagePeek4> {
 
         @Override
         public StagePeek4 createStage(RemoteHyperManager hyperManager, int indexTrial) {

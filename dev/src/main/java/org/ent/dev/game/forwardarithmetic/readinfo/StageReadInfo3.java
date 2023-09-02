@@ -4,7 +4,7 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
 import org.ent.dev.game.forwardarithmetic.PortalMoveEntEventListener;
 import org.ent.dev.game.forwardarithmetic.ReadOperandsEntListener;
-import org.ent.dev.game.forwardarithmetic.StageBase;
+import org.ent.dev.game.Study;
 import org.ent.dev.game.forwardarithmetic.Util;
 import org.ent.dev.trim2.TrimmingHelper;
 import org.ent.dev.trim2.TrimmingListener;
@@ -27,7 +27,7 @@ import java.time.Duration;
 /**
  * Clean up the 2 Ents from previous stage
  */
-public class StageReadInfo3 extends StageBase<StageReadInfo3.Solution> {
+public class StageReadInfo3 extends Study<StageReadInfo3.Solution> {
 
     private static final boolean WEB_UI = true;
 

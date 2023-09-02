@@ -6,7 +6,7 @@ import org.ent.NopNetEventListener;
 import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
 import org.ent.dev.game.forwardarithmetic.PortalMoveEntEventListener;
 import org.ent.dev.game.forwardarithmetic.ReadOperandsEntListener;
-import org.ent.dev.game.forwardarithmetic.StageBase;
+import org.ent.dev.game.Study;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.randnet.ValueDrawing;
 import org.ent.dev.trim2.TrimmingHelper;
@@ -37,7 +37,7 @@ import java.time.Duration;
  * Splice mode, i.e. a fresh second net is executed
  * after the first has finished (keeping the portals intact).
  */
-public class StageReadInfo2 extends StageBase<StageReadInfo2.Solution> {
+public class StageReadInfo2 extends Study<StageReadInfo2.Solution> {
 
     private static final boolean WEB_UI = false;
     public static final boolean REPLAY_HITS = true || WEB_UI;

@@ -3,7 +3,7 @@ package org.ent.dev.game.forwardarithmetic.readinfo;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.dev.game.forwardarithmetic.ArithmeticForwardGame;
 import org.ent.dev.game.forwardarithmetic.ReadOperandsEntListener;
-import org.ent.dev.game.forwardarithmetic.StageBase;
+import org.ent.dev.game.Study;
 import org.ent.dev.randnet.PortalValue;
 import org.ent.dev.randnet.RandomNetCreator;
 import org.ent.dev.randnet.ValueDrawing;
@@ -32,7 +32,7 @@ import java.time.Duration;
  *
  * Implies portal move to reach the operand.
  */
-public class StageTransfer1 extends StageBase {
+public class StageTransfer1 extends Study {
 
     private static final boolean WEB_UI = false;
     public static final boolean REPLAY_HITS = false || WEB_UI;
