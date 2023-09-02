@@ -1,6 +1,5 @@
 rootProject.name = 'ent'
 include 'core'
 include 'dev'
-include 'gui'
 include 'webui'
 
