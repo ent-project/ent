@@ -1,9 +1,9 @@
 package org.ent.dev.game;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.ent.hyper.CollectingHyperManager;
-import org.ent.hyper.HyperManager;
-import org.ent.hyper.RemoteHyperManager;
+import org.ent.dev.hyper.CollectingHyperManager;
+import org.ent.dev.hyper.HyperManager;
+import org.ent.dev.hyper.RemoteHyperManager;
 import org.ent.net.util.RandomUtil;
 import org.ent.util.Tools;
 import org.slf4j.Logger;

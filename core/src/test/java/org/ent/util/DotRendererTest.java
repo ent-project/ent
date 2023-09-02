@@ -30,7 +30,7 @@ import static org.ent.util.NetBuilder.value;
 
 class DotRendererTest {
 
-    private static final boolean WEB_UI = true;
+    private static final boolean WEB_UI = false;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
