@@ -5,7 +5,7 @@ import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ent.Ent;
-import org.ent.NopEntEventListener;
+import org.ent.listener.NopEntEventListener;
 import org.ent.Profile;
 import org.ent.dev.randnet.DefaultValueDrawing;
 import org.ent.dev.randnet.RandomNetCreator;

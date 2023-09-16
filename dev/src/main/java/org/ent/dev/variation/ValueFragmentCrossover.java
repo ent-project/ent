@@ -1,8 +1,8 @@
 package org.ent.dev.variation;
 
 import org.apache.commons.rng.UniformRandomProvider;
+import org.ent.permission.Permissions;
 import org.ent.net.Net;
-import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.net.util.RandomUtil;
 import org.ent.util.ModifiedPoisson;
@@ -38,8 +38,8 @@ public class ValueFragmentCrossover {
 
     static void swapValueFragment(Node node1, Node node2, int maskIndex) {
         int mask = MASKS[maskIndex];
-        int value1 = node1.getValue(Purview.DIRECT);
-        int value2 = node2.getValue(Purview.DIRECT);
+        int value1 = node1.getValue(Permissions.DIRECT);
+        int value2 = node2.getValue(Permissions.DIRECT);
         node1.setValue((value1 & (~mask)) | (value2 & mask));
         node2.setValue((value2 & (~mask)) | (value1 & mask));
     }

@@ -1,9 +1,9 @@
 package org.ent.dev.randnet;
 
 import org.apache.commons.rng.UniformRandomProvider;
+import org.ent.permission.Permissions;
 import org.ent.net.Arrow;
 import org.ent.net.Net;
-import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.util.ModifiedPoisson;
 
@@ -67,7 +67,7 @@ public class RandomNetCreator {
 
 	private void createNodes(int noNodes) {
 		for (int i = 0; i < noNodes; i++) {
-			Node n = net.newNode(valueDrawing.drawValue(rand));
+			Node n = net.newNode(valueDrawing.drawValue(rand), Permissions.DIRECT);
 			if (i == 0) {
 				net.setRoot(n);
 			}
@@ -80,7 +80,7 @@ public class RandomNetCreator {
 			for (Arrow arrow : node.getArrows()) {
 				int targetIndex = rand.nextInt(size);
 				Node target = net.getNode(targetIndex);
-				arrow.setTarget(target, Purview.DIRECT);
+				arrow.setTarget(target, Permissions.DIRECT);
 			}
 		}
 	}

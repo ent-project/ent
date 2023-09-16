@@ -1,6 +1,5 @@
 package org.ent.net.node.cmd;
 
-import org.ent.Ent;
 import org.ent.TestBase;
 import org.ent.net.Net;
 import org.ent.net.node.Node;
@@ -23,7 +22,7 @@ class TriCommandTest extends TestBase {
         Net net = builder().net(unary(parameters = node(arg1 = value(7), arg2 = value(5))));
         Command command = new TriCommand(Operations.PLUS_OPERATION, Accessors.DIRECT, Accessors.LEFT, Accessors.RIGHT);
 
-        command.execute(net.getRoot(), new Ent(net));
+        command.execute(net.getRoot(), net.getPermissions());
 
         assertThat(parameters.getValue()).isEqualTo(12);
         assertThat(arg1.getValue()).isEqualTo(7);
@@ -37,7 +36,7 @@ class TriCommandTest extends TestBase {
         Net net = builder().net(unary(node(GREATER_THAN_CONDITION, i = value(7), value(0))));
         Command command = new TriCommand(Operations.PLUS_OPERATION, Accessors.LEFT, Accessors.LEFT, Accessors.LEFT); // i = i + i
 
-        command.execute(net.getRoot(), new Ent(net));
+        command.execute(net.getRoot(), net.getPermissions());
 
         assertThat(i.getValue()).isEqualTo(14);
     }
@@ -48,7 +47,7 @@ class TriCommandTest extends TestBase {
         Net net = builder().net(unary(node(GREATER_THAN_CONDITION, i = value(7), value(1000))));
         Command command = new TriCommand(Operations.PLUS_OPERATION, Accessors.LEFT, Accessors.LEFT, Accessors.LEFT); // i = i + i
 
-        command.execute(net.getRoot(), new Ent(net));
+        command.execute(net.getRoot(), net.getPermissions());
 
         assertThat(i.getValue()).isEqualTo(7);
     }

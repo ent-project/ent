@@ -1,8 +1,8 @@
 package org.ent.net.util;
 
+import org.ent.permission.Permissions;
 import org.ent.net.Arrow;
 import org.ent.net.Net;
-import org.ent.net.Purview;
 import org.ent.net.node.Node;
 
 import java.util.HashMap;
@@ -53,8 +53,8 @@ public class NetCopy {
 		for (Node nodeOrig : netOrig.getNodes()) {
 			for (Arrow arrowOrig : nodeOrig.getArrows()) {
 				Arrow arrowClone = originalToClone(arrowOrig);
-				Node targetClone = originalToClone(arrowOrig.getTarget(Purview.DIRECT));
-				arrowClone.setTarget(targetClone, Purview.DIRECT);
+				Node targetClone = originalToClone(arrowOrig.getTarget(Permissions.DIRECT));
+				arrowClone.setTarget(targetClone, Permissions.DIRECT);
 			}
 		}
 	}

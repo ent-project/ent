@@ -1,30 +1,25 @@
 package org.ent.net.node.cmd;
 
-import org.ent.Ent;
-import org.ent.net.AccessToken;
-import org.ent.net.Purview;
+import org.ent.permission.Permissions;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.veto.Veto;
 import org.ent.net.node.cmd.veto.Vetos;
 
 public abstract class VetoedCommand implements Command {
     @Override
-    public ExecutionResult execute(Node base, Ent ent, AccessToken accessToken) {
-        int vetoValue = base.getLeftChild(Purview.COMMAND).getValue(Purview.COMMAND);
+    public ExecutionResult execute(Node base, Permissions permissions) {
+        int vetoValue = base.getLeftChild(permissions).getValue(permissions);
         Veto veto = Vetos.getByValue(vetoValue);
         if (veto != null) {
-            boolean pass = veto.evaluate(base, ent);
+            boolean pass = veto.evaluate(base, permissions);
             if (!pass) {
-                ent.event().blockedByVeto(veto);
                 return ExecutionResult.NORMAL;
-            } else {
-                ent.event().passedThroughVeto(veto);
             }
         }
-        return doExecute(base, ent, accessToken);
+        return doExecute(base, permissions);
     }
 
-    protected abstract ExecutionResult doExecute(Node base, Ent ent, AccessToken accessToken);
+    protected abstract ExecutionResult doExecute(Node base, Permissions permissions);
 
     @Override
     public String toString() {

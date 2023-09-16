@@ -1,28 +1,23 @@
 package org.ent.net;
 
+import org.ent.permission.Permissions;
 import org.ent.net.node.Node;
 
 /**
- * An arrow is a pair consisting of a node (that may have children) and the {@link ArrowDirection} ("child index").
+ * An arrow is a pair consisting of a node (origin) and the {@link ArrowDirection}.
  *
  * The target of the arrow is not explicitly part of this information, but can be resolved
- * at any given time ({@link #getTarget(Purview)}).
+ * at any given time ({@link #getTarget(Permissions)}).
  */
 public interface Arrow {
 
-	ArrowDirection getDirection();
-
 	Node getOrigin();
 
-	Node getTarget(Purview purview);
+	ArrowDirection getDirection();
 
-	void setTarget(Node target, Purview purview);
+	Node getTarget(Permissions permissions);
 
-	default void setTarget(Node target, Purview purview, AccessToken token) {
-		setTarget(target, purview);
-	}
-
-	boolean permittedToSetTarget(Node target, AccessToken accessToken);
+	void setTarget(Node target, Permissions permissions);
 
 	default int getIndex() {
 		Node origin = getOrigin();

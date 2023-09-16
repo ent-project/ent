@@ -1,13 +1,12 @@
 package org.ent.net.node.cmd.veto;
 
-import org.ent.Ent;
-import org.ent.net.Purview;
+import org.ent.permission.Permissions;
 import org.ent.net.node.Node;
 
 public abstract sealed class BiValueCondition implements BiCondition permits SameValueCondition, GreaterThanCondition {
 
-    public boolean evaluate(Node node1, Node node2, Ent ent) {
-        return test(node1.getValue(Purview.COMMAND), node2.getValue(Purview.COMMAND));
+    public boolean evaluate(Node node1, Node node2, Permissions permissions) {
+        return test(node1.getValue(permissions), node2.getValue(permissions));
     }
 
     protected abstract boolean test(int value1, int value2);

@@ -1,21 +1,17 @@
 package org.ent.net.node.cmd.operation;
 
-import org.ent.Ent;
-import org.ent.net.AccessToken;
-import org.ent.net.Purview;
+import org.ent.permission.Permissions;
+import org.ent.permission.WriteFacet;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.ExecutionResult;
 
 public abstract class MonoValueOperation extends MonoNodeOperation {
 
     @Override
-    public ExecutionResult doApply(Node node, Ent ent, AccessToken accessToken) {
-        if (!node.permittedToSetValue(accessToken)) {
-            return ExecutionResult.ERROR;
-        }
-        int newValue = compute(node.getValue(Purview.COMMAND));
-        ent.event().transverValue(node, node);
-        node.setValue(newValue);
+    public ExecutionResult doApply(Node node, Permissions permissions) {
+        if (permissions.noWrite(node, WriteFacet.VALUE)) return ExecutionResult.ERROR;
+        int newValue = compute(node.getValue(permissions));
+        node.setValue(newValue, permissions);
         return ExecutionResult.NORMAL;
     }
 

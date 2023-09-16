@@ -1,18 +1,17 @@
 package org.ent.net.node.cmd.accessor;
 
-import org.ent.Ent;
 import org.ent.net.Arrow;
-import org.ent.net.Purview;
 import org.ent.net.node.Node;
+import org.ent.permission.Permissions;
 
 public interface Accessor {
 
-	Arrow get(Node base, Ent ent, Purview purview);
+	Arrow get(Node base, Permissions permissions);
 
 	default
-	Node getTarget(Node base, Ent ent, Purview purview) {
-		Arrow arrow = get(base, ent, purview);
-		return arrow.getTarget(purview);
+	Node getTarget(Node base, Permissions permissions) {
+		Arrow arrow = get(base, permissions);
+		return arrow.getTarget(permissions);
 	}
 
 	int getCode();

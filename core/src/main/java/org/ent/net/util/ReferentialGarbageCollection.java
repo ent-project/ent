@@ -1,7 +1,7 @@
 package org.ent.net.util;
 
+import org.ent.permission.Permissions;
 import org.ent.net.Arrow;
-import org.ent.net.Purview;
 import org.ent.net.Net;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
@@ -34,7 +34,7 @@ public class ReferentialGarbageCollection {
 			return;
 		}
 		for (Arrow arrow : n.getArrows()) {
-			arrow.setTarget(n, Purview.DIRECT);
+			arrow.setTarget(n, Permissions.DIRECT);
 		}
 	}
 }

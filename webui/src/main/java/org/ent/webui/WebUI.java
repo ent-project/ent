@@ -71,7 +71,6 @@ public class WebUI {
 
         Javalin app = Javalin.create(config ->
                 config.staticFiles.add("/public", Location.CLASSPATH)).start(7070);
-        // fixme try with resource
 
         app.ws("/logs", ws -> {
             ws.onConnect(ctx -> {

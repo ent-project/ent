@@ -1,33 +1,35 @@
 package org.ent.net.node.cmd.operation;
 
-import org.ent.Ent;
+import org.ent.permission.Permissions;
+import org.ent.permission.WriteFacet;
 import org.ent.net.Arrow;
-import org.ent.net.AccessToken;
-import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.ExecutionResult;
 
 public class SetOperation implements BiOperation {
 
-	@Override
-	public int getCode() {
-		return Operations.CODE_SET_OPERATION;
-	}
+    @Override
+    public int getCode() {
+        return Operations.CODE_SET_OPERATION;
+    }
 
-	@Override
-	public ExecutionResult apply(Arrow setter, Arrow arrowToTarget, Ent ent, AccessToken accessToken) {
-		Node target = arrowToTarget.getTarget(Purview.COMMAND);
-		if (!setter.permittedToSetTarget(target, accessToken)) {
-			ent.event().domainBreachAttemptInSet(setter, target);
-			return ExecutionResult.ERROR;
-		}
-		setter.setTarget(target, Purview.COMMAND, accessToken);
-		return ExecutionResult.NORMAL;
-	}
+    @Override
+    public ExecutionResult apply(Arrow setter, Arrow arrowToTarget, Permissions permissions) {
+        if (permissions.noWrite(setter, WriteFacet.ARROW)) return ExecutionResult.ERROR;
 
-	@Override
-	public String getShortName() {
-		return "::";
-	}
+        Node origin = setter.getOrigin();
+        Permissions originPermissions = origin.getNet().getPermissions();
+
+        Node target = arrowToTarget.getTarget(permissions);
+        if (originPermissions.noPointTo(target)) return ExecutionResult.ERROR;
+
+        setter.setTarget(target, permissions);
+        return ExecutionResult.NORMAL;
+    }
+
+    @Override
+    public String getShortName() {
+        return "::";
+    }
 
 }

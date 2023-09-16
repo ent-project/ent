@@ -24,7 +24,7 @@ class DupOperationTest {
         DupOperation dupOperation = new DupOperation();
 
         Node root = ent.getNet().getRoot();
-        dupOperation.apply(root.getLeftArrow(), root.getRightArrow(), ent, null);
+        dupOperation.apply(root.getLeftArrow(), root.getRightArrow(), ent.getNet().getPermissions());
 
         NetFormatter formatter = new NetFormatter()
                 .withIncludeOrphans(true)

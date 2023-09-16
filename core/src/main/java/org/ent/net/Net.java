@@ -3,23 +3,28 @@ package org.ent.net;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.Validate;
-import org.ent.MultiNetEventListener;
-import org.ent.NetEventListener;
-import org.ent.NopNetEventListener;
+import org.ent.Ent;
 import org.ent.Profile;
+import org.ent.listener.MultiNetEventListener;
+import org.ent.listener.NetEventListener;
+import org.ent.listener.NopNetEventListener;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.node.Hub;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.util.ReferentialGarbageCollection;
+import org.ent.permission.Permissions;
+import org.ent.permission.PermissionsViolatedException;
+import org.ent.permission.WriteFacet;
 
 import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+
+import static org.ent.permission.Permissions.DOUBLE_CHECK_PERMISSIONS;
 
 public class Net {
 
@@ -28,19 +33,19 @@ public class Net {
 
     private int netIndex;
     private String name;
-    private boolean coreNet;
+    private Ent ent;
 
     private final List<Node> nodes;
     /**
      * Node names used for serialization and debugging. Saved here for consistency in
      * different output contexts.
-     *
+     * <p>
      * Usually not set in computations where performance is of concern.
      */
     private BiMap<Node, String> nodeNames;
     /**
      * Annotations/labels that can be used for output and debugging.
-     *
+     * <p>
      * Usually not set in computations where performance is of concern.
      */
     private Map<Node, String> nodeAnnotations;
@@ -61,15 +66,16 @@ public class Net {
 
     private MarkerNode markerNode;
 
-    List<NetEventListener> eventListeners = new ArrayList<>(); // FIXME get rid
-
     NetEventListener netEventListener = new NopNetEventListener();
 
-    private final AccessToken evalToken = new AccessToken();
-    private final AccessToken setRootToken = new AccessToken();
+    private Permissions permissions;
 
-    private boolean permittedToEvalRoot = true;
-    private boolean permittedToWrite = true;
+    private boolean executable;
+
+    public Net(Ent ent) {
+        this.ent = ent;
+        this.nodes = new ArrayList<>();
+    }
 
     public Net() {
         this.nodes = new ArrayList<>();
@@ -77,6 +83,10 @@ public class Net {
 
     public Net(int noNodes) {
         this.nodes = new ArrayList<>(noNodes);
+    }
+
+    public Ent getEnt() {
+        return ent;
     }
 
     public int getNetIndex() {
@@ -96,12 +106,23 @@ public class Net {
         this.name = name;
     }
 
-    public void setCoreNet(boolean coreNet) {
-        this.coreNet = coreNet;
+    public Permissions getPermissions() {
+        if (permissions == null) {
+            permissions = new NoPermissions();
+        }
+        return permissions;
     }
 
-    public boolean isCoreNet() {
-        return coreNet;
+    public void setPermissions(Permissions permissions) {
+        this.permissions = permissions;
+    }
+
+    public boolean isExecutable() {
+        return executable;
+    }
+
+    public void setExecutable(boolean executable) {
+        this.executable = executable;
     }
 
     public Net addEventListener(NetEventListener netEventListener) {
@@ -186,8 +207,10 @@ public class Net {
         return root;
     }
 
-    public void setRoot(Node root) {
-        // FIXME check it is part of net
+    public void setRoot(@NotNull Node root) {
+        if (root.getNet() != this) {
+            throw new IllegalStateException("Root must be one of the net nodes");
+        }
         event().setRoot(this.root, root);
         this.root = root;
     }
@@ -256,7 +279,7 @@ public class Net {
     }
 
     private void consistencyCheck(Arrow arrow) {
-        Node child = arrow.getTarget(Purview.DIRECT);
+        Node child = arrow.getTarget(Permissions.DIRECT);
         if (child instanceof MarkerNode) {
             if (!markerNodePermitted) {
                 throw new AssertionError("Child of node is marker node, but they are not permitted");
@@ -293,83 +316,163 @@ public class Net {
         hub1.setNode(node2);
     }
 
+    public Node newRoot(Permissions permissions) {
+        Node newRoot = newNode(permissions);
+        setRoot(newRoot);
+        return newRoot;
+    }
+
+    @VisibleForTesting
     public Node newRoot() {
-        Node newRoot = newNode();
-        setRoot(newRoot);
-        return newRoot;
-    }
-
-    public Node newRoot(int value, Node leftChild, Node rightChild) {
-        Node newRoot = newNode(value, leftChild, rightChild);
-        setRoot(newRoot);
-        return newRoot;
-    }
-
-    public Node newRoot(Node leftChild, Node rightChild) {
-        Node newRoot = newNode(leftChild, rightChild);
-        setRoot(newRoot);
-        return newRoot;
+        Profile.verifyTestProfile();
+        return newRoot(Permissions.DIRECT);
     }
 
     public Node newNode(int value, Node leftChild, Node rightChild) {
-        validateBelongsToNet(leftChild);
-        validateBelongsToNet(rightChild);
+        Profile.verifyTestProfile();
+        return newNode(value, leftChild, rightChild, Permissions.DIRECT);
+    }
+
+    public Node newNode(int value, Node leftChild, Node rightChild, Permissions permissions) {
+        if (DOUBLE_CHECK_PERMISSIONS) {
+            if (permissions.noWrite(netIndex, WriteFacet.NEW_NODE)) {
+                throw new PermissionsViolatedException();
+            }
+        }
         Node node = new Node(this, value, leftChild, rightChild);
         addNodeInternal(node);
-        fireNewNodeCall(node);
+        if (permissions.shouldFireEvent()) {
+            event().calledNewNode(node);
+        }
         return node;
     }
 
-    public Node newNode(int value, Optional<Node> leftChild, Optional<Node> rightChild) {
+    public Node newNode(int value, Optional<Node> leftChild, Optional<Node> rightChild, Permissions permissions) {
+        if (DOUBLE_CHECK_PERMISSIONS) {
+            if (permissions.noWrite(netIndex, WriteFacet.NEW_NODE)) {
+                throw new PermissionsViolatedException();
+            }
+        }
         leftChild.ifPresent(this::validateBelongsToNet);
         rightChild.ifPresent(this::validateBelongsToNet);
         Node node = new Node(this, value, leftChild, rightChild);
         addNodeInternal(node);
-        fireNewNodeCall(node);
+        if (permissions.shouldFireEvent()) {
+            event().calledNewNode(node);
+        }
         return node;
     }
 
-    public Node newNode() {
+    @VisibleForTesting
+    public Node newNode(int value, Optional<Node> leftChild, Optional<Node> rightChild) {
+        Profile.verifyTestProfile();
+        return newNode(value, leftChild, rightChild, Permissions.DIRECT);
+    }
+
+    public Node newNode(Permissions permissions) {
+        if (DOUBLE_CHECK_PERMISSIONS) {
+            if (permissions.noWrite(netIndex, WriteFacet.NEW_NODE)) {
+                throw new PermissionsViolatedException();
+            }
+        }
         Node bNode = new Node(this);
         addNodeInternal(bNode);
-        fireNewNodeCall(bNode);
+        if (permissions.shouldFireEvent()) {
+            event().calledNewNode(bNode);
+        }
         return bNode;
     }
 
-    public Node newNode(Node leftChild, Node rightChild) {
+    @VisibleForTesting
+    public Node newNode() {
+        Profile.verifyTestProfile();
+        return newNode(Permissions.DIRECT);
+    }
+
+    public Node newNode(Node leftChild, Node rightChild, Permissions permissions) {
+        if (DOUBLE_CHECK_PERMISSIONS) {
+            if (permissions.noWrite(netIndex, WriteFacet.NEW_NODE)) {
+                throw new PermissionsViolatedException();
+            }
+        }
         validateBelongsToNet(leftChild);
         validateBelongsToNet(rightChild);
         Node bNode = new Node(this, leftChild, rightChild);
         addNodeInternal(bNode);
-        fireNewNodeCall(bNode);
+        if (permissions.shouldFireEvent()) {
+            event().calledNewNode(bNode);
+        }
         return bNode;
     }
 
-    public Node newNode(Command command) {
-        return newNode(command.getValue());
+    @VisibleForTesting
+    public Node newNode(Node leftChild, Node rightChild) {
+        Profile.verifyTestProfile();
+        return newNode(leftChild, rightChild, Permissions.DIRECT);
     }
 
+    public Node newNode(Command command, Permissions permissions) {
+        return newNode(command.getValue(), permissions);
+    }
+
+    @VisibleForTesting
     public Node newNode(int value) {
+        Profile.verifyTestProfile();
+        return newNode(value, Permissions.DIRECT);
+    }
+
+    public Node newNode(int value, Permissions permissions) {
+        if (DOUBLE_CHECK_PERMISSIONS) {
+            if (permissions.noWrite(netIndex, WriteFacet.NEW_NODE)) {
+                throw new PermissionsViolatedException();
+            }
+        }
         Node cNode = new Node(this, value);
         addNodeInternal(cNode);
-        fireNewNodeCall(cNode);
+        if (permissions.shouldFireEvent()) {
+            event().calledNewNode(cNode);
+        }
         return cNode;
     }
 
-    public Node newUNode(Node child) {
-        validateBelongsToNet(child);
+    public Node newUNode(Node child, Permissions permissions) {
+        if (DOUBLE_CHECK_PERMISSIONS) {
+            if (permissions.noWrite(netIndex, WriteFacet.NEW_NODE)) {
+                throw new PermissionsViolatedException();
+            }
+        }
         Node uNode = new Node(this, child);
         addNodeInternal(uNode);
-        fireNewNodeCall(uNode);
+        if (permissions.shouldFireEvent()) {
+            event().calledNewNode(uNode);
+        }
         return uNode;
     }
 
-    public Node newCNode(Command command) {
-        return newNode(command);
+    @VisibleForTesting
+    public Node newUNode(Node child) {
+        Profile.verifyTestProfile();
+        return newUNode(child, Permissions.DIRECT);
     }
 
+    public Node newCNode(Command command, Permissions permissions) {
+        return newNode(command, permissions);
+    }
+
+    @VisibleForTesting
+    public Node newCNode(Command command) {
+        Profile.verifyTestProfile();
+        return newNode(command, Permissions.DIRECT);
+    }
+
+    public Node newCNode(int value, Permissions permissions) {
+        return newNode(value, permissions);
+    }
+
+    @VisibleForTesting
     public Node newCNode(int value) {
-        return newNode(value);
+        Profile.verifyTestProfile();
+        return newNode(value, Permissions.DIRECT);
     }
 
     private void addNodeInternal(Node node) {
@@ -379,47 +482,6 @@ public class Net {
             throw new AssertionError();
         }
         currentIndex++;
-    }
-
-    @Deprecated
-    public void addExecutionEventListener(NetEventListener listener) {
-        throw new NotImplementedException();
-    }
-
-    @Deprecated
-    public void removeExecutionEventListener(NetEventListener listener) {
-        throw new NotImplementedException();
-    }
-
-    @Deprecated
-    public void withExecutionEventListener(NetEventListener listener, Runnable runnable) {
-        addExecutionEventListener(listener);
-        try {
-            runnable.run();
-        } finally {
-            removeExecutionEventListener(listener);
-        }
-    }
-
-    public void fireGetTargetCall(Node n, ArrowDirection arrowDirection, Purview purview) {
-        if (purview == Purview.DIRECT) {
-            return;
-        }
-        event().calledGetChild(n, arrowDirection, purview);
-    }
-
-    public void fireSetTargetCall(Node from, ArrowDirection arrowDirection, Node to, Purview purview) {
-        if (Profile.PARANOIA) {
-            validateBelongsToNet(to);
-        }
-        if (purview == Purview.DIRECT) {
-            return;
-        }
-        event().calledSetChild(from, arrowDirection, to, purview);
-    }
-
-    public void fireNewNodeCall(Node n) {
-        event().calledNewNode(n);
     }
 
     public void setName(Node node, String name) {
@@ -457,7 +519,7 @@ public class Net {
         if (nodeAnnotations == null) {
             nodeAnnotations = new HashMap<>();
         }
-        nodeAnnotations.merge(node, annotation, (current, ann) -> current+ "|" + ann);
+        nodeAnnotations.merge(node, annotation, (current, ann) -> current + "|" + ann);
     }
 
     public String getAnnotation(Node node) {
@@ -479,49 +541,24 @@ public class Net {
         return nodes.get(index);
     }
 
-    /**
-     * Provide token for elevated access rights. Holder of the eval token
-     * can modify this Net, even if modification is not permitted in general.
-     */
-    public AccessToken getEvalToken() {
-        return evalToken;
-    }
-
-    public AccessToken getSetRootToken() {
-        return setRootToken;
-    }
-
-
-    public boolean isPermittedToEval(Node node) {
-        return permittedToWrite || (permittedToEvalRoot && node == root);
-    }
-
-    public boolean isPermittedToEvalRoot() {
-        return permittedToEvalRoot;
-    }
-
-    public Net setPermittedToEvalRoot(boolean permittedToEvalRoot) {
-        this.permittedToEvalRoot = permittedToEvalRoot;
-        return this;
-    }
-
-    public boolean isPermittedToWrite(AccessToken accessToken) {
-        if (permittedToWrite) {
-            return true;
-        }
-        return permittedToEvalRoot && accessToken == this.evalToken;
-    }
-
-    public Net setPermittedToWrite(boolean permittedToWrite) {
-        this.permittedToWrite = permittedToWrite;
-        return this;
-    }
-
-    public boolean isPermittedToSetRoot(AccessToken token) {
-        return permittedToEvalRoot && token == setRootToken;
-    }
-
     public String format() {
         return new NetFormatter().format(this);
+    }
+
+    class NoPermissions implements Permissions {
+        @Override
+        public boolean noWrite(int indexTarget, WriteFacet facet) {
+            return netIndex != indexTarget;
+        }
+
+        @Override
+        public boolean noPointTo(int indexTarget) {
+            return netIndex != indexTarget;
+        }
+
+        @Override
+        public boolean noExecute(Net net) {
+            return true;
+        }
     }
 }

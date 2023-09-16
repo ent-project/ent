@@ -1,10 +1,9 @@
 package org.ent.net.node.cmd.accessor;
 
-import org.ent.Ent;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
-import org.ent.net.Purview;
 import org.ent.net.node.Node;
+import org.ent.permission.Permissions;
 
 public class SecondaryAccessor implements Accessor {
 
@@ -30,12 +29,12 @@ public class SecondaryAccessor implements Accessor {
 	}
 
 	@Override
-	public Arrow get(Node base, Ent ent, Purview purview) {
-		Node node1 = base.getLeftChild(purview);
-		Arrow arrow1 = ent.getArrowMaybeThroughPortal(node1, direction1, purview);
-		Node node2 = arrow1.getTarget(purview);
-		return ent.getArrowMaybeThroughPortal(node2, direction2, purview);
-	}
+	public Arrow get(Node base, Permissions permissions) {
+		Node node1 = base.getLeftChild(permissions);
+        Arrow arrow1 = node1.getArrow(direction1);
+		Node node2 = arrow1.getTarget(permissions);
+        return node2.getArrow(direction2);
+    }
 
 	@Override
 	public String getShortName() {

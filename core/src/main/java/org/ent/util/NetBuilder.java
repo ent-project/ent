@@ -10,6 +10,7 @@ import org.ent.net.node.cmd.operation.MonoOperation;
 import org.ent.net.node.cmd.veto.BiCondition;
 import org.ent.net.node.cmd.veto.Veto;
 import org.ent.net.node.cmd.veto.Vetos;
+import org.ent.permission.Permissions;
 
 import java.util.Optional;
 
@@ -38,15 +39,15 @@ public class NetBuilder {
     }
 
     public static Node node() {
-        return currentNet.get().newNode();
+        return currentNet.get().newNode(Permissions.DIRECT);
     }
 
     public static Node node(Command c) {
-        return currentNet.get().newCNode(c.getValue());
+        return currentNet.get().newCNode(c.getValue(), Permissions.DIRECT);
     }
 
     public static Node node(int value, Node n1, Node n2) {
-        return currentNet.get().newNode(value, n1, n2);
+        return currentNet.get().newNode(value, n1, n2, Permissions.DIRECT);
     }
 
     public static Node node(Command c, Node n1, Node n2) {
@@ -74,8 +75,8 @@ public class NetBuilder {
     }
 
     public static Node unary(int value, Node child) {
-        Node node = currentNet.get().newUNode(child);
-        node.setValue(value);
+        Node node = currentNet.get().newUNode(child, Permissions.DIRECT);
+        node.setValue(value, Permissions.DIRECT);
         return node;
     }
 
@@ -92,11 +93,11 @@ public class NetBuilder {
     }
 
     public static Node unary(Node child) {
-        return currentNet.get().newUNode(child);
+        return currentNet.get().newUNode(child, Permissions.DIRECT);
     }
 
     public static Node unaryRight(int value, Node child) {
-        return currentNet.get().newNode(value, Optional.empty(), Optional.of(child));
+        return currentNet.get().newNode(value, Optional.empty(), Optional.of(child), Permissions.DIRECT);
     }
 
     public static Node unaryRight(Node child) {
@@ -108,7 +109,7 @@ public class NetBuilder {
     }
 
     public static Node value(int v) {
-        return currentNet.get().newNode(v);
+        return currentNet.get().newNode(v, Permissions.DIRECT);
     }
 
     public static Node value(BiCondition c) {
@@ -126,5 +127,4 @@ public class NetBuilder {
     public static Node ignored() {
         return value(0);
     }
-
 }

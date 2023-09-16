@@ -11,8 +11,8 @@ class RemoteHyperManagerTest {
     public static final IntHyperDefinition HYPER_MAX_STEPS2 = new IntHyperDefinition("max-steps2", 3, 200);
     public static final IntHyperDefinition HYPER_MAX_ATTEMPTS = new IntHyperDefinition("max-attempts", 1, 2000);
     public static final IntHyperDefinition HYPER_MAX_ATTEMPTS2 = new IntHyperDefinition("max-attempts2", 1, 2000);
-    public static final DoubleHyperDefinition HYPER_FRAC_PORTALS = new DoubleHyperDefinition("fraction_portals", 0.0, 1.0);
-    public static final DoubleHyperDefinition HYPER_FRAC_PORTALS2 = new DoubleHyperDefinition("fraction_portals2", 0.0, 1.0);
+    public static final DoubleHyperDefinition HYPER_FRAC_ANCESTOR_SWAP = new DoubleHyperDefinition("fraction-ancestor-swap", 0.0, 1.0);
+    public static final DoubleHyperDefinition HYPER_FRAC_ANCESTOR_SWAP2 = new DoubleHyperDefinition("fraction-ancestor-swap2", 0.0, 1.0);
 
     @Test
     void fix() {
@@ -22,8 +22,8 @@ class RemoteHyperManagerTest {
         hyperCollector.get(HYPER_ARROW_MIX_STRENGTH);
 
         assertThat(hyperCollector.getHyperDefinitions().stream().map(HyperDefinition::getName)).containsExactly(
-                "stage3.stage2.stage1.fraction_portals",
-                "stage3.stage2.stage1.fraction_portals2",
+                "stage3.stage2.stage1.fraction-ancestor-swap",
+                "stage3.stage2.stage1.fraction-ancestor-swap2",
                 "stage3.stage2.max-attempts",
                 "stage3.stage2.max-attempts2",
                 "stage3.max-steps",
@@ -55,8 +55,8 @@ class RemoteHyperManagerTest {
     }
 
     private void registerStage1(HyperManager hyperCollector) {
-        hyperCollector.get(HYPER_FRAC_PORTALS);
-        hyperCollector.get(HYPER_FRAC_PORTALS2);
+        hyperCollector.get(HYPER_FRAC_ANCESTOR_SWAP);
+        hyperCollector.get(HYPER_FRAC_ANCESTOR_SWAP2);
     }
 
     private void fixStage3(HyperManager hyperManager) {
@@ -70,13 +70,13 @@ class RemoteHyperManagerTest {
     private void fixStage2(HyperManager hyperManager) {
         fixStage1(hyperManager.group("stage1"));
         hyperManager.fixLines("""
-                stage1.fraction_portals2 0.7
+                stage1.fraction-ancestor-swap2 0.7
                 """);
         hyperManager.fix(HYPER_MAX_ATTEMPTS, 40);
     }
 
     private void fixStage1(HyperManager hyperManager) {
-        hyperManager.fix(HYPER_FRAC_PORTALS, 0.1);
+        hyperManager.fix(HYPER_FRAC_ANCESTOR_SWAP, 0.1);
     }
 
 

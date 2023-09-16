@@ -1,10 +1,10 @@
 package org.ent.dev.variation;
 
 import org.apache.commons.rng.UniformRandomProvider;
+import org.ent.permission.Permissions;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
-import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.util.ModifiedPoisson;
 
@@ -41,6 +41,6 @@ public class ArrowMixMerger {
         Arrow arrow = node.getArrow(rand.nextBoolean() ? ArrowDirection.LEFT : ArrowDirection.RIGHT);
         int indexTarget = rand.nextInt(netPrimary.getNodes().size());
         Node nodeTarget = netPrimary.getNodesAsList().get(indexTarget);
-        arrow.setTarget(nodeTarget, Purview.DIRECT);
+        arrow.setTarget(nodeTarget, Permissions.DIRECT);
     }
 }

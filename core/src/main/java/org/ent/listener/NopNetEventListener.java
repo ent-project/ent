@@ -1,17 +1,17 @@
-package org.ent;
+package org.ent.listener;
 
 import org.ent.net.ArrowDirection;
-import org.ent.net.Purview;
 import org.ent.net.node.Node;
 
 public class NopNetEventListener implements NetEventListener {
+
     @Override
-    public void calledGetChild(Node n, ArrowDirection arrowDirection, Purview purview) {
+    public void calledGetChild(Node n, ArrowDirection arrowDirection) {
         // do nothing
     }
 
     @Override
-    public void calledSetChild(Node from, ArrowDirection arrowDirection, Node to, Purview purview) {
+    public void calledSetChild(Node from, ArrowDirection arrowDirection, Node to) {
         // do nothing
     }
 
@@ -21,17 +21,12 @@ public class NopNetEventListener implements NetEventListener {
     }
 
     @Override
-    public void getValue(Node node, Purview purview) {
+    public void getValue(Node node) {
         // do nothing
     }
 
     @Override
     public void setValue(Node node, int previousValue, int newValue) {
-        // do nothing
-    }
-
-    @Override
-    public void evaluatedIsIdenticalCondition(Node node1, Node node2) {
         // do nothing
     }
 

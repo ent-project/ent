@@ -1,8 +1,8 @@
 package org.ent.net.io.formatter;
 
+import org.ent.permission.Permissions;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
-import org.ent.net.Purview;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Values;
@@ -66,7 +66,7 @@ public class FormattingWorker {
 				continue;
 			}
 			for (ArrowDirection direction : ArrowDirection.values()) {
-				Node child = node.getChild(direction, Purview.DIRECT);
+				Node child = node.getChild(direction, Permissions.DIRECT);
 				if (!child.isMarkerNode()) {
 					inverseRefs[child.getIndex()]++;
 				}
@@ -100,26 +100,26 @@ public class FormattingWorker {
 		if (node.isMarkerNode()) {
 			stringBuilder.append(MarkerNode.MARKER_NODE_SYMBOL);
 		} else {
-			if (node.getValue(Purview.DIRECT) != 0 || node.isLeafNode()) {
-				String name = Values.getName(node.getValue(Purview.DIRECT));
+			if (node.getValue(Permissions.DIRECT) != 0 || node.isLeafNode()) {
+				String name = Values.getName(node.getValue(Permissions.DIRECT));
 				if (name != null) {
 					stringBuilder.append("<");
 					stringBuilder.append(name);
 					stringBuilder.append(">");
 				} else {
-					stringBuilder.append(String.format("#%x", node.getValue(Purview.DIRECT)));
+					stringBuilder.append(String.format("#%x", node.getValue(Permissions.DIRECT)));
 				}
 			}
 			if (node.isUnaryNode()) {
 				stringBuilder.append("[");
-				doFormatRecursively(node.getLeftChild(Purview.DIRECT), level + 1);
+				doFormatRecursively(node.getLeftChild(Permissions.DIRECT), level + 1);
 				stringBuilder.append("]");
 			} else if (!node.isLeafNode()) {
 				stringBuilder.append("(");
-				Node leftChild = node.getLeftChild(Purview.DIRECT);
+				Node leftChild = node.getLeftChild(Permissions.DIRECT);
 				doFormatRecursively(leftChild, level + 1);
 				stringBuilder.append(", ");
-				Node rightChild = node.getRightChild(Purview.DIRECT);
+				Node rightChild = node.getRightChild(Permissions.DIRECT);
 				doFormatRecursively(rightChild, level + 1);
 				stringBuilder.append(")");
 			}
@@ -134,9 +134,9 @@ public class FormattingWorker {
 			return true;
 		}
 		int references = inverseReferences[n.getIndex()];
-		if (n.getRightChild(Purview.DIRECT) == n) {
+		if (n.getRightChild(Permissions.DIRECT) == n) {
 			references--;
-			if (n.getLeftChild(Purview.DIRECT) == n) {
+			if (n.getLeftChild(Permissions.DIRECT) == n) {
 				references--;
 			}
 		}

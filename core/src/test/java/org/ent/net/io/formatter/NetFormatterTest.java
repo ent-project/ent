@@ -3,7 +3,6 @@ package org.ent.net.io.formatter;
 import org.ent.Profile;
 import org.ent.net.Net;
 import org.ent.net.NetTestData;
-import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.veto.Vetos;
@@ -87,7 +86,7 @@ class NetFormatterTest {
 
 			@Test
 			void unary() {
-				root.setLeftChild(net.newCNode(Commands.get(SET_OPERATION)), Purview.DIRECT);
+				root.setLeftChild(net.newCNode(Commands.get(SET_OPERATION)));
 
 				String str = formatter.format(net);
 
@@ -97,7 +96,7 @@ class NetFormatterTest {
 			@Test
 			void unaryWithValue() {
 				root.setValue(0x1a);
-				root.setLeftChild(net.newCNode(Commands.get(SET_OPERATION)), Purview.DIRECT);
+				root.setLeftChild(net.newCNode(Commands.get(SET_OPERATION)));
 
 				String str = formatter.format(net);
 
@@ -107,7 +106,7 @@ class NetFormatterTest {
 			@Test
 			void unaryWithCommand() {
 				root.setCommand(Commands.get(ANCESTOR_EXCHANGE_OPERATION));
-				root.setLeftChild(net.newCNode(Commands.get(SET_OPERATION)), Purview.DIRECT);
+				root.setLeftChild(net.newCNode(Commands.get(SET_OPERATION)));
 
 				String str = formatter.format(net);
 
@@ -116,8 +115,8 @@ class NetFormatterTest {
 
 			@Test
 			void binary() {
-				root.setLeftChild(net.newCNode(Commands.get(SET_OPERATION)), Purview.DIRECT);
-				root.setRightChild(net.newCNode(Commands.get(ANCESTOR_EXCHANGE_OPERATION)), Purview.DIRECT);
+				root.setLeftChild(net.newCNode(Commands.get(SET_OPERATION)));
+				root.setRightChild(net.newCNode(Commands.get(ANCESTOR_EXCHANGE_OPERATION)));
 
 				String str = formatter.format(net);
 
@@ -127,8 +126,8 @@ class NetFormatterTest {
 			@Test
 			void binaryWithValue() {
 				root.setValue(0xabc);
-				root.setLeftChild(net.newCNode(Commands.get(SET_OPERATION)), Purview.DIRECT);
-				root.setRightChild(net.newCNode(Commands.get(ANCESTOR_EXCHANGE_OPERATION)), Purview.DIRECT);
+				root.setLeftChild(net.newCNode(Commands.get(SET_OPERATION)));
+				root.setRightChild(net.newCNode(Commands.get(ANCESTOR_EXCHANGE_OPERATION)));
 
 				String str = formatter.format(net);
 
@@ -137,7 +136,7 @@ class NetFormatterTest {
 
 			@Test
 			void rightUnary() {
-				root.setRightChild(net.newCNode(Commands.get(ANCESTOR_EXCHANGE_OPERATION)), Purview.DIRECT);
+				root.setRightChild(net.newCNode(Commands.get(ANCESTOR_EXCHANGE_OPERATION)));
 
 				String str = formatter.format(net);
 
@@ -150,8 +149,8 @@ class NetFormatterTest {
 			@Test
 			void doubleChildCommand() {
 				Node n = net.newNode();
-				root.setLeftChild(n, Purview.DIRECT);
-				root.setRightChild(n, Purview.DIRECT);
+				root.setLeftChild(n);
+				root.setRightChild(n);
 
 				String str = formatter.format(net);
 
@@ -161,8 +160,8 @@ class NetFormatterTest {
 			@Test
 			void doubleChildUnary() {
 				Node u = net.newUNode(net.newNode());
-				root.setLeftChild(u, Purview.DIRECT);
-				root.setRightChild(u, Purview.DIRECT);
+				root.setLeftChild(u);
+				root.setRightChild(u);
 
 				String str = formatter.format(net);
 
@@ -172,8 +171,8 @@ class NetFormatterTest {
 			@Test
 			void doubleChildBinary() {
 				Node b = net.newNode(net.newCNode(Commands.get(SET_OPERATION)), net.newCNode(Commands.get(ANCESTOR_EXCHANGE_OPERATION)));
-				root.setLeftChild(b, Purview.DIRECT);
-				root.setRightChild(b, Purview.DIRECT);
+				root.setLeftChild(b);
+				root.setRightChild(b);
 
 				String str = formatter.format(net);
 

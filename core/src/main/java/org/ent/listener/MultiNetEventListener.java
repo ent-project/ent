@@ -1,7 +1,6 @@
-package org.ent;
+package org.ent.listener;
 
 import org.ent.net.ArrowDirection;
-import org.ent.net.Purview;
 import org.ent.net.node.Node;
 
 import java.util.ArrayList;
@@ -16,16 +15,16 @@ public class MultiNetEventListener implements NetEventListener {
     }
 
     @Override
-    public void calledGetChild(Node n, ArrowDirection arrowDirection, Purview purview) {
+    public void calledGetChild(Node n, ArrowDirection arrowDirection) {
         for (NetEventListener eventListener : eventListeners) {
-            eventListener.calledGetChild(n, arrowDirection, purview);
+            eventListener.calledGetChild(n, arrowDirection);
         }
     }
 
     @Override
-    public void calledSetChild(Node from, ArrowDirection arrowDirection, Node to, Purview purview) {
+    public void calledSetChild(Node from, ArrowDirection arrowDirection, Node to) {
         for (NetEventListener eventListener : eventListeners) {
-            eventListener.calledSetChild(from, arrowDirection, to, purview);
+            eventListener.calledSetChild(from, arrowDirection, to);
         }
     }
 
@@ -37,9 +36,9 @@ public class MultiNetEventListener implements NetEventListener {
     }
 
     @Override
-    public void getValue(Node node, Purview purview) {
+    public void getValue(Node node) {
         for (NetEventListener eventListener : eventListeners) {
-            eventListener.getValue(node, purview);
+            eventListener.getValue(node);
         }
     }
 
@@ -49,13 +48,6 @@ public class MultiNetEventListener implements NetEventListener {
             eventListener.setValue(node, previousValue, newValue);
         }
 
-    }
-
-    @Override
-    public void evaluatedIsIdenticalCondition(Node node1, Node node2) {
-        for (NetEventListener eventListener : eventListeners) {
-            eventListener.evaluatedIsIdenticalCondition(node1, node2);
-        }
     }
 
     @Override

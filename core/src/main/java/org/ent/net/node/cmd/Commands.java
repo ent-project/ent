@@ -1,5 +1,6 @@
 package org.ent.net.node.cmd;
 
+import org.ent.net.Net;
 import org.ent.net.node.cmd.accessor.Accessor;
 import org.ent.net.node.cmd.accessor.Accessors;
 import org.ent.net.node.cmd.operation.BiOperation;
@@ -142,4 +143,13 @@ public class Commands {
     public static Command getByName(String name) {
         return commandsByName.get(name);
     }
+
+    public static boolean isFinal(int value) {
+         return value == Commands.FINAL_SUCCESS.getValue() || value == Commands.FINAL_FAILURE.getValue();
+    }
+
+    public static boolean isFinal(Net net) {
+        return isFinal(net.getRoot().getValue());
+    }
+
 }

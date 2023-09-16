@@ -2,27 +2,15 @@ package org.ent.util;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.ent.Ent;
-import org.ent.LazyPortalArrow;
 import org.ent.net.Arrow;
-import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
-import org.ent.net.Purview;
 import org.ent.net.node.Node;
-import org.ent.net.node.cmd.BiCommand;
-import org.ent.net.node.cmd.Command;
-import org.ent.net.node.cmd.Commands;
-import org.ent.net.node.cmd.MonoCommand;
-import org.ent.net.node.cmd.TriCommand;
+import org.ent.net.node.cmd.*;
 import org.ent.net.node.cmd.accessor.Accessor;
-import org.ent.net.node.cmd.operation.AncestorExchangeNormalOperation;
-import org.ent.net.node.cmd.operation.AncestorExchangeOperation;
-import org.ent.net.node.cmd.operation.BiOperation;
-import org.ent.net.node.cmd.operation.BiValueOperation;
-import org.ent.net.node.cmd.operation.DupNormalOperation;
-import org.ent.net.node.cmd.operation.DupOperation;
-import org.ent.net.node.cmd.operation.SetOperation;
+import org.ent.net.node.cmd.operation.*;
 import org.ent.net.node.cmd.veto.Veto;
 import org.ent.net.node.cmd.veto.Vetos;
+import org.ent.permission.Permissions;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -31,7 +19,6 @@ import java.util.Set;
 
 public class DotRenderer {
 
-    private static final String COLOR_PORTAL = "wheat1";
     private static final String COLOR_NODE = "ivory2";
     public static final String COLOR_VETO = "beige";
     public static final String COLOR_DOT = "lightcyan4";
@@ -58,11 +45,6 @@ public class DotRenderer {
         Set<Node> nodesConnectedToRoot = new LinkedHashSet<>();
         collectNodesRightToLeft(ent.getNet().getRoot(), nodesConnectedToRoot);
         renderNetNodes(nodesConnectedToRoot, ent.getNet(), "n");
-        // portals
-        for (int i = 0; i < ent.getPortals().size(); i++) {
-            sb.append(" p%s[label=\"Portal %s\" shape=invhouse color=%s height=0.5];\n"
-                    .formatted(i, i, COLOR_PORTAL));
-        }
         for (int i = 0; i < ent.getDomains().size(); i++) {
             Net domain = ent.getDomains().get(i);
             sb.append(" subgraph cluster_").append(i).append(" {\n");
@@ -74,86 +56,47 @@ public class DotRenderer {
             }
             Set<Node> domainNodesToRender = new LinkedHashSet<>();
             collectNodesRightToLeft(domain.getRoot(), domainNodesToRender);
-            for (int j = 0; j < ent.getPortals().size(); j++) {
-                Arrow portal = ent.getPortals().get(j);
-                if (portal instanceof LazyPortalArrow lazyPortalArrow) {
-                    if (!lazyPortalArrow.isInitialized()) {
-                        continue;
-                    }
-                }
-                Node target = portal.getTarget(Purview.DIRECT);
-                if (target.getNet() == domain) {
-                    collectNodesRightToLeft(target, domainNodesToRender);
-                }
-            }
             renderNetNodes(domainNodesToRender, domain, "d" + i + "n");
             sb.append(" }\n");
         }
-        // edges for portals
-        for (int i = 0; i < ent.getPortals().size(); i++) {
-            Arrow portal = ent.getPortals().get(i);
-            if (portal instanceof LazyPortalArrow lazyPortalArrow) {
-                if (!lazyPortalArrow.isInitialized()) {
-                    continue;
-                }
-            }
-            Node target = portal.getTarget(Purview.DIRECT);
-            sb.append(" p").append(i).append(" -> ");
-            int domainIndex = getDomainIndex(target);
-            sb.append("d").append(domainIndex).append("n").append(target.getIndex()).append(" [style=dotted]");
-            if (portal == targetArrow) {
-                sb.append("[penwidth=6]");
-            }
-            sb.append(";\n");
-        }
-
         sb.append("}\n");
         return sb.toString();
     }
 
     private void determineCommandTargets() {
         Node root = ent.getNet().getRoot();
-        Command command = Commands.getByValue(root.getValue(Purview.DIRECT));
+        Command command = Commands.getByValue(root.getValue());
         if (command != null) {
             if (command instanceof MonoCommand monoCommand) {
                 Accessor accessor = monoCommand.getAccessor();
-                target1 = accessor.getTarget(root, ent, Purview.DIRECT);
+                target1 = accessor.getTarget(root, Permissions.DIRECT);
             } else if (command instanceof BiCommand biCommand) {
                 Accessor accessor1 = biCommand.getAccessor1();
                 Accessor accessor2 = biCommand.getAccessor2();
                 BiOperation operation = biCommand.getOperation();
                 if (operation instanceof BiValueOperation || operation instanceof AncestorExchangeOperation || operation instanceof AncestorExchangeNormalOperation) {
-                    target1 = accessor1.getTarget(root, ent, Purview.DIRECT);
-                    target2 = accessor2.getTarget(root, ent, Purview.DIRECT);
+                    target1 = accessor1.getTarget(root, Permissions.DIRECT);
+                    target2 = accessor2.getTarget(root, Permissions.DIRECT);
                 } else if (operation instanceof SetOperation || operation instanceof DupOperation || operation instanceof DupNormalOperation) {
-                    targetArrow = accessor1.get(root, ent, Purview.DIRECT);
-                    target2 = accessor2.getTarget(root, ent, Purview.DIRECT);
+                    targetArrow = accessor1.get(root, Permissions.DIRECT);
+                    target2 = accessor2.getTarget(root, Permissions.DIRECT);
                 }
             } else if (command instanceof TriCommand triCommand) {
                 Accessor accessor1 = triCommand.getAccessor1();
                 Accessor accessor2 = triCommand.getAccessor2();
                 Accessor accessor3 = triCommand.getAccessor3();
-                target1 = accessor1.getTarget(root, ent, Purview.DIRECT);
-                target2 = accessor2.getTarget(root, ent, Purview.DIRECT);
-                target3 = accessor3.getTarget(root, ent, Purview.DIRECT);
+                target1 = accessor1.getTarget(root, Permissions.DIRECT);
+                target2 = accessor2.getTarget(root, Permissions.DIRECT);
+                target3 = accessor3.getTarget(root, Permissions.DIRECT);
             }
         }
-    }
-
-    private int getDomainIndex(Node target) {
-        for (int j = 0; j < ent.getDomains().size(); j++) {
-            if (ent.getDomains().get(j) == target.getNet()) {
-                return j;
-            }
-        }
-        throw new AssertionError();
     }
 
     private void renderNetNodes(Set<Node> nodes, Net net, String nodePrefix) {
         for (Node node : nodes) {
             String nodeName = renderNode(net, nodePrefix, node);
             for (Arrow arrow : node.getArrows()) {
-                Node child = arrow.getTarget(Purview.DIRECT);
+                Node child = arrow.getTarget(Permissions.DIRECT);
                 if (node == child && arrow != targetArrow) {
                     continue;
                 }
@@ -178,7 +121,7 @@ public class DotRenderer {
     private String renderNode(Net net, String nodePrefix, Node node) {
         String nodeName = nodePrefix + node.getIndex();
         sb.append(" ").append(nodeName);
-        int value = node.getValue(Purview.DIRECT);
+        int value = node.getValue(Permissions.DIRECT);
         if (value == 0) {
             if (isTarget(node)) {
                 TableBuilder table = new TableBuilder();
@@ -228,60 +171,36 @@ public class DotRenderer {
                     }
                 } else {
                     String hexString = Integer.toHexString(value);
-                    Integer portalIndexLeft = getPortalIndex(value, ArrowDirection.LEFT);
-                    Integer portalIndexRight = getPortalIndex(value, ArrowDirection.RIGHT);
-                    if (portalIndexLeft != null || portalIndexRight != null) {
-                        TableBuilder table = new TableBuilder();
-                        table.rounded = false;
-                        table.vanishEmptySides = true;
-                        table.outlineColors = getOutlineColors(node);
-                        table.fillColor = COLOR_NODE;
-                        if (portalIndexLeft != null) {
-                            table.textLeft = "P" + portalIndexLeft;
-                            table.fillColorLeft = COLOR_PORTAL;
+                    if (node.isLeafNode()) {
+                        List<String> outlineColors = getOutlineColors(node);
+                        if (outlineColors.size() <= 1) {
+                            sb.append("[shape=rect style=\"filled,rounded\" label=\"%s\" fillcolor=%s margin=0.07 height=0 width=0"
+                                    .formatted(hexString, COLOR_NODE));
+                            if (outlineColors.size() > 0) {
+                                sb.append(" color=%s penwidth=%s"
+                                        .formatted(getOutlineColors(node).get(0), TARGET_HIGHLIGHT_PENWIDTH));
+                            }
+                            sb.append("]");
                         } else {
-                            table.fillColorLeft = COLOR_NODE;
+                            TableBuilder table = new TableBuilder();
+                            table.textCenter = hexString;
+                            table.fillColor = COLOR_NODE;
+                            table.rounded = true;
+                            table.outlineColors = outlineColors;
+                            table.skipSides = true;
+                            table.renderTable(sb);
                         }
-                        if (portalIndexRight != null) {
-                            table.textRight = "P" + portalIndexRight;
-                            table.fillColorRight = COLOR_PORTAL;
-                        } else {
-                            table.fillColorRight = COLOR_NODE;
-                        }
-                        table.textCenter = hexString;
-                        table.renderTable(sb);
                     } else {
-                        if (node.isLeafNode()) {
+                        if (isTarget(node)) {
                             List<String> outlineColors = getOutlineColors(node);
-                            if (outlineColors.size() <= 1) {
-                                sb.append("[shape=rect style=\"filled,rounded\" label=\"%s\" fillcolor=%s margin=0.07 height=0 width=0"
-                                        .formatted(hexString, COLOR_NODE));
-                                if (outlineColors.size() > 0) {
-                                    sb.append(" color=%s penwidth=%s"
-                                            .formatted(getOutlineColors(node).get(0), TARGET_HIGHLIGHT_PENWIDTH));
-                                }
-                                sb.append("]");
-                            } else {
-                                TableBuilder table = new TableBuilder();
-                                table.textCenter = hexString;
-                                table.fillColor = COLOR_NODE;
-                                table.rounded = true;
-                                table.outlineColors = outlineColors;
-                                table.skipSides = true;
-                                table.renderTable(sb);
-                            }
+                            TableBuilder table = new TableBuilder();
+                            table.textCenter = hexString;
+                            table.fillColor = COLOR_NODE;
+                            table.rounded = false;
+                            table.outlineColors = outlineColors;
+                            table.renderTable(sb);
                         } else {
-                            if (isTarget(node)) {
-                                List<String> outlineColors = getOutlineColors(node);
-                                TableBuilder table = new TableBuilder();
-                                table.textCenter = hexString;
-                                table.fillColor = COLOR_NODE;
-                                table.rounded = false;
-                                table.outlineColors = outlineColors;
-                                table.renderTable(sb);
-                            } else {
-                                sb.append("[shape=record][label=\"<l>|").append(hexString).append("|<r>\"]");
-                            }
+                            sb.append("[shape=record][label=\"<l>|").append(hexString).append("|<r>\"]");
                         }
                     }
                 }
@@ -439,21 +358,12 @@ public class DotRenderer {
         return node == target1 || node == target2 || node == target3;
     }
 
-    private Integer getPortalIndex(int value, ArrowDirection dir) {
-        int portalIndex = Ent.getPortalIndex(value, dir);
-        if (ent.isPortal(portalIndex)) {
-            return portalIndex;
-        } else {
-            return null;
-        }
-    }
-
     private static void collectNodesRightToLeft(Node node, Set<Node> collected) {
         if (!collected.add(node)) {
             return;
         }
-        collectNodesRightToLeft(node.getRightChild(Purview.DIRECT), collected);
-        collectNodesRightToLeft(node.getLeftChild(Purview.DIRECT), collected);
+        collectNodesRightToLeft(node.getRightChild(Permissions.DIRECT), collected);
+        collectNodesRightToLeft(node.getLeftChild(Permissions.DIRECT), collected);
     }
 
     private static String escape(String shortName) {

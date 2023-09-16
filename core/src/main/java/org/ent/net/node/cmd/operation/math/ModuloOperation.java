@@ -1,8 +1,7 @@
 package org.ent.net.node.cmd.operation.math;
 
-import org.ent.Ent;
-import org.ent.net.AccessToken;
-import org.ent.net.Purview;
+import org.ent.permission.Permissions;
+import org.ent.permission.WriteFacet;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.ExecutionResult;
 import org.ent.net.node.cmd.operation.Operations;
@@ -16,18 +15,15 @@ public class ModuloOperation extends TriNodeOperation {
     }
 
     @Override
-    public ExecutionResult doApply(Node node1, Node node2, Node node3, Ent ent, AccessToken accessToken) {
-        if (!node1.permittedToSetValue(accessToken)) {
-            return ExecutionResult.ERROR;
-        }
-        int a = node2.getValue(Purview.COMMAND);
-        int b = node3.getValue(Purview.COMMAND);
+    public ExecutionResult doApply(Node node1, Node node2, Node node3, Permissions permissions) {
+        if (permissions.noWrite(node1, WriteFacet.VALUE)) return ExecutionResult.ERROR;
+
+        int a = node2.getValue(permissions);
+        int b = node3.getValue(permissions);
         if (b == 0) {
             return ExecutionResult.ERROR;
         }
-        node1.setValue(compute(a, b));
-        ent.event().transverValue(node2, node1);
-        ent.event().transverValue(node3, node1);
+        node1.setValue(compute(a, b), permissions);
         return ExecutionResult.NORMAL;
     }
 

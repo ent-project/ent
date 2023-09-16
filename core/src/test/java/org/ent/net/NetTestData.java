@@ -59,10 +59,10 @@ public class NetTestData {
 		Node unary_root_a = net.newUNode(unary_b);	// a
 		Node nop = net.newCNode(Commands.NOP);
 
-		b3.setLeftChild(b4, Purview.DIRECT);
-		b3.setRightChild(unary_b, Purview.DIRECT);
-		b4.setLeftChild(nop, Purview.DIRECT);
-		b4.setRightChild(unary_root_a, Purview.DIRECT);
+		b3.setLeftChild(b4);
+		b3.setRightChild(unary_b);
+		b4.setLeftChild(nop);
+		b4.setRightChild(unary_root_a);
 
 		net.setRoot(unary_root_a);
         return new NetWithStringRepresentation(net, "a:[b:[(A:(<o>, a), (A, (A, b)))]]");

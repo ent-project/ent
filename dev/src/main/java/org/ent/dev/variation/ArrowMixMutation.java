@@ -1,10 +1,10 @@
 package org.ent.dev.variation;
 
 import org.apache.commons.rng.UniformRandomProvider;
+import org.ent.permission.Permissions;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
-import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.util.ModifiedPoisson;
 
@@ -58,6 +58,6 @@ public class ArrowMixMutation {
         int indexTarget = rand.nextInt(destinationRange.minIncluive, destinationRange.maxExclusive);
         int indexTargetResolved = resolveDestination(indexTarget);
         Node nodeTarget = net.getNodesAsList().get(indexTargetResolved);
-        arrow.setTarget(nodeTarget, Purview.DIRECT);
+        arrow.setTarget(nodeTarget, Permissions.DIRECT);
     }
 }

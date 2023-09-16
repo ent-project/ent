@@ -3,9 +3,9 @@ package org.ent.net.io.formatter;
 import org.ent.Ent;
 import org.ent.net.Arrow;
 import org.ent.net.Net;
-import org.ent.net.Purview;
 import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
+import org.ent.permission.Permissions;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -90,7 +90,7 @@ public class NetFormatter {
         	}
         }
         for (Arrow arrow : node.getArrows()) {
-        	Node child = arrow.getTarget(Purview.DIRECT);
+        	Node child = arrow.getTarget(Permissions.DIRECT);
         	collectRecursively(child, collected, markerNodesPermitted);
         }
     }
@@ -100,7 +100,7 @@ public class NetFormatter {
             return;
         missing.remove(node);
         for (Arrow arrow : node.getArrows()) {
-        	Node child = arrow.getTarget(Purview.DIRECT);
+        	Node child = arrow.getTarget(Permissions.DIRECT);
         	collectRecursivelyInverted(child, missing);
         }
     }

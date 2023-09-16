@@ -1,8 +1,8 @@
 package org.ent.net.util;
 
+import org.ent.permission.Permissions;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
-import org.ent.net.Purview;
 import org.ent.net.node.Node;
 
 /**
@@ -40,7 +40,7 @@ public class NetCopyPack {
             if (nodeOrig == null) {
                 continue;
             }
-            Node newNode = receivingNet.newNode(nodeOrig.getValue(Purview.DIRECT));
+            Node newNode = receivingNet.newNode(nodeOrig.getValue());
             indexMap[nodeOrig.getIndex()] = newNode.getIndex();
         }
         for (Node nodeOrig : netOrig.getNodes()) {
@@ -49,8 +49,8 @@ public class NetCopyPack {
             }
             Node nodeClone = receivingNet.getNode(indexMap[nodeOrig.getIndex()]);
             for (ArrowDirection direction : ArrowDirection.values()) {
-                Node targetOrig = nodeOrig.getChild(direction, Purview.DIRECT);
-                nodeClone.setChild(direction, receivingNet.getNode(indexMap[targetOrig.getIndex()]), Purview.DIRECT);
+                Node targetOrig = nodeOrig.getChild(direction, Permissions.DIRECT);
+                nodeClone.setChild(direction, receivingNet.getNode(indexMap[targetOrig.getIndex()]), Permissions.DIRECT);
             }
         }
     }

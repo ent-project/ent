@@ -1,6 +1,7 @@
 package org.ent.net.io.parser;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.ent.permission.Permissions;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
 import org.ent.net.node.Node;
@@ -18,8 +19,8 @@ public class ValueNodeTemplate implements NodeTemplate {
     }
 
     @Override
-    public Node generateNode(Net net) throws ParserException {
-        return net.newNode(value);
+    public Node generateNode(Net net) {
+        return net.newNode(value, Permissions.DIRECT);
     }
 
     @Override

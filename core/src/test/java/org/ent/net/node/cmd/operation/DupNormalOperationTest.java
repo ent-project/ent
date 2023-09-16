@@ -24,7 +24,7 @@ class DupNormalOperationTest {
         DupNormalOperation dupNormalOperation = new DupNormalOperation();
 
         Node root = ent.getNet().getRoot();
-        dupNormalOperation.apply(root.getLeftArrow(), root.getRightArrow(), ent, null);
+        dupNormalOperation.apply(root.getLeftArrow(), root.getRightArrow(), ent.getNet().getPermissions());
 
         NetFormatter formatter = new NetFormatter()
                 .withIncludeOrphans(true)

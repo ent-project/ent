@@ -1,25 +1,24 @@
 package org.ent;
 
-import org.ent.net.Arrow;
-import org.ent.net.ArrowDirection;
+import org.ent.listener.EntEventListener;
+import org.ent.listener.MultiEntEventListener;
+import org.ent.listener.NopEntEventListener;
 import org.ent.net.Net;
-import org.ent.net.Purview;
-import org.ent.net.node.Node;
+import org.ent.permission.PermissionBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class Ent {
     private Net net;
 
-    private Purview purview;
-
     private final List<Net> domains = new ArrayList<>();
-    private final List<Arrow> portals = new ArrayList<>();
 
     EntEventListener eventListener = new NopEntEventListener();
 
     public Ent(Net net) {
+        addDomain(net);
         setNet(net);
     }
 
@@ -29,73 +28,30 @@ public class Ent {
 
     public void setNet(Net net) {
         this.net = net;
-        this.net.setCoreNet(true);
+        if (domains.isEmpty()) {
+            domains.add(net);
+        } else {
+            this.domains.set(0, net);
+        }
     }
 
     public List<Net> getDomains() {
         return domains;
     }
 
-    public List<Arrow> getPortals() {
-        return portals;
-    }
-
-    public Arrow getArrowMaybeThroughPortal(Node node, ArrowDirection direction, Purview purview) {
-        int value = node.getValue(purview);
-        int portalIndex = getPortalIndex(value, direction);
-        if (isPortal(portalIndex)) {
-            Arrow portal = portals.get(portalIndex);
-            event().getArrowThroughPortal(node, direction, portal);
-            return portal;
-        } else {
-            return node.getArrow(direction);
-        }
-    }
-
-    public static int getPortalIndex(int value, ArrowDirection direction) {
-        // "main" direction (left) gets the "better" (least significant bits) side of the int
-        int halfValue = switch (direction) {
-            case LEFT -> value & 0xFFFF;
-            case RIGHT -> value >>> 16;
-        };
-        return halfValue ^ 0xFFFF;
-    }
-
     public void addDomain(Net net) {
-        if (net.isCoreNet()) {
-            throw new IllegalArgumentException();
-        }
         domains.add(net);
+        net.setNetIndex(domains.size() - 1);
     }
 
-    public int addPortal(Arrow portal) {
-        int index = portals.size();
-        portals.add(portal);
-        return getPortalCode(index);
-    }
-
-    public static int getPortalCode(int index) {
-        return index ^ 0xFFFF;
-    }
-
-    public boolean isPortal(int index) {
-        return index >= 0 && index < portals.size();
-    }
-
-    public Ent setPurview(Purview purview) {
-        if (this.purview != null) {
-            throw new AssertionError("Trying to set purview " + purview + " but has unfinished purview " + this.purview);
+    public void putPermissions(Consumer<PermissionBuilder> consumer) {
+        PermissionBuilder permissionBuilder = new PermissionBuilder(domains.size());
+        consumer.accept(permissionBuilder);
+        for (int i = 0; i < domains.size(); i++) {
+            Net domain = domains.get(i);
+            domain.setPermissions(permissionBuilder.buildPermissions(i));
+            domain.setExecutable(permissionBuilder.shouldBeExecutable(i));
         }
-        this.purview = purview;
-        return this;
-    }
-
-    public Ent clearPurview() {
-        if (this.purview == null) {
-            throw new AssertionError("trying to clear purview, but none is active");
-        }
-        this.purview = null;
-        return this;
     }
 
     public EntEventListener getEventListener() {

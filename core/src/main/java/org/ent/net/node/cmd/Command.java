@@ -1,9 +1,6 @@
 package org.ent.net.node.cmd;
 
-import com.google.common.annotations.VisibleForTesting;
-import org.ent.Ent;
-import org.ent.Profile;
-import org.ent.net.AccessToken;
+import org.ent.permission.Permissions;
 import org.ent.net.node.Node;
 
 public interface Command extends ParameterizedValue {
@@ -21,13 +18,7 @@ public interface Command extends ParameterizedValue {
      */
     int COMMAND_PATTERN = 0b110011 << 24;
 
-    ExecutionResult execute(Node base, Ent ent, AccessToken accessToken);
-
-    @VisibleForTesting
-    default ExecutionResult execute(Node base, Ent ent) {
-        Profile.verifyTestProfile();
-        return execute(base, ent, null);
-    }
+    ExecutionResult execute(Node base, Permissions permissions);
 
     int getValue();
 

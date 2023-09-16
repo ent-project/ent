@@ -1,10 +1,8 @@
 package org.ent.util;
 
 import org.ent.Ent;
-import org.ent.PortalArrow;
 import org.ent.Profile;
 import org.ent.net.Net;
-import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.accessor.Accessors;
 import org.ent.net.node.cmd.operation.Operations;
@@ -72,8 +70,6 @@ class DotRendererTest {
         entTripleTargetCommand.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.DIRECT, Accessors.DIRECT, Accessors.DIRECT).getValue());
         Ent entTripleTargetVeto = entBase();
         entTripleTargetVeto.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LEFT, Accessors.LEFT, Accessors.LEFT).getValue());
-        Ent entTripleTargetPortal = entBase();
-        entTripleTargetPortal.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.RIGHT, Accessors.RIGHT, Accessors.RIGHT).getValue());
         Ent entTripleTargetLeafNumber = entBase();
         entTripleTargetLeafNumber.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LEFT_LEFT, Accessors.LEFT_LEFT, Accessors.LEFT_LEFT).getValue());
         Ent entTripleTargetInnerNumber = entBase();
@@ -81,27 +77,20 @@ class DotRendererTest {
         Ent entTripleTargetDot = entBase();
         entTripleTargetDot.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LEFT_RIGHT_LEFT, Accessors.LEFT_RIGHT_LEFT, Accessors.LEFT_RIGHT_LEFT).getValue());
         return Stream.of(entBase(), ent2, ent3, entTripleTargetCommand, entTripleTargetVeto,
-                entTripleTargetPortal, entTripleTargetLeafNumber, entTripleTargetInnerNumber, entTripleTargetDot);
+                entTripleTargetLeafNumber, entTripleTargetInnerNumber, entTripleTargetDot);
     }
 
     private static Ent entBase() {
-        Node portal, portalLeft;
         Ent ent = builder().ent(node(
-                node(Commands.get(Operations.BITWISE_AND_OPERATION, Accessors.RIGHT, Accessors.LEFT_RIGHT, Accessors.FLOW),
+                unary(Commands.get(Operations.BITWISE_AND_OPERATION, Accessors.RIGHT, Accessors.LEFT_RIGHT, Accessors.FLOW),
                         node(Vetos.get(Conditions.GREATER_THAN_CONDITION, Accessors.RIGHT, Accessors.RIGHT_LEFT_RIGHT),
                                 value(54),
-                                unary(0xa3, ignored())),
-                        portal = unary(
-                                portalLeft = ignored()
-                        )),
+                                unary(0xa3, ignored()))
+                        ),
                 value(Commands.FINAL_SUCCESS)));
         Net domain = builder().net(ignored());
         domain.setName("domain");
         ent.addDomain(domain);
-        int portalCode1 = ent.addPortal(new PortalArrow(domain));
-        int portalCode2 = ent.addPortal(new PortalArrow(domain));
-        portal.setValue(portalCode1 | (portalCode2 << 16));
-        portalLeft.setValue(portalCode1);
         return ent;
     }
 

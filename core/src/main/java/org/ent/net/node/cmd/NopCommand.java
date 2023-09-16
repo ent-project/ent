@@ -1,13 +1,12 @@
 package org.ent.net.node.cmd;
 
-import org.ent.Ent;
-import org.ent.net.AccessToken;
+import org.ent.permission.Permissions;
 import org.ent.net.node.Node;
 
 public class NopCommand implements Command {
 
 	@Override
-	public ExecutionResult execute(Node base, Ent ent, AccessToken accessToken) {
+	public ExecutionResult execute(Node base, Permissions permissions) {
 		return ExecutionResult.NORMAL;
 	}
 

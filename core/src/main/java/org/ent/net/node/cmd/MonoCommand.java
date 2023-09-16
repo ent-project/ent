@@ -1,13 +1,11 @@
 package org.ent.net.node.cmd;
 
-import org.ent.Ent;
 import org.ent.net.Arrow;
-import org.ent.net.AccessToken;
-import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
 import org.ent.net.node.cmd.accessor.DirectAccessor;
 import org.ent.net.node.cmd.operation.MonoOperation;
+import org.ent.permission.Permissions;
 
 public class MonoCommand extends VetoedCommand {
 
@@ -30,9 +28,9 @@ public class MonoCommand extends VetoedCommand {
     }
 
     @Override
-    protected ExecutionResult doExecute(Node base, Ent ent, AccessToken accessToken) {
-        Arrow handle = accessor.get(base, ent, Purview.COMMAND);
-        return operation.apply(handle, ent, accessToken);
+    protected ExecutionResult doExecute(Node base, Permissions permissions) {
+        Arrow handle = accessor.get(base, permissions);
+        return operation.apply(handle, permissions);
     }
 
     @Override

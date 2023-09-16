@@ -1,6 +1,7 @@
 package org.ent.net.node.cmd.operation;
 
 import org.ent.Ent;
+import org.ent.permission.Permissions;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.io.parser.NetParser;
 import org.ent.net.io.parser.ParserException;
@@ -24,7 +25,7 @@ class AncestorExchangeNormalOperationTest {
         AncestorExchangeNormalOperation ancestorExchangeNormalOperation = new AncestorExchangeNormalOperation();
 
         Node root = ent.getNet().getRoot();
-        ancestorExchangeNormalOperation.apply(root.getLeftArrow(), root.getRightArrow(), ent, null);
+        ancestorExchangeNormalOperation.apply(root.getLeftArrow(), root.getRightArrow(), Permissions.DIRECT);
 
         NetFormatter formatter = new NetFormatter()
                 .withForceGivenNodeNames(true);

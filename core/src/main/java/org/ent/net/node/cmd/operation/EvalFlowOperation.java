@@ -1,29 +1,32 @@
 package org.ent.net.node.cmd.operation;
 
-import org.ent.Ent;
-import org.ent.net.AccessToken;
+import org.ent.permission.Permissions;
 import org.ent.net.Arrow;
 import org.ent.net.Net;
-import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.ExecutionResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EvalFlowOperation implements MonoOperation {
+
+    private final static Logger log = LoggerFactory.getLogger(EvalFlowOperation.class);
+
     @Override
     public int getCode() {
         return Operations.CODE_EVAL_FLOW_OPERATION;
     }
 
     @Override
-    public ExecutionResult apply(Arrow handle, Ent ent, AccessToken accessToken) {
-        Node node = handle.getTarget(Purview.COMMAND);
+    public ExecutionResult apply(Arrow handle, Permissions permissions) {
+        if (permissions.noExecute(handle)) return ExecutionResult.ERROR;
+        Node node = handle.getTarget(permissions);
         Net net = node.getNet();
-        if (!net.isPermittedToEval(node)) {
-            return ExecutionResult.ERROR;
-        }
-        Command command = Commands.getByValue(node.getValue(Purview.COMMAND));
+        if (node != net.getRoot()) return ExecutionResult.ERROR;
+
+        Command command = Commands.getByValue(node.getValue(permissions));
         if (command == null) {
             return ExecutionResult.ERROR;
         }
@@ -32,13 +35,18 @@ public class EvalFlowOperation implements MonoOperation {
         }
         net.event().beforeEvalExecution(node, true);
 
-        ExecutionResult executionResult = command.execute(node, ent, net.getEvalToken());
-        ent.event().evalFloatOperation(node);
+        Permissions permissionsForNewActor = net.getPermissions();
+        ExecutionResult executionResult = command.execute(node, permissionsForNewActor);
+
         // advance pointer
-        Node newTarget = node.getRightChild(Purview.COMMAND);
-
-        handle.setTarget(newTarget, Purview.COMMAND, net.getSetRootToken());
-
+        Node newTarget = node.getRightChild(permissions);
+        if (newTarget.getNet() != net) {
+            log.trace("cannot advance root as it would leave the net");
+            return ExecutionResult.ERROR;
+        } else {
+            handle.setTarget(newTarget, permissions);
+            net.setRoot(newTarget);
+        }
         return executionResult;
     }
 

@@ -1,5 +1,6 @@
 package org.ent.net.io.parser;
 
+import org.ent.permission.Permissions;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
 import org.ent.net.node.Node;
@@ -33,6 +34,6 @@ class BNodeTemplate implements NodeTemplate {
 
     @Override
 	public Node generateNode(Net net) {
-		return net.newNode(value);
+		return net.newNode(value, Permissions.DIRECT);
 	}
 }

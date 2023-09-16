@@ -1,6 +1,5 @@
 package org.ent.net.node.cmd;
 
-import org.ent.Ent;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
 import org.ent.net.node.Node;
@@ -67,7 +66,7 @@ class BiCommandTest {
 		Net net = builder().net(unary(node(GREATER_THAN_CONDITION, i = value(7), value(0))));
 		Command command = new MonoCommand(INC_OPERATION, Accessors.LEFT);
 
-		command.execute(net.getRoot(), new Ent(net));
+		command.execute(net.getRoot(), net.getPermissions());
 
 		assertThat(i.getValue()).isEqualTo(8);
 	}
@@ -78,7 +77,7 @@ class BiCommandTest {
 		Net net = builder().net(unary(node(GREATER_THAN_CONDITION, i = value(7), value(1000))));
 		Command command = new MonoCommand(INC_OPERATION, Accessors.LEFT);
 
-		command.execute(net.getRoot(), new Ent(net));
+		command.execute(net.getRoot(), net.getPermissions());
 
 		assertThat(i.getValue()).isEqualTo(7);
 	}

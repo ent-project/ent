@@ -2,7 +2,6 @@ package org.ent.run;
 
 import org.ent.Ent;
 import org.ent.net.Net;
-import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.Commands;
@@ -52,8 +51,9 @@ public class EntRunner {
 	}
 
 	private StepResult doStep(Node executionPointer) {
-		boolean executionPointerDoesNotAdvance = executionPointer.getRightChild(Purview.RUNNER) == executionPointer;
-		Command command = Commands.getByValue(executionPointer.getValue(Purview.RUNNER));
+		boolean executionPointerDoesNotAdvance =
+				executionPointer.getRightChild(net.getPermissions()) == executionPointer;
+		Command command = Commands.getByValue(executionPointer.getValue(net.getPermissions()));
 		if (command == null) {
 			ent.event().beforeCommandExecution(executionPointer, null);
 			if (executionPointerDoesNotAdvance) {
@@ -64,7 +64,7 @@ public class EntRunner {
 		}
 
 		ent.event().beforeCommandExecution(executionPointer, command);
-		ExecutionResult executeResult = command.execute(executionPointer, ent, null);
+		ExecutionResult executeResult = command.execute(executionPointer, net.getPermissions());
 		StepResult stepResult = convertToStepResult(executeResult);
 		log.trace("command {} executed: {}", command, executeResult);
 		ent.event().afterCommandExecution(stepResult);
@@ -86,7 +86,7 @@ public class EntRunner {
 	}
 
 	private void advanceExecutionPointer(Node executionPointer) {
-		Node newExecutionPointer = executionPointer.getRightChild(Purview.RUNNER);
+		Node newExecutionPointer = executionPointer.getRightChild(net.getPermissions());
 		net.setRoot(newExecutionPointer);
 	}
 }

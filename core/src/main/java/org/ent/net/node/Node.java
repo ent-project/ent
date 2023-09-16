@@ -1,12 +1,13 @@
 package org.ent.net.node;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.ent.permission.Permissions;
 import org.ent.Profile;
-import org.ent.net.AccessToken;
+import org.ent.permission.WriteFacet;
 import org.ent.net.Arrow;
 import org.ent.net.ArrowDirection;
 import org.ent.net.Net;
-import org.ent.net.Purview;
+import org.ent.permission.PermissionsViolatedException;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.veto.Veto;
@@ -14,11 +15,12 @@ import org.ent.net.node.cmd.veto.Veto;
 import java.util.List;
 import java.util.Optional;
 
+import static org.ent.permission.Permissions.DOUBLE_CHECK_PERMISSIONS;
+
 /**
  * Binary node.
  */
 public class Node {
-
 	private Net net;
 	private Hub hub;
 	private int index;
@@ -89,95 +91,94 @@ public class Node {
 		this.hub = hub;
 	}
 
-	public boolean permittedToSetValue(AccessToken accessToken) {
-		return net.isPermittedToWrite(accessToken);
-	}
-
-	@VisibleForTesting
-	public Node getLeftChild() {
-		Profile.verifyTestProfile();
-		return getLeftChild(Purview.DIRECT);
-	}
-
-	public Node getChild(ArrowDirection direction, Purview purview) {
+	public Node getChild(ArrowDirection direction, Permissions permissions) {
 		return switch (direction) {
-			case LEFT -> getLeftChild(purview);
-			case RIGHT -> getRightChild(purview);
+			case LEFT -> getLeftChild(permissions);
+			case RIGHT -> getRightChild(permissions);
 		};
 	}
 
-	public boolean hasProperLeftChild() {
-		return getLeftChild(Purview.DIRECT) != this;
+	public boolean hasProperLeftChild(Permissions permissions) {
+		return getLeftChild(permissions) != this;
 	}
 
-	public boolean hasProperRightChild() {
-		return getRightChild(Purview.DIRECT) != this;
+	public boolean hasProperRightChild(Permissions permissions) {
+		return getRightChild(permissions) != this;
 	}
 
-	public void setChild(ArrowDirection direction, Node child, Purview purview) {
+	public void setChild(ArrowDirection direction, Node child, Permissions permissions) {
 		switch (direction) {
-			case LEFT -> setLeftChild(child, purview);
-			case RIGHT -> setRightChild(child, purview);
+			case LEFT -> setLeftChild(child, permissions);
+			case RIGHT -> setRightChild(child, permissions);
 		}
 	}
 
 	@VisibleForTesting
 	public void setLeftChild(Node child) {
 		Profile.verifyTestProfile();
-		setLeftChild(child, Purview.DIRECT);
-	}
-
-	@VisibleForTesting
-	public Node getRightChild() {
-		Profile.verifyTestProfile();
-		return getRightChild(Purview.DIRECT);
+		setLeftChild(child, Permissions.DIRECT);
 	}
 
 	@VisibleForTesting
 	public void setRightChild(Node child) {
 		Profile.verifyTestProfile();
-		setRightChild(child, Purview.DIRECT);
+		setRightChild(child, Permissions.DIRECT);
 	}
 
+	@VisibleForTesting
 	public int getValue() {
 		Profile.verifyTestProfile();
-		return getValue(Purview.DIRECT);
+		return getValue(Permissions.DIRECT);
 	}
 
+	@VisibleForTesting
+	public void setValue(int value) {
+		Profile.verifyTestProfile();
+		setValue(value, Permissions.DIRECT);
+	}
+
+	@VisibleForTesting
 	public void setCommand(Command command) {
-		setValue(command.getValue());
+		Profile.verifyTestProfile();
+		setValue(command.getValue(), Permissions.DIRECT);
 	}
 
+	@VisibleForTesting
 	public void setVeto(Veto value) {
-		setValue(value.getValue());
+		Profile.verifyTestProfile();
+		setValue(value.getValue(), Permissions.DIRECT);
 	}
 
 	public Command getCommand() {
 		return Commands.getByValue(getValue());
 	}
 
-	public long getAddress() {
-		long index = getIndex();
-		long netIndex = getNet().getNetIndex();
-		return index + (netIndex << 32);
-
-		// FIXME unit tests
+	public Node getLeftChild(Permissions permissions) {
+		return leftArrow.getTarget(permissions);
 	}
 
-	public Node getLeftChild(Purview purview) {
-		return leftArrow.getTarget(purview);
+	@VisibleForTesting
+	public Node getLeftChild() {
+		Profile.verifyTestProfile();
+		return getLeftChild(Permissions.DIRECT);
 	}
 
-	public void setLeftChild(Node child, Purview purview) {
-		leftArrow.setTarget(child, purview);
+	public void setLeftChild(Node child, Permissions permissions) {
+		leftArrow.setTarget(child, permissions);
 	}
 
-	public Node getRightChild(Purview purview) {
-		return rightArrow.getTarget(purview);
+	public Node getRightChild(Permissions permissions) {
+		return rightArrow.getTarget(permissions);
 	}
 
-	public void setRightChild(Node child, Purview purview) {
-		rightArrow.setTarget(child, purview);
+	@VisibleForTesting
+	public Node getRightChild() {
+		Profile.verifyTestProfile();
+		return getRightChild(Permissions.DIRECT);
+	}
+
+	public void setRightChild(Node child, Permissions permissions) {
+		rightArrow.setTarget(child, permissions);
 	}
 
 	public Arrow getLeftArrow() {
@@ -199,15 +200,22 @@ public class Node {
 		};
 	}
 
-	final public int getValue(Purview purview) {
-		if (purview != Purview.DIRECT) {
-			net.event().getValue(this, purview);
+	final public int getValue(Permissions permissions) {
+		if (permissions.shouldFireEvent()) {
+			net.event().getValue(this);
 		}
 		return value;
 	}
 
-	public void setValue(int value) {
-		net.event().setValue(this, this.value, value);
+	public void setValue(int value, Permissions permissions) {
+		if (DOUBLE_CHECK_PERMISSIONS) {
+			if (permissions.noWrite(this, WriteFacet.VALUE)) {
+				throw new PermissionsViolatedException();
+			}
+		}
+		if (permissions.shouldFireEvent()) {
+			net.event().setValue(this, this.value, value);
+		}
 		this.value = value;
 	}
 
@@ -255,23 +263,27 @@ public class Node {
 			return Node.this;
 		}
 
-		public Node getTarget(Purview purview) {
-			net.fireGetTargetCall(Node.this, ArrowDirection.LEFT, purview);
-			return doGetTarget();
-		}
-
-		public void setTarget(Node target, Purview purview) {
-			net.fireSetTargetCall(Node.this, ArrowDirection.LEFT, target, purview);
-			doSetTarget(target);
-		}
-
-		@Override
-		public boolean permittedToSetTarget(Node target, AccessToken accessToken) {
-			return net.isPermittedToWrite(accessToken) && target.getNet() == net;
-		}
-
-		private Node doGetTarget() {
+		public Node getTarget(Permissions permissions) {
+			if (permissions.shouldFireEvent()) {
+				net.event().calledGetChild(Node.this, ArrowDirection.LEFT);
+			}
 			return leftChildHub.getNode();
+		}
+
+		public void setTarget(Node target, Permissions permissions) {
+			if (DOUBLE_CHECK_PERMISSIONS) {
+				// At this point, we do not know if the caller is eval_flow.
+				// If it is not, the following test is too lenient, so this
+				// 	double check may not be a full verification of valid permissions.
+				if (permissions.noWrite(Node.this, WriteFacet.ARROW) &&
+					permissions.noExecute(Node.this)) {
+					throw new PermissionsViolatedException();
+				}
+			}
+			if (permissions.shouldFireEvent()) {
+				net.event().calledSetChild(Node.this, ArrowDirection.LEFT, target);
+			}
+			doSetTarget(target);
 		}
 
 		private void doSetTarget(Node target) {
@@ -290,23 +302,18 @@ public class Node {
 			return Node.this;
 		}
 
-		public Node getTarget(Purview purview) {
-			net.fireGetTargetCall(Node.this, ArrowDirection.RIGHT, purview);
-			return doGetTarget();
-		}
-
-		public void setTarget(Node target, Purview purview) {
-			net.fireSetTargetCall(Node.this, ArrowDirection.RIGHT, target, purview);
-			doSetTarget(target);
-		}
-
-		@Override
-		public boolean permittedToSetTarget(Node target, AccessToken accessToken) {
-			return net.isPermittedToWrite(accessToken) && target.getNet() == net;
-		}
-
-		private Node doGetTarget() {
+		public Node getTarget(Permissions permissions) {
+			if (permissions.shouldFireEvent()) {
+				net.event().calledGetChild(Node.this, ArrowDirection.RIGHT);
+			}
 			return rightChildHub.getNode();
+		}
+
+		public void setTarget(Node target, Permissions permissions) {
+			if (permissions.shouldFireEvent()) {
+				net.event().calledSetChild(Node.this, ArrowDirection.RIGHT, target);
+			}
+			doSetTarget(target);
 		}
 
 		private void doSetTarget(Node target) {

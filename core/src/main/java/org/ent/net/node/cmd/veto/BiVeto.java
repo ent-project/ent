@@ -1,11 +1,10 @@
 package org.ent.net.node.cmd.veto;
 
-import org.ent.Ent;
 import org.ent.net.ArrowDirection;
-import org.ent.net.Purview;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
 import org.ent.net.node.cmd.accessor.PrimaryAccessor;
+import org.ent.permission.Permissions;
 
 public class BiVeto implements Veto {
 
@@ -33,12 +32,10 @@ public class BiVeto implements Veto {
     }
 
     @Override
-    public boolean evaluate(Node base, Ent ent) {
-        Node node1 = accessor1.getTarget(base, ent, Purview.COMMAND);
-        Node node2 = accessor2.getTarget(base, ent, Purview.COMMAND);
-        boolean result = not ^ condition.evaluate(node1, node2, ent);
-        ent.event().vetoEvaluation(this, node1, node2, result);
-        return result;
+    public boolean evaluate(Node base, Permissions permissions) {
+        Node node1 = accessor1.getTarget(base, permissions);
+        Node node2 = accessor2.getTarget(base, permissions);
+        return not ^ condition.evaluate(node1, node2, permissions);
     }
 
     private String buildShortName() {
