@@ -5,6 +5,8 @@ import org.ent.net.ArrowDirection;
 import org.ent.net.node.Node;
 import org.ent.permission.Permissions;
 
+import static org.ent.net.ArrowDirection.ARROW_SYMBOLS;
+
 public class TertiaryAccessor implements Accessor {
 
     private final ArrowDirection direction1;
@@ -22,9 +24,10 @@ public class TertiaryAccessor implements Accessor {
         this.direction2 = direction2;
         this.direction3 = direction3;
         this.code = 0b1000 | (direction1 == ArrowDirection.RIGHT ? 0b0001 : 0) | (direction2 == ArrowDirection.RIGHT ? 0b0010 : 0) | (direction3 == ArrowDirection.RIGHT ? 0b0100 : 0);
-        this.shortName = ArrowDirection.ARROW_SYMBOLS.get(direction1)
-                + ArrowDirection.ARROW_SYMBOLS.get(direction2)
-                + ArrowDirection.ARROW_SYMBOLS.get(direction3);
+        this.shortName = ARROW_SYMBOLS.get(ArrowDirection.LEFT)
+                + ARROW_SYMBOLS.get(direction1)
+                + ARROW_SYMBOLS.get(direction2)
+                + ARROW_SYMBOLS.get(direction3);
     }
 
     @Override

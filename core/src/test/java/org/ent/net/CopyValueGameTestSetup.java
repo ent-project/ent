@@ -28,19 +28,19 @@ public class CopyValueGameTestSetup {
         verifier = builder().net(
                 node(Commands.NOP,
                         data = node(input.getRoot(), value(targetValue)),
-                        node(Commands.get(Operations.SET_OPERATION, FLOW, RIGHT),
-                                node(Vetos.get(Conditions.SAME_VALUE_CONDITION, LEFT_LEFT, LEFT_RIGHT),
+                        node(Commands.get(Operations.SET_OPERATION, R, LR),
+                                node(Vetos.get(Conditions.SAME_VALUE_CONDITION, LLL, LLR),
                                         data,
                                         value(Commands.FINAL_SUCCESS)),
                                 value(Commands.FINAL_FAILURE))));
 
         Node toVerifier;
         ent = builder().ent(
-                node(Commands.get(Operations.SET_VALUE_OPERATION, LEFT_LEFT_LEFT, LEFT_LEFT_RIGHT),
+                node(Commands.get(Operations.SET_VALUE_OPERATION, LLLL, LLLR),
                         toVerifier = unary(verifier.getRoot()),
-                        node(Commands.get(Operations.EVAL_FLOW_OPERATION, LEFT),
+                        node(Commands.get(Operations.EVAL_FLOW_OPERATION, LL),
                                 toVerifier,
-                                node(Commands.get(Operations.EVAL_FLOW_OPERATION, LEFT),
+                                node(Commands.get(Operations.EVAL_FLOW_OPERATION, LL),
                                         toVerifier,
                                         value(Commands.FINAL_SUCCESS)))));
         ent.addDomain(input);

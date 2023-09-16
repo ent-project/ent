@@ -64,7 +64,7 @@ class BiCommandTest {
 	void execute_withVeto_pass() {
 		Node i;
 		Net net = builder().net(unary(node(GREATER_THAN_CONDITION, i = value(7), value(0))));
-		Command command = new MonoCommand(INC_OPERATION, Accessors.LEFT);
+		Command command = new MonoCommand(INC_OPERATION, Accessors.LL);
 
 		command.execute(net.getRoot(), net.getPermissions());
 
@@ -75,7 +75,7 @@ class BiCommandTest {
 	void execute_withVeto_reject() {
 		Node i;
 		Net net = builder().net(unary(node(GREATER_THAN_CONDITION, i = value(7), value(1000))));
-		Command command = new MonoCommand(INC_OPERATION, Accessors.LEFT);
+		Command command = new MonoCommand(INC_OPERATION, Accessors.LL);
 
 		command.execute(net.getRoot(), net.getPermissions());
 

@@ -24,27 +24,27 @@ class ValueFragmentCrossoverTest {
 
     public static Stream<Arguments> swapValuesData() {
 
-        int inputValue1 = Commands.get(Operations.MODULO_OPERATION, Accessors.LEFT_LEFT_RIGHT, Accessors.FLOW, Accessors.RIGHT_RIGHT).getValue();
-        int inputValue2 = Commands.get(Operations.MULTIPLY_OPERATION, Accessors.DIRECT, Accessors.RIGHT_LEFT, Accessors.LEFT).getValue();
+        int inputValue1 = Commands.get(Operations.MODULO_OPERATION, Accessors.LLLR, Accessors.R, Accessors.LRR).getValue();
+        int inputValue2 = Commands.get(Operations.MULTIPLY_OPERATION, Accessors.L, Accessors.LRL, Accessors.LL).getValue();
         return Stream.of(arguments(
                         inputValue1, inputValue2, 0,
-                        Commands.get(Operations.MULTIPLY_OPERATION, Accessors.LEFT_LEFT_RIGHT, Accessors.FLOW, Accessors.RIGHT_RIGHT).getValue(),
-                        Commands.get(Operations.MODULO_OPERATION, Accessors.DIRECT, Accessors.RIGHT_LEFT, Accessors.LEFT).getValue()
+                        Commands.get(Operations.MULTIPLY_OPERATION, Accessors.LLLR, Accessors.R, Accessors.LRR).getValue(),
+                        Commands.get(Operations.MODULO_OPERATION, Accessors.L, Accessors.LRL, Accessors.LL).getValue()
                 ),
                 arguments(
                         inputValue1, inputValue2, 1,
-                        Commands.get(Operations.MODULO_OPERATION, Accessors.DIRECT, Accessors.FLOW, Accessors.RIGHT_RIGHT).getValue(),
-                        Commands.get(Operations.MULTIPLY_OPERATION, Accessors.LEFT_LEFT_RIGHT, Accessors.RIGHT_LEFT, Accessors.LEFT).getValue()
+                        Commands.get(Operations.MODULO_OPERATION, Accessors.L, Accessors.R, Accessors.LRR).getValue(),
+                        Commands.get(Operations.MULTIPLY_OPERATION, Accessors.LLLR, Accessors.LRL, Accessors.LL).getValue()
                 ),
                 arguments(
                         inputValue1, inputValue2, 2,
-                        Commands.get(Operations.MODULO_OPERATION, Accessors.LEFT_LEFT_RIGHT, Accessors.RIGHT_LEFT, Accessors.RIGHT_RIGHT).getValue(),
-                        Commands.get(Operations.MULTIPLY_OPERATION, Accessors.DIRECT, Accessors.FLOW, Accessors.LEFT).getValue()
+                        Commands.get(Operations.MODULO_OPERATION, Accessors.LLLR, Accessors.LRL, Accessors.LRR).getValue(),
+                        Commands.get(Operations.MULTIPLY_OPERATION, Accessors.L, Accessors.R, Accessors.LL).getValue()
                 ),
                 arguments(
                         inputValue1, inputValue2, 3,
-                        Commands.get(Operations.MODULO_OPERATION, Accessors.LEFT_LEFT_RIGHT, Accessors.FLOW, Accessors.LEFT).getValue(),
-                        Commands.get(Operations.MULTIPLY_OPERATION, Accessors.DIRECT, Accessors.RIGHT_LEFT, Accessors.RIGHT_RIGHT).getValue()
+                        Commands.get(Operations.MODULO_OPERATION, Accessors.LLLR, Accessors.R, Accessors.LL).getValue(),
+                        Commands.get(Operations.MULTIPLY_OPERATION, Accessors.L, Accessors.LRL, Accessors.LRR).getValue()
                 )
         );
     }

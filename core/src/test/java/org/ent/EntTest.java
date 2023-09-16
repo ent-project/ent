@@ -74,7 +74,7 @@ class EntTest {
         void standard_right() {
             Node x;
             domain = builder().net(x = value(7));
-            ent = builder().ent(unary(Commands.get(Operations.SET_VALUE_OPERATION, Accessors.RIGHT, Accessors.LEFT),
+            ent = builder().ent(unary(Commands.get(Operations.SET_VALUE_OPERATION, Accessors.LR, Accessors.LL),
                     node(value(5), x)));
             setUp();
             ent.putPermissions(p -> p.net(np -> np.canWrite(domain, WriteFacet.VALUE)));
@@ -89,7 +89,7 @@ class EntTest {
         void setDomainArrowToDomainNode() {
             Node y, b;
             domain = builder().net(y = node(value(5), b = value(9)));
-            ent = builder().ent(unary(Commands.get(Operations.SET_OPERATION, Accessors.LEFT, Accessors.RIGHT), y));
+            ent = builder().ent(unary(Commands.get(Operations.SET_OPERATION, Accessors.LL, Accessors.LR), y));
             setUp();
             ent.putPermissions(p -> p.net(np -> np.canWrite(domain, WriteFacet.ARROW)));
 
@@ -104,7 +104,7 @@ class EntTest {
             Node x;
             domain = builder().net(x = value(5));
             Node a;
-            ent = builder().ent(unary(Commands.get(Operations.SET_OPERATION, Accessors.LEFT, Accessors.RIGHT),
+            ent = builder().ent(unary(Commands.get(Operations.SET_OPERATION, Accessors.LL, Accessors.LR),
                     a = node(ignored(), x)));
             setUp();
             ent.putPermissions(p -> p.net(np -> np.canPointTo(domain)));
@@ -147,7 +147,7 @@ class EntTest {
             void set(boolean canWriteArrows) {
                 Node y, a;
                 domain = builder().net(y = node(a = value(5), value(9)));
-                ent = builder().ent(unary(Commands.get(Operations.SET_OPERATION, Accessors.LEFT, Accessors.RIGHT),
+                ent = builder().ent(unary(Commands.get(Operations.SET_OPERATION, Accessors.LL, Accessors.LR),
                         domain.getRoot()));
                 setUp();
                 ent.putPermissions(p -> p.net(np -> {
@@ -172,7 +172,7 @@ class EntTest {
             void ancestorExchange(boolean canWriteArrows) {
                 Node y, a, b_parent, b;
                 domain = builder().net(y = node(a = value(5), b_parent = unary(b = value(9))));
-                ent = builder().ent(unary(Commands.get(Operations.ANCESTOR_EXCHANGE_OPERATION, Accessors.LEFT, Accessors.RIGHT_LEFT),
+                ent = builder().ent(unary(Commands.get(Operations.ANCESTOR_EXCHANGE_OPERATION, Accessors.LL, Accessors.LRL),
                         domain.getRoot()));
                 setUp();
                 ent.putPermissions(p -> p.net(np -> {
@@ -199,7 +199,7 @@ class EntTest {
         void eval_toplevel() {
             Node y;
             domain = builder().net(unary(Operations.INC_OPERATION, y = value(14)));
-            ent = builder().ent(unary(Commands.get(Operations.EVAL_OPERATION, Accessors.DIRECT), domain.getRoot()));
+            ent = builder().ent(unary(Commands.get(Operations.EVAL_OPERATION, Accessors.L), domain.getRoot()));
             setUp();
             ent.putPermissions(p -> p.net(np -> np.canWrite(domain, WriteFacet.VALUE)));
 
@@ -213,7 +213,7 @@ class EntTest {
         void eval_inner() {
             Node y;
             domain = builder().net(unary(unary(Operations.INC_OPERATION, y = value(14))));
-            ent = builder().ent(unary(Commands.get(Operations.EVAL_OPERATION, Accessors.LEFT), domain.getRoot()));
+            ent = builder().ent(unary(Commands.get(Operations.EVAL_OPERATION, Accessors.LL), domain.getRoot()));
             setUp();
             ent.putPermissions(p -> p.net(np -> np.canWrite(domain, WriteFacet.VALUE)));
 
@@ -232,7 +232,7 @@ class EntTest {
                 domain = builder().net(domainRoot1 = node(Operations.INC_OPERATION,
                         y = value(14),
                         domainRoot2 = ignored()));
-                ent = builder().ent(unary(Commands.get(Operations.EVAL_FLOW_OPERATION, Accessors.DIRECT), domainRoot1));
+                ent = builder().ent(unary(Commands.get(Operations.EVAL_FLOW_OPERATION, Accessors.L), domainRoot1));
                 setUp();
                 ent.putPermissions(p -> p.net(n -> {
                     if (permittedToEvalRoot) {
@@ -262,7 +262,7 @@ class EntTest {
                     // (otherwise you would break with the intended execution flow)
                     Node y, domainRoot1;
                     domain = builder().net(domainRoot1 = unary(Operations.INC_OPERATION, y = value(14)));
-                    ent = builder().ent(unary(Commands.get(Operations.EVAL_OPERATION, Accessors.DIRECT), domain.getRoot()));
+                    ent = builder().ent(unary(Commands.get(Operations.EVAL_OPERATION, Accessors.L), domain.getRoot()));
                     setUp();
                     ent.putPermissions(p -> p.net(n -> n.canExecute(domain)));
 
@@ -278,7 +278,7 @@ class EntTest {
                     // can eval the toplevel node, but not an inner node of the domain
                     Node y;
                     domain = builder().net(unary(unary(Operations.INC_OPERATION, y = value(14))));
-                    ent = builder().ent(unary(Commands.get(Operations.EVAL_FLOW_OPERATION, Accessors.LEFT), domain.getRoot()));
+                    ent = builder().ent(unary(Commands.get(Operations.EVAL_FLOW_OPERATION, Accessors.LL), domain.getRoot()));
                     setUp();
                     ent.putPermissions(p -> p.net(n -> n.canExecute(domain)));
 
@@ -294,7 +294,7 @@ class EntTest {
                     Node y;
                     domain = builder().net(y = value(14));
                     ent = builder().ent(unary(Operations.EVAL_OPERATION,
-                            unary(Commands.get(Operations.INC_OPERATION, Accessors.DIRECT), domain.getRoot())));
+                            unary(Commands.get(Operations.INC_OPERATION, Accessors.L), domain.getRoot())));
                     setUp();
                     ent.putPermissions(p -> p.net(n -> {
                         n.canExecute(domain);
@@ -320,7 +320,7 @@ class EntTest {
                 void duplicate(BiOperation operation) {
                     // verify, that you cannot duplicate a node inside the read-only domain
                     domain = builder().net(node(Commands.NOP, value(3), value(7)));
-                    ent = builder().ent(unary(Commands.get(operation, Accessors.LEFT, Accessors.RIGHT),
+                    ent = builder().ent(unary(Commands.get(operation, Accessors.LL, Accessors.LR),
                             domain.getRoot()));
                     setUp();
                     ent.putPermissions(p -> p.net(n -> n.canExecute(domain)));

@@ -20,7 +20,7 @@ class TriCommandTest extends TestBase {
     void execute() {
         Node parameters, arg1, arg2;
         Net net = builder().net(unary(parameters = node(arg1 = value(7), arg2 = value(5))));
-        Command command = new TriCommand(Operations.PLUS_OPERATION, Accessors.DIRECT, Accessors.LEFT, Accessors.RIGHT);
+        Command command = new TriCommand(Operations.PLUS_OPERATION, Accessors.L, Accessors.LL, Accessors.LR);
 
         command.execute(net.getRoot(), net.getPermissions());
 
@@ -34,7 +34,7 @@ class TriCommandTest extends TestBase {
     void execute_withVeto_pass() {
         Node i;
         Net net = builder().net(unary(node(GREATER_THAN_CONDITION, i = value(7), value(0))));
-        Command command = new TriCommand(Operations.PLUS_OPERATION, Accessors.LEFT, Accessors.LEFT, Accessors.LEFT); // i = i + i
+        Command command = new TriCommand(Operations.PLUS_OPERATION, Accessors.LL, Accessors.LL, Accessors.LL); // i = i + i
 
         command.execute(net.getRoot(), net.getPermissions());
 
@@ -45,7 +45,7 @@ class TriCommandTest extends TestBase {
     void execute_withVeto_reject() {
         Node i;
         Net net = builder().net(unary(node(GREATER_THAN_CONDITION, i = value(7), value(1000))));
-        Command command = new TriCommand(Operations.PLUS_OPERATION, Accessors.LEFT, Accessors.LEFT, Accessors.LEFT); // i = i + i
+        Command command = new TriCommand(Operations.PLUS_OPERATION, Accessors.LL, Accessors.LL, Accessors.LL); // i = i + i
 
         command.execute(net.getRoot(), net.getPermissions());
 

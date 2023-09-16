@@ -5,6 +5,8 @@ import org.ent.net.ArrowDirection;
 import org.ent.net.node.Node;
 import org.ent.permission.Permissions;
 
+import static org.ent.net.ArrowDirection.ARROW_SYMBOLS;
+
 public class PrimaryAccessor implements Accessor {
 
 	private final ArrowDirection direction;
@@ -16,7 +18,7 @@ public class PrimaryAccessor implements Accessor {
 	public PrimaryAccessor(ArrowDirection direction) {
 		this.direction = direction;
 		this.code = 0b10 | (direction == ArrowDirection.RIGHT ? 0b01 : 0);
-		this.shortName = ArrowDirection.ARROW_SYMBOLS.get(direction);
+		this.shortName = ARROW_SYMBOLS.get(ArrowDirection.LEFT) + ARROW_SYMBOLS.get(direction);
 	}
 
 	@Override

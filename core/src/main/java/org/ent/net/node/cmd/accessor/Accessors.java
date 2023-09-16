@@ -10,33 +10,33 @@ public class Accessors {
     Accessor overview:
                                  <> (root)
                                 /  \
-                       DIRECT /     \ FLOW
+                            L /     \ R
                             /        \
             ("parameters") o         <> (next root)
                          /  \
-                 LEFT  /     \ RIGHT
+                    LL /     \ LR
                      /        \
    ("1st argument") o          o ("2nd argument")
                   /  \       /  \
-              LL/   LR\    /RL   \RR
+             LLL/  LLR\    /LRL  \LRR
               o        o  o       o
 
          TertiaryAccessor goes one level deeper
      */
 
-    public static final FlowAccessor FLOW = new FlowAccessor();
-    public static final DirectAccessor DIRECT = new DirectAccessor();
-    public static final PrimaryAccessor LEFT = new PrimaryAccessor(ArrowDirection.LEFT);
-    public static final PrimaryAccessor RIGHT = new PrimaryAccessor(ArrowDirection.RIGHT);
-    public static final SecondaryAccessor LEFT_LEFT = new SecondaryAccessor(ArrowDirection.LEFT, ArrowDirection.LEFT);
-    public static final SecondaryAccessor LEFT_RIGHT = new SecondaryAccessor(ArrowDirection.LEFT, ArrowDirection.RIGHT);
-    public static final SecondaryAccessor RIGHT_LEFT = new SecondaryAccessor(ArrowDirection.RIGHT, ArrowDirection.LEFT);
-    public static final SecondaryAccessor RIGHT_RIGHT = new SecondaryAccessor(ArrowDirection.RIGHT, ArrowDirection.RIGHT);
+    public static final FlowAccessor R = new FlowAccessor();
+    public static final DirectAccessor L = new DirectAccessor();
+    public static final PrimaryAccessor LL = new PrimaryAccessor(ArrowDirection.LEFT);
+    public static final PrimaryAccessor LR = new PrimaryAccessor(ArrowDirection.RIGHT);
+    public static final SecondaryAccessor LLL = new SecondaryAccessor(ArrowDirection.LEFT, ArrowDirection.LEFT);
+    public static final SecondaryAccessor LLR = new SecondaryAccessor(ArrowDirection.LEFT, ArrowDirection.RIGHT);
+    public static final SecondaryAccessor LRL = new SecondaryAccessor(ArrowDirection.RIGHT, ArrowDirection.LEFT);
+    public static final SecondaryAccessor LRR = new SecondaryAccessor(ArrowDirection.RIGHT, ArrowDirection.RIGHT);
 
-    public static final TertiaryAccessor LEFT_LEFT_LEFT = new TertiaryAccessor(ArrowDirection.LEFT, ArrowDirection.LEFT, ArrowDirection.LEFT);
-    public static final TertiaryAccessor LEFT_LEFT_RIGHT = new TertiaryAccessor(ArrowDirection.LEFT, ArrowDirection.LEFT, ArrowDirection.RIGHT);
-    public static final TertiaryAccessor LEFT_RIGHT_LEFT = new TertiaryAccessor(ArrowDirection.LEFT, ArrowDirection.RIGHT, ArrowDirection.LEFT);
-    public static final TertiaryAccessor RIGHT_LEFT_RIGHT = new TertiaryAccessor(ArrowDirection.RIGHT, ArrowDirection.LEFT, ArrowDirection.RIGHT);
+    public static final TertiaryAccessor LLLL = new TertiaryAccessor(ArrowDirection.LEFT, ArrowDirection.LEFT, ArrowDirection.LEFT);
+    public static final TertiaryAccessor LLLR = new TertiaryAccessor(ArrowDirection.LEFT, ArrowDirection.LEFT, ArrowDirection.RIGHT);
+    public static final TertiaryAccessor LLRL = new TertiaryAccessor(ArrowDirection.LEFT, ArrowDirection.RIGHT, ArrowDirection.LEFT);
+    public static final TertiaryAccessor LRLR = new TertiaryAccessor(ArrowDirection.RIGHT, ArrowDirection.LEFT, ArrowDirection.RIGHT);
 
     public static final List<Accessor> ALL_ACCESSORS;
 
@@ -45,14 +45,14 @@ public class Accessors {
 
     static {
         ALL_ACCESSORS = new ArrayList<>();
-        ALL_ACCESSORS.add(FLOW);
-        ALL_ACCESSORS.add(DIRECT);
-        ALL_ACCESSORS.add(LEFT);
-        ALL_ACCESSORS.add(RIGHT);
-        ALL_ACCESSORS.add(LEFT_LEFT);
-        ALL_ACCESSORS.add(LEFT_RIGHT);
-        ALL_ACCESSORS.add(RIGHT_LEFT);
-        ALL_ACCESSORS.add(RIGHT_RIGHT);
+        ALL_ACCESSORS.add(R);
+        ALL_ACCESSORS.add(L);
+        ALL_ACCESSORS.add(LL);
+        ALL_ACCESSORS.add(LR);
+        ALL_ACCESSORS.add(LLL);
+        ALL_ACCESSORS.add(LLR);
+        ALL_ACCESSORS.add(LRL);
+        ALL_ACCESSORS.add(LRR);
         for (ArrowDirection direction1 : ArrowDirection.values()) {
             for (ArrowDirection direction2 : ArrowDirection.values()) {
                 for (ArrowDirection direction3 : ArrowDirection.values()) {
@@ -64,20 +64,20 @@ public class Accessors {
 
     public static Accessor get(ArrowDirection direction) {
         return switch (direction) {
-            case LEFT -> LEFT;
-            case RIGHT -> RIGHT;
+            case LEFT -> LL;
+            case RIGHT -> LR;
         };
     }
 
     public static Accessor get(ArrowDirection direction1, ArrowDirection direction2) {
         return switch (direction1) {
             case LEFT -> switch (direction2) {
-                case LEFT -> LEFT_LEFT;
-                case RIGHT -> LEFT_RIGHT;
+                case LEFT -> LLL;
+                case RIGHT -> LLR;
             };
             case RIGHT -> switch (direction2) {
-                case LEFT -> RIGHT_LEFT;
-                case RIGHT -> RIGHT_RIGHT;
+                case LEFT -> LRL;
+                case RIGHT -> LRR;
             };
         };
     }

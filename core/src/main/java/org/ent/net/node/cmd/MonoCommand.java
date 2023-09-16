@@ -3,7 +3,6 @@ package org.ent.net.node.cmd;
 import org.ent.net.Arrow;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
-import org.ent.net.node.cmd.accessor.DirectAccessor;
 import org.ent.net.node.cmd.operation.MonoOperation;
 import org.ent.permission.Permissions;
 
@@ -59,9 +58,6 @@ public class MonoCommand extends VetoedCommand {
 
     private String buildShortName() {
         String accessorName = this.accessor.getShortName();
-        if (this.accessor instanceof DirectAccessor) {
-            accessorName = "";
-        }
         return this.operation.getShortName() + accessorName;
     }
 

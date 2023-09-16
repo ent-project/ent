@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.ent.net.node.cmd.operation.Operations.ANCESTOR_EXCHANGE_OPERATION;
 import static org.ent.net.node.cmd.operation.Operations.SET_OPERATION;
 import static org.ent.net.node.cmd.veto.Conditions.GREATER_THAN_CONDITION;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class NetFormatterTest {
 
@@ -73,7 +74,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("<::>");
+				assertThat(str).isEqualTo("<//::/\\>");
 			}
 
 			@Test
@@ -82,7 +83,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("<?gt?>");
+				assertThat(str).isEqualTo("<?//gt/\\?>");
 			}
 
 			@Test
@@ -91,7 +92,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("[<::>]");
+				assertThat(str).isEqualTo("[<//::/\\>]");
 			}
 
 			@Test
@@ -101,7 +102,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("#1a[<::>]");
+				assertThat(str).isEqualTo("#1a[<//::/\\>]");
 			}
 
 			@Test
@@ -111,7 +112,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("<x>[<::>]");
+				assertThat(str).isEqualTo("<//x/\\>[<//::/\\>]");
 			}
 
 			@Test
@@ -121,7 +122,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("(<::>, <x>)");
+				assertThat(str).isEqualTo("(<//::/\\>, <//x/\\>)");
 			}
 
 			@Test
@@ -132,7 +133,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("#abc(<::>, <x>)");
+				assertThat(str).isEqualTo("#abc(<//::/\\>, <//x/\\>)");
 			}
 
 			@Test
@@ -141,7 +142,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("A:(A, <x>)");
+				assertThat(str).isEqualTo("A:(A, <//x/\\>)");
 			}
 		}
 
@@ -155,7 +156,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("(_a:<o>, _a)");
+				assertThat(str).isEqualTo("(_a:#0, _a)");
 			}
 
 			@Test
@@ -166,7 +167,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("(a:[<o>], a)");
+				assertThat(str).isEqualTo("(a:[#0], a)");
 			}
 
 			@Test
@@ -177,7 +178,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("(A:(<::>, <x>), A)");
+				assertThat(str).isEqualTo("(A:(<//::/\\>, <//x/\\>), A)");
 			}
 
 			@Test
@@ -262,7 +263,7 @@ class NetFormatterTest {
 	}
 
 	private static Stream<Arguments> format_testData() {
-		return testData.all.stream().map(nws -> Arguments.of(nws.getNet(), nws.getStringRepresentation()));
+		return testData.all.stream().map(nws -> arguments(nws.getNet(), nws.getStringRepresentation()));
 	}
 
 
@@ -273,7 +274,7 @@ class NetFormatterTest {
 		String str2 = formatter.format(testData.net2.getNet());
 
 		assertThat(str0).isEqualTo("(a:[[a]], <o>)");
-		assertThat(str1).isEqualTo("(a:[<o>], #1f(a, <x>))");
+		assertThat(str1).isEqualTo("(a:[<o>], #1f(a, <//x/\\>))");
 		assertThat(str2).isEqualTo("a:[b:[(A:(<o>, a), (A, (A, b)))]]");
 	}
 
@@ -295,9 +296,9 @@ class NetFormatterTest {
 			String str = formatter.format(ent);
 
 			assertThat(str).isEqualTo("""
-					<///=//\\>(a:[A], <eval_flow/>(a, <eval_flow/>(a, <SUCCESS>)))
-					input { x:<o> }
-					verifier { B:(data:(x, #7), <^::>(<?//==/\\?>(data, <SUCCESS>), <FAILURE>)) }"""
+					<////=///\\>(a:[A], <eval_flow//>(a, <eval_flow//>(a, <SUCCESS>)))
+					input { x:#0 }
+					verifier { B:<o>(data:(x, #7), <\\::/\\>(<?///==//\\?>(data, <SUCCESS>), <FAILURE>)) }"""
 			);
 		}
 	}

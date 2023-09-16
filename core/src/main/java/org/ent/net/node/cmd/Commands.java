@@ -23,8 +23,8 @@ public class Commands {
     public static final Command FINAL_FAILURE = getByValue(new FinalFailureCommand().getValue());
     public static final Command ANCESTOR_EXCHANGE = get(Operations.ANCESTOR_EXCHANGE_OPERATION);
     public static final Command SET = get(Operations.SET_OPERATION);
-    public static final Command EVAL = get(Operations.EVAL_OPERATION, Accessors.DIRECT);
-    public static final Command EVAL_FLOW = get(Operations.EVAL_FLOW_OPERATION, Accessors.DIRECT);
+    public static final Command EVAL = get(Operations.EVAL_OPERATION, Accessors.L);
+    public static final Command EVAL_FLOW = get(Operations.EVAL_FLOW_OPERATION, Accessors.L);
 
     private Commands() {
     }
@@ -35,7 +35,7 @@ public class Commands {
     }
 
     public static Command get(MonoOperation operation) {
-        return get(operation, Accessors.DIRECT);
+        return get(operation, Accessors.L);
     }
 
     public static Command get(BiOperation operation, Accessor accessor1, Accessor accessor2) {
@@ -44,7 +44,7 @@ public class Commands {
     }
 
     public static Command get(BiOperation operation) {
-        Command command = new BiCommand(operation, Accessors.LEFT, Accessors.RIGHT);
+        Command command = new BiCommand(operation, Accessors.LL, Accessors.LR);
         return getByValue(command.getValue());
     }
 

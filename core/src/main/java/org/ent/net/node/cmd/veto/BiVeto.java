@@ -1,9 +1,7 @@
 package org.ent.net.node.cmd.veto;
 
-import org.ent.net.ArrowDirection;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
-import org.ent.net.node.cmd.accessor.PrimaryAccessor;
 import org.ent.permission.Permissions;
 
 public class BiVeto implements Veto {
@@ -40,13 +38,7 @@ public class BiVeto implements Veto {
 
     private String buildShortName() {
         String accessor1Name = this.accessor1.getShortName();
-        if (this.accessor1 instanceof PrimaryAccessor primaryLeft && primaryLeft.getDirection() == ArrowDirection.LEFT) {
-            accessor1Name = "";
-        }
         String accessor2Name = this.accessor2.getShortName();
-        if (this.accessor2 instanceof PrimaryAccessor primaryRight && primaryRight.getDirection() == ArrowDirection.RIGHT) {
-            accessor2Name = "";
-        }
         String conditionShortName = not ? this.condition.getInvertedShortName() : this.condition.getShortName();
         return "?" + accessor1Name + conditionShortName + accessor2Name + "?";
     }

@@ -63,27 +63,27 @@ class DotRendererTest {
 
     private static Stream<Ent> render() {
         Ent ent2 = entBase();
-        ent2.getNet().getRoot().setValue(Commands.get(Operations.BITWISE_OR_OPERATION, Accessors.DIRECT, Accessors.LEFT, Accessors.RIGHT).getValue());
+        ent2.getNet().getRoot().setValue(Commands.get(Operations.BITWISE_OR_OPERATION, Accessors.L, Accessors.LL, Accessors.LR).getValue());
         Ent ent3 = entBase();
-        ent3.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LEFT_LEFT, Accessors.LEFT_RIGHT, Accessors.FLOW).getValue());
+        ent3.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LLL, Accessors.LLR, Accessors.R).getValue());
         Ent entTripleTargetCommand = entBase();
-        entTripleTargetCommand.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.DIRECT, Accessors.DIRECT, Accessors.DIRECT).getValue());
+        entTripleTargetCommand.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.L, Accessors.L, Accessors.L).getValue());
         Ent entTripleTargetVeto = entBase();
-        entTripleTargetVeto.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LEFT, Accessors.LEFT, Accessors.LEFT).getValue());
+        entTripleTargetVeto.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LL, Accessors.LL, Accessors.LL).getValue());
         Ent entTripleTargetLeafNumber = entBase();
-        entTripleTargetLeafNumber.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LEFT_LEFT, Accessors.LEFT_LEFT, Accessors.LEFT_LEFT).getValue());
+        entTripleTargetLeafNumber.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LLL, Accessors.LLL, Accessors.LLL).getValue());
         Ent entTripleTargetInnerNumber = entBase();
-        entTripleTargetInnerNumber.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LEFT_RIGHT, Accessors.LEFT_RIGHT, Accessors.LEFT_RIGHT).getValue());
+        entTripleTargetInnerNumber.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LLR, Accessors.LLR, Accessors.LLR).getValue());
         Ent entTripleTargetDot = entBase();
-        entTripleTargetDot.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LEFT_RIGHT_LEFT, Accessors.LEFT_RIGHT_LEFT, Accessors.LEFT_RIGHT_LEFT).getValue());
+        entTripleTargetDot.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LLRL, Accessors.LLRL, Accessors.LLRL).getValue());
         return Stream.of(entBase(), ent2, ent3, entTripleTargetCommand, entTripleTargetVeto,
                 entTripleTargetLeafNumber, entTripleTargetInnerNumber, entTripleTargetDot);
     }
 
     private static Ent entBase() {
         Ent ent = builder().ent(node(
-                unary(Commands.get(Operations.BITWISE_AND_OPERATION, Accessors.RIGHT, Accessors.LEFT_RIGHT, Accessors.FLOW),
-                        node(Vetos.get(Conditions.GREATER_THAN_CONDITION, Accessors.RIGHT, Accessors.RIGHT_LEFT_RIGHT),
+                unary(Commands.get(Operations.BITWISE_AND_OPERATION, Accessors.LR, Accessors.LLR, Accessors.R),
+                        node(Vetos.get(Conditions.GREATER_THAN_CONDITION, Accessors.LR, Accessors.LRLR),
                                 value(54),
                                 unary(0xa3, ignored()))
                         ),
@@ -105,7 +105,7 @@ class DotRendererTest {
     }
 
     private static Stream<Ent> renderSpecialCases() {
-        Ent targetArrowToSelf = builder().ent(unaryRight(Commands.get(Operations.SET_OPERATION, Accessors.DIRECT, Accessors.DIRECT),
+        Ent targetArrowToSelf = builder().ent(unaryRight(Commands.get(Operations.SET_OPERATION, Accessors.L, Accessors.L),
                 ignored()));
         return Stream.of(targetArrowToSelf);
     }

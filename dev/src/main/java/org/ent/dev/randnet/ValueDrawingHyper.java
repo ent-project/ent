@@ -100,20 +100,20 @@ public class ValueDrawingHyper extends AbstractValueDrawing {
         }
 
         public DistributionLeaf add(BiCondition condition, boolean not, double groupWeight) {
-            add(Vetos.get(condition, not, Accessors.FLOW, Accessors.FLOW), groupWeight);
+            add(Vetos.get(condition, not, Accessors.R, Accessors.R), groupWeight);
             return this;
         }
 
         private Command getCommandBase(MonoOperation operation) {
-            return Commands.get(operation, Accessors.FLOW);
+            return Commands.get(operation, Accessors.R);
         }
 
         private Command getCommandBase(BiOperation o) {
-            return Commands.get(o, Accessors.FLOW, Accessors.FLOW);
+            return Commands.get(o, Accessors.R, Accessors.R);
         }
 
         private Command getCommandBase(TriOperation operation) {
-            return Commands.get(operation, Accessors.FLOW, Accessors.FLOW, Accessors.FLOW);
+            return Commands.get(operation, Accessors.R, Accessors.R, Accessors.R);
         }
 
         @Override

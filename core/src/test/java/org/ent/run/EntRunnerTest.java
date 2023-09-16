@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.ent.net.node.cmd.accessor.Accessors.LEFT;
+import static org.ent.net.node.cmd.accessor.Accessors.LL;
 import static org.ent.net.node.cmd.operation.Operations.INC_OPERATION;
 import static org.ent.net.node.cmd.veto.Conditions.IDENTICAL_CONDITION;
 import static org.ent.util.NetBuilder.*;
@@ -69,32 +69,32 @@ class EntRunnerTest {
     @Test
     void testNetRunner1() throws Exception {
         doTestNetRunner(true, StepResult.ENDLESS_LOOP, Arrays.asList(
-                "<::>(params:(@, [#1]), [params])",
+                "<//::/\\>(params:(@, [#1]), [params])",
                 "[params:(a:[#1], a)]"));
     }
 
     @Test
     void testNetRunner2() throws Exception {
         doTestNetRunner(false, StepResult.SUCCESS, Arrays.asList(
-                "A:<//dup>(B:([B], C:[A]), <xn>((A, _b:<//=\\\\>), _b))",
-                "D:<xn>((A:<//dup>(B:([(A, C:[A])], C), D), _b:<//=\\\\>), _b)",
-                "A:<//dup>(B:([(_b:<//=\\\\>, C:[_b])], C), D:<xn>((_b, A), A))",
-                "D:<xn>((_b:<//=\\\\>, A:<//dup>(B:([(_b, C:[_b])], C), D)), A)",
-                "_b:<//=\\\\>"));
+                "A:<///dup/\\>(B:([B], C:[A]), <//xn/\\>((A, _b:<///=/\\\\>), _b))",
+                "D:<//xn/\\>((A:<///dup/\\>(B:([(A, C:[A])], C), D), _b:<///=/\\\\>), _b)",
+                "A:<///dup/\\>(B:([(_b:<///=/\\\\>, C:[_b])], C), D:<//xn/\\>((_b, A), A))",
+                "D:<//xn/\\>((_b:<///=/\\\\>, A:<///dup/\\>(B:([(_b, C:[_b])], C), D)), A)",
+                "_b:<///=/\\\\>"));
     }
 
     @Test
     void testNetRunner3() throws Exception {
         doTestNetRunner(false, StepResult.SUCCESS, Arrays.asList(
-                "A:<xn>[a:[A]]",
-                "A:<xn>",
-                "A:<xn>"));
+                "A:<//xn/\\>[a:[A]]",
+                "A:<//xn/\\>",
+                "A:<//xn/\\>"));
     }
 
     @Test
     void testNetRunner4() throws Exception {
         doTestNetRunner(false, StepResult.ENDLESS_LOOP, Arrays.asList(
-                "</=\\sl*>(#1(result:<o>, #3), result)",
+                "<//=/\\sl/>(#1(result:<o>, #3), result)",
                 "result:#6"));
     }
 
@@ -131,8 +131,8 @@ class EntRunnerTest {
     @Test
     void loop() throws Exception {
         Net net = parser.parse("""
-                    line01:<^::>(<?//gt/\\?>((i:#0, #5), FIN:[i]), line02);  ~ goto FIN if i > 5
-                    line02:<inc>(i, line01);			   		  			 ~ i++; goto start
+                line01:<\\::/\\>(<?///gt//\\?>((i:#0, #5), FIN:[i]), line02);  ~ goto FIN if i > 5
+                line02:<inc/>(i, line01);			   		  			       ~ i++; goto start
                 """);
         EntRunner runner = new EntRunner(net);
 
@@ -160,7 +160,7 @@ class EntRunnerTest {
         void pass() {
             Node i;
             Ent ent = builder().ent(
-                    unary(Commands.get(INC_OPERATION, LEFT),
+                    unary(Commands.get(INC_OPERATION, LL),
                             node(Conditions.SAME_VALUE_CONDITION, i = value(3), value(3))));
             ent.addEventListener(listener);
             EntRunner runner = new EntRunner(ent);
@@ -175,7 +175,7 @@ class EntRunnerTest {
         void block() {
             Node i;
             Ent ent = builder().ent(
-                    unary(Commands.get(INC_OPERATION, LEFT),
+                    unary(Commands.get(INC_OPERATION, LL),
                             node(IDENTICAL_CONDITION, i = value(3), value(3))));
             ent.addEventListener(listener);
             EntRunner runner = new EntRunner(ent);

@@ -51,7 +51,7 @@ public abstract class AbstractValueDrawing implements ValueDrawing {
         }
 
         protected void addValueBase(BiCondition condition, boolean not, double weight) {
-            addValueBase(Vetos.get(condition, not, Accessors.FLOW, Accessors.FLOW), weight);
+            addValueBase(Vetos.get(condition, not, Accessors.R, Accessors.R), weight);
         }
 
         protected void addValueBase(TriOperation operation, double weight) {
@@ -59,11 +59,11 @@ public abstract class AbstractValueDrawing implements ValueDrawing {
         }
 
         private Command getCommandBase(MonoOperation operation) {
-            return Commands.get(operation, Accessors.FLOW);
+            return Commands.get(operation, Accessors.R);
         }
 
         private Command getCommandBase(TriOperation operation) {
-            return Commands.get(operation, Accessors.FLOW, Accessors.FLOW, Accessors.FLOW);
+            return Commands.get(operation, Accessors.R, Accessors.R, Accessors.R);
         }
 
         protected void addValueBase(BiOperation operation, double weight) {
@@ -71,7 +71,7 @@ public abstract class AbstractValueDrawing implements ValueDrawing {
         }
 
         private Command getCommandBase(BiOperation o) {
-            return Commands.get(o, Accessors.FLOW, Accessors.FLOW);
+            return Commands.get(o, Accessors.R, Accessors.R);
         }
 
         public void buildValueSamples(int targetSize) {
@@ -154,8 +154,8 @@ public abstract class AbstractValueDrawing implements ValueDrawing {
     }
 
     protected void initializeAccessors() {
-        addAccessor(Accessors.FLOW, 4);
-        addAccessor(Accessors.DIRECT, 4);
+        addAccessor(Accessors.R, 4);
+        addAccessor(Accessors.L, 4);
         for (ArrowDirection direction1 : ArrowDirection.values()) {
             addAccessor(new PrimaryAccessor(direction1), 4);
         }

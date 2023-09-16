@@ -1,10 +1,8 @@
 package org.ent.net.node.cmd;
 
 import org.ent.net.Arrow;
-import org.ent.net.ArrowDirection;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
-import org.ent.net.node.cmd.accessor.PrimaryAccessor;
 import org.ent.net.node.cmd.operation.BiOperation;
 import org.ent.permission.Permissions;
 
@@ -71,13 +69,7 @@ public class BiCommand extends VetoedCommand {
 
 	private String buildShortName() {
 		String accessor1Name = this.accessor1.getShortName();
-		if (this.accessor1 instanceof PrimaryAccessor primaryLeft && primaryLeft.getDirection() == ArrowDirection.LEFT) {
-			accessor1Name = "";
-		}
 		String accessor2Name = this.accessor2.getShortName();
-		if (this.accessor2 instanceof PrimaryAccessor primaryRight && primaryRight.getDirection() == ArrowDirection.RIGHT) {
-			accessor2Name = "";
-		}
 		return accessor1Name + this.operation.getShortName() + accessor2Name;
 	}
 }

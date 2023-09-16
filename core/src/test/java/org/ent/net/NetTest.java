@@ -54,7 +54,7 @@ class NetTest {
             @Test
             void rootNotInNet() throws Exception {
                 Net net = parser.parse("[#1]");
-                Net net2 = parser.parse("(<o>,<x>)");
+                Net net2 = parser.parse("(<o>,<//x/\\>)");
                 assertThatThrownBy(() -> net.setRoot(net2.getNodes().iterator().next()))
                         .isInstanceOf(IllegalStateException.class)
                         .hasMessage("Root must be one of the net nodes");
@@ -104,7 +104,7 @@ class NetTest {
     void addNodes_okay() throws Exception {
         Net net = new NetParser().parse("<o>");
         assertThat(net.getNodes()).hasSize(1);
-        Net net2 = new NetParser().parse("<x>");
+        Net net2 = new NetParser().parse("<//x/\\>");
 
         net.addNodes(net2.removeAllNodes());
 
@@ -116,7 +116,7 @@ class NetTest {
     void addNodes_error() throws Exception {
         Net net = parser.parse("<o>");
         assertThat(net.getNodes()).hasSize(1);
-        Net net2 = parser.parse("<x>");
+        Net net2 = parser.parse("<//x/\\>");
 
         List<Node> net2Nodes = net2.getNodes();
 
@@ -255,7 +255,7 @@ class NetTest {
 
         @Test
         void newBNode_childArgs() throws Exception {
-            Net net = parser.parse("_a:<o>; _b:<x>");
+            Net net = parser.parse("_a:<o>; _b:<//x/\\>");
             Node nop = net.getByName("_a");
             Node ix = net.getByName("_b");
             net.addEventListener(eventListener);
@@ -324,10 +324,10 @@ class NetTest {
             private static Stream<Arguments> ancestorSwapData() {
                 return Stream.of(
                         arguments("(a:(#1, #2), b:(#3, #4))", "(b:(#3, #4), a:(#1, #2))"),
-                        arguments("[a:#1(<o>, <o>)]; b:#2(<x>, <x>)", "[b:#2(<x>, <x>)]; a:#1(<o>, <o>)"),
-                        arguments("[a:#1(b, b)]; b:#2(<x>, <x>)", "[b:#2(<x>, <x>)]; a:#1"),
-                        arguments("(a:[<x>], b:[<o>])", "(b:(<o>, a:(<x>, b)), a)"),
-                        arguments("(([a:<o>], b:<x>), ((a, a), [b]))", "(([b:<x>(a:(b, b), a)], a), ((b, b), [a]))")
+                        arguments("[a:#1(<o>, <o>)]; b:#2(<//x/\\>, <//x/\\>)", "[b:#2(<//x/\\>, <//x/\\>)]; a:#1(<o>, <o>)"),
+                        arguments("[a:#1(b, b)]; b:#2(<//x/\\>, <//x/\\>)", "[b:#2(<//x/\\>, <//x/\\>)]; a:#1"),
+                        arguments("(a:[<//x/\\>], b:[<o>])", "(b:(<o>, a:(<//x/\\>, b)), a)"),
+                        arguments("(([a:#0], b:<//x/\\>), ((a, a), [b]))", "(([b:<//x/\\>(a:(b, b), a)], a), ((b, b), [a]))")
                 );
             }
 
@@ -355,7 +355,7 @@ class NetTest {
 
     @Test
     void referentialGarbageCollection() throws Exception {
-        Net net = parser.parse("<o>[#1]; <x>");
+        Net net = parser.parse("<o>[#1]; <//x/\\>");
 
         net.referentialGarbageCollection();
 

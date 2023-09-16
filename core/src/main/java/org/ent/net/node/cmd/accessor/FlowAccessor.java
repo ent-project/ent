@@ -18,7 +18,7 @@ public class FlowAccessor implements Accessor {
 
 	@Override
 	public String getShortName() {
-		return "^";
+		return "\\";
 	}
 
 	@Override

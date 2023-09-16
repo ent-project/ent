@@ -17,7 +17,7 @@ public class NopCommand implements Command {
 
 	@Override
 	public int getValueBase() {
-		return 0;
+		return Command.COMMAND_PATTERN;
 	}
 
 	@Override

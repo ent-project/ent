@@ -45,7 +45,7 @@ public class NetTestData {
 
         net.setRoot(root);
 
-        return new NetWithStringRepresentation(net, "(a:[<o>], #1f(a, <x>))");
+        return new NetWithStringRepresentation(net, "(a:[<o>], #1f(a, <//x/\\>))");
     }
 
 	public static NetWithStringRepresentation buildNet2() {

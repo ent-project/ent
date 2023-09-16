@@ -55,7 +55,7 @@ class NetParserTest {
 
 		@Test
 		void command() throws Exception {
-			Net net = parser.parse("<x>");
+			Net net = parser.parse("<//x/\\>");
 
 			List<Node> nodes = net.getNodes();
 			assertThat(nodes).hasSize(1);
@@ -67,7 +67,7 @@ class NetParserTest {
 
 		@Test
 		void condition() throws Exception {
-			Net net = parser.parse("<?===?>");
+			Net net = parser.parse("<?//===/\\?>");
 
 			List<Node> nodes = net.getNodes();
 			assertThat(nodes).hasSize(1);
@@ -104,7 +104,7 @@ class NetParserTest {
 
 		@Test
 		void binary() throws Exception {
-			Net net = parser.parse("(<o>, <x>)");
+			Net net = parser.parse("(<o>, <//x/\\>)");
 
 			List<Node> nodes = net.getNodes();
 			assertThat(nodes).hasSize(3);
@@ -183,16 +183,16 @@ class NetParserTest {
 
 		private static Stream<Arguments> otherGoodCases() {
 			return Stream.of(
-				arguments("<x>[<o>]"),  	// unary with command value
-				arguments("<=>(<o>, <o>)"), // binary with command value
+				arguments("<//x/\\>[<o>]"),  	// unary with command value
+				arguments("<//=/\\>(<o>, <o>)"), // binary with command value
 				arguments("#1a(<o>, <o>)"), // binary with value
 				arguments("[#abc]"), 		// value inside unary
 				arguments("(#1, #2)"), 		// values inside binary
 				arguments("A:#1(<o>, [A])"), // label and value on binary
 				arguments("a:#1[[a]]"), 	// label and value on unary
-				arguments("_a:<x>; [_a]"), 	// name command and use it later
+				arguments("_a:<//x/\\>; [_a]"), 	// name command and use it later
 				arguments("#1; #2; <o>"), 	// multiple values
-				arguments("A:((<x>, A), a:[[[[a]]]])")
+				arguments("A:((<//x/\\>, A), a:[[[[a]]]])")
 			);
 		}
 	}
