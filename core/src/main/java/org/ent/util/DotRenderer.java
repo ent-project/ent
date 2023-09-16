@@ -42,10 +42,12 @@ public class DotRenderer {
                 .formatted(COLOR_NODE));
         sb.append(" edge[arrowsize=0.6];\n");
         determineCommandTargets();
-        Set<Node> nodesConnectedToRoot = new LinkedHashSet<>();
-        collectNodesRightToLeft(ent.getNet().getRoot(), nodesConnectedToRoot);
-        renderNetNodes(nodesConnectedToRoot, ent.getNet(), "n");
-        for (int i = 0; i < ent.getDomains().size(); i++) {
+        Set<Node> allNodesConnectedToAnyRoot = new LinkedHashSet<>();
+        for (Net domain : ent.getDomains()) {
+            collectNodesRightToLeft(domain.getRoot(), allNodesConnectedToAnyRoot);
+        }
+        renderNetNodes(allNodesConnectedToAnyRoot, ent.getNet());
+        for (int i = 1; i < ent.getDomains().size(); i++) {
             Net domain = ent.getDomains().get(i);
             sb.append(" subgraph cluster_").append(i).append(" {\n");
             sb.append(" color=\"gray\";\n");
@@ -54,9 +56,7 @@ public class DotRenderer {
                 sb.append(" fontcolor=\"gray\";\n");
                 sb.append(" labeljust=\"l\";\n");
             }
-            Set<Node> domainNodesToRender = new LinkedHashSet<>();
-            collectNodesRightToLeft(domain.getRoot(), domainNodesToRender);
-            renderNetNodes(domainNodesToRender, domain, "d" + i + "n");
+            renderNetNodes(allNodesConnectedToAnyRoot, domain);
             sb.append(" }\n");
         }
         sb.append("}\n");
@@ -92,20 +92,23 @@ public class DotRenderer {
         }
     }
 
-    private void renderNetNodes(Set<Node> nodes, Net net, String nodePrefix) {
+    private void renderNetNodes(Set<Node> nodes, Net net) {
         for (Node node : nodes) {
-            String nodeName = renderNode(net, nodePrefix, node);
+            if (node.getNet() != net) {
+                continue;
+            }
+            String nodeName = renderNode(net, node);
             for (Arrow arrow : node.getArrows()) {
                 Node child = arrow.getTarget(Permissions.DIRECT);
                 if (node == child && arrow != targetArrow) {
                     continue;
                 }
-                sb.append(" \"").append(nodeName).append("\":");
+                sb.append(" \"%s\":".formatted(nodeName));
                 sb.append(switch (arrow.getDirection()) {
                     case LEFT -> "l";
                     case RIGHT -> "r";
                 });
-                sb.append(" -> ").append(nodePrefix).append(child.getIndex());
+                sb.append(" -> ").append(getNodeId(child));
                 sb.append(switch (arrow.getDirection()) {
                     case LEFT -> " [color=hotpink4]";
                     case RIGHT -> " [color=olivedrab4]";
@@ -118,8 +121,17 @@ public class DotRenderer {
         }
     }
 
-    private String renderNode(Net net, String nodePrefix, Node node) {
-        String nodeName = nodePrefix + node.getIndex();
+    private String getNodeId(Node node) {
+        int netIndex = node.getNet().getNetIndex();
+        if (netIndex <= 0) {
+            return "n%s".formatted(node.getIndex());
+        } else {
+            return "d%sn%s".formatted(netIndex, node.getIndex());
+        }
+    }
+
+    private String renderNode(Net net, Node node) {
+        String nodeName = getNodeId(node);
         sb.append(" ").append(nodeName);
         int value = node.getValue(Permissions.DIRECT);
         if (value == 0) {
