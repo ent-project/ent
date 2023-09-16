@@ -35,16 +35,16 @@ class TrimmingHelperTest {
 
     @Test
     void sameCommandsExecuted() {
-        UniformRandomProvider randMaster = RandomUtil.newRandom2(RANDOM_SEED);
+        UniformRandomProvider randMaster = RandomUtil.newRandom(RANDOM_SEED);
         for (int i = 0; i < 1000; i++) {
             long netSeed = randMaster.nextLong();
-            RandomNetCreator netCreator0 = new RandomNetCreator(NUMBER_OF_NODES, RandomUtil.newRandom2(netSeed), DRAWING);
+            RandomNetCreator netCreator0 = new RandomNetCreator(NUMBER_OF_NODES, RandomUtil.newRandomNoScramble(netSeed), DRAWING);
             Net net0 = netCreator0.drawNet();
             TrimmingListener trimmingListener = new TrimmingListener(net0.getNodes().size());
             net0.addEventListener(trimmingListener);
             int hash0 = executeAndGetHash(net0);
 
-            RandomNetCreator netCreator1 = new RandomNetCreator(NUMBER_OF_NODES, RandomUtil.newRandom2(netSeed), DRAWING);
+            RandomNetCreator netCreator1 = new RandomNetCreator(NUMBER_OF_NODES, RandomUtil.newRandomNoScramble(netSeed), DRAWING);
             Net net1 = netCreator1.drawNet();
             TrimmingHelper.trim(net1, trimmingListener);
             int hash1 = executeAndGetHash(net1);

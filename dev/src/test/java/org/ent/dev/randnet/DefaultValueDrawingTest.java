@@ -11,7 +11,7 @@ class DefaultValueDrawingTest {
     @Test
     void drawValue() {
         DefaultValueDrawing defaultValueDrawing = new DefaultValueDrawing();
-        UniformRandomProvider rand = RandomUtil.newRandom2(0x7aL);
+        UniformRandomProvider rand = RandomUtil.newRandom(0x7aL);
         for (int i = 0; i < 10000; i++) {
             int v = defaultValueDrawing.drawValue(rand);
             String name = Values.getName(v);

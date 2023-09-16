@@ -27,9 +27,7 @@ class RandomNetCreatorTest {
 
 	@BeforeEach
 	void setUpRandomNetCreator() {
-		Random randMaster = RandomTestUtil.newRandom();
-		Random randCommandDrawing = RandomUtil.newRandom(randMaster.nextLong());
-		UniformRandomProvider randNetCreator = RandomUtil.newRandom2(randMaster.nextLong());
+		UniformRandomProvider randNetCreator = RandomUtil.newRandom(123L);
 		DefaultValueDrawing commandDrawing = new DefaultValueDrawing();
 		netCreator = new RandomNetCreator(15, randNetCreator, commandDrawing);
 	}

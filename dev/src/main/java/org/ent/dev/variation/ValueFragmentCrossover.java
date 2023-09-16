@@ -1,10 +1,9 @@
 package org.ent.dev.variation;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.ent.permission.Permissions;
 import org.ent.net.Net;
 import org.ent.net.node.Node;
-import org.ent.net.util.RandomUtil;
+import org.ent.permission.Permissions;
 import org.ent.util.ModifiedPoisson;
 
 public class ValueFragmentCrossover {
@@ -16,10 +15,10 @@ public class ValueFragmentCrossover {
     private final Net net1;
     private final Net net2;
 
-    public ValueFragmentCrossover(Net net1, Net net2, long seed, double frequencyFactor) {
+    public ValueFragmentCrossover(Net net1, Net net2, UniformRandomProvider rand, double frequencyFactor) {
         this.net1 = net1;
         this.net2 = net2;
-        this.rand = RandomUtil.newRandom2(seed);
+        this.rand = rand;
         this.frequencyFactor = frequencyFactor;
     }
 

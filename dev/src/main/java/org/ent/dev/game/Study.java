@@ -40,7 +40,7 @@ public abstract class Study<S> {
     public static abstract class StudyFactory<SB extends Study<?>> {
         protected final Logger log = LoggerFactory.getLogger(getClass());
 
-        protected final UniformRandomProvider randomTrials = RandomUtil.newRandom2(12345L);
+        protected final UniformRandomProvider randomTrials = RandomUtil.newRandom(12345L);
 
         public void start(int numTrials) throws IOException {
             CollectingHyperManager hyperCollector = new CollectingHyperManager();
