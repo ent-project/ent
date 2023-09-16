@@ -5,6 +5,8 @@ import org.ent.net.node.Node;
 
 public class NopNetEventListener implements NetEventListener {
 
+    public static final NopNetEventListener INSTANCE = new NopNetEventListener();
+
     @Override
     public void calledGetChild(Node n, ArrowDirection arrowDirection) {
         // do nothing

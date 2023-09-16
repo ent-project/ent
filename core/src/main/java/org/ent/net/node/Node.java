@@ -201,9 +201,7 @@ public class Node {
 	}
 
 	final public int getValue(Permissions permissions) {
-		if (permissions.shouldFireEvent()) {
-			net.event().getValue(this);
-		}
+		net.event(permissions).getValue(this);
 		return value;
 	}
 
@@ -213,9 +211,7 @@ public class Node {
 				throw new PermissionsViolatedException();
 			}
 		}
-		if (permissions.shouldFireEvent()) {
-			net.event().setValue(this, this.value, value);
-		}
+		net.event(permissions).setValue(this, this.value, value);
 		this.value = value;
 	}
 
@@ -264,9 +260,7 @@ public class Node {
 		}
 
 		public Node getTarget(Permissions permissions) {
-			if (permissions.shouldFireEvent()) {
-				net.event().calledGetChild(Node.this, ArrowDirection.LEFT);
-			}
+			net.event(permissions).calledGetChild(Node.this, ArrowDirection.LEFT);
 			return leftChildHub.getNode();
 		}
 
@@ -276,13 +270,11 @@ public class Node {
 				// If it is not, the following test is too lenient, so this
 				// 	double check may not be a full verification of valid permissions.
 				if (permissions.noWrite(Node.this, WriteFacet.ARROW) &&
-					permissions.noExecute(Node.this)) {
+						permissions.noExecute(Node.this)) {
 					throw new PermissionsViolatedException();
 				}
 			}
-			if (permissions.shouldFireEvent()) {
-				net.event().calledSetChild(Node.this, ArrowDirection.LEFT, target);
-			}
+			net.event(permissions).calledSetChild(Node.this, ArrowDirection.LEFT, target);
 			doSetTarget(target);
 		}
 
@@ -303,16 +295,12 @@ public class Node {
 		}
 
 		public Node getTarget(Permissions permissions) {
-			if (permissions.shouldFireEvent()) {
-				net.event().calledGetChild(Node.this, ArrowDirection.RIGHT);
-			}
+			net.event(permissions).calledGetChild(Node.this, ArrowDirection.RIGHT);
 			return rightChildHub.getNode();
 		}
 
 		public void setTarget(Node target, Permissions permissions) {
-			if (permissions.shouldFireEvent()) {
-				net.event().calledSetChild(Node.this, ArrowDirection.RIGHT, target);
-			}
+			net.event(permissions).calledSetChild(Node.this, ArrowDirection.RIGHT, target);
 			doSetTarget(target);
 		}
 

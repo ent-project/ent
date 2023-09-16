@@ -144,6 +144,14 @@ public class Net {
         return netEventListener;
     }
 
+    public NetEventListener event(Permissions permissions) {
+        if (permissions == Permissions.DIRECT) {
+            return NopNetEventListener.INSTANCE;
+        } else {
+            return netEventListener;
+        }
+    }
+
     public List<Node> getNodes() {
         return nodes;
     }
@@ -341,9 +349,7 @@ public class Net {
         }
         Node node = new Node(this, value, leftChild, rightChild);
         addNodeInternal(node);
-        if (permissions.shouldFireEvent()) {
-            event().calledNewNode(node);
-        }
+        event(permissions).calledNewNode(node);
         return node;
     }
 
@@ -357,9 +363,7 @@ public class Net {
         rightChild.ifPresent(this::validateBelongsToNet);
         Node node = new Node(this, value, leftChild, rightChild);
         addNodeInternal(node);
-        if (permissions.shouldFireEvent()) {
-            event().calledNewNode(node);
-        }
+        event(permissions).calledNewNode(node);
         return node;
     }
 
@@ -377,9 +381,7 @@ public class Net {
         }
         Node bNode = new Node(this);
         addNodeInternal(bNode);
-        if (permissions.shouldFireEvent()) {
-            event().calledNewNode(bNode);
-        }
+        event(permissions).calledNewNode(bNode);
         return bNode;
     }
 
@@ -399,9 +401,7 @@ public class Net {
         validateBelongsToNet(rightChild);
         Node bNode = new Node(this, leftChild, rightChild);
         addNodeInternal(bNode);
-        if (permissions.shouldFireEvent()) {
-            event().calledNewNode(bNode);
-        }
+        event(permissions).calledNewNode(bNode);
         return bNode;
     }
 
@@ -429,9 +429,7 @@ public class Net {
         }
         Node cNode = new Node(this, value);
         addNodeInternal(cNode);
-        if (permissions.shouldFireEvent()) {
-            event().calledNewNode(cNode);
-        }
+        event(permissions).calledNewNode(cNode);
         return cNode;
     }
 
@@ -443,9 +441,7 @@ public class Net {
         }
         Node uNode = new Node(this, child);
         addNodeInternal(uNode);
-        if (permissions.shouldFireEvent()) {
-            event().calledNewNode(uNode);
-        }
+        event(permissions).calledNewNode(uNode);
         return uNode;
     }
 
