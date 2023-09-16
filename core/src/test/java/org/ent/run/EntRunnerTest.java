@@ -3,15 +3,13 @@ package org.ent.run;
 import org.ent.Ent;
 import org.ent.Profile;
 import org.ent.listener.EntEventListener;
+import org.ent.net.CopyValueGameTestSetup;
 import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.io.parser.NetParser;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Commands;
-import org.ent.net.node.cmd.operation.Operations;
 import org.ent.net.node.cmd.veto.Conditions;
-import org.ent.net.node.cmd.veto.Vetos;
-import org.ent.permission.WriteFacet;
 import org.ent.util.Logging;
 import org.ent.webui.WebUI;
 import org.junit.jupiter.api.*;
@@ -25,7 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.ent.net.node.cmd.accessor.Accessors.*;
+import static org.ent.net.node.cmd.accessor.Accessors.LEFT;
 import static org.ent.net.node.cmd.operation.Operations.INC_OPERATION;
 import static org.ent.net.node.cmd.veto.Conditions.IDENTICAL_CONDITION;
 import static org.ent.util.NetBuilder.*;
@@ -190,40 +188,10 @@ class EntRunnerTest {
     }
 
     @Nested
-    class VerifierGame {
+    class VerifierGame extends CopyValueGameTestSetup {
         @Test
         void copyValue() {
-            Node x;
-            Net input = builder().net(x = value(0));
-
-            int targetValue = 7;
-            Node data;
-            Net verifier = builder().net(
-                    node(Commands.NOP,
-                            data = node(input.getRoot(), value(targetValue)),
-                            node(Commands.get(Operations.SET_OPERATION, FLOW, RIGHT),
-                                    node(Vetos.get(Conditions.SAME_VALUE_CONDITION, LEFT_LEFT, LEFT_RIGHT),
-                                            data,
-                                            value(Commands.FINAL_SUCCESS)),
-                                    value(Commands.FINAL_FAILURE))));
-
-            Node toVerifier;
-            Ent ent = builder().ent(
-                    node(Commands.get(Operations.SET_VALUE_OPERATION, LEFT_LEFT_LEFT, LEFT_LEFT_RIGHT),
-                            toVerifier = unary(verifier.getRoot()),
-                            node(Commands.get(Operations.EVAL_FLOW_OPERATION, LEFT),
-                                    toVerifier,
-                                    node(Commands.get(Operations.EVAL_FLOW_OPERATION, LEFT),
-                                            toVerifier,
-                                            value(Commands.FINAL_SUCCESS)))));
-            ent.addDomain(input);
-            ent.addDomain(verifier);
-            input.setName("input");
-            verifier.setName("verifier");
-
-            ent.putPermissions(p -> p.net(np -> np
-                    .canExecute(verifier)
-                    .canWrite(input, WriteFacet.VALUE)));
+            build();
 
             EntRunner runner = new EntRunner(ent);
             Logging.logDot(ent);
@@ -241,7 +209,7 @@ class EntRunnerTest {
             }
 
             assertThat(verifier.getRoot().getValue()).isEqualTo(Commands.FINAL_SUCCESS.getValue());
-            assertThat(x.getValue()).isEqualTo(targetValue);
+            assertThat(inputNode.getValue()).isEqualTo(targetValue);
         }
     }
 }

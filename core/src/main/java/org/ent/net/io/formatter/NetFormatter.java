@@ -46,20 +46,28 @@ public class NetFormatter {
 		setIncludeOrphans(includeOrphans);
 		return this;
 	}
-
-	public String format(Ent ent) {
-		return format(ent.getNet());
+	public String format(@NotNull Net net) {
+		return format(new Ent(net));
 	}
 
-	public String format(@NotNull Net net) {
+	public String format(Ent ent) {
+
         Set<Node> collected = new LinkedHashSet<>();
         List<Node> rootNodes = new ArrayList<>();
-        rootNodes.add(net.getRoot());
 
-        collectRecursively(net.getRoot(), collected, net.isMarkerNodePermitted());
+		for (Net net : ent.getDomains()) {
+			rootNodes.add(net.getRoot());
+		}
+		for (Net net : ent.getDomains()) {
+			collectRecursively(net.getRoot(), collected, net.isMarkerNodePermitted());
+		}
 
 		if (includeOrphans) {
-			Set<Node> missing = new LinkedHashSet<>(net.getNodes());
+			Set<Node> missing = new LinkedHashSet<>();
+			for (Net net : ent.getDomains()) {
+				missing.addAll(net.getNodes());
+			}
+
 			missing.removeAll(collected);
 
 			while (!missing.isEmpty()) {
@@ -69,11 +77,11 @@ public class NetFormatter {
 			}
 		}
 
-        FormattingWorker worker = new FormattingWorker(net, rootNodes, forceGivenNodeNames, maxDepth);
+        FormattingWorker worker = new FormattingWorker(ent, rootNodes, forceGivenNodeNames, maxDepth);
 
         String result = worker.formatRecursively();
 
-		worker.getVariableBindings().forEach(net::setName);
+		worker.getVariableBindings().forEach(Node::setName);
 
         return result;
 	}

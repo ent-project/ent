@@ -1,6 +1,7 @@
 package org.ent.net.io.formatter;
 
 import org.ent.Profile;
+import org.ent.net.CopyValueGameTestSetup;
 import org.ent.net.Net;
 import org.ent.net.NetTestData;
 import org.ent.net.node.Node;
@@ -283,5 +284,21 @@ class NetFormatterTest {
 		formatter.setMaxDepth(3);
 
 		assertThat(formatter.format(net)).isEqualTo("[[[...]]]");
+	}
+
+	@Nested
+	class CopyValueGameExample extends CopyValueGameTestSetup {
+		@Test
+		void format() {
+			build();
+
+			String str = formatter.format(ent);
+
+			assertThat(str).isEqualTo("""
+					<///=//\\>(a:[A], <eval_flow/>(a, <eval_flow/>(a, <SUCCESS>)))
+					input { x:<o> }
+					verifier { B:(data:(x, #7), <^::>(<?//==/\\?>(data, <SUCCESS>), <FAILURE>)) }"""
+			);
+		}
 	}
 }

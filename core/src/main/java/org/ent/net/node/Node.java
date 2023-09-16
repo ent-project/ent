@@ -247,6 +247,13 @@ public class Node {
 		this.index = index;
 	}
 
+	public void setName(String name) {
+		net.setName(this, name);
+	}
+
+	public String getName() {
+		return net.getName(this);
+	}
 
 	private class BNodeLeftArrow implements Arrow {
 		@Override
