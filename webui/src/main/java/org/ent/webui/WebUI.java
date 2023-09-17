@@ -37,7 +37,11 @@ public class WebUI {
         }
 
         public void run() {
-            runnable.run();
+            try {
+                runnable.run();
+            } catch (Exception e) {
+                log.error("Exception in story", e);
+            }
         }
 
         public boolean isExecuted() {
