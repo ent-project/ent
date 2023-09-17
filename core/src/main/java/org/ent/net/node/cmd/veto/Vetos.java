@@ -76,7 +76,7 @@ public class Vetos {
     }
 
     public static Veto get(BiCondition condition, boolean not) {
-        BiVeto veto = new BiVeto(Accessors.LL, Accessors.LR, condition, not);
+        BiVeto veto = new BiVeto(Accessors.L, Accessors.R, condition, not);
         return Vetos.getByValue(veto.getValue());
     }
 

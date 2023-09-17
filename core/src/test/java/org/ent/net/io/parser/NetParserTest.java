@@ -67,7 +67,7 @@ class NetParserTest {
 
 		@Test
 		void condition() throws Exception {
-			Net net = parser.parse("<?//===/\\?>");
+			Net net = parser.parse("<?/===\\?>");
 
 			List<Node> nodes = net.getNodes();
 			assertThat(nodes).hasSize(1);

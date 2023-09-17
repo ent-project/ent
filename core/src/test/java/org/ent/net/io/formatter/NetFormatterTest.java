@@ -83,7 +83,7 @@ class NetFormatterTest {
 
 				String str = formatter.format(net);
 
-				assertThat(str).isEqualTo("<?//gt/\\?>");
+				assertThat(str).isEqualTo("<?/gt\\?>");
 			}
 
 			@Test

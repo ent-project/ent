@@ -131,7 +131,7 @@ class EntRunnerTest {
     @Test
     void loop() throws Exception {
         Net net = parser.parse("""
-                line01:<\\::/\\>(<?///gt//\\?>((i:#0, #5), FIN:[i]), line02);  ~ goto FIN if i > 5
+                line01:<\\::/\\>(<?//gt/\\?>((i:#0, #5), FIN:[i]), line02);  ~ goto FIN if i > 5
                 line02:<inc/>(i, line01);			   		  			       ~ i++; goto start
                 """);
         EntRunner runner = new EntRunner(net);

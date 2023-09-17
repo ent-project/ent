@@ -8,10 +8,11 @@ import org.ent.net.node.cmd.veto.Vetos;
 public abstract class VetoedCommand implements Command {
     @Override
     public ExecutionResult execute(Node base, Permissions permissions) {
-        int vetoValue = base.getLeftChild(permissions).getValue(permissions);
+        Node vetoNode = base.getLeftChild(permissions);
+        int vetoValue = vetoNode.getValue(permissions);
         Veto veto = Vetos.getByValue(vetoValue);
         if (veto != null) {
-            boolean pass = veto.evaluate(base, permissions);
+            boolean pass = veto.evaluate(vetoNode, permissions);
             if (!pass) {
                 return ExecutionResult.NORMAL;
             }
