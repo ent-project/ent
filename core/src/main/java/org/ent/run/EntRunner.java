@@ -17,7 +17,6 @@ public class EntRunner {
 	private final Net net;
 
 	private EntRunnerListener entRunnerListener;
-	private boolean checkConclusion = true;
 
 	public EntRunner(Ent ent) {
 		this.ent = ent;
@@ -34,10 +33,6 @@ public class EntRunner {
 
 	public Ent getEnt() {
 		return ent;
-	}
-
-	public void setCheckConclusion(boolean checkConclusion) {
-		this.checkConclusion = checkConclusion;
 	}
 
 	public EntRunnerListener getNetRunnerListener() {
