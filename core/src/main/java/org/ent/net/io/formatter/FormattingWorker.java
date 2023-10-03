@@ -194,6 +194,9 @@ public class FormattingWorker {
     }
 
     private String determineVariableName(Node node) {
+        if (variableBindings.containsKey(node)) {
+            return variableBindings.get(node);
+        }
         String name;
         String givenNodeName = node.getName();
         if (givenNodeName != null) {

@@ -52,17 +52,17 @@ public class NetFormatter {
 
 	public String format(Ent ent) {
 
-        Set<Node> collected = new LinkedHashSet<>();
         List<Node> rootNodes = new ArrayList<>();
-
 		for (Net net : ent.getDomains()) {
 			rootNodes.add(net.getRoot());
 		}
-		for (Net net : ent.getDomains()) {
-			collectRecursively(net.getRoot(), collected, net.isMarkerNodePermitted());
-		}
 
 		if (includeOrphans) {
+			Set<Node> collected = new LinkedHashSet<>();
+			for (Net net : ent.getDomains()) {
+				collectRecursively(net.getRoot(), collected, net.isMarkerNodePermitted());
+			}
+
 			Set<Node> missing = new LinkedHashSet<>();
 			for (Net net : ent.getDomains()) {
 				missing.addAll(net.getNodes());

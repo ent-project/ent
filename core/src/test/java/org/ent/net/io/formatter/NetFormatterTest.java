@@ -1,11 +1,14 @@
 package org.ent.net.io.formatter;
 
+import org.ent.Ent;
 import org.ent.Profile;
 import org.ent.net.CopyValueGameTestSetup;
 import org.ent.net.Net;
 import org.ent.net.NetTestData;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Commands;
+import org.ent.net.node.cmd.accessor.Accessors;
+import org.ent.net.node.cmd.operation.Operations;
 import org.ent.net.node.cmd.veto.Vetos;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.ent.net.node.cmd.operation.Operations.ANCESTOR_EXCHANGE_OPERATION;
 import static org.ent.net.node.cmd.operation.Operations.SET_OPERATION;
 import static org.ent.net.node.cmd.veto.Conditions.GREATER_THAN_CONDITION;
+import static org.ent.util.NetBuilder.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class NetFormatterTest {
@@ -229,19 +233,6 @@ class NetFormatterTest {
 			assertThat(str).isEqualTo("A:(a:[[a]], <o>); [A]");
 		}
 
-//		@Test
-//		void setNodeNames() {
-//			Map<Node, String> nodeNames = new HashMap<>();
-//			nodeNames.put(root, "x1");
-//			formatter.setNodeNames(nodeNames);
-//			Node u = net.newUNode(root);
-//			root.setLeftChild(u);
-//
-//			String str = formatter.format(net);
-//
-//			assertThat(str).isEqualTo("x1:[[x1]]");
-//		}
-
 		@Test
 		void marker() {
 			Node marker = net.permitMarkerNode();
@@ -298,8 +289,23 @@ class NetFormatterTest {
 			assertThat(str).isEqualTo("""
 					<////=///\\>(a:[A], <eval_flow//>(a, <eval_flow//>(a, <SUCCESS>)))
 					input { x:#0 }
-					verifier { B:<o>(data:(x, #7), <\\::/\\>(<?///==//\\?>(data, <SUCCESS>), <FAILURE>)) }"""
+					verifier { A:<o>(data:(x, #7), <\\::/\\>(<?///==//\\?>(data, <SUCCESS>), <FAILURE>)) }"""
 			);
 		}
 	}
+
+    @Test
+    void withDomain() {
+        Net domain = builder().net(node(value(1), value(2)));
+        domain.setName("ant");
+        Ent ent = builder().ent(
+                node(Commands.get(Operations.SET_OPERATION, Accessors.R, Accessors.LL), domain.getRoot(), ignored()));
+        ent.addDomain(domain);
+
+        String str = formatter.format(ent);
+
+        assertThat(str).isEqualTo("""
+                <\\:://>(A, #0)
+                ant { A:(#1, #2) }""");
+    }
 }
