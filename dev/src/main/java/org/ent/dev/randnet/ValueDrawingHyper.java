@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ValueDrawingHyper extends AbstractValueDrawing {
+
     private static final Logger log = LoggerFactory.getLogger(ValueDrawingHyper.class);
 
     public static DoubleHyperDefinition FRAC_COMMANDS = new DoubleHyperDefinition("fraction_commands", 0.0, 1.0);
@@ -27,13 +28,14 @@ public class ValueDrawingHyper extends AbstractValueDrawing {
     public static DoubleHyperDefinition FRAC_MAJOR_SPLIT = new DoubleHyperDefinition("fraction_major_split", 0.0, 1.0);
     public static DoubleHyperDefinition FRAC_SET = new DoubleHyperDefinition("fraction_set", 0.0, 1.0);
 
+    protected final HyperManager hyperManager;
+
     public static void registerHyperparameter(HyperManager hyperManager) {
         hyperManager.get(FRAC_COMMANDS);
         hyperManager.get(FRAC_MAJOR_COMMANDS);
         hyperManager.get(FRAC_MAJOR_SPLIT);
         hyperManager.get(FRAC_SET);
     }
-    protected final HyperManager hyperManager;
 
     public interface DistributionNode {
         void collect(double currentFractionBase, Map<ParameterizedValue, Double> values);
@@ -194,7 +196,7 @@ public class ValueDrawingHyper extends AbstractValueDrawing {
         for (Double relativeWeight : relativeWeights.values()) {
             totalRelativeWeight += relativeWeight;
         }
-        // totalRelativeWeight should be ~ 1.0
+        // totalRelativeWeight should be roughly 1.0
 
         int discreteTotalWeight = 0;
         for (double weight : relativeWeights.values()) {

@@ -33,7 +33,7 @@ public class EvalFlowOperation implements MonoOperation {
         if (command.isEval()) {
             return ExecutionResult.ERROR;
         }
-        net.event().beforeEvalExecution(node, true);
+        net.event(permissions).beforeEvalExecution(node, true);
 
         Permissions permissionsForNewActor = net.getPermissions();
         ExecutionResult executionResult = command.execute(node, permissionsForNewActor);

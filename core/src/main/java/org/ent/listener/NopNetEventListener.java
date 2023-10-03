@@ -33,6 +33,11 @@ public class NopNetEventListener implements NetEventListener {
     }
 
     @Override
+    public void ancestorExchange(Node node1, Node node2) {
+        // do nothing
+    }
+
+    @Override
     public void beforeEvalExecution(Node target, boolean flow) {
         // do nothing
     }

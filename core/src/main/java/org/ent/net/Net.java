@@ -50,6 +50,11 @@ public class Net {
      */
     private Map<Node, String> nodeAnnotations;
     /**
+     * Set of nodes that should be printed or drawn on output,
+     * even if they are disconnected from the root.
+     */
+    private Set<Node> secondaryRoots;
+    /**
      * 'sparse' indicates that the list of nodes may contain null entries.
      * A dense (non-sparse) net allows for more optimized algorithms.
      * This flag is not maintained automatically, but needs to be
@@ -313,7 +318,12 @@ public class Net {
         forbidMarkerNode();
     }
 
-    public static void ancestorExchange(Node node1, Node node2) {
+    public void ancestorExchange(Node node1, Node node2, Permissions permissions) {
+        if (DOUBLE_CHECK_PERMISSIONS) {
+            if (permissions.noWrite(node1.getNet(), WriteFacet.ARROW)) {
+                throw new PermissionsViolatedException();
+            }
+        }
         Net net = node1.getNet();
         net.validateBelongsToNet(node2);
         Hub hub1 = node1.getHub();
@@ -322,6 +332,7 @@ public class Net {
         hub2.setNode(node1);
         node2.setHub(hub1);
         hub1.setNode(node2);
+        event(permissions).ancestorExchange(node1, node2);
     }
 
     public Node newRoot(Permissions permissions) {
@@ -527,6 +538,20 @@ public class Net {
 
     public Map<Node, String> getAnnotations() {
         return nodeAnnotations;
+    }
+
+    public void addSecondaryRoot(Node node) {
+        if (node.getNet() != this) {
+            throw new AssertionError();
+        }
+        if (secondaryRoots == null) {
+            secondaryRoots = new LinkedHashSet<>();
+        }
+        secondaryRoots.add(node);
+    }
+
+    public Set<Node> getSecondaryRoots() {
+        return secondaryRoots;
     }
 
     public List<Node> getNodesAsList() {

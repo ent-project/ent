@@ -1,11 +1,10 @@
 package org.ent.net.node.cmd.operation;
 
-import org.ent.permission.Permissions;
-import org.ent.net.Net;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.ExecutionResult;
+import org.ent.permission.Permissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,19 +18,18 @@ public class EvalOperation extends MonoNodeOperation {
 	}
 
 	@Override
-	public ExecutionResult doApply(Node node, Permissions permissions) {
-		Net net = node.getNet();
-		Command command = Commands.getByValue(node.getValue(permissions));
+	public ExecutionResult doApply(Node commandNode, Permissions permissions) {
+		Command command = Commands.getByValue(commandNode.getValue(permissions));
 		if (command == null) {
-			log.trace("EvalOperation results in error: target value is no command: {}", node);
+			log.trace("EvalOperation results in error: target value is no command: {}", commandNode);
 			return ExecutionResult.ERROR;
 		}
 		if (command.isEval()) {
 			return ExecutionResult.ERROR;
 		}
-		net.event().beforeEvalExecution(node, false);
+		commandNode.getNet().event(permissions).beforeEvalExecution(commandNode, false);
 
-		return command.execute(node, permissions);
+		return command.execute(commandNode, permissions);
 	}
 
 	@Override

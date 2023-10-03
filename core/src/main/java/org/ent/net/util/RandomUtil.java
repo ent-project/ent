@@ -25,7 +25,7 @@ public class RandomUtil {
      * over all the bits in a {@code long}.
      * Any hand-picked value, such as 12345L will not work. (I.e. at least the first draw will have a
      * predictable bit pattern.)
-     *
+     * <p>
      * Use {@link RandomUtil#newRandom(long)} for hand-picked seeds.
      */
     public static UniformRandomProvider newRandomNoScramble(long seed) {
@@ -36,4 +36,16 @@ public class RandomUtil {
         return MURMUR_128.newHasher().putLong(seed).hash().asLong();
     }
 
+    /**
+     * Compute a variation of the given seed, provided the input seed is already a proper seed.
+     * (I.e. not hand-picked)
+     * <p>
+     * This method is intended to be a more efficient variant of {@link RandomUtil#scrambleSeed(long)} for
+     * the special case the seed is already sufficiently "random".
+     * <p>
+     * This method will repeat after 64 applications, use with caution.
+     */
+    public static long lightScramble(long netSeed) {
+        return Long.rotateRight(~netSeed, 7);
+    }
 }

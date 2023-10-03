@@ -1,11 +1,10 @@
 package org.ent.net.node.cmd.operation;
 
-import org.ent.permission.Permissions;
-import org.ent.permission.WriteFacet;
 import org.ent.net.Arrow;
-import org.ent.net.Net;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.ExecutionResult;
+import org.ent.permission.Permissions;
+import org.ent.permission.WriteFacet;
 
 public class AncestorExchangeOperation implements BiOperation {
 
@@ -22,7 +21,7 @@ public class AncestorExchangeOperation implements BiOperation {
 		Node node2 = arrowToNode2.getTarget(permissions);
 		if (node1.getNet() != node2.getNet()) return ExecutionResult.ERROR;
 
-		Net.ancestorExchange(node1, node2);
+		node1.getNet().ancestorExchange(node1, node2, permissions);
 		return ExecutionResult.NORMAL;
 	}
 

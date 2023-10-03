@@ -47,7 +47,13 @@ public class MultiNetEventListener implements NetEventListener {
         for (NetEventListener eventListener : eventListeners) {
             eventListener.setValue(node, previousValue, newValue);
         }
+    }
 
+    @Override
+    public void ancestorExchange(Node node1, Node node2) {
+        for (NetEventListener eventListener : eventListeners) {
+            eventListener.ancestorExchange(node1, node2);
+        }
     }
 
     @Override

@@ -1,11 +1,10 @@
 package org.ent.net.node.cmd.operation;
 
-import org.ent.permission.Permissions;
-import org.ent.permission.WriteFacet;
 import org.ent.net.Arrow;
-import org.ent.net.Net;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.ExecutionResult;
+import org.ent.permission.Permissions;
+import org.ent.permission.WriteFacet;
 
 /**
  * Similar to ancestor exchange, but for the two target nodes, arrows pointing to self are not affected.
@@ -29,7 +28,7 @@ public class AncestorExchangeNormalOperation implements BiOperation {
 		boolean node1HasProperRightChild = node1.hasProperRightChild(permissions);
 		boolean node2HasProperLeftChild = node2.hasProperLeftChild(permissions);
 		boolean node2HasProperRightChild = node2.hasProperRightChild(permissions);
-		Net.ancestorExchange(node1, node2);
+		node1.getNet().ancestorExchange(node1, node2, permissions);
 		if (!node1HasProperLeftChild) {
 			node1.setLeftChild(node1, permissions);
 		}

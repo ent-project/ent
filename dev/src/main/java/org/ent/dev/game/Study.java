@@ -19,6 +19,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * A Study consists of a number of Trials.
+ * A Trial consists of a number of Evaluations.
+ * <p>
+ * In a scenario of Hyperparameter optimization, a Study will choose a new set of Hyperparameters
+ * for each of its Trials. A Trial is limited by time or by a maximum number of Evaluations,
+ * or both (as is appropriate to judge the quality of the Hyperparameter choice).
+ * <p>
+ * An Evaluation computes a solution (hit) and submits it: {@link Study#submitSolution(Object)}.
+ * The measure of quality for a Trial is the number of hits per time.
+ */
 public abstract class Study<S> {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
@@ -31,7 +42,7 @@ public abstract class Study<S> {
     protected Integer indexTrial;
     protected Integer indexEvaluation;
 
-    private final List<S> solutions = new ArrayList<>();
+    protected final List<S> solutions = new ArrayList<>();
     private int nextSolutionIndex;
 
     protected int numHit;
@@ -65,7 +76,6 @@ public abstract class Study<S> {
             Class<SB> result = (Class<SB>) parameterized.getActualTypeArguments()[0];
             return result;
         }
-
 
         public void runStudy(RemoteHyperManager hyperManager, int numTrials) throws IOException {
             for (int indexTrial = 0; indexTrial < numTrials; indexTrial++) {
@@ -109,8 +119,13 @@ public abstract class Study<S> {
         return numHit;
     }
 
-    public void runTrial(int indexTrial) {
+    public void initializeTrial(Integer indexTrial) {
         this.indexTrial = indexTrial;
+        this.indexEvaluation = 1;
+    }
+
+    public void runTrial(int indexTrial) {
+        initializeTrial(indexTrial);
         long startTime = System.nanoTime();
         indexEvaluation = 1;
         while (withinTimeLimit(startTime) && withinCountLimit(indexEvaluation)) {
@@ -153,6 +168,7 @@ public abstract class Study<S> {
     public S getNextSolution() {
         while (solutions.size() <= nextSolutionIndex) {
             nextEvaluation();
+            indexEvaluation++;
         }
         S solution = solutions.get(nextSolutionIndex);
         solutions.set(nextSolutionIndex, null);

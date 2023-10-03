@@ -30,7 +30,7 @@ public class EntHash {
         return hasher.hash().asInt();
     }
 
-    private static int hash(Net net) {
+    public static int hash(Net net) {
         Hasher hasher = MURMUR_3.newHasher();
         doHash(net, hasher);
         return hasher.hash().asInt();

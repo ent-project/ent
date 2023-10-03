@@ -9,6 +9,7 @@ import org.ent.net.node.MarkerNode;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.NopCommand;
+import org.ent.permission.Permissions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -213,7 +214,7 @@ class NetTest {
         }
 
         @Test
-        void setTarget_otherNet() throws Exception {
+        void setTarget_otherNet() {
             Node a;
             Net net = builder().net(a = value(0));
             net.addEventListener(eventListener);
@@ -312,7 +313,7 @@ class NetTest {
                 Node b = net.getByName("b");
                 net.addEventListener(eventListener);
 
-                Net.ancestorExchange(a, b);
+                net.ancestorExchange(a, b, Permissions.DIRECT);
 
                 verifyNoMoreInteractions(eventListener);
                 NetFormatter formatter = new NetFormatter()
@@ -336,7 +337,7 @@ class NetTest {
                 Net net = parser.parse("_a:<o>");
                 Node nop = net.getByName("_a");
 
-                assertThatThrownBy(() -> Net.ancestorExchange(externalNode, nop))
+                assertThatThrownBy(() -> net.ancestorExchange(externalNode, nop, Permissions.DIRECT))
                         .isInstanceOf(IllegalStateException.class)
                         .hasMessage("node belongs to another net");
             }
@@ -347,7 +348,7 @@ class NetTest {
             Net net = parser.parse("_a:<o>");
             Node nop = net.getByName("_a");
 
-            assertThatThrownBy(() -> Net.ancestorExchange(nop, externalNode))
+            assertThatThrownBy(() -> net.ancestorExchange(nop, externalNode, Permissions.DIRECT))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("node belongs to another net");
         }

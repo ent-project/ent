@@ -39,8 +39,12 @@ public class ArrowMixMutation {
         this.destinationRange = new Range(minIncluive, maxExclusive);
     }
 
-    protected int resolveDestination(int index) {
+    protected int mapTargetIndex(int index) {
         return index;
+    }
+
+    protected Node resolveTargetNode(int indexTargetResolved) {
+        return net.getNodesAsList().get(indexTargetResolved);
     }
 
     public void execute() {
@@ -54,10 +58,14 @@ public class ArrowMixMutation {
     private void rewireOneArrowRandomly() {
         int indexSource = rand.nextInt(sourceRange.minIncluive, sourceRange.maxExclusive);
         Node node = net.getNodesAsList().get(indexSource);
-        Arrow arrow = node.getArrow(rand.nextBoolean() ? ArrowDirection.LEFT : ArrowDirection.RIGHT);
+        Arrow arrow = node.getArrow(drawArrowDirection());
         int indexTarget = rand.nextInt(destinationRange.minIncluive, destinationRange.maxExclusive);
-        int indexTargetResolved = resolveDestination(indexTarget);
-        Node nodeTarget = net.getNodesAsList().get(indexTargetResolved);
+        int indexTargetResolved = mapTargetIndex(indexTarget);
+        Node nodeTarget = resolveTargetNode(indexTargetResolved);
         arrow.setTarget(nodeTarget, Permissions.DIRECT);
+    }
+
+    protected ArrowDirection drawArrowDirection() {
+        return rand.nextBoolean() ? ArrowDirection.LEFT : ArrowDirection.RIGHT;
     }
 }

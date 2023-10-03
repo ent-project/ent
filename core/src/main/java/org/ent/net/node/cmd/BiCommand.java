@@ -50,6 +50,11 @@ public class BiCommand extends VetoedCommand {
 		return value;
 	}
 
+	@Override
+	public boolean isEval() {
+		return operation.isEval();
+	}
+
 	public String getShortName() {
 		return shortName;
 	}

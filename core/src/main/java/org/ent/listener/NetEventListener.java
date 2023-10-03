@@ -15,6 +15,8 @@ public interface NetEventListener {
 
 	void setValue(Node node, int previousValue, int newValue);
 
+	void ancestorExchange(Node node1, Node node2);
+
 	void beforeEvalExecution(Node target, boolean flow);
 
     void setRoot(Node previousRoot, Node newRoot);

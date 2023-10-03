@@ -11,4 +11,8 @@ public interface BiOperation {
 	ExecutionResult apply(Arrow handle1, Arrow handle2, Permissions permissions);
 
 	String getShortName();
+
+	default boolean isEval() {
+		return false;
+	}
 }
