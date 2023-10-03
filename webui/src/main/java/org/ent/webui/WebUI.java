@@ -39,7 +39,7 @@ public class WebUI {
         public void run() {
             try {
                 runnable.run();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 log.error("Exception in story", e);
             }
         }
