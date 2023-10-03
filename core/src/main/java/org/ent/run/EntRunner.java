@@ -50,13 +50,18 @@ public class EntRunner {
 
 	public StepResult step() {
 		Node executionPointer = net.getRoot();
-		StepResult result;
+		StepResult result = doStep(executionPointer);
+		if (result != StepResult.CONCLUDED) {
+			advanceExecutionPointer(executionPointer);
+		}
+		return result;
+	}
+
+	private StepResult doStep(Node executionPointer) {
 		Command command = Commands.getByValue(executionPointer.getValue(net.getPermissions()));
 		if (command == null) {
 			ent.event().beforeCommandExecution(executionPointer, null);
-			result = StepResult.INVALID_COMMAND_NODE;
-		} else if (checkConclusion && command.isConcluding()) {
-			result = StepResult.CONCLUDED;
+			return StepResult.INVALID_COMMAND_NODE;
 		} else {
 			ent.event().beforeCommandExecution(executionPointer, command);
 			ExecutionResult executeResult = command.execute(executionPointer, net.getPermissions());
@@ -66,25 +71,25 @@ public class EntRunner {
 			if (entRunnerListener != null) {
 				entRunnerListener.fireCommandExecuted(executionPointer, executeResult);
 			}
-			result = stepResult;
+			return stepResult;
 		}
-
-		if (result != StepResult.CONCLUDED) {
-			Node newExecutionPointer = executionPointer.getRightChild(net.getPermissions());
-			if (newExecutionPointer.getNet().equals(net)) {
-				net.setRoot(newExecutionPointer);
-			} else {
-				result = StepResult.EXECUTION_POINTER_LEAVING_NET;
-			}
-		}
-		return result;
 	}
 
 	private StepResult convertToStepResult(ExecutionResult executeResult) throws AssertionError {
 		return switch (executeResult) {
 			case NORMAL -> StepResult.SUCCESS;
 			case ERROR -> StepResult.COMMAND_EXECUTION_FAILED;
+			case CONCLUDED -> StepResult.CONCLUDED;
 		};
+	}
+
+	private void advanceExecutionPointer(Node executionPointer) {
+		Node newExecutionPointer = executionPointer.getRightChild(net.getPermissions());
+		if (newExecutionPointer.getNet().equals(net)) {
+			net.setRoot(newExecutionPointer);
+		} else {
+			ent.event().executionPointerTryingToLeaveNet(executionPointer, newExecutionPointer);
+		}
 	}
 
 }

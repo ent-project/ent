@@ -15,4 +15,6 @@ public interface EntEventListener {
 	void afterCommandExecution(StepResult stepResult);
 
 	void triValueOperation(Node node1, Node node2, Node node3, TriValueOperation operation);
+
+    void executionPointerTryingToLeaveNet(Node executionPointer, Node newExecutionPointer);
 }

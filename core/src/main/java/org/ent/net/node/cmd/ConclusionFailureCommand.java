@@ -1,8 +1,15 @@
 package org.ent.net.node.cmd;
 
+import org.ent.net.node.Node;
 import org.ent.net.node.cmd.operation.Operations;
+import org.ent.permission.Permissions;
 
 public class ConclusionFailureCommand extends NopCommand {
+
+    @Override
+    public ExecutionResult execute(Node base, Permissions permissions) {
+        return ExecutionResult.CONCLUDED;
+    }
 
     @Override
     public int getValueBase() {
@@ -12,10 +19,5 @@ public class ConclusionFailureCommand extends NopCommand {
     @Override
     public String getShortName() {
         return "FAILURE";
-    }
-
-    @Override
-    public boolean isConcluding() {
-        return true;
     }
 }

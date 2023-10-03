@@ -181,7 +181,8 @@ class EntRunnerTest {
         root.setRightChild(domainNode);
         EntRunner runner = new EntRunner(ent);
 
-        assertThat(runner.step()).isEqualTo(StepResult.EXECUTION_POINTER_LEAVING_NET);
+        runner.step();
+
         assertThat(ent.getNet().getRoot().getNet()).isEqualTo(ent.getNet());
     }
 

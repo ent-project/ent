@@ -27,4 +27,9 @@ public class NopEntEventListener implements EntEventListener {
     public void triValueOperation(Node node1, Node node2, Node node3, TriValueOperation operation) {
         // do nothing
     }
+
+    @Override
+    public void executionPointerTryingToLeaveNet(Node executionPointer, Node newExecutionPointer) {
+        // do nothing
+    }
 }

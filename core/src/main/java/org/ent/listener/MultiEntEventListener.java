@@ -44,4 +44,11 @@ public class MultiEntEventListener implements EntEventListener {
             eventListener.triValueOperation(node1, node2, node3, operation);
         }
     }
+
+    @Override
+    public void executionPointerTryingToLeaveNet(Node executionPointer, Node newExecutionPointer) {
+        for (EntEventListener eventListener : eventListeners) {
+            eventListener.executionPointerTryingToLeaveNet(executionPointer, newExecutionPointer);
+        }
+    }
 }
