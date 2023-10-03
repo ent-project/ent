@@ -50,32 +50,34 @@ public class EntRunner {
 
 	public StepResult step() {
 		Node executionPointer = net.getRoot();
-		StepResult result = doStep(executionPointer);
-		if (result != StepResult.CONCLUDED) {
-			advanceExecutionPointer(executionPointer);
-		}
-		return result;
-	}
-
-	private StepResult doStep(Node executionPointer) {
+		StepResult result;
 		Command command = Commands.getByValue(executionPointer.getValue(net.getPermissions()));
 		if (command == null) {
 			ent.event().beforeCommandExecution(executionPointer, null);
-			return StepResult.INVALID_COMMAND_NODE;
+			result = StepResult.INVALID_COMMAND_NODE;
 		} else if (checkConclusion && command.isConcluding()) {
-			return StepResult.CONCLUDED;
+			result = StepResult.CONCLUDED;
+		} else {
+			ent.event().beforeCommandExecution(executionPointer, command);
+			ExecutionResult executeResult = command.execute(executionPointer, net.getPermissions());
+			StepResult stepResult = convertToStepResult(executeResult);
+			log.trace("command {} executed: {}", command, executeResult);
+			ent.event().afterCommandExecution(stepResult);
+			if (entRunnerListener != null) {
+				entRunnerListener.fireCommandExecuted(executionPointer, executeResult);
+			}
+			result = stepResult;
 		}
 
-		ent.event().beforeCommandExecution(executionPointer, command);
-		ExecutionResult executeResult = command.execute(executionPointer, net.getPermissions());
-		StepResult stepResult = convertToStepResult(executeResult);
-		log.trace("command {} executed: {}", command, executeResult);
-		ent.event().afterCommandExecution(stepResult);
-		if (entRunnerListener != null) {
-			entRunnerListener.fireCommandExecuted(executionPointer, executeResult);
+		if (result != StepResult.CONCLUDED) {
+			Node newExecutionPointer = executionPointer.getRightChild(net.getPermissions());
+			if (newExecutionPointer.getNet().equals(net)) {
+				net.setRoot(newExecutionPointer);
+			} else {
+				result = StepResult.EXECUTION_POINTER_LEAVING_NET;
+			}
 		}
-
-		return stepResult;
+		return result;
 	}
 
 	private StepResult convertToStepResult(ExecutionResult executeResult) throws AssertionError {
@@ -85,8 +87,4 @@ public class EntRunner {
 		};
 	}
 
-	private void advanceExecutionPointer(Node executionPointer) {
-		Node newExecutionPointer = executionPointer.getRightChild(net.getPermissions());
-		net.setRoot(newExecutionPointer);
-	}
 }

@@ -171,6 +171,20 @@ class EntRunnerTest {
         assertThat(ent.getNet().getRoot().getValue()).isEqualTo(terminatingCommand.getValue());
     }
 
+    @Test
+    void shouldNotLeaveNet() {
+        Node domainNode;
+        Net domain = builder().net(domainNode = value(7));
+        Node root;
+        Ent ent = builder().ent(root = unaryRight(Commands.NOP, ignored()));
+        ent.addDomain(domain);
+        root.setRightChild(domainNode);
+        EntRunner runner = new EntRunner(ent);
+
+        assertThat(runner.step()).isEqualTo(StepResult.EXECUTION_POINTER_LEAVING_NET);
+        assertThat(ent.getNet().getRoot().getNet()).isEqualTo(ent.getNet());
+    }
+
     @Nested
     @ExtendWith(MockitoExtension.class)
     class Veto {
