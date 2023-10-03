@@ -52,6 +52,7 @@ public class WebUI {
             this.executed = executed;
         }
     }
+
     private static final Multimap<String, WsConnectContext> sessionsByStory = ArrayListMultimap.create();
     private static final Map<String, Queue<Object>> buffersByStory = new HashMap<>();
     private static final Map<String, Story> storyHooks = new HashMap<>();
@@ -144,12 +145,19 @@ public class WebUI {
         return buffer;
     }
 
-    public static void broadcast(String storyId, LogEntryType type, String input) {
-        Object payload = switch (type) {
+    public static void broadcast(String storyId, LogEntryType type, String input,
+                                 boolean jumpPoint, boolean jumpPointMajor) {
+        Map<String, Object> payload = switch (type) {
             case PLAIN -> buildPayloadForLogEntry(input);
             case HTML -> buildPayloadForHtmlEntry(input);
             case DOT -> buildPayloadForDotEntry(input);
         };
+        if (jumpPoint) {
+            payload.put("jump", true);
+        }
+        if (jumpPointMajor) {
+            payload.put("jump_major", true);
+        }
         storyId = Optional.ofNullable(storyId).orElse(STORY_ID_MAIN);
         Queue<Object> buffer = getBuffer(storyId);
         buffer.add(payload);
@@ -157,26 +165,26 @@ public class WebUI {
                 .forEach(session -> session.send(payload));
     }
 
-    public static Object buildPayloadForLogEntry(String message) {
-        return Map.of(
-                "type", "log",
-                "message", message
-        );
+    public static Map<String, Object> buildPayloadForLogEntry(String message) {
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("type", "log");
+        result.put("message", message);
+        return result;
     }
 
-    private static Object buildPayloadForHtmlEntry(String html) {
-        return Map.of(
-                "type", "html",
-                "html", html
-        );
+    private static Map<String, Object> buildPayloadForHtmlEntry(String html) {
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("type", "html");
+        result.put("html", html);
+        return result;
     }
 
-    public static Object buildPayloadForDotEntry(String dotString) {
-        return Map.of(
-                "type", "dot",
-                "scale", 0.7,
-                "dot", dotString
-        );
+    public static Map<String, Object> buildPayloadForDotEntry(String dotString) {
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("type", "dot");
+        result.put("scale", 0.7);
+        result.put("dot", dotString);
+        return result;
     }
 
     public static Story addStoryHook(String storyId, Runnable runnable) {

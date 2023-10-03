@@ -20,9 +20,15 @@ ws.onclose = () => {
 function updateLogs(msg) {
     let logs = id("logs");
     let data = JSON.parse(msg.data);
+    const article = document.createElement('article');
+    if (data.jump) {
+        article.className = "jump";
+    }
+    if (data.jump_major) {
+        article.className = "jump_major"
+    }
     if (data.type === 'log' || data.type === 'html') {
         let atBottom = logs.scrollTop + logs.clientHeight >= logs.scrollHeight;
-        const article = document.createElement('article');
         if (data.type === 'log') {
             const pre = document.createElement('pre');
             pre.innerText = data.message;
@@ -37,7 +43,6 @@ function updateLogs(msg) {
             logs.scrollTop = logs.scrollHeight;
         }
     } else if (data.type === 'dot') {
-        const article = document.createElement('article');
         logs.insertAdjacentElement("beforeend", article);
         Viz.instance().then(function(viz) {
             let atBottom = logs.scrollTop + logs.clientHeight >= logs.scrollHeight;
@@ -62,3 +67,40 @@ function updateLogs(msg) {
         console.error("unknown type: " + data.type);
     }
 }
+
+function findFromEnd(arr, predicate) {
+    for (let i = arr.length - 1; i >= 0; i--) {
+        if (predicate(arr[i], i, arr)) {
+            return arr[i];
+        }
+    }
+    return undefined;
+}
+
+document.addEventListener("keydown", function(event) {
+    console.log(event.key);
+    console.log(event.shiftKey);
+    if (event.key.toLowerCase() !== 'n' && event.key.toLowerCase() !== 'p') {
+        return;
+    }
+    const entries = Array.from(document.querySelectorAll(event.shiftKey ? '.jump_major' : '.jump'));
+    console.log(event.key.toLowerCase())
+    if (event.key.toLowerCase() === 'n') {
+        console.log("coming here...")
+        const nextEntry = entries.find(entry => {
+            const rect = entry.getBoundingClientRect();
+            return rect.top > 5;
+        });
+        if (nextEntry !== undefined) {
+            nextEntry.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    } else if (event.key.toLowerCase() === 'p') {
+        const previousEntry = findFromEnd(entries, entry => {
+            const rect = entry.getBoundingClientRect();
+            return rect.top < -5;
+        });
+        if (previousEntry !== undefined) {
+            previousEntry.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+});

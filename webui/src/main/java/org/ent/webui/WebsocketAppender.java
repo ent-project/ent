@@ -31,16 +31,27 @@ public class WebsocketAppender extends UnsynchronizedAppenderBase<ILoggingEvent>
             byte[] byteArray = encoder.encode(event);
             message = new String(byteArray, StandardCharsets.UTF_8);
         } else {
-            message = event.getMessage();
+            if ("dot".equals(channel)) {
+                message = event.getMessage();
+            } else {
+                message = event.getFormattedMessage();
+            }
         }
         String storyId = event.getMDCPropertyMap().get("story");
+        boolean isJump = hasMarker(event, "jump");
+        boolean isMajorJump = hasMarker(event, "jump_major");
         if ("dot".equals(channel)) {
-            WebUI.broadcast(storyId, LogEntryType.DOT, message);
+            WebUI.broadcast(storyId, LogEntryType.DOT, message, isJump, isMajorJump);
         } else if ("html".equals(channel)) {
-            WebUI.broadcast(storyId, LogEntryType.HTML, message);
+            WebUI.broadcast(storyId, LogEntryType.HTML, message, isJump, isMajorJump);
         } else {
-            WebUI.broadcast(storyId, LogEntryType.PLAIN, message);
+            WebUI.broadcast(storyId, LogEntryType.PLAIN, message, isJump, isMajorJump);
         }
+    }
+
+    private static boolean hasMarker(ILoggingEvent event, String marker) {
+        return event.getMarkerList() != null
+                && event.getMarkerList().stream().anyMatch(m -> marker.equals(m.getName()));
     }
 
     public Encoder<ILoggingEvent> getEncoder() {

@@ -18,7 +18,11 @@ public class WebUiStoryOutput {
 
     public static void addStoryWithAnnouncement(String storyId, Runnable run) {
         addStory(storyId, run);
-        htmlLogger.info("<a href=\"/?story=%s\" target=\"_blank\">%s</a>".formatted(storyId, storyId));
+        htmlLogger.info(getStoryLink(storyId, storyId));
+    }
+
+    public static String getStoryLink(String storyId, String content) {
+        return "<a href=\"/?story=%s\" target=\"_blank\">%s</a>".formatted(storyId, content);
     }
 
     public static void startStory(String storyId) {
@@ -30,7 +34,7 @@ public class WebUiStoryOutput {
     }
 
     public static <T> T runStoryWithAnnouncement(String storyId, Supplier<T> run) {
-        htmlLogger.info("<a href=\"/?story=%s\" target=\"_blank\">%s</a>".formatted(storyId, storyId));
+        htmlLogger.info(getStoryLink(storyId, storyId));
         return runStory(storyId, run);
     }
 
