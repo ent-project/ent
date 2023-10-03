@@ -68,7 +68,7 @@ class EntRunnerTest {
 
     @Test
     void testNetRunner1() throws Exception {
-        doTestNetRunner(true, StepResult.ENDLESS_LOOP, Arrays.asList(
+        doTestNetRunner(true, StepResult.INVALID_COMMAND_NODE, Arrays.asList(
                 "<//::/\\>(params:(@, [#1]), [params])",
                 "[params:(a:[#1], a)]"));
     }
@@ -93,7 +93,7 @@ class EntRunnerTest {
 
     @Test
     void testNetRunner4() throws Exception {
-        doTestNetRunner(false, StepResult.ENDLESS_LOOP, Arrays.asList(
+        doTestNetRunner(false, StepResult.INVALID_COMMAND_NODE, Arrays.asList(
                 "<//=/\\sl/>(#1(result:<o>, #3), result)",
                 "result:#6"));
     }
@@ -143,7 +143,7 @@ class EntRunnerTest {
                 break;
             }
         }
-        assertThat(result).isEqualTo(StepResult.ENDLESS_LOOP);
+        assertThat(result).isEqualTo(StepResult.INVALID_COMMAND_NODE);
 
         net.referentialGarbageCollection();
         assertThat(formatter.format(net)).isEqualTo("FIN:[i:#6]");

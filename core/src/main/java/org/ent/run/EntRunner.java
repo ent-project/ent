@@ -51,16 +51,10 @@ public class EntRunner {
 	}
 
 	private StepResult doStep(Node executionPointer) {
-		boolean executionPointerDoesNotAdvance =
-				executionPointer.getRightChild(net.getPermissions()) == executionPointer;
 		Command command = Commands.getByValue(executionPointer.getValue(net.getPermissions()));
 		if (command == null) {
 			ent.event().beforeCommandExecution(executionPointer, null);
-			if (executionPointerDoesNotAdvance) {
-				return StepResult.ENDLESS_LOOP;
-			} else {
-				return StepResult.INVALID_COMMAND_NODE;
-			}
+			return StepResult.INVALID_COMMAND_NODE;
 		}
 
 		ent.event().beforeCommandExecution(executionPointer, command);
@@ -72,9 +66,6 @@ public class EntRunner {
 			entRunnerListener.fireCommandExecuted(executionPointer, executeResult);
 		}
 
-		if (command.getValue() == Commands.NOP.getValue() && executionPointerDoesNotAdvance) {
-			return StepResult.ENDLESS_LOOP;
-		}
 		return stepResult;
 	}
 
