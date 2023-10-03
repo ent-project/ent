@@ -97,7 +97,7 @@ public class DotRenderer {
             if (node.getNet() != net) {
                 continue;
             }
-            String nodeName = renderNode(net, node);
+            String nodeName = renderNode(node);
             for (Arrow arrow : node.getArrows()) {
                 Node child = arrow.getTarget(Permissions.DIRECT);
                 if (node == child && arrow != targetArrow) {
@@ -130,7 +130,8 @@ public class DotRenderer {
         }
     }
 
-    private String renderNode(Net net, Node node) {
+    private String renderNode(Node node) {
+        Net net = node.getNet();
         String nodeName = getNodeId(node);
         sb.append(" ").append(nodeName);
         int value = node.getValue(Permissions.DIRECT);
@@ -142,11 +143,11 @@ public class DotRenderer {
                 table.rounded = true;
                 table.vanishEmptySides = true;
                 table.cellpaddingTable = 0;
-                table.cellpaddingCenter = 4;
+                table.cellpaddingCenter = 5;
                 table.outlineColors = getOutlineColors(node);
                 table.renderTable(sb);
             } else {
-                sb.append("[shape=Mrecord label=\"<l>|<r>\" width=0.1 height=0.1 fixedsize=true color=%s]"
+                sb.append("[shape=Mrecord label=\"<l>|<r>\" width=0.15 height=0.15 fixedsize=true color=%s]"
                         .formatted(COLOR_DOT));
             }
         } else {
