@@ -16,8 +16,17 @@ public class PermissionBuilder {
     }
 
     public PermissionBuilder net(Consumer<NetPermissionBuilder> netPermissionBuilderConsumer) {
-        netPermissionBuilders[0] = new NetPermissionBuilder();
-        netPermissionBuilderConsumer.accept(netPermissionBuilders[0]);
+        return domain(0, netPermissionBuilderConsumer);
+    }
+
+    public PermissionBuilder domain(Net domain, Consumer<NetPermissionBuilder> netPermissionBuilderConsumer) {
+        return domain(domain.getNetIndex(), netPermissionBuilderConsumer);
+    }
+
+    public PermissionBuilder domain(int domainIndex, Consumer<NetPermissionBuilder> netPermissionBuilderConsumer) {
+        NetPermissionBuilder netPermissionBuilder = new NetPermissionBuilder();
+        netPermissionBuilders[domainIndex] = netPermissionBuilder;
+        netPermissionBuilderConsumer.accept(netPermissionBuilder);
         return this;
     }
 
@@ -31,7 +40,6 @@ public class PermissionBuilder {
         canWriteNewNode[netIndex] = true;
         canWriteArrow[netIndex] = true;
         canPointTo[netIndex] = true;
-        canExecute[netIndex] = true;
         NetPermissionBuilder netPermissionBuilder = netPermissionBuilders[netIndex];
         if (netPermissionBuilder != null) {
             for (WriteFacet facet : WriteFacet.values()) {
@@ -92,6 +100,13 @@ public class PermissionBuilder {
 
         public NetPermissionBuilder canPointTo(Net net) {
             return canPointTo(net.getNetIndex());
+        }
+
+        public NetPermissionBuilder canModify(Net net) {
+            return canPointTo(net)
+                    .canWrite(net, WriteFacet.VALUE)
+                    .canWrite(net, WriteFacet.NEW_NODE)
+                    .canWrite(net, WriteFacet.ARROW);
         }
 
         private NetPermissionBuilder canPointTo(int netIndex) {
