@@ -27,4 +27,8 @@ public interface Command extends ParameterizedValue {
     default boolean isEval() {
         return false;
     }
+
+    default boolean isConcluding() {
+        return false;
+    }
 }

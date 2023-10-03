@@ -17,6 +17,7 @@ public class EntRunner {
 	private final Net net;
 
 	private EntRunnerListener entRunnerListener;
+	private boolean checkConclusion = true;
 
 	public EntRunner(Ent ent) {
 		this.ent = ent;
@@ -35,6 +36,10 @@ public class EntRunner {
 		return ent;
 	}
 
+	public void setCheckConclusion(boolean checkConclusion) {
+		this.checkConclusion = checkConclusion;
+	}
+
 	public EntRunnerListener getNetRunnerListener() {
 		return entRunnerListener;
 	}
@@ -46,7 +51,9 @@ public class EntRunner {
 	public StepResult step() {
 		Node executionPointer = net.getRoot();
 		StepResult result = doStep(executionPointer);
-		advanceExecutionPointer(executionPointer);
+		if (result != StepResult.CONCLUDED) {
+			advanceExecutionPointer(executionPointer);
+		}
 		return result;
 	}
 
@@ -55,6 +62,8 @@ public class EntRunner {
 		if (command == null) {
 			ent.event().beforeCommandExecution(executionPointer, null);
 			return StepResult.INVALID_COMMAND_NODE;
+		} else if (checkConclusion && command.isConcluding()) {
+			return StepResult.CONCLUDED;
 		}
 
 		ent.event().beforeCommandExecution(executionPointer, command);

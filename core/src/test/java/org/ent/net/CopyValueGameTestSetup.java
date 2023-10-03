@@ -31,8 +31,8 @@ public class CopyValueGameTestSetup {
                         node(Commands.get(Operations.SET_OPERATION, R, LR),
                                 node(Vetos.get(Conditions.SAME_VALUE_CONDITION, LLL, LLR),
                                         data,
-                                        value(Commands.FINAL_SUCCESS)),
-                                value(Commands.FINAL_FAILURE))));
+                                        value(Commands.CONCLUSION_SUCCESS)),
+                                value(Commands.CONCLUSION_FAILURE))));
 
         Node toVerifier;
         ent = builder().ent(
@@ -42,7 +42,7 @@ public class CopyValueGameTestSetup {
                                 toVerifier,
                                 node(Commands.get(Operations.EVAL_FLOW_OPERATION, LL),
                                         toVerifier,
-                                        value(Commands.FINAL_SUCCESS)))));
+                                        value(Commands.CONCLUSION_SUCCESS)))));
         ent.addDomain(input);
         ent.addDomain(verifier);
         input.setName("input");

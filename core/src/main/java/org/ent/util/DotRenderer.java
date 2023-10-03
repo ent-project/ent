@@ -358,9 +358,9 @@ public class DotRenderer {
     }
 
     private String getCommandFillColor(Command command) {
-        if (command.getValue() == Commands.FINAL_SUCCESS.getValue()) {
+        if (command.getValue() == Commands.CONCLUSION_SUCCESS.getValue()) {
             return "#daffb5";
-        } else if (command.getValue() == Commands.FINAL_FAILURE.getValue()) {
+        } else if (command.getValue() == Commands.CONCLUSION_FAILURE.getValue()) {
             return "#ffcfb5";
         }
         return COLOR_NODE;

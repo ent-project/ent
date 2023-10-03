@@ -8,12 +8,15 @@ import org.ent.net.Net;
 import org.ent.net.io.formatter.NetFormatter;
 import org.ent.net.io.parser.NetParser;
 import org.ent.net.node.Node;
+import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.veto.Conditions;
 import org.ent.util.Logging;
 import org.ent.webui.WebUI;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
@@ -21,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.ent.net.node.cmd.accessor.Accessors.LL;
@@ -149,6 +153,24 @@ class EntRunnerTest {
         assertThat(formatter.format(net)).isEqualTo("FIN:[i:#6]");
     }
 
+    private static Stream<Command> terminate() {
+        return Stream.of(Commands.CONCLUSION_SUCCESS, Commands.CONCLUSION_FAILURE);
+    }
+
+    @ParameterizedTest
+    @MethodSource("terminate")
+    void terminate(Command terminatingCommand) {
+        Ent ent = builder().ent(unaryRight(Commands.NOP,
+                unaryRight(terminatingCommand, value(7))));
+        EntRunner runner = new EntRunner(ent);
+
+        assertThat(runner.step()).isEqualTo(StepResult.SUCCESS);
+        assertThat(runner.step()).isEqualTo(StepResult.CONCLUDED);
+        assertThat(runner.step()).isEqualTo(StepResult.CONCLUDED);
+
+        assertThat(ent.getNet().getRoot().getValue()).isEqualTo(terminatingCommand.getValue());
+    }
+
     @Nested
     @ExtendWith(MockitoExtension.class)
     class Veto {
@@ -208,7 +230,7 @@ class EntRunnerTest {
                 assertThat(i++).isLessThan(STEPS_CUTOFF);
             }
 
-            assertThat(verifier.getRoot().getValue()).isEqualTo(Commands.FINAL_SUCCESS.getValue());
+            assertThat(verifier.getRoot().getValue()).isEqualTo(Commands.CONCLUSION_SUCCESS.getValue());
             assertThat(inputNode.getValue()).isEqualTo(targetValue);
         }
     }

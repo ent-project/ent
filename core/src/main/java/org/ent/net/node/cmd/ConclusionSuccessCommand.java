@@ -2,7 +2,7 @@ package org.ent.net.node.cmd;
 
 import org.ent.net.node.cmd.operation.Operations;
 
-public class FinalSuccessCommand extends NopCommand {
+public class ConclusionSuccessCommand extends NopCommand {
 
     @Override
     public int getValueBase() {
@@ -14,4 +14,8 @@ public class FinalSuccessCommand extends NopCommand {
         return "SUCCESS";
     }
 
+    @Override
+    public boolean isConcluding() {
+        return true;
+    }
 }

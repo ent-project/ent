@@ -2,7 +2,7 @@ package org.ent.net.node.cmd;
 
 import org.ent.net.node.cmd.operation.Operations;
 
-public class FinalFailureCommand extends NopCommand {
+public class ConclusionFailureCommand extends NopCommand {
 
     @Override
     public int getValueBase() {
@@ -14,4 +14,8 @@ public class FinalFailureCommand extends NopCommand {
         return "FAILURE";
     }
 
+    @Override
+    public boolean isConcluding() {
+        return true;
+    }
 }

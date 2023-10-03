@@ -87,7 +87,7 @@ class DotRendererTest {
                                 value(54),
                                 unary(0xa3, ignored()))
                         ),
-                value(Commands.FINAL_SUCCESS)));
+                value(Commands.CONCLUSION_SUCCESS)));
         Net domain = builder().net(ignored());
         domain.setName("domain");
         ent.addDomain(domain);

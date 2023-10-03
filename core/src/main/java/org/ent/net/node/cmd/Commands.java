@@ -19,8 +19,8 @@ public class Commands {
     private static final Map<String, Command> commandsByName = buildCommandsByName();
 
     public static final Command NOP = getByValue(new NopCommand().getValue());
-    public static final Command FINAL_SUCCESS = getByValue(new FinalSuccessCommand().getValue());
-    public static final Command FINAL_FAILURE = getByValue(new FinalFailureCommand().getValue());
+    public static final Command CONCLUSION_SUCCESS = getByValue(new ConclusionSuccessCommand().getValue());
+    public static final Command CONCLUSION_FAILURE = getByValue(new ConclusionFailureCommand().getValue());
     public static final Command ANCESTOR_EXCHANGE = get(Operations.ANCESTOR_EXCHANGE_OPERATION);
     public static final Command SET = get(Operations.SET_OPERATION);
     public static final Command EVAL = get(Operations.EVAL_OPERATION, Accessors.L);
@@ -56,8 +56,8 @@ public class Commands {
     static  Map<Integer, Command> initializeCommandMap() {
         HashMap<Integer, Command> result = new HashMap<>();
         initializeCommand(new NopCommand(), result);
-        initializeCommand(new FinalSuccessCommand(), result);
-        initializeCommand(new FinalFailureCommand(), result);
+        initializeCommand(new ConclusionSuccessCommand(), result);
+        initializeCommand(new ConclusionFailureCommand(), result);
         List<MonoOperation> monoOperations = List.of(
                 Operations.EVAL_OPERATION,
                 Operations.EVAL_FLOW_OPERATION,
@@ -145,7 +145,7 @@ public class Commands {
     }
 
     public static boolean isFinal(int value) {
-         return value == Commands.FINAL_SUCCESS.getValue() || value == Commands.FINAL_FAILURE.getValue();
+         return value == Commands.CONCLUSION_SUCCESS.getValue() || value == Commands.CONCLUSION_FAILURE.getValue();
     }
 
     public static boolean isFinal(Net net) {
