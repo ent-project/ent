@@ -65,7 +65,7 @@ public class DotRenderer {
 
     private void determineCommandTargets() {
         Node root = ent.getNet().getRoot();
-        Command command = Commands.getByValue(root.getValue());
+        Command command = Commands.getByValue(root.getValue(Permissions.DIRECT));
         if (command != null) {
             if (command instanceof MonoCommand monoCommand) {
                 Accessor accessor = monoCommand.getAccessor();

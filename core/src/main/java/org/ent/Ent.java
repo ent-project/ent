@@ -17,8 +17,11 @@ public class Ent {
 
     EntEventListener eventListener = new NopEntEventListener();
 
+    public Ent() {
+        domains.add(null); // reserve a spot for the primary Net
+    }
+
     public Ent(Net net) {
-        addDomain(net);
         setNet(net);
     }
 
@@ -27,12 +30,16 @@ public class Ent {
     }
 
     public void setNet(Net net) {
+        if (this.net != null) {
+            net.setPermissions(this.net.getPermissions());
+        }
         this.net = net;
         if (domains.isEmpty()) {
             domains.add(net);
         } else {
             this.domains.set(0, net);
         }
+        net.setNetIndex(0);
     }
 
     public List<Net> getDomains() {

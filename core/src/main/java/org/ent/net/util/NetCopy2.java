@@ -20,7 +20,7 @@ public class NetCopy2 {
         }
         Net netClone = new Net();
         for (Node nodeOrig : netOrig.getNodes()) {
-            netClone.newNode(nodeOrig.getValue());
+            netClone.newNode(nodeOrig.getValue(Permissions.DIRECT), Permissions.DIRECT);
         }
         netClone.setRoot(netClone.getNode(netOrig.getRoot().getIndex()));
         for (Node nodeOrig : netOrig.getNodes()) {
