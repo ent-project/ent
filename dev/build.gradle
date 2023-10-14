@@ -1,8 +1,20 @@
 
+
+
 apply plugin: 'application'
 
-mainClassName = 'org.ent.dev.DevelopmentPlan'
+
+application {
+    mainClass = 'org.ent.dev.DevelopmentPlan'
+}
+
+
+
 dependencies {
+
+
+
+
     implementation project(':core')
     implementation project(':webui')
     implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
