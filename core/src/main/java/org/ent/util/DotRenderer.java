@@ -223,6 +223,10 @@ public class DotRenderer {
         if (node == net.getRoot()) {
             xlabel = "⤷";
         }
+        String name = net.getName(node);
+        if (name != null) {
+            xlabel += name;
+        }
         String annotation = net.getAnnotation(node);
         if (annotation != null) {
             xlabel += annotation;
