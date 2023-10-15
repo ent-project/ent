@@ -26,6 +26,10 @@ enum Direction {
         return deltaY;
     }
 
+    public char label() {
+        return label;
+    }
+
     public static Direction[] valuesReversed() {
         // FIXME: performance
         return Arrays.stream(values()).toList().reversed().toArray(new Direction[0]);

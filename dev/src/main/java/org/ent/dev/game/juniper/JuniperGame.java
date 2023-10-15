@@ -99,6 +99,7 @@ public class JuniperGame {
             } else {
                 list = net.newNode(nodeNeighbor, list, Permissions.DIRECT);
             }
+            list.setValue(dir.label(), Permissions.DIRECT);
         }
         return list;
     }
