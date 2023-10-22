@@ -9,4 +9,8 @@ class Field {
     public Field(char type) {
         this.type = type;
     }
+
+    public Node node() {
+        return node;
+    }
 }

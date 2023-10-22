@@ -4,37 +4,41 @@ import org.ent.net.Net;
 import org.ent.net.node.Node;
 import org.ent.permission.Permissions;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-public class EntBuilder implements AutoCloseable {
+public class EntBuilder {
 
-    private final static ThreadLocal<EntBuilder> instance = new ThreadLocal<>();
+    Set<NodeTemplate> nodeTemplates = new LinkedHashSet<>();
 
-    List<NodeTemplate> nodeTemplates = new ArrayList<>();
-
-    public EntBuilder() {
-        instance.set(this);
-    }
-
-    public static NodeTemplate node() {
+    public NodeTemplate node() {
         NodeTemplate nodeTemplate = new NodeTemplate();
-        instance.get().nodeTemplates.add(nodeTemplate);
+        nodeTemplates.add(nodeTemplate);
         return nodeTemplate;
     }
 
-    public static ExternalNode external(Node node) {
-        return new ExternalNode(node);
-    }
-
-    public static void chain(NodeTemplate... refs) {
+    public void chain(NodeTemplate... refs) {
+        nodeTemplates.add(refs[0]);
         for (int i = 0; i < refs.length - 1; i++) {
+            nodeTemplates.add(refs[i]);
             refs[i].right(refs[i + 1]);
         }
     }
 
+    public Net build(NodeTemplate nt) {
+        nodeTemplates.add(nt);
+        return build();
+    }
+
     public Net build() {
         Net net = new Net();
+
+        HashSet<NodeTemplate> nodeTemplatesCopy = new HashSet<>(nodeTemplates);
+        for (NodeTemplate ref : nodeTemplatesCopy) {
+            collectRec(ref);
+        }
+
         for (NodeTemplate ref : nodeTemplates) {
             Node node = net.newNode(ref.getValue(), Permissions.DIRECT);
             if (ref.isRoot()) {
@@ -63,8 +67,18 @@ public class EntBuilder implements AutoCloseable {
         return net;
     }
 
-    @Override
-    public void close() {
-        instance.remove();
+    private void collectRec(NodeTemplate ref) {
+        if (ref.getLeft() instanceof NodeTemplate nt) {
+            boolean added = nodeTemplates.add(nt);
+            if (added) {
+                collectRec(nt);
+            }
+        }
+        if (ref.getRight() instanceof NodeTemplate nt) {
+            boolean added = nodeTemplates.add(nt);
+            if (added) {
+                collectRec(nt);
+            }
+        }
     }
 }

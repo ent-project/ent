@@ -19,6 +19,10 @@ public final class NodeTemplate implements NodeProxy {
     private String name;
     private Node resolved;
 
+    public static NodeTemplate node() {
+        return new NodeTemplate();
+    }
+
     public static class CommandInfo {
         private BiOperation biOperation;
         private Integer numArgs;
@@ -125,7 +129,7 @@ public final class NodeTemplate implements NodeProxy {
             this.left(info.arg1);
         } else {
             this.command(info.biOperation, info.accessor1, info.accessor2);
-            this.left(EntBuilder.node()
+            this.left(node()
                     .left(info.arg1)
                     .right(info.arg2));
         }
