@@ -36,7 +36,11 @@ public class Accessors {
     public static final TertiaryAccessor LLLL = new TertiaryAccessor(ArrowDirection.LEFT, ArrowDirection.LEFT, ArrowDirection.LEFT);
     public static final TertiaryAccessor LLLR = new TertiaryAccessor(ArrowDirection.LEFT, ArrowDirection.LEFT, ArrowDirection.RIGHT);
     public static final TertiaryAccessor LLRL = new TertiaryAccessor(ArrowDirection.LEFT, ArrowDirection.RIGHT, ArrowDirection.LEFT);
+    public static final TertiaryAccessor LLRR = new TertiaryAccessor(ArrowDirection.LEFT, ArrowDirection.RIGHT, ArrowDirection.RIGHT);
+    public static final TertiaryAccessor LRLL = new TertiaryAccessor(ArrowDirection.RIGHT, ArrowDirection.LEFT, ArrowDirection.LEFT);
     public static final TertiaryAccessor LRLR = new TertiaryAccessor(ArrowDirection.RIGHT, ArrowDirection.LEFT, ArrowDirection.RIGHT);
+    public static final TertiaryAccessor LRRL = new TertiaryAccessor(ArrowDirection.RIGHT, ArrowDirection.RIGHT, ArrowDirection.LEFT);
+    public static final TertiaryAccessor LRRR = new TertiaryAccessor(ArrowDirection.RIGHT, ArrowDirection.RIGHT, ArrowDirection.RIGHT);
 
     public static final List<Accessor> ALL_ACCESSORS;
 

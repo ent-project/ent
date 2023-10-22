@@ -1,6 +1,6 @@
 package org.ent.dev.game.juniper;
 
-class HabitatMap {
+public class HabitatMap {
     private final int width;
     private final int height;
 
