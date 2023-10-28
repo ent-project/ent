@@ -121,6 +121,13 @@ public final class NodeTemplate implements NodeProxy {
         return this;
     }
 
+    public NodeTemplate branching(BiOperation operation, Accessor accessor1, Accessor accessor2a, Accessor accessor2b) {
+        Command command = Commands.getBranching(operation, accessor1, accessor2a, accessor2b);
+        this.value = command.getValue();
+        return this;
+    }
+
+
     public NodeTemplate command(Consumer<CommandInfo> consumer) {
         CommandInfo info = new CommandInfo();
         consumer.accept(info);

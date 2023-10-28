@@ -175,41 +175,36 @@ public class JuniperGame {
         builder.chain(
                 // initialize i
                 root.command(c -> c.operation(SET_OPERATION).argument1(i, Arg1.L).argument2(l, Arg2.LL)),
-                n0.command(SET_OPERATION, Accessors.R, Accessors.LR)
+                n0.branching(SET_OPERATION, Accessors.R, Accessors.LRL, Accessors.LRR)
                         .left(node().name("found?")
                                 .veto(Conditions.IDENTICAL_CONDITION, Accessors.LLLL, Accessors.LRRL)
                                 .left(node().left(i).right(l))
-                                .right(exit_success)),
-                n1.command(SET_OPERATION, Accessors.R, Accessors.LR)
+                                .right(node()
+                                        .left(exit_success)
+                                        .right(n1)))
+        );
+        builder.chain(
+                n1.branching(SET_OPERATION, Accessors.R, Accessors.LRL, Accessors.LRR)
                         .left(node().name("end of list?")
                                 .veto(Conditions.IDENTICAL_CONDITION, Accessors.LLR, Accessors.LL)
                                 .left(i)
-                                .right(exit_fail)),
+                                .right(node()
+                                        .left(exit_fail)
+                                        .right(n2))));
+        builder.chain(
                 n2.name("i++").command(c -> c.operation(SET_OPERATION).argument1(i, ArgSingle.L).argument2(i, ArgSingle.LR)),
                 // goto top of loop
                 n0
         );
         builder.chain(
-                // restore condition pointer
-                exit_fail.command(c -> c.operation(SET_OPERATION).argument1(n1, Arg1.R).argument2(n2, Arg2.D)),
-                // collapse location setter
-                node().command(c -> c.operation(SET_OPERATION)
-                        .argument1(external(locationSetter), ArgSingle.L)
-                        .argument2(external(locationSetter), ArgSingle.D)),
-                node().command(Commands.CONCLUSION_FAILURE),
+                exit_fail.command(Commands.CONCLUSION_FAILURE),
                 root
         );
         builder.chain(
-                // restore condition pointer
-                exit_success.command(c -> c.operation(SET_OPERATION).argument1(n0, Arg1.R).argument2(n1, Arg2.D)),
-                node().name("set new location").command(c -> c.
+                exit_success.name("set new location").command(c -> c.
                         operation(SET_OPERATION).
                         argument1(l, Arg1.L).
                         argument2(external(locationSetter), Arg2.L)),
-                // collapse location setter
-                node().command(c -> c.operation(SET_OPERATION)
-                        .argument1(external(locationSetter), ArgSingle.L)
-                        .argument2(external(locationSetter), ArgSingle.D)),
                 node().command(Commands.CONCLUSION_SUCCESS),
                 root
         );
