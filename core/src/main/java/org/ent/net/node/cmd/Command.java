@@ -13,7 +13,7 @@ public interface Command extends ParameterizedValue {
     X - accessor for the first parameter
     Y - accessor for the second parameter
     Z - accessor for the third parameter
-    bit 25-32: some pattern to avoid collision with low numbers (not used for NopCommand)
+    bit 25-32: some pattern to avoid collision with low numbers
 
      */
     int COMMAND_PATTERN = 0b110011 << 24;

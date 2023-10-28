@@ -54,6 +54,11 @@ public class Commands {
         return getByValue(command.getValue());
     }
 
+    public static Command getBranching(BiOperation operation, Accessor accessor1, Accessor accessor2a, Accessor accessor2b) {
+        Command command = new BranchingBiCommand(operation, accessor1, accessor2a, accessor2b);
+        return getByValue(command.getValue());
+    }
+
     static  Map<Integer, Command> initializeCommandMap() {
         HashMap<Integer, Command> result = new HashMap<>();
         initializeCommand(new NopCommand(), result);
@@ -105,6 +110,19 @@ public class Commands {
                 for (Accessor accessor3 : Accessors.ALL_ACCESSORS) {
                     for (TriOperation operation : triOperations) {
                         Command command = new TriCommand(operation, accessor1, accessor2, accessor3);
+                        initializeCommand(command, result);
+                    }
+                }
+            }
+        }
+        List<BiOperation> branchingBiOperations = List.of(
+                Operations.SET_OPERATION
+        );
+        for (Accessor accessor1 : Accessors.ALL_ACCESSORS) {
+            for (Accessor accessor2a : Accessors.ALL_ACCESSORS) {
+                for (Accessor accessor2b : Accessors.ALL_ACCESSORS) {
+                    for (BiOperation operation : branchingBiOperations) {
+                        Command command = new BranchingBiCommand(operation, accessor1, accessor2a, accessor2b);
                         initializeCommand(command, result);
                     }
                 }

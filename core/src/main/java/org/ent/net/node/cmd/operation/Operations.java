@@ -20,7 +20,8 @@ public class Operations {
     public static final int CODE_ANCESTOR_EXCHANGE_OPERATION = 0b10;
     public static final int CODE_ANCESTOR_EXCHANGE_NORMAL_OPERATION = 0b11;
     public static final int CODE_DUP_OPERATION = 0b100;
-    public static final int CODE_DUP_NORMAL_OPERATION = 0b101;
+    public static final int CODE_BRANCHING_SET_OPERATION = 0b101;
+    public static final int CODE_DUP_NORMAL_OPERATION = 0b110;
     public static final int CODE_EVAL_OPERATION = 0b1000;
     public static final int CODE_EVAL_FLOW_OPERATION = 0b1001;
     public static final int CODE_IS_IDENTICAL_OPERATION = 0b1100;
