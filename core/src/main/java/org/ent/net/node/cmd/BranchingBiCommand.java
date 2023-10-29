@@ -5,8 +5,9 @@ import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
 import org.ent.net.node.cmd.operation.BiOperation;
 import org.ent.net.node.cmd.operation.Operations;
-import org.ent.net.node.cmd.veto.Veto;
-import org.ent.net.node.cmd.veto.Vetos;
+import org.ent.net.node.cmd.split.Split;
+import org.ent.net.node.cmd.split.SplitResult;
+import org.ent.net.node.cmd.split.Splits;
 import org.ent.permission.Permissions;
 
 public class BranchingBiCommand implements Command {
@@ -40,12 +41,12 @@ public class BranchingBiCommand implements Command {
     public ExecutionResult execute(Node base, Permissions permissions) {
         Node conditionNode = base.getLeftChild(permissions);
         int conditionalue = conditionNode.getValue(permissions);
-        Veto condition = Vetos.getByValue(conditionalue);
+        Split condition = Splits.getByValue(conditionalue);
         if (condition == null) {
             return ExecutionResult.NORMAL;
         } else {
-            boolean pass = condition.evaluate(conditionNode, permissions);
-            return doExecute(base, pass, permissions);
+            SplitResult evaluate = condition.evaluate(conditionNode, permissions);
+            return doExecute(base, false, permissions);
         }
     }
 

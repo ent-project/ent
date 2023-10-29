@@ -10,7 +10,9 @@ import org.ent.net.io.parser.NetParser;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.Commands;
-import org.ent.net.node.cmd.veto.Conditions;
+import org.ent.net.node.cmd.accessor.Accessors;
+import org.ent.net.node.cmd.split.Conditions;
+import org.ent.net.node.cmd.split.Splits;
 import org.ent.util.Logging;
 import org.ent.webui.WebUI;
 import org.junit.jupiter.api.*;
@@ -27,9 +29,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.ent.net.node.cmd.accessor.Accessors.LL;
-import static org.ent.net.node.cmd.operation.Operations.INC_OPERATION;
-import static org.ent.net.node.cmd.veto.Conditions.IDENTICAL_CONDITION;
 import static org.ent.util.NetBuilder.*;
 
 class EntRunnerTest {
@@ -135,8 +134,8 @@ class EntRunnerTest {
     @Test
     void loop() throws Exception {
         Net net = parser.parse("""
-                line01:<\\::/\\>(<?//gt/\\?>((i:#0, #5), FIN:[i]), line02);  ~ goto FIN if i > 5
-                line02:<inc/>(i, line01);			   		  			       ~ i++; goto start
+                line01:<?//gt/\\?>((i:#0, #5), (FIN:[i], line02));  ~ if i > 5 then FIN else ...
+                line02:<inc/>(i, line01);			   		  		~ ... i++; goto start
                 """);
         EntRunner runner = new EntRunner(net);
 
@@ -166,9 +165,9 @@ class EntRunnerTest {
 
         assertThat(runner.step()).isEqualTo(StepResult.SUCCESS);
         assertThat(runner.step()).isEqualTo(StepResult.CONCLUDED);
-        assertThat(runner.step()).isEqualTo(StepResult.CONCLUDED);
+        assertThat(runner.step()).isEqualTo(StepResult.INVALID_COMMAND_NODE);
 
-        assertThat(ent.getNet().getRoot().getValue()).isEqualTo(terminatingCommand.getValue());
+        assertThat(ent.getNet().getRoot().getValue()).isEqualTo(7);
     }
 
     @Test
@@ -188,39 +187,37 @@ class EntRunnerTest {
 
     @Nested
     @ExtendWith(MockitoExtension.class)
-    class Veto {
+    class Split {
 
         @Mock
         private EntEventListener listener;
 
         @Test
         void pass() {
-            Node i;
-            Ent ent = builder().ent(
-                    unary(Commands.get(INC_OPERATION, LL),
-                            node(Conditions.SAME_VALUE_CONDITION, i = value(3), value(3))));
-            ent.addEventListener(listener);
-            EntRunner runner = new EntRunner(ent);
+            Net net = builder().net(
+                    node(Splits.get(Conditions.SAME_VALUE_CONDITION, Accessors.LL, Accessors.LR),
+                            node(value(3), value(3)),
+                            node(value(Commands.CONCLUSION_SUCCESS), value(Commands.CONCLUSION_FAILURE))));
+            EntRunner runner = new EntRunner(net);
 
             StepResult result = runner.step();
 
             assertThat(result).isEqualTo(StepResult.SUCCESS);
-            assertThat(i.getValue()).isEqualTo(4);
+            assertThat(net.getRoot().getValue()).isEqualTo(Commands.CONCLUSION_SUCCESS.getValue());
         }
 
         @Test
         void block() {
-            Node i;
-            Ent ent = builder().ent(
-                    unary(Commands.get(INC_OPERATION, LL),
-                            node(IDENTICAL_CONDITION, i = value(3), value(3))));
-            ent.addEventListener(listener);
-            EntRunner runner = new EntRunner(ent);
+            Net net = builder().net(
+                    node(Splits.get(Conditions.IDENTICAL_CONDITION, Accessors.LL, Accessors.LR),
+                            node(value(3), value(3)),
+                            node(value(Commands.CONCLUSION_SUCCESS), value(Commands.CONCLUSION_FAILURE))));
+            EntRunner runner = new EntRunner(net);
 
             StepResult result = runner.step();
 
             assertThat(result).isEqualTo(StepResult.SUCCESS);
-            assertThat(i.getValue()).isEqualTo(3);
+            assertThat(net.getRoot().getValue()).isEqualTo(Commands.CONCLUSION_FAILURE.getValue());
         }
     }
 

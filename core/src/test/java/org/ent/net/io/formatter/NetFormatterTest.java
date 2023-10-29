@@ -9,7 +9,7 @@ import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.accessor.Accessors;
 import org.ent.net.node.cmd.operation.Operations;
-import org.ent.net.node.cmd.veto.Vetos;
+import org.ent.net.node.cmd.split.Splits;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.ent.net.node.cmd.operation.Operations.ANCESTOR_EXCHANGE_OPERATION;
 import static org.ent.net.node.cmd.operation.Operations.SET_OPERATION;
-import static org.ent.net.node.cmd.veto.Conditions.GREATER_THAN_CONDITION;
+import static org.ent.net.node.cmd.split.Conditions.GREATER_THAN_CONDITION;
 import static org.ent.util.NetBuilder.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
@@ -82,8 +82,8 @@ class NetFormatterTest {
 			}
 
 			@Test
-			void veto() {
-				root.setVeto(Vetos.get(GREATER_THAN_CONDITION));
+			void split() {
+				root.setSplit(Splits.get(GREATER_THAN_CONDITION));
 
 				String str = formatter.format(net);
 

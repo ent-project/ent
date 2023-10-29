@@ -22,7 +22,16 @@ public class EntBuilder {
         nodeTemplates.add(refs[0]);
         for (int i = 0; i < refs.length - 1; i++) {
             nodeTemplates.add(refs[i]);
-            refs[i].right(refs[i + 1]);
+            if (refs[i].isSplit()) {
+                NodeProxy right = refs[i].getRight();
+                if (right instanceof NodeTemplate templ) {
+                    templ.right(refs[i + 1]);
+                } else {
+                    throw new IllegalArgumentException("Cannot chain split");
+                }
+            } else {
+                refs[i].right(refs[i + 1]);
+            }
         }
     }
 

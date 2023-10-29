@@ -10,7 +10,7 @@ import org.ent.net.Net;
 import org.ent.permission.PermissionsViolatedException;
 import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.Commands;
-import org.ent.net.node.cmd.veto.Veto;
+import org.ent.net.node.cmd.split.Split;
 
 import java.util.List;
 import java.util.Optional;
@@ -144,9 +144,9 @@ public class Node {
 	}
 
 	@VisibleForTesting
-	public void setVeto(Veto value) {
+	public void setSplit(Split split) {
 		Profile.verifyTestProfile();
-		setValue(value.getValue(), Permissions.DIRECT);
+		setValue(split.getValue(), Permissions.DIRECT);
 	}
 
 	public Command getCommand() {

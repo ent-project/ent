@@ -5,13 +5,14 @@ import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.accessor.Accessor;
 import org.ent.net.node.cmd.operation.BiOperation;
-import org.ent.net.node.cmd.veto.BiCondition;
-import org.ent.net.node.cmd.veto.Veto;
-import org.ent.net.node.cmd.veto.Vetos;
+import org.ent.net.node.cmd.split.BiCondition;
+import org.ent.net.node.cmd.split.Split;
+import org.ent.net.node.cmd.split.Splits;
 
 import java.util.function.Consumer;
 
 public final class NodeTemplate implements NodeProxy {
+    private boolean split;
     private int value;
     private NodeProxy left;
     private NodeProxy right;
@@ -65,6 +66,10 @@ public final class NodeTemplate implements NodeProxy {
 
     public Node get() {
         return resolved;
+    }
+
+    public boolean isSplit() {
+        return split;
     }
 
     public NodeTemplate setRoot() {
@@ -127,7 +132,6 @@ public final class NodeTemplate implements NodeProxy {
         return this;
     }
 
-
     public NodeTemplate command(Consumer<CommandInfo> consumer) {
         CommandInfo info = new CommandInfo();
         consumer.accept(info);
@@ -143,9 +147,10 @@ public final class NodeTemplate implements NodeProxy {
         return this;
     }
 
-    public NodeTemplate veto(BiCondition condition, Accessor accessor1, Accessor accessor2) {
-        Veto veto = Vetos.get(condition, accessor1, accessor2);
-        this.value = veto.getValue();
+    public NodeTemplate split(BiCondition condition, Accessor accessor1, Accessor accessor2) {
+        Split split = Splits.get(condition, accessor1, accessor2);
+        this.value = split.getValue();
+        this.split = true;
         return this;
     }
 

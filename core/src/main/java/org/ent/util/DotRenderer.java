@@ -8,8 +8,8 @@ import org.ent.net.node.Node;
 import org.ent.net.node.cmd.*;
 import org.ent.net.node.cmd.accessor.Accessor;
 import org.ent.net.node.cmd.operation.*;
-import org.ent.net.node.cmd.veto.Veto;
-import org.ent.net.node.cmd.veto.Vetos;
+import org.ent.net.node.cmd.split.Split;
+import org.ent.net.node.cmd.split.Splits;
 import org.ent.permission.Permissions;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ import java.util.Set;
 public class DotRenderer {
 
     private static final String COLOR_NODE = "ivory2";
-    public static final String COLOR_VETO = "beige";
+    public static final String COLOR_SPLIT = "beige";
     public static final String COLOR_DOT = "lightcyan4";
     public static final String COLOR_TARGET1 = "black";
     public static final String COLOR_TARGET2 = "darkblue";
@@ -169,18 +169,18 @@ public class DotRenderer {
                     sb.append("]");
                 }
             } else {
-                Veto veto = Vetos.getByValue(value);
-                if (veto != null) {
+                Split split = Splits.getByValue(value);
+                if (split != null) {
                     if (isTarget(node)) {
                         TableBuilder table = new TableBuilder();
-                        table.fillColor = COLOR_VETO;
-                        table.textCenter = escape(veto.getShortName());
+                        table.fillColor = COLOR_SPLIT;
+                        table.textCenter = escape(split.getShortName());
                         table.rounded = false;
                         table.outlineColors = getOutlineColors(node);
                         table.renderTable(sb);
                     } else {
                         sb.append("[shape=record][label=\"<l>|%s|<r>\"][color=%s]"
-                                .formatted(escape(veto.getShortName()), COLOR_VETO));
+                                .formatted(escape(split.getShortName()), COLOR_SPLIT));
                     }
                 } else {
                     String hexString = Integer.toHexString(value);

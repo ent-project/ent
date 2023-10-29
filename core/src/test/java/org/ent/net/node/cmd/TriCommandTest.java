@@ -8,11 +8,7 @@ import org.ent.net.node.cmd.operation.Operations;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.ent.net.node.cmd.veto.Conditions.GREATER_THAN_CONDITION;
-import static org.ent.util.NetBuilder.builder;
-import static org.ent.util.NetBuilder.node;
-import static org.ent.util.NetBuilder.unary;
-import static org.ent.util.NetBuilder.value;
+import static org.ent.util.NetBuilder.*;
 
 class TriCommandTest extends TestBase {
 
@@ -27,28 +23,5 @@ class TriCommandTest extends TestBase {
         assertThat(parameters.getValue()).isEqualTo(12);
         assertThat(arg1.getValue()).isEqualTo(7);
         assertThat(arg2.getValue()).isEqualTo(5);
-    }
-
-
-    @Test
-    void execute_withVeto_pass() {
-        Node i;
-        Net net = builder().net(unary(node(GREATER_THAN_CONDITION, i = value(7), value(0))));
-        Command command = new TriCommand(Operations.PLUS_OPERATION, Accessors.LL, Accessors.LL, Accessors.LL); // i = i + i
-
-        command.execute(net.getRoot(), net.getPermissions());
-
-        assertThat(i.getValue()).isEqualTo(14);
-    }
-
-    @Test
-    void execute_withVeto_reject() {
-        Node i;
-        Net net = builder().net(unary(node(GREATER_THAN_CONDITION, i = value(7), value(1000))));
-        Command command = new TriCommand(Operations.PLUS_OPERATION, Accessors.LL, Accessors.LL, Accessors.LL); // i = i + i
-
-        command.execute(net.getRoot(), net.getPermissions());
-
-        assertThat(i.getValue()).isEqualTo(7);
     }
 }

@@ -14,9 +14,9 @@ import org.ent.net.node.cmd.operation.BiOperation;
 import org.ent.net.node.cmd.operation.MonoOperation;
 import org.ent.net.node.cmd.operation.Operations;
 import org.ent.net.node.cmd.operation.TriOperation;
-import org.ent.net.node.cmd.veto.BiCondition;
-import org.ent.net.node.cmd.veto.Conditions;
-import org.ent.net.node.cmd.veto.Vetos;
+import org.ent.net.node.cmd.split.BiCondition;
+import org.ent.net.node.cmd.split.Conditions;
+import org.ent.net.node.cmd.split.Splits;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -51,7 +51,7 @@ public abstract class AbstractValueDrawing implements ValueDrawing {
         }
 
         protected void addValueBase(BiCondition condition, boolean not, double weight) {
-            addValueBase(Vetos.get(condition, not, Accessors.R, Accessors.R), weight);
+            addValueBase(Splits.get(condition, not, Accessors.R, Accessors.R), weight);
         }
 
         protected void addValueBase(TriOperation operation, double weight) {

@@ -13,7 +13,7 @@ public class ConclusionFailureCommand extends NopCommand {
 
     @Override
     public int getValueBase() {
-        return Command.COMMAND_PATTERN | Operations.COMMAND_CODE_FINAL_FAILURE;
+        return Command.COMMAND_PATTERN | Command.IS_FINAL_FLAG | Operations.COMMAND_CODE_FINAL_FAILURE;
     }
 
     @Override

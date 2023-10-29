@@ -1,10 +1,10 @@
-package org.ent.net.node.cmd.veto;
+package org.ent.net.node.cmd.split;
 
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.accessor.Accessor;
 import org.ent.permission.Permissions;
 
-public class BiVeto implements Veto {
+public class BiSplit implements Split {
 
     private final Accessor accessor1;
 
@@ -19,21 +19,21 @@ public class BiVeto implements Veto {
 
     private final String shortName;
 
-    public BiVeto(Accessor accessor1, Accessor accessor2, BiCondition condition, boolean not) {
+    public BiSplit(Accessor accessor1, Accessor accessor2, BiCondition condition, boolean not) {
         this.accessor1 = accessor1;
         this.accessor2 = accessor2;
         this.condition = condition;
         this.not = not;
-        this.valueBase = Veto.VETO_FLAG | (not ? 1 : 0) | (condition.getCode() << 1);
+        this.valueBase = Split.SPLIT_PATTERN | (not ? 1 : 0) | (condition.getCode() << 1);
         this.value = valueBase | (accessor1.getCode() << 12) | (accessor2.getCode() << 16);
         this.shortName = buildShortName();
     }
 
     @Override
-    public boolean evaluate(Node base, Permissions permissions) {
+    public SplitResult evaluate(Node base, Permissions permissions) {
         Node node1 = accessor1.getTarget(base, permissions);
         Node node2 = accessor2.getTarget(base, permissions);
-        return not ^ condition.evaluate(node1, node2, permissions);
+        return (not ^ condition.evaluate(node1, node2, permissions)) ? SplitResult.NORMAL_LEFT : SplitResult.NORMAL_RIGHT;
     }
 
     private String buildShortName() {

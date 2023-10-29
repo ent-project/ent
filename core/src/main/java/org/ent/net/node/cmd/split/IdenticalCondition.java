@@ -1,4 +1,4 @@
-package org.ent.net.node.cmd.veto;
+package org.ent.net.node.cmd.split;
 
 import org.ent.permission.Permissions;
 import org.ent.net.node.Node;

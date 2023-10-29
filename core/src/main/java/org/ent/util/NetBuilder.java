@@ -7,9 +7,9 @@ import org.ent.net.node.cmd.Command;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.operation.BiOperation;
 import org.ent.net.node.cmd.operation.MonoOperation;
-import org.ent.net.node.cmd.veto.BiCondition;
-import org.ent.net.node.cmd.veto.Veto;
-import org.ent.net.node.cmd.veto.Vetos;
+import org.ent.net.node.cmd.split.BiCondition;
+import org.ent.net.node.cmd.split.Split;
+import org.ent.net.node.cmd.split.Splits;
 import org.ent.permission.Permissions;
 
 import java.util.Optional;
@@ -54,7 +54,7 @@ public class NetBuilder {
         return node(c.getValue(), n1, n2);
     }
 
-    public static Node node(Veto v, Node n1, Node n2) {
+    public static Node node(Split v, Node n1, Node n2) {
         return node(v.getValue(), n1, n2);
     }
 
@@ -71,7 +71,7 @@ public class NetBuilder {
     }
 
     public static Node node(BiCondition c, Node n1, Node n2) {
-        return node(Vetos.get(c).getValue(), n1, n2);
+        return node(Splits.get(c).getValue(), n1, n2);
     }
 
     public static Node unary(int value, Node child) {
@@ -113,15 +113,15 @@ public class NetBuilder {
     }
 
     public static Node value(BiCondition c) {
-        return value(Vetos.get(c).getValue());
+        return value(Splits.get(c).getValue());
     }
 
     public static Node value(Command c) {
         return value(c.getValue());
     }
 
-    public static Node value(Veto v) {
-        return value(v.getValue());
+    public static Node value(Split s) {
+        return value(s.getValue());
     }
 
     public static Node ignored() {

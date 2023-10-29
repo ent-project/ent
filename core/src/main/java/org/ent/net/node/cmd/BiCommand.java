@@ -6,7 +6,7 @@ import org.ent.net.node.cmd.accessor.Accessor;
 import org.ent.net.node.cmd.operation.BiOperation;
 import org.ent.permission.Permissions;
 
-public class BiCommand extends VetoedCommand {
+public class BiCommand implements Command {
 
 	private final Accessor accessor1;
 
@@ -30,7 +30,7 @@ public class BiCommand extends VetoedCommand {
 	}
 
 	@Override
-	public ExecutionResult doExecute(Node base, Permissions permissions) {
+	public ExecutionResult execute(Node base, Permissions permissions) {
 		Arrow handle1 = accessor1.get(base, permissions);
 		Arrow handle2 = accessor2.get(base, permissions);
 		return operation.apply(handle1, handle2, permissions);
@@ -76,5 +76,10 @@ public class BiCommand extends VetoedCommand {
 		String accessor1Name = this.accessor1.getShortName();
 		String accessor2Name = this.accessor2.getShortName();
 		return accessor1Name + this.operation.getShortName() + accessor2Name;
+	}
+
+	@Override
+	public String toString() {
+		return "<" + getShortName() + ">";
 	}
 }

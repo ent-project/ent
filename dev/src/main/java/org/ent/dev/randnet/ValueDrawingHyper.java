@@ -10,9 +10,9 @@ import org.ent.net.node.cmd.operation.BiOperation;
 import org.ent.net.node.cmd.operation.MonoOperation;
 import org.ent.net.node.cmd.operation.Operations;
 import org.ent.net.node.cmd.operation.TriOperation;
-import org.ent.net.node.cmd.veto.BiCondition;
-import org.ent.net.node.cmd.veto.Conditions;
-import org.ent.net.node.cmd.veto.Vetos;
+import org.ent.net.node.cmd.split.BiCondition;
+import org.ent.net.node.cmd.split.Conditions;
+import org.ent.net.node.cmd.split.Splits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +102,7 @@ public class ValueDrawingHyper extends AbstractValueDrawing {
         }
 
         public DistributionLeaf add(BiCondition condition, boolean not, double groupWeight) {
-            add(Vetos.get(condition, not, Accessors.R, Accessors.R), groupWeight);
+            add(Splits.get(condition, not, Accessors.R, Accessors.R), groupWeight);
             return this;
         }
 

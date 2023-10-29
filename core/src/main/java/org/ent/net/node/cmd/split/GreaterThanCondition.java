@@ -1,4 +1,4 @@
-package org.ent.net.node.cmd.veto;
+package org.ent.net.node.cmd.split;
 
 public final class GreaterThanCondition extends BiValueCondition {
 

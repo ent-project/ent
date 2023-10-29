@@ -2,7 +2,7 @@ package org.ent.net.node.cmd;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import org.ent.net.node.cmd.veto.Vetos;
+import org.ent.net.node.cmd.split.Splits;
 
 public class Values {
 
@@ -19,11 +19,11 @@ public class Values {
             }
             result.put(name, Commands.getByName(name).getValue());
         });
-        Vetos.getAllVetoNames().forEach(name -> {
+        Splits.getAllSplitNames().forEach(name -> {
             if (result.containsKey(name)) {
                 throw new AssertionError("duplicate name: " + name);
             }
-            result.put(name, Vetos.getByName(name).getValue());
+            result.put(name, Splits.getByName(name).getValue());
         });
         return result;
     }

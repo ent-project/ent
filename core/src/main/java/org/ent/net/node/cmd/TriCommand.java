@@ -6,7 +6,7 @@ import org.ent.net.node.cmd.accessor.Accessor;
 import org.ent.net.node.cmd.operation.TriOperation;
 import org.ent.permission.Permissions;
 
-public class TriCommand extends VetoedCommand {
+public class TriCommand implements Command {
 
     private final Accessor accessor1;
     private final Accessor accessor2;
@@ -50,7 +50,7 @@ public class TriCommand extends VetoedCommand {
     }
 
     @Override
-    public ExecutionResult doExecute(Node base, Permissions permissions) {
+    public ExecutionResult execute(Node base, Permissions permissions) {
         Arrow handle1 = accessor1.get(base, permissions);
         Arrow handle2 = accessor2.get(base, permissions);
         Arrow handle3 = accessor3.get(base, permissions);
@@ -74,5 +74,10 @@ public class TriCommand extends VetoedCommand {
     @Override
     public int getNumberOfParameters() {
         return 3;
+    }
+
+    @Override
+    public String toString() {
+        return "<" + getShortName() + ">";
     }
 }

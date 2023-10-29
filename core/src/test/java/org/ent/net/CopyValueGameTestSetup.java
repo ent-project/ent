@@ -4,8 +4,8 @@ import org.ent.Ent;
 import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.operation.Operations;
-import org.ent.net.node.cmd.veto.Conditions;
-import org.ent.net.node.cmd.veto.Vetos;
+import org.ent.net.node.cmd.split.Conditions;
+import org.ent.net.node.cmd.split.Splits;
 import org.ent.permission.WriteFacet;
 
 import static org.ent.net.node.cmd.accessor.Accessors.*;
@@ -29,7 +29,7 @@ public class CopyValueGameTestSetup {
                 node(Commands.NOP,
                         data = node(input.getRoot(), value(targetValue)),
                         node(Commands.get(Operations.SET_OPERATION, R, LR),
-                                node(Vetos.get(Conditions.SAME_VALUE_CONDITION, LLL, LLR),
+                                node(Splits.get(Conditions.SAME_VALUE_CONDITION, LLL, LLR),
                                         data,
                                         value(Commands.CONCLUSION_SUCCESS)),
                                 value(Commands.CONCLUSION_FAILURE))));

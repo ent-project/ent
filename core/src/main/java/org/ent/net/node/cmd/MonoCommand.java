@@ -6,7 +6,7 @@ import org.ent.net.node.cmd.accessor.Accessor;
 import org.ent.net.node.cmd.operation.MonoOperation;
 import org.ent.permission.Permissions;
 
-public class MonoCommand extends VetoedCommand {
+public class MonoCommand implements Command {
 
     private final Accessor accessor;
 
@@ -27,7 +27,7 @@ public class MonoCommand extends VetoedCommand {
     }
 
     @Override
-    protected ExecutionResult doExecute(Node base, Permissions permissions) {
+    public ExecutionResult execute(Node base, Permissions permissions) {
         Arrow handle = accessor.get(base, permissions);
         return operation.apply(handle, permissions);
     }
@@ -64,5 +64,10 @@ public class MonoCommand extends VetoedCommand {
     @Override
     public boolean isEval() {
         return operation.isEval();
+    }
+
+    @Override
+    public String toString() {
+        return "<" + getShortName() + ">";
     }
 }

@@ -6,7 +6,7 @@ import org.ent.net.node.Node;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.accessor.Accessors;
 import org.ent.net.node.cmd.operation.Operations;
-import org.ent.net.node.cmd.veto.Conditions;
+import org.ent.net.node.cmd.split.Conditions;
 import org.ent.permission.Permissions;
 import org.ent.permission.WriteFacet;
 import org.ent.run.EntRunner;
@@ -175,23 +175,16 @@ public class JuniperGame {
         builder.chain(
                 // initialize i
                 root.command(c -> c.operation(SET_OPERATION).argument1(i, Arg1.L).argument2(l, Arg2.LL)),
-                n0.branching(SET_OPERATION, Accessors.R, Accessors.LRL, Accessors.LRR)
-                        .left(node().name("found?")
-                                .veto(Conditions.IDENTICAL_CONDITION, Accessors.LLLL, Accessors.LRRL)
+                n0.split(Conditions.IDENTICAL_CONDITION, Accessors.LLLL, Accessors.LRRL)
+                                .name("found?")
                                 .left(node().left(i).right(l))
                                 .right(node()
-                                        .left(exit_success)
-                                        .right(n1)))
-        );
-        builder.chain(
-                n1.branching(SET_OPERATION, Accessors.R, Accessors.LRL, Accessors.LRR)
-                        .left(node().name("end of list?")
-                                .veto(Conditions.IDENTICAL_CONDITION, Accessors.LLR, Accessors.LL)
+                                        .left(exit_success)),
+                n1.split(Conditions.IDENTICAL_CONDITION, Accessors.LLR, Accessors.LL)
+                                .name("end of list?")
                                 .left(i)
                                 .right(node()
-                                        .left(exit_fail)
-                                        .right(n2))));
-        builder.chain(
+                                        .left(exit_fail)),
                 n2.name("i++").command(c -> c.operation(SET_OPERATION).argument1(i, ArgSingle.L).argument2(i, ArgSingle.LR)),
                 // goto top of loop
                 n0

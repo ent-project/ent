@@ -7,8 +7,8 @@ import org.ent.net.node.Node;
 import org.ent.net.node.NodeType;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.operation.Operations;
-import org.ent.net.node.cmd.veto.Conditions;
-import org.ent.net.node.cmd.veto.Vetos;
+import org.ent.net.node.cmd.split.Conditions;
+import org.ent.net.node.cmd.split.Splits;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -74,7 +74,7 @@ class NetParserTest {
 			Node root = net.getRoot();
 
 			assertThat(root.getNodeType()).isEqualTo(NodeType.COMMAND_NODE);
-			assertThat(root.getValue()).isEqualTo(Vetos.get(Conditions.IDENTICAL_CONDITION).getValue());
+			assertThat(root.getValue()).isEqualTo(Splits.get(Conditions.IDENTICAL_CONDITION).getValue());
 		}
 
 		@Test

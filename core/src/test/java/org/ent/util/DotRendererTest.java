@@ -6,8 +6,8 @@ import org.ent.net.Net;
 import org.ent.net.node.cmd.Commands;
 import org.ent.net.node.cmd.accessor.Accessors;
 import org.ent.net.node.cmd.operation.Operations;
-import org.ent.net.node.cmd.veto.Conditions;
-import org.ent.net.node.cmd.veto.Vetos;
+import org.ent.net.node.cmd.split.Conditions;
+import org.ent.net.node.cmd.split.Splits;
 import org.ent.webui.WebUI;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -68,22 +68,22 @@ class DotRendererTest {
         ent3.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LLL, Accessors.LLR, Accessors.R).getValue());
         Ent entTripleTargetCommand = entBase();
         entTripleTargetCommand.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.L, Accessors.L, Accessors.L).getValue());
-        Ent entTripleTargetVeto = entBase();
-        entTripleTargetVeto.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LL, Accessors.LL, Accessors.LL).getValue());
+        Ent entTripleTargetSplit = entBase();
+        entTripleTargetSplit.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LL, Accessors.LL, Accessors.LL).getValue());
         Ent entTripleTargetLeafNumber = entBase();
         entTripleTargetLeafNumber.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LLL, Accessors.LLL, Accessors.LLL).getValue());
         Ent entTripleTargetInnerNumber = entBase();
         entTripleTargetInnerNumber.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LLR, Accessors.LLR, Accessors.LLR).getValue());
         Ent entTripleTargetDot = entBase();
         entTripleTargetDot.getNet().getRoot().setValue(Commands.get(Operations.PLUS_OPERATION, Accessors.LLRL, Accessors.LLRL, Accessors.LLRL).getValue());
-        return Stream.of(entBase(), ent2, ent3, entTripleTargetCommand, entTripleTargetVeto,
+        return Stream.of(entBase(), ent2, ent3, entTripleTargetCommand, entTripleTargetSplit,
                 entTripleTargetLeafNumber, entTripleTargetInnerNumber, entTripleTargetDot);
     }
 
     private static Ent entBase() {
         Ent ent = builder().ent(node(
                 unary(Commands.get(Operations.BITWISE_AND_OPERATION, Accessors.LR, Accessors.LLR, Accessors.R),
-                        node(Vetos.get(Conditions.GREATER_THAN_CONDITION, Accessors.LR, Accessors.LRLR),
+                        node(Splits.get(Conditions.GREATER_THAN_CONDITION, Accessors.LR, Accessors.LRLR),
                                 value(54),
                                 unary(0xa3, ignored()))
                         ),

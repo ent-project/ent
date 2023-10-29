@@ -1,6 +1,6 @@
 package org.ent.dev.game.juniper;
 
-import java.util.Arrays;
+import org.apache.commons.lang3.ArrayUtils;
 
 enum Direction {
     E('e', 1, 0),
@@ -32,7 +32,9 @@ enum Direction {
 
     public static Direction[] valuesReversed() {
         // FIXME: performance
-        return Arrays.stream(values()).toList().reversed().toArray(new Direction[0]);
+        Direction[] values = values();
+        ArrayUtils.reverse(values);
+        return values;
     }
 
 }
