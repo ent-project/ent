@@ -40,13 +40,17 @@ public class BranchingBiCommand implements Command {
     @Override
     public ExecutionResult execute(Node base, Permissions permissions) {
         Node conditionNode = base.getLeftChild(permissions);
-        int conditionalue = conditionNode.getValue(permissions);
-        Split condition = Splits.getByValue(conditionalue);
+        int conditionValue = conditionNode.getValue(permissions);
+        Split condition = Splits.getByValue(conditionValue);
         if (condition == null) {
             return ExecutionResult.NORMAL;
         } else {
             SplitResult evaluate = condition.evaluate(conditionNode, permissions);
-            return doExecute(base, false, permissions);
+            return switch (evaluate) {
+                case ERROR -> ExecutionResult.ERROR;
+                case NORMAL_LEFT -> doExecute(base, true, permissions);
+                case NORMAL_RIGHT -> doExecute(base, false, permissions);
+            };
         }
     }
 

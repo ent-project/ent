@@ -17,8 +17,10 @@ import org.ent.webui.WebUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.ent.dev.game.juniper.HabitatMap.MAP_TINY;
 import static org.ent.net.node.cmd.operation.Operations.SET_OPERATION;
 import static org.ent.util.builder.ExternalNode.external;
+import static org.ent.util.builder.NodeTemplate.NOT;
 import static org.ent.util.builder.NodeTemplate.node;
 
 public class JuniperGame {
@@ -27,29 +29,6 @@ public class JuniperGame {
 
     private static final boolean WEB_UI = true;
 
-    private static final String MAP = """
-        #                  #
-        #                  #
-        #    J          S  #
-        #            J     #
-        #                  #
-        #          S       #
-        #                  #
-        #  S               #
-        #        J      J  #
-        #                  #
-        #                  #""";
-
-    private static final String MAP1 = """
-        #    J     S  #
-        #       J     #
-        #             #""";
-
-    private static final String MAP_TINY = """
-        #J S#
-        #SJ #""";
-
-
     private final HabitatMap map;
     private final Ent ent;
     private Net habitat;
@@ -57,6 +36,14 @@ public class JuniperGame {
     public JuniperGame(HabitatMap map) {
         this.map = map;
         this.ent = new Ent(buildMainNet());
+    }
+
+    public Ent getEnt() {
+        return ent;
+    }
+
+    public Net getHabitat() {
+        return habitat;
     }
 
     private static Net buildMainNet() {
@@ -84,7 +71,7 @@ public class JuniperGame {
         for (int x = 0; x < map.getWidth(); x++) {
             for (int y = 0; y < map.getHeight(); y++) {
                 Node node = habitat.newNode(Permissions.DIRECT);
-                node.setName("(%s/%s)".formatted(x, y));
+                node.setName("f_%s_%s".formatted(x, y));
                 map.getField(x, y).node = node;
             }
         }
@@ -121,14 +108,11 @@ public class JuniperGame {
     }
 
     private void tryIt() {
-        Net locationSetterNet = new EntBuilder().build(
-                node().setRoot().left(external(map.getField(0,0).node())));
-        locationSetterNet.setName("location_setter");
+        Net locationSetterNet = buildLocationSetterNet();
         ent.addDomain(locationSetterNet);
 
         Field field = map.getField(1, 0);
-        Net locatorNet = locatorMachine(field.node(), locationSetterNet.getRoot());
-        locatorNet.setName("locator");
+        Net locatorNet = buildLocatorMechanism(field.node(), locationSetterNet.getRoot());
         ent.addDomain(locatorNet);
 
         Node root = ent.getNet().getRoot();
@@ -143,7 +127,7 @@ public class JuniperGame {
                         .canPointTo(habitat)
                         .canPointTo(locationSetterNet)
                         .canWrite(locationSetterNet, WriteFacet.ARROW))
-                .domain(locationSetterNet, p-> p
+                .domain(locationSetterNet, p -> p
                         .canPointTo(locatorNet))
         );
 
@@ -161,7 +145,7 @@ public class JuniperGame {
         }
     }
 
-    public Net locatorMachine(Node initialLocation, Node locationSetter) {
+    public Net buildLocatorMechanism(Node initialLocation, Node locationSetter) {
         EntBuilder builder = new EntBuilder();
         var i = node().name("i");
         var l = node().name("location").left(external(initialLocation)).right(external(locationSetter));
@@ -176,16 +160,16 @@ public class JuniperGame {
                 // initialize i
                 root.command(c -> c.operation(SET_OPERATION).argument1(i, Arg1.L).argument2(l, Arg2.LL)),
                 n0.split(Conditions.IDENTICAL_CONDITION, Accessors.LLLL, Accessors.LRRL)
-                                .name("found?")
-                                .left(node().left(i).right(l))
-                                .right(node()
-                                        .left(exit_success)),
+                        .name("is_found")
+                        .left(node().left(i).right(l))
+                        .right(node()
+                                .left(exit_success)),
                 n1.split(Conditions.IDENTICAL_CONDITION, Accessors.LLR, Accessors.LL)
-                                .name("end of list?")
-                                .left(i)
-                                .right(node()
-                                        .left(exit_fail)),
-                n2.name("i++").command(c -> c.operation(SET_OPERATION).argument1(i, ArgSingle.L).argument2(i, ArgSingle.LR)),
+                        .name("is_end_of_list")
+                        .left(i)
+                        .right(node()
+                                .left(exit_fail)),
+                n2.name("inc_i").command(c -> c.operation(SET_OPERATION).argument1(i, ArgSingle.L).argument2(i, ArgSingle.LR)),
                 // goto top of loop
                 n0
         );
@@ -194,13 +178,48 @@ public class JuniperGame {
                 root
         );
         builder.chain(
-                exit_success.name("set new location").command(c -> c.
+                exit_success.name("set_new_location").command(c -> c.
                         operation(SET_OPERATION).
                         argument1(l, Arg1.L).
                         argument2(external(locationSetter), Arg2.L)),
                 node().command(Commands.CONCLUSION_SUCCESS),
                 root
         );
+        Net locatorNet = builder.build();
+        locatorNet.setName("locator");
+        return locatorNet;
+    }
+
+    public Net buildLocationSetterNet() {
+        Net locationSetterNet = new EntBuilder().build(
+                node().setRoot().left(external(map.getField(0, 0).node())));
+        locationSetterNet.setName("location_setter");
+        ent.addDomain(locationSetterNet);
+        return locationSetterNet;
+    }
+
+    private Net growerMachine() {
+        EntBuilder builder = new EntBuilder();
+        var n = node();
+        var start = node();
+        var n_div_2 = node();
+        var c1 = node().value(1);
+        var c1000 = node().value(1000);
+        var limitExceeded = node();
+        builder.chain(
+                start.split(Conditions.GREATER_THAN_CONDITION, NOT, c1000, n)
+                        .name("is_n_greater_or_equal_1000")
+                        .right(node()
+                                .left(limitExceeded)),
+                node().command(Operations.SHIFT_LEFT_OPERATION, n_div_2, n, c1),
+                node().command(Operations.PLUS_OPERATION, n, n, n_div_2),
+                node().command(Operations.PLUS_OPERATION, n, n, c1)
+        );
+        builder.chain(
+                limitExceeded.command(Operations.SET_VALUE_OPERATION, n, c1000),
+                start
+        );
+
         return builder.build();
     }
 }

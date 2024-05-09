@@ -11,12 +11,15 @@ public class PrimaryAccessor implements Accessor {
 
 	private final ArrowDirection direction;
 
+	private final ArrowDirection[] path;
+
 	private final int code;
 
     private final String shortName;
 
 	public PrimaryAccessor(ArrowDirection direction) {
 		this.direction = direction;
+		this.path = new ArrowDirection[]{ArrowDirection.LEFT, direction};
 		this.code = 0b10 | (direction == ArrowDirection.RIGHT ? 0b01 : 0);
 		this.shortName = ARROW_SYMBOLS.get(ArrowDirection.LEFT) + ARROW_SYMBOLS.get(direction);
 	}
@@ -39,6 +42,11 @@ public class PrimaryAccessor implements Accessor {
 	@Override
 	public String getShortName() {
 		return shortName;
+	}
+
+	@Override
+	public ArrowDirection[] getPath() {
+		return path;
 	}
 
 	@Override

@@ -1,10 +1,13 @@
 package org.ent.net.node.cmd.accessor;
 
 import org.ent.net.Arrow;
+import org.ent.net.ArrowDirection;
 import org.ent.net.node.Node;
 import org.ent.permission.Permissions;
 
 public class DirectAccessor implements Accessor {
+
+	private static final ArrowDirection[] PATH = new ArrowDirection[]{ ArrowDirection.LEFT };
 
 	@Override
 	public int getCode() {
@@ -19,6 +22,11 @@ public class DirectAccessor implements Accessor {
 	@Override
 	public String getShortName() {
 		return "/";
+	}
+
+	@Override
+	public ArrowDirection[] getPath() {
+		return PATH;
 	}
 
 	@Override

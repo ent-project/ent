@@ -1,6 +1,30 @@
 package org.ent.dev.game.juniper;
 
 public class HabitatMap {
+
+
+    public static final String MAP = """
+            #                  #
+            #                  #
+            #    J          S  #
+            #            J     #
+            #                  #
+            #          S       #
+            #                  #
+            #  S               #
+            #        J      J  #
+            #                  #
+            #                  #""";
+
+    public static final String MAP1 = """
+            #    J     S  #
+            #       J     #
+            #             #""";
+
+    public static final String MAP_TINY = """
+            #J S#
+            #SJ #""";
+
     private final int width;
     private final int height;
 

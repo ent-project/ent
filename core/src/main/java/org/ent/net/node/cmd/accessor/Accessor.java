@@ -1,6 +1,7 @@
 package org.ent.net.node.cmd.accessor;
 
 import org.ent.net.Arrow;
+import org.ent.net.ArrowDirection;
 import org.ent.net.node.Node;
 import org.ent.permission.Permissions;
 
@@ -17,4 +18,6 @@ public interface Accessor {
 	int getCode();
 
 	String getShortName();
+
+	ArrowDirection[] getPath();
 }

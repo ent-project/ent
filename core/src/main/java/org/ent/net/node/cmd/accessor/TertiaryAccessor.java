@@ -15,6 +15,8 @@ public class TertiaryAccessor implements Accessor {
 
     private final ArrowDirection direction3;
 
+    private final ArrowDirection[] path;
+
     private final int code;
 
     private final String shortName;
@@ -23,6 +25,7 @@ public class TertiaryAccessor implements Accessor {
         this.direction1 = direction1;
         this.direction2 = direction2;
         this.direction3 = direction3;
+        this.path = new ArrowDirection[]{ArrowDirection.LEFT, direction1, direction2, direction3};
         this.code = 0b1000 | (direction1 == ArrowDirection.RIGHT ? 0b0001 : 0) | (direction2 == ArrowDirection.RIGHT ? 0b0010 : 0) | (direction3 == ArrowDirection.RIGHT ? 0b0100 : 0);
         this.shortName = ARROW_SYMBOLS.get(ArrowDirection.LEFT)
                 + ARROW_SYMBOLS.get(direction1)
@@ -48,6 +51,11 @@ public class TertiaryAccessor implements Accessor {
     @Override
     public String getShortName() {
         return shortName;
+    }
+
+    @Override
+    public ArrowDirection[] getPath() {
+        return path;
     }
 
     @Override
