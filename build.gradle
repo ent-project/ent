@@ -67,6 +67,6 @@ subprojects {
 
 // task for gradle wrapper upgrade: change gradleVersion here, then run "./gradlew wrapper"
 tasks.named('wrapper') {
-   gradleVersion = '8.4'
+   gradleVersion = '8.12.1'
    distributionType = Wrapper.DistributionType.ALL
 }
